@@ -5,6 +5,7 @@ import { ThisExtension } from '../ThisExtension';
 import { CloudProvider } from './_types';
 import { iDatabricksEnvironment } from './iDatabricksEnvironment';
 import { ActiveDatabricksEnvironment } from './ActiveDatabricksEnvironment';
+import { Helper } from '../helpers/Helper';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -146,29 +147,26 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 		vscode.workspace.getConfiguration().update('databricks.connection.default.pythonInterpreter', this.pythonInterpreter, vscode.ConfigurationTarget.Workspace);
 
 		// update the venvPath for Databricks-Connect
-		vscode.workspace.getConfiguration().update('python.venvPath', this.databricksConnectJars, vscode.ConfigurationTarget.Workspace);
+		//vscode.workspace.getConfiguration().update('python.venvPath', this.databricksConnectJars, vscode.ConfigurationTarget.Workspace);
+		//vscode.workspace.getConfiguration().update('python.venvPath', this.databricksConnectJars, vscode.ConfigurationTarget.Global);
 		vscode.workspace.getConfiguration().update('python.linting.enabled', false, vscode.ConfigurationTarget.Workspace);
+		vscode.workspace.getConfiguration().update('python.linting.enabled', false, vscode.ConfigurationTarget.Global);
 
 		// update the actual Python interpreter
 		vscode.workspace.getConfiguration().update('python.pythonPath', this.pythonInterpreter, vscode.ConfigurationTarget.Workspace);
+		vscode.workspace.getConfiguration().update('python.pythonPath', this.pythonInterpreter, vscode.ConfigurationTarget.Global);
 
 
 		this._isActive = true;
 
 		DatabricksApiService.initialize(this);
+	
+		Helper.delay(1000);
 
-		/*
-		process.env.DATABRICKS_ADDRESS = ActiveDatabricksEnvironment.apiRootUrl;
-		process.env.DATABRICKS_API_TOKEN = ActiveDatabricksEnvironment.personalAccessToken;
-		process.env.DATABRICKS_CLUSTER_ID = "0117-115356-dubs795";
-		process.env.DATABRICKS_ORG_ID = "7673835501392586";
-		process.env.DATABRICKS_PORT = "15001";
-		*/
-		
-		vscode.commands.executeCommand("databricksEnvironments.refresh");
+		vscode.commands.executeCommand("databricksEnvironments.refresh", this.displayName);
 		vscode.commands.executeCommand("databricksWorkspace.refresh");
 		vscode.commands.executeCommand("databricksClusters.refresh");
-		vscode.commands.executeCommand("databricksDBFS.refresh");
+		vscode.commands.executeCommand("databricksFS.refresh");
 		vscode.commands.executeCommand("databricksSecrets.refresh");
 	}
 }

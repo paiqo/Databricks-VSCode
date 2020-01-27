@@ -43,4 +43,9 @@ export abstract class Helper
 
 		return result;
 	}
+
+
+	static async delay(ms: number) {
+		return new Promise( resolve => setTimeout(resolve, ms) );
+	}
 }

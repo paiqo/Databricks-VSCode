@@ -1,2 +1,2 @@
-# Databricks-VSCode
-VSCode extension to work with Databricks 
+# Databricks.VSCode
+VS Code Extension to work with Databricks

@@ -36,6 +36,6 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 	}
 
 	upload(): void {
-
+		new DatabricksWorkspaceTreeItem("/", "DIRECTORY", -1).upload();
 	}
 }

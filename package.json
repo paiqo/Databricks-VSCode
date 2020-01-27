@@ -4,14 +4,18 @@
 	"description": "Databricks Integration",
 	"version": "0.0.1",
 	"publisher": "paiqo",
+	"author": {
+		"name": "Gerhard Brueckl"
+	},
 	"license": "GPLv3",
-    "homepage": "https://github.com/paiqo/Databricks-VSCode",
+    "homepage": "https://github.com/paiqo/Databricks-VSCode/blob/master/README.md",
     "repository": {
         "type": "git",
         "url": "https://github.com/paiqo/Databricks-VSCode"
     },
     "bugs": {
-        "url": "https://github.com/paiqo/Databricks-VSCode/issues"
+		"url": "https://github.com/paiqo/Databricks-VSCode/issues",
+		"email": "gbrueckl@paiqo.com"
     },
     "qna": "https://github.com/paiqo/Databricks-VSCode",
 	"enableProposedApi": true,
@@ -19,9 +23,13 @@
 		"vscode": "^1.39.0"
 	},
 	"categories": [
+		"Debuggers",
+		"Azure",
+		"Extension Packs",
 		"Other"
 	],
 	"activationEvents": [
+		"onView:databricksEnvironments",
 		"onView:databricksWorkspace",
 		"onView:databricksClusters",
 		"onView:databricksFS",
@@ -33,18 +41,28 @@
 			{
 				"type": "object",
 				"title": "Databricks Environment Configuration",
+				"required": [
+					"databricks.connection.default.displayName",
+					"databricks.connection.default.apiRootUrl",
+					"databricks.connection.default.cloudProvider",
+					"databricks.connection.default.personalAccessToken",
+					"databricks.connection.default.localSyncFolder",
+					"databricks.connection.default.pythonInterpreter",
+					"databricks.connection.default.databricksConnectJars",
+					"databricks.connection.default.port"
+				],
 				"properties": {
 					"databricks.connection.default.displayName": {
 						"type": "string",
-						"default": "{{my Databricks workspace}}",
-						"description": "Displayname shown in the environment list",
-						"scope": "workbench"
+						"default": "my Databricks workspace",
+						"description": "Name shown in the environment list of the Databricks VSCode extension.",
+						"scope": "window"
 					},
 					"databricks.connection.default.apiRootUrl": {
 						"type": "string",
-						"default": "{{https://westeurope.azuredatabricks.net}}",
+						"default": "https://westeurope.azuredatabricks.net",
 						"description": "Root URL of the Databricks API. Azure: https://westeurope.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com",
-						"scope": "workbench"
+						"scope": "window"
 					},
 					"databricks.connection.default.cloudProvider": {
 						"type": "string",
@@ -52,70 +70,74 @@
 							"Azure",
 							"AWS"
 						],
-						"description": "Cloud provider of your Databricks workspace",
-						"scope": "workbench"
+						"description": "Cloud provider of your Databricks workspace.",
+						"scope": "window"
 					},
 					"databricks.connection.default.personalAccessToken": {
 						"type": "string",
-						"default": "{{dapi123456789abcdef123456789abcdef}}",
-						"description": "The Personal Access Token (PAT) used to access the API"
+						"default": "dapi123456789abcdef123456789abcdef",
+						"description": "The Personal Access Token (PAT) used to access the Databricks API.",
+						"scope": "window"
 					},
 					"databricks.connection.default.localSyncFolder": {
 						"type": "string",
-						"default": "{{C:\\Databricks_sync}}",
-						"description": "The local path where files should be synced to."
+						"default": "C:\\Databricks_sync",
+						"description": "A local path where files (notebooks) that are downloaded from Databricks should be stored. This folder can then be integrated in your GIT repository",
+						"scope": "window"
 					},
 					"databricks.connection.default.pythonInterpreter": {
 						"type": "string",
-						"default": "{{C:\\Anaconda3\\envs\\databricksconnect\\python.exe}}",
-						"description": "Path to python.exe of the interpreter to use."
+						"default": "C:\\Anaconda3\\envs\\databricksconnect\\python.exe",
+						"description": "Path to python.exe of the interpreter to use. Is displayed whne setting the Python interpretor in VS Code",
+						"scope": "window"
 					},
 					"databricks.connection.default.organizationId": {
 						"type": "string",
-						"default": "{{1234567890392586}}",
-						"description": "The organization ID of the Databricks workspace. Can be found in the URL when connected in the browser."
+						"default": "1234567890392586",
+						"description": "Azure only! The organization ID of the Databricks workspace. Can be found in the URL when connected in the browser.",
+						"scope": "window"
 					},
 					"databricks.connection.default.databricksConnectJars": {
 						"type": "string",
-						"default": "{{c:\\anaconda3\\envs\\databricksconnect\\lib\\site-packages\\pyspark/jars}}",
-						"description": "Path to the Databricks-Connect Pyspark JARs. Can be obtained using 'databricks-connect get-jar-dir'."
+						"default": "C:\\anaconda3\\envs\\databricksconnect\\lib\\site-packages\\pyspark\\jars",
+						"description": "Path to the Databricks-Connect Pyspark JARs. Can be obtained using 'databricks-connect get-jar-dir'.",
+						"scope": "window"
 					},
 					"databricks.connection.default.port": {
 						"type": "number",
-						"default": "{{15001}}",
-						"description": "The port to use when connecting using Databricks-Connect."
+						"default": 15001,
+						"description": "The port to use when connecting using Databricks-Connect. Default is 15001.",
+						"scope": "window"
 					},
 					
 					"databricks.connections": {
 						"type": "array",
 						"default": [
 							{
-								"displayName": "{{my Databricks workspace}}",
-								"cloudProvider": "{{Azure or AWS}}",
-								"personalAccessToken": "{{dapi123456789abcdef123456789abcdef}}",
-								"apiRootUrl": "{{https://westeurope.azuredatabricks.net}}",
-								"localSyncFolder": "{{c:\\Databricks_sync}}",
-								"pythonInterpreter": "c:\\Anaconda3\\envs\\DatabricksConnect\\python.exe",
+								"displayName": "my Databricks workspace",
+								"cloudProvider": "Azure",
+								"personalAccessToken": "dapi123456789abcdef123456789abcdef",
+								"apiRootUrl": "https://westeurope.azuredatabricks.net",
+								"localSyncFolder": "C:\\Databricks_sync",
+								"pythonInterpreter": "C:\\Anaconda3\\envs\\DatabricksConnect\\python.exe",
 								"organizationId": "1234567890392586",
-								"databricksConnectJars": "c:\\anaconda3\\envs\\databricksconnect\\lib\\site-packages\\pyspark/jars",
-								"port": "15001"
+								"databricksConnectJars": "C:\\anaconda3\\envs\\databricksconnect\\lib\\site-packages\\pyspark\\jars",
+								"port": 15001
 							}
 						],
-						"description": "%databricks.connections%",
+						"description": "An array of objects where each object represents a Databricks environment containing the same settings as defined for databricks.connection.default.* ",
 						"items": {
 							"type": "object",
 							"properties": {
 								"displayName": {
 									"type": "string",
-									"default": "{{my Databricks workspace}}",
-									"description": "Displayname shown in the environment list",
-									"scope": "workbench"
+									"default": "my Databricks workspace",
+									"description": "Displayname shown in the environment list"
 								},
 								"apiRootUrl": {
 									"type": "string",
 									"default": "{{https://westeurope.azuredatabricks.net}}",
-									"description": "Root URL of the Databricks API. Azure: https://westeurope.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com",
-									"scope": "workbench"
+									"description": "Root URL of the Databricks API. Azure: https://westeurope.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com"
 								},
 								"cloudProvider": {
 									"type": "string",
@@ -123,8 +145,7 @@
 										"Azure",
 										"AWS"
 									],
-									"description": "Cloud provider of your Databricks workspace",
-									"scope": "workbench"
+									"description": "Cloud provider of your Databricks workspace"
 								},
 								"personalAccessToken": {
 									"type": "string",
@@ -152,13 +173,13 @@
 									"description": "Path to the Databricks-Connect Pyspark JARs. Can be obtained using 'databricks-connect get-jar-dir'."
 								},
 								"port": {
-									"type": "number",
-									"default": "{{15001}}",
-									"description": "The port to use when connecting using Databricks-Connect."
+									"type": "integer",
+									"default": 15001,
+									"description": "The port to use when connecting using Databricks-Connect. Default is 15001."
 								}
 							}
 						},
-						"scope": "workbench"
+						"scope": "window"
 					}
 				}
 			}
@@ -226,8 +247,8 @@
 				"command": "databricksWorkspace.download",
 				"title": "Download",
 				"icon": {
-					"light": "resources/light/workspace/download.svg",
-					"dark": "resources/dark/workspace/download.svg"
+					"light": "resources/light/download.svg",
+					"dark": "resources/dark/download.svg"
 				}
 			},
 			{
