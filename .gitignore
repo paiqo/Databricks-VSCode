@@ -1,0 +1,11 @@
+.DS_Store
+npm-debug.log
+Thumbs.db
+*/node_modules/
+*/out/
+*/.vs/
+node_modules
+out
+out/
+node_modules/
+*.vsix

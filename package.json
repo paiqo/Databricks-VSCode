@@ -1,0 +1,554 @@
+{
+	"name": "databricks-vscode",
+	"displayName": "Databricks Integration",
+	"description": "Databricks Integration",
+	"version": "0.0.1",
+	"publisher": "paiqo",
+	"license": "GPLv3",
+    "homepage": "https://github.com/paiqo/Databricks-VSCode",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/paiqo/Databricks-VSCode"
+    },
+    "bugs": {
+        "url": "https://github.com/paiqo/Databricks-VSCode/issues"
+    },
+    "qna": "https://github.com/paiqo/Databricks-VSCode",
+	"enableProposedApi": true,
+	"engines": {
+		"vscode": "^1.39.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onView:databricksWorkspace",
+		"onView:databricksClusters",
+		"onView:databricksFS",
+		"onView:databricksSecrets"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"configuration": [
+			{
+				"type": "object",
+				"title": "Databricks Environment Configuration",
+				"properties": {
+					"databricks.connection.default.displayName": {
+						"type": "string",
+						"default": "{{my Databricks workspace}}",
+						"description": "Displayname shown in the environment list",
+						"scope": "workbench"
+					},
+					"databricks.connection.default.apiRootUrl": {
+						"type": "string",
+						"default": "{{https://westeurope.azuredatabricks.net}}",
+						"description": "Root URL of the Databricks API. Azure: https://westeurope.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com",
+						"scope": "workbench"
+					},
+					"databricks.connection.default.cloudProvider": {
+						"type": "string",
+						"enum": [
+							"Azure",
+							"AWS"
+						],
+						"description": "Cloud provider of your Databricks workspace",
+						"scope": "workbench"
+					},
+					"databricks.connection.default.personalAccessToken": {
+						"type": "string",
+						"default": "{{dapi123456789abcdef123456789abcdef}}",
+						"description": "The Personal Access Token (PAT) used to access the API"
+					},
+					"databricks.connection.default.localSyncFolder": {
+						"type": "string",
+						"default": "{{C:\\Databricks_sync}}",
+						"description": "The local path where files should be synced to."
+					},
+					"databricks.connection.default.pythonInterpreter": {
+						"type": "string",
+						"default": "{{C:\\Anaconda3\\envs\\databricksconnect\\python.exe}}",
+						"description": "Path to python.exe of the interpreter to use."
+					},
+					"databricks.connection.default.organizationId": {
+						"type": "string",
+						"default": "{{1234567890392586}}",
+						"description": "The organization ID of the Databricks workspace. Can be found in the URL when connected in the browser."
+					},
+					"databricks.connection.default.databricksConnectJars": {
+						"type": "string",
+						"default": "{{c:\\anaconda3\\envs\\databricksconnect\\lib\\site-packages\\pyspark/jars}}",
+						"description": "Path to the Databricks-Connect Pyspark JARs. Can be obtained using 'databricks-connect get-jar-dir'."
+					},
+					"databricks.connection.default.port": {
+						"type": "number",
+						"default": "{{15001}}",
+						"description": "The port to use when connecting using Databricks-Connect."
+					},
+					
+					"databricks.connections": {
+						"type": "array",
+						"default": [
+							{
+								"displayName": "{{my Databricks workspace}}",
+								"cloudProvider": "{{Azure or AWS}}",
+								"personalAccessToken": "{{dapi123456789abcdef123456789abcdef}}",
+								"apiRootUrl": "{{https://westeurope.azuredatabricks.net}}",
+								"localSyncFolder": "{{c:\\Databricks_sync}}",
+								"pythonInterpreter": "c:\\Anaconda3\\envs\\DatabricksConnect\\python.exe",
+								"organizationId": "1234567890392586",
+								"databricksConnectJars": "c:\\anaconda3\\envs\\databricksconnect\\lib\\site-packages\\pyspark/jars",
+								"port": "15001"
+							}
+						],
+						"description": "%databricks.connections%",
+						"items": {
+							"type": "object",
+							"properties": {
+								"displayName": {
+									"type": "string",
+									"default": "{{my Databricks workspace}}",
+									"description": "Displayname shown in the environment list",
+									"scope": "workbench"
+								},
+								"apiRootUrl": {
+									"type": "string",
+									"default": "{{https://westeurope.azuredatabricks.net}}",
+									"description": "Root URL of the Databricks API. Azure: https://westeurope.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com",
+									"scope": "workbench"
+								},
+								"cloudProvider": {
+									"type": "string",
+									"enum": [
+										"Azure",
+										"AWS"
+									],
+									"description": "Cloud provider of your Databricks workspace",
+									"scope": "workbench"
+								},
+								"personalAccessToken": {
+									"type": "string",
+									"default": "{{dapi123456789abcdef123456789abcdef}}",
+									"description": "The Personal Access Token (PAT) used to access the API"
+								},
+								"localSyncFolder": {
+									"type": "string",
+									"default": "{{C:\\Databricks_sync}}",
+									"description": "The local path where files should be synced to."
+								},
+								"pythonInterpreter": {
+									"type": "string",
+									"default": "{{C:\\Anaconda3\\envs\\databricksconnect\\python.exe}}",
+									"description": "Path to python.exe of the interpreter to use."
+								},
+								"organizationId": {
+									"type": "string",
+									"default": "{{1234567890392586}}",
+									"description": "The organization ID of the Databricks workspace. Can be found in the URL when connected in the browser."
+								},
+								"databricksConnectJars": {
+									"type": "string",
+									"default": "{{c:\\anaconda3\\envs\\databricksconnect\\lib\\site-packages\\pyspark/jars}}",
+									"description": "Path to the Databricks-Connect Pyspark JARs. Can be obtained using 'databricks-connect get-jar-dir'."
+								},
+								"port": {
+									"type": "number",
+									"default": "{{15001}}",
+									"description": "The port to use when connecting using Databricks-Connect."
+								}
+							}
+						},
+						"scope": "workbench"
+					}
+				}
+			}
+		],
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "databricks",
+					"title": "Databricks",
+					"icon": "resources/databricks.svg"
+				}
+			]
+		},
+		"views": {
+			"databricks": [
+				{
+					"id": "databricksEnvironments",
+					"name": "Environments"
+				},
+				{
+					"id": "databricksWorkspace",
+					"name": "Workspace"
+				},
+				{
+					"id": "databricksClusters",
+					"name": "Clusters"
+				},
+				{
+					"id": "databricksFS",
+					"name": "DBFS"
+				},
+				{
+					"id": "databricksSecrets",
+					"name": "Secrets"
+				}
+			]
+		},
+		"commands": [
+			{
+				"command": "databricksEnvironments.refresh",
+				"title": "Refresh",
+				"icon": {
+					"light": "resources/light/refresh.svg",
+					"dark": "resources/dark/refresh.svg"
+				}
+			},
+			{
+				"command": "databricksEnvironmentItem.activate",
+				"title": "Activate",
+				"icon": {
+					"light": "resources/light/start.svg",
+					"dark": "resources/dark/start.svg"
+				}
+			},
+
+			{
+				"command": "databricksWorkspace.refresh",
+				"title": "Refresh",
+				"icon": {
+					"light": "resources/light/refresh.svg",
+					"dark": "resources/dark/refresh.svg"
+				}
+			},
+			{
+				"command": "databricksWorkspace.download",
+				"title": "Download",
+				"icon": {
+					"light": "resources/light/workspace/download.svg",
+					"dark": "resources/dark/workspace/download.svg"
+				}
+			},
+			{
+				"command": "databricksWorkspace.upload",
+				"title": "Upload",
+				"icon": {
+					"light": "resources/light/upload.svg",
+					"dark": "resources/dark/upload.svg"
+				}
+			},
+
+			{
+				"command": "databricksWorkspaceItem.open",
+				"title": "Open",
+				"icon": {
+					"light": "resources/light/edit.svg",
+					"dark": "resources/dark/edit.svg"
+				}
+			},
+			{
+				"command": "databricksWorkspaceItem.edit",
+				"title": "Edit",
+				"icon": {
+					"light": "resources/light/edit.svg",
+					"dark": "resources/dark/edit.svg"
+				}
+			},
+			{
+				"command": "databricksWorkspaceItem.download",
+				"title": "Download",
+				"icon": {
+					"light": "resources/light/download.svg",
+					"dark": "resources/dark/download.svg"
+				}
+			},
+			{
+				"command": "databricksWorkspaceItem.upload",
+				"title": "Upload",
+				"icon": {
+					"light": "resources/light/upload.svg",
+					"dark": "resources/dark/upload.svg"
+				}
+			},
+			{
+				"command": "databricksWorkspaceItem.sync",
+				"title": "Sync",
+				"icon": {
+					"light": "resources/light/sync.svg",
+					"dark": "resources/dark/sync.svg"
+				}
+			},
+			{
+				"command": "databricksWorkspaceItem.delete",
+				"title": "Delete",
+				"icon": {
+					"light": "resources/light/delete.svg",
+					"dark": "resources/dark/delete.svg"
+				}
+			},
+			{
+				"command": "databricksClusters.refresh",
+				"title": "Refresh",
+				"icon": {
+					"light": "resources/light/refresh.svg",
+					"dark": "resources/dark/refresh.svg"
+				}
+			},
+			{
+				"command": "databricksClusters.addCluster",
+				"title": "Add",
+				"icon": {
+					"light": "resources/light/add.svg",
+					"dark": "resources/dark/add.svg"
+				}
+			},
+			{
+				"command": "databricksClusterItem.start",
+				"title": "Start",
+				"icon": {
+					"light": "resources/light/start.svg",
+					"dark": "resources/dark/start.svg"
+				}
+			},
+			{
+				"command": "databricksClusterItem.stop",
+				"title": "Stop",
+				"icon": {
+					"light": "resources/light/stop.svg",
+					"dark": "resources/dark/stop.svg"
+				}
+			},
+			{
+				"command": "databricksClusterItem.edit",
+				"title": "Edit",
+				"icon": {
+					"light": "resources/light/edit.svg",
+					"dark": "resources/dark/edit.svg"
+				}
+			},
+			{
+				"command": "databricksClusterItem.delete",
+				"title": "Delete",
+				"icon": {
+					"light": "resources/light/delete.svg",
+					"dark": "resources/dark/delete.svg"
+				}
+			},
+			{
+				"command": "databricksFS.refresh",
+				"title": "Refresh",
+				"icon": {
+					"light": "resources/light/refresh.svg",
+					"dark": "resources/dark/refresh.svg"
+				}
+			},
+			{
+				"command": "databricksFSItem.download",
+				"title": "download",
+				"icon": {
+					"light": "resources/light/download.svg",
+					"dark": "resources/dark/download.svg"
+				}
+			},
+			{
+				"command": "databricksFSItem.upload",
+				"title": "Upload",
+				"icon": {
+					"light": "resources/light/upload.svg",
+					"dark": "resources/dark/upload.svg"
+				}
+			},
+
+			{
+				"command": "databricksSecrets.refresh",
+				"title": "Refresh",
+				"icon": {
+					"light": "resources/light/refresh.svg",
+					"dark": "resources/dark/refresh.svg"
+				}
+			},
+			{
+				"command": "databricksSecrets.addSecretScope",
+				"title": "Add",
+				"icon": {
+					"light": "resources/light/add.svg",
+					"dark": "resources/dark/add.svg"
+				}
+			},
+			{
+				"command": "databricksSecretItem.deleteSecretScope",
+				"title": "Delete",
+				"icon": {
+					"light": "resources/light/delete.svg",
+					"dark": "resources/dark/delete.svg"
+				}
+			},
+			{
+				"command": "databricksSecretItem.addSecret",
+				"title": "Add",
+				"icon": {
+					"light": "resources/light/add.svg",
+					"dark": "resources/dark/add.svg"
+				}
+			},
+			{
+				"command": "databricksSecretItem.deleteSecret",
+				"title": "Delete",
+				"icon": {
+					"light": "resources/light/delete.svg",
+					"dark": "resources/dark/delete.svg"
+				}
+			}
+		],
+		"menus": {
+			"view/title": [
+				{
+					"command": "databricksEnvironments.refresh",
+					"when": "view == databricksEnvironments",
+					"group": "navigation"
+				},
+
+				{
+					"command": "databricksWorkspace.refresh",
+					"when": "view == databricksWorkspace",
+					"group": "navigation"
+				},
+				{
+					"command": "databricksWorkspace.download",
+					"when": "view == databricksWorkspace",
+					"group": "navigation"
+				},
+				{
+					"command": "databricksWorkspace.upload",
+					"when": "view == databricksWorkspace",
+					"group": "navigation"
+				},
+
+				{
+					"command": "databricksClusters.refresh",
+					"when": "view == databricksClusters",
+					"group": "navigation"
+				},
+				{
+					"command": "databricksClusters.addCluster",
+					"when": "view == databricksClusters",
+					"group": "navigation"
+				},
+				{
+					"command": "databricksFS.refresh",
+					"when": "view == databricksFS",
+					"group": "navigation"
+				},
+
+				{
+					"command": "databricksSecrets.refresh",
+					"when": "view == databricksSecrets",
+					"group": "navigation"
+				},
+				{
+					"command": "databricksSecrets.addSecretScope",
+					"when": "view == databricksSecrets",
+					"group": "navigation"
+				}
+			],
+			"view/item/context": [
+				{
+					"command": "databricksEnvironmentItem.activate",
+					"when": "view == databricksEnvironments && viewItem == INACTIVE",
+					"group": "inline"
+				},
+				{
+					"command": "databricksWorkspaceItem.edit",
+					"when": "view == databricksWorkspace",
+					"group": "inline"
+				},
+				{
+					"command": "databricksWorkspaceItem.download",
+					"when": "view == databricksWorkspace && viewItem == CAN_SYNC",
+					"group": "inline"
+				},
+				{
+					"command": "databricksWorkspaceItem.upload",
+					"when": "view == databricksWorkspace && viewItem == CAN_SYNC",
+					"group": "inline"
+				},
+				{
+					"command": "databricksWorkspaceItem.sync",
+					"when": "view == databricksWorkspace && viewItem == CAN_SYNC",
+					"group": "inline"
+				},
+				{
+					"command": "databricksWorkspaceItem.delete",
+					"when": "view == databricksWorkspace",
+					"group": "inline"
+				},
+				{
+					"command": "databricksClusterItem.start",
+					"when": "view == databricksClusters && viewItem == CAN_START",
+					"group": "inline"
+				},
+				{
+					"command": "databricksClusterItem.stop",
+					"when": "view == databricksClusters && viewItem == CAN_STOP",
+					"group": "inline"
+				},
+				{
+					"command": "databricksClusterItem.edit",
+					"when": "view == databricksClusters",
+					"group": "inline"
+				},
+				{
+					"command": "databricksClusterItem.delete",
+					"when": "view == databricksClusters",
+					"group": "inline"
+				},
+
+				{
+					"command": "databricksSecretItem.addSecret",
+					"when": "view == databricksSecrets && viewItem == SCOPE",
+					"group": "inline"
+				},
+				{
+					"command": "databricksSecretItem.deleteSecretScope",
+					"when": "view == databricksSecrets && viewItem == SCOPE",
+					"group": "inline"
+				},
+				{
+					"command": "databricksSecretItem.deleteSecret",
+					"when": "view == databricksSecrets && viewItem == SECRET",
+					"group": "inline"
+				}
+			]
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./"
+	},
+	"devDependencies": {
+		"@types/mkdirp": "^0.5.2",
+		"@types/node": "^10.17.13",
+		"@types/rimraf": "^2.0.2",
+		"@types/vscode": "^1.39.0",
+		"tslint": "^5.20.1",
+		"typescript": "^3.5.1"
+	},
+	"dependencies": {
+		"@angular/common": "^8.2.14",
+		"@angular/core": "^8.2.14",
+		"angular": "^1.7.9",
+		"axios": "^0.19.1",
+		"file-saver": "^2.0.2",
+		"ftp": "^0.3.10",
+		"jsonc-parser": "^0.4.2",
+		"mkdirp": "^0.5.1",
+		"promise.prototype.finally": "^3.1.2",
+		"request": "^2.88.0",
+		"rimraf": "^2.6.2",
+		"rxjs": "^6.5.3",
+		"sync-request": "^6.1.0",
+		"typed-rest-client": "^1.7.1"
+	}
+}
