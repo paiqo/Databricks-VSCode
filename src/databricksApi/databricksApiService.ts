@@ -120,7 +120,7 @@ export abstract class DatabricksApiService {
 		let cItems: DatabricksClusterTreeItem[] = [];
 		if(items != undefined)
 		{
-			items.map(item => cItems.push(new DatabricksClusterTreeItem(item.cluster_id, item.cluster_name, item.state)));
+			items.map(item => cItems.push(new DatabricksClusterTreeItem(JSON.stringify(item, null, 4), item.cluster_id, item.cluster_name, item.state)));
 			DatabricksApiService.sortArrayByProperty(cItems, "label");
 		}
 		return cItems;

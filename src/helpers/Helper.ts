@@ -33,7 +33,8 @@ export abstract class Helper
 		const result = await window.showInputBox({
 			value: defaultValue,
 			valueSelection: valueSelection,
-			placeHolder: toolTip
+			placeHolder: toolTip,
+			prompt: toolTip
 			/*,
 			validateInput: text => {
 				window.showInformationMessage(`Validating: ${text}`);
@@ -47,5 +48,13 @@ export abstract class Helper
 
 	static async delay(ms: number) {
 		return new Promise( resolve => setTimeout(resolve, ms) );
+	}
+
+	static mapToObject<T>(map: Map<string, any>): T {
+		const obj = {};
+		for (let [key, value] of map) {
+			obj[key] = value;
+		}
+		return obj as T;
 	}
 }

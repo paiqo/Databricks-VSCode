@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import { DatabricksApiService} from './databricksApi/databricksApiService';
 import { DatabricksEnvironmentTreeItem } from './environments/DatabricksEnvironmentTreeItem';
 import { iDatabricksEnvironment } from './environments/iDatabricksEnvironment';
+import { Helper } from './helpers/Helper';
+import { ThisExtension } from './ThisExtension';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class DatabricksEnvironmentTreeProvider implements vscode.TreeDataProvider<DatabricksEnvironmentTreeItem> {
@@ -42,5 +44,31 @@ export class DatabricksEnvironmentTreeProvider implements vscode.TreeDataProvide
 													item.organizationId)));
 		}
 		return Promise.resolve(envItems);
+	}
+
+	async add(): Promise<void> {
+		vscode.window.showErrorMessage("Please use the Settings -> Databricks to configure a single/default enviornment or the JSON editor to add multiple environments!");
+		return;
+		let config = ThisExtension.configuration.packageJSON.contributes.configuration[0];
+		let requiredSettings = config.required;
+
+		let newEnvConfig: Map<string, any> = new Map<string, any>();
+
+		for(let setting in requiredSettings) {
+			let settingName: string = requiredSettings[setting];
+			let settingConfig = config.properties[settingName];
+			let newValue = await Helper.showInputBox(settingConfig.default, settingConfig.description);
+
+			newEnvConfig.set(settingName.replace('databricks.connection.default.', ''), newValue);
+		}
+
+		//let newEnv = DatabricksEnvironmentTreeItem.fromJson(JSON.stringify(newEnvConfig));
+		let newEnv: iDatabricksEnvironment = Helper.mapToObject<iDatabricksEnvironment>(newEnvConfig);
+
+		let currentConnections: iDatabricksEnvironment[] = vscode.workspace.getConfiguration().get('databricks.connections');
+
+		currentConnections.push(newEnv);
+
+		vscode.workspace.getConfiguration().update('databricks.connections', currentConnections, vscode.ConfigurationTarget.Workspace);
 	}
 }

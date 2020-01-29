@@ -8,16 +8,16 @@
 		"name": "Gerhard Brueckl"
 	},
 	"license": "GPLv3",
-    "homepage": "https://github.com/paiqo/Databricks-VSCode/blob/master/README.md",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/paiqo/Databricks-VSCode"
-    },
-    "bugs": {
+	"homepage": "https://github.com/paiqo/Databricks-VSCode/blob/master/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/paiqo/Databricks-VSCode"
+	},
+	"bugs": {
 		"url": "https://github.com/paiqo/Databricks-VSCode/issues",
 		"email": "gbrueckl@paiqo.com"
-    },
-    "qna": "https://github.com/paiqo/Databricks-VSCode",
+	},
+	"qna": "https://github.com/paiqo/Databricks-VSCode",
 	"enableProposedApi": true,
 	"engines": {
 		"vscode": "^1.39.0"
@@ -39,6 +39,7 @@
 	"contributes": {
 		"configuration": [
 			{
+				"name": "Databricks",
 				"type": "object",
 				"title": "Databricks Environment Configuration",
 				"required": [
@@ -109,7 +110,6 @@
 						"description": "The port to use when connecting using Databricks-Connect. Default is 15001.",
 						"scope": "window"
 					},
-					
 					"databricks.connections": {
 						"type": "array",
 						"default": [
@@ -132,12 +132,14 @@
 								"displayName": {
 									"type": "string",
 									"default": "my Databricks workspace",
-									"description": "Displayname shown in the environment list"
+									"description": "Name shown in the environment list of the Databricks VSCode extension.",
+									"scope": "window"
 								},
 								"apiRootUrl": {
 									"type": "string",
-									"default": "{{https://westeurope.azuredatabricks.net}}",
-									"description": "Root URL of the Databricks API. Azure: https://westeurope.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com"
+									"default": "https://westeurope.azuredatabricks.net",
+									"description": "Root URL of the Databricks API. Azure: https://westeurope.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com",
+									"scope": "window"
 								},
 								"cloudProvider": {
 									"type": "string",
@@ -145,37 +147,44 @@
 										"Azure",
 										"AWS"
 									],
-									"description": "Cloud provider of your Databricks workspace"
+									"description": "Cloud provider of your Databricks workspace.",
+									"scope": "window"
 								},
 								"personalAccessToken": {
 									"type": "string",
-									"default": "{{dapi123456789abcdef123456789abcdef}}",
-									"description": "The Personal Access Token (PAT) used to access the API"
+									"default": "dapi123456789abcdef123456789abcdef",
+									"description": "The Personal Access Token (PAT) used to access the Databricks API.",
+									"scope": "window"
 								},
 								"localSyncFolder": {
 									"type": "string",
-									"default": "{{C:\\Databricks_sync}}",
-									"description": "The local path where files should be synced to."
+									"default": "C:\\Databricks_sync",
+									"description": "A local path where files (notebooks) that are downloaded from Databricks should be stored. This folder can then be integrated in your GIT repository",
+									"scope": "window"
 								},
 								"pythonInterpreter": {
 									"type": "string",
-									"default": "{{C:\\Anaconda3\\envs\\databricksconnect\\python.exe}}",
-									"description": "Path to python.exe of the interpreter to use."
+									"default": "C:\\Anaconda3\\envs\\databricksconnect\\python.exe",
+									"description": "Path to python.exe of the interpreter to use. Is displayed whne setting the Python interpretor in VS Code",
+									"scope": "window"
 								},
 								"organizationId": {
 									"type": "string",
-									"default": "{{1234567890392586}}",
-									"description": "The organization ID of the Databricks workspace. Can be found in the URL when connected in the browser."
+									"default": "1234567890392586",
+									"description": "Azure only! The organization ID of the Databricks workspace. Can be found in the URL when connected in the browser.",
+									"scope": "window"
 								},
 								"databricksConnectJars": {
 									"type": "string",
-									"default": "{{c:\\anaconda3\\envs\\databricksconnect\\lib\\site-packages\\pyspark/jars}}",
-									"description": "Path to the Databricks-Connect Pyspark JARs. Can be obtained using 'databricks-connect get-jar-dir'."
+									"default": "C:\\anaconda3\\envs\\databricksconnect\\lib\\site-packages\\pyspark\\jars",
+									"description": "Path to the Databricks-Connect Pyspark JARs. Can be obtained using 'databricks-connect get-jar-dir'.",
+									"scope": "window"
 								},
 								"port": {
-									"type": "integer",
+									"type": "number",
 									"default": 15001,
-									"description": "The port to use when connecting using Databricks-Connect. Default is 15001."
+									"description": "The port to use when connecting using Databricks-Connect. Default is 15001.",
+									"scope": "window"
 								}
 							}
 						},
@@ -227,14 +236,21 @@
 				}
 			},
 			{
+				"command": "databricksEnvironments.add",
+				"title": "Add",
+				"icon": {
+					"light": "resources/light/add.svg",
+					"dark": "resources/dark/add.svg"
+				}
+			},
+			{
 				"command": "databricksEnvironmentItem.activate",
 				"title": "Activate",
 				"icon": {
-					"light": "resources/light/start.svg",
-					"dark": "resources/dark/start.svg"
+					"light": "resources/light/connected.svg",
+					"dark": "resources/dark/connected.svg"
 				}
 			},
-
 			{
 				"command": "databricksWorkspace.refresh",
 				"title": "Refresh",
@@ -259,7 +275,6 @@
 					"dark": "resources/dark/upload.svg"
 				}
 			},
-
 			{
 				"command": "databricksWorkspaceItem.open",
 				"title": "Open",
@@ -341,11 +356,11 @@
 				}
 			},
 			{
-				"command": "databricksClusterItem.edit",
-				"title": "Edit",
+				"command": "databricksClusterItem.showDefinition",
+				"title": "JSON Definition",
 				"icon": {
-					"light": "resources/light/edit.svg",
-					"dark": "resources/dark/edit.svg"
+					"light": "resources/light/json.svg",
+					"dark": "resources/dark/json.svg"
 				}
 			},
 			{
@@ -380,7 +395,6 @@
 					"dark": "resources/dark/upload.svg"
 				}
 			},
-
 			{
 				"command": "databricksSecrets.refresh",
 				"title": "Refresh",
@@ -429,7 +443,11 @@
 					"when": "view == databricksEnvironments",
 					"group": "navigation"
 				},
-
+				{
+					"command": "databricksEnvironments.add",
+					"when": "view == databricksEnvironments",
+					"group": "navigation"
+				},
 				{
 					"command": "databricksWorkspace.refresh",
 					"when": "view == databricksWorkspace",
@@ -445,7 +463,6 @@
 					"when": "view == databricksWorkspace",
 					"group": "navigation"
 				},
-
 				{
 					"command": "databricksClusters.refresh",
 					"when": "view == databricksClusters",
@@ -461,7 +478,6 @@
 					"when": "view == databricksFS",
 					"group": "navigation"
 				},
-
 				{
 					"command": "databricksSecrets.refresh",
 					"when": "view == databricksSecrets",
@@ -515,7 +531,7 @@
 					"group": "inline"
 				},
 				{
-					"command": "databricksClusterItem.edit",
+					"command": "databricksClusterItem.showDefinition",
 					"when": "view == databricksClusters",
 					"group": "inline"
 				},
@@ -524,7 +540,6 @@
 					"when": "view == databricksClusters",
 					"group": "inline"
 				},
-
 				{
 					"command": "databricksSecretItem.addSecret",
 					"when": "view == databricksSecrets && viewItem == SCOPE",
@@ -570,6 +585,7 @@
 		"rimraf": "^2.6.2",
 		"rxjs": "^6.5.3",
 		"sync-request": "^6.1.0",
-		"typed-rest-client": "^1.7.1"
+		"typed-rest-client": "^1.7.1",
+		"uniquefilename": "^1.1.2"
 	}
 }

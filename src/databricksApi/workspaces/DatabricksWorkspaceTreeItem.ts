@@ -181,6 +181,10 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		{
 			vscode.window.showWarningMessage("Opening local cached file. To open most recent file from Databricks, please manually download it first!");
 		}
-		vscode.window.showTextDocument(this.localFileUri);
+
+		vscode.workspace
+				.openTextDocument(this.localFileUri)
+				.then(vscode.window.showTextDocument);
+		//vscode.window.showTextDocument(this.localFileUri);
 	}
 }

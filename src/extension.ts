@@ -1,6 +1,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
+import * as fs from 'fs';
 import { ThisExtension } from './ThisExtension';
 import { Helper } from './helpers/Helper';
 
@@ -16,8 +17,14 @@ import { DatabricksFSTreeProvider } from './DatabricksFSTreeProvider';
 import { DatabricksFSTreeItem } from './databricksApi/dbfs/DatabricksFSTreeItem';
 import { DatabricksSecretTreeProvider } from './DatabricksSecretTreeProvider';
 import { DatabricksSecretTreeItem } from './databricksApi/secrets/DatabricksSecretTreeItem';
+import { iDatabricksEnvironment } from './environments/iDatabricksEnvironment';
 
 export function activate(context: vscode.ExtensionContext) {
+
+	let x: Map<string, any> = new Map<string, any>();
+	x.set("displayName", "adf");
+
+	let y: iDatabricksEnvironment = Helper.mapToObject(x);
 
 	ThisExtension.initialize(context);
 	DatabricksApiService.initialize();
@@ -26,6 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
 	let databricksEnvironmentTreeProvider = new DatabricksEnvironmentTreeProvider();
 	vscode.window.registerTreeDataProvider('databricksEnvironments', databricksEnvironmentTreeProvider);
 	vscode.commands.registerCommand('databricksEnvironments.refresh', () => databricksEnvironmentTreeProvider.refresh());
+	vscode.commands.registerCommand('databricksEnvironments.add', () => databricksEnvironmentTreeProvider.add());
 
 	vscode.commands.registerCommand('databricksEnvironmentItem.activate', (envItem: DatabricksEnvironmentTreeItem) => envItem.activate());
 		
@@ -52,7 +60,7 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	vscode.commands.registerCommand('databricksClusterItem.start', (cluster: DatabricksClusterTreeItem) => cluster.start());
 	vscode.commands.registerCommand('databricksClusterItem.stop', (cluster: DatabricksClusterTreeItem) => cluster.stop());
-	vscode.commands.registerCommand('databricksClusterItem.edit', (cluster: DatabricksClusterTreeItem) => vscode.window.showErrorMessage(`Not yet implemented!`));
+	vscode.commands.registerCommand('databricksClusterItem.showDefinition', (cluster: DatabricksClusterTreeItem) => cluster.showDefinition());
 	vscode.commands.registerCommand('databricksClusterItem.delete', (cluster: DatabricksClusterTreeItem) => vscode.window.showErrorMessage(`Not yet implemented!`));
 
 
@@ -73,5 +81,9 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksSecretItem.deleteSecretScope', (secretItem: DatabricksSecretTreeItem) => secretItem.deleteSecretScope());
 	vscode.commands.registerCommand('databricksSecretItem.addSecret', (secretItem: DatabricksSecretTreeItem) => secretItem.addSecret());
 	vscode.commands.registerCommand('databricksSecretItem.deleteSecret', (secretItem: DatabricksSecretTreeItem) => secretItem.deleteSecret());
-	
+}
+
+
+export function deactivate() {
+	ThisExtension.removeTempFiles();
 }

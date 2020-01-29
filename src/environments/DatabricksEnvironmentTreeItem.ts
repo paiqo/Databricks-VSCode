@@ -74,7 +74,7 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 	}
 
 	private getIconPath(theme: string): string {
-		let state = this.isActive ? 'start' : 'stop';
+		let state = this.isActive ? 'connected' : 'disconnected';
 		return fspath.join(ThisExtension.rootPath, 'resources', theme, state + '.svg');
 	}
 
@@ -133,7 +133,9 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 			environment.apiRootUrl, 
 			environment.localSyncFolder, 
 			environment.databricksConnectJars, 
-			environment.pythonInterpreter);
+			environment.pythonInterpreter,
+			environment.port,
+			environment.organizationId);
 	}
 
 	activate(): void {

@@ -14,11 +14,13 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem implements iDatab
 	private _definition: string;
 	
 	constructor(
+		definition: string,
 		cluster_id: string,
 		cluster_name: string,
-		cluster_state: ClusterState
+		cluster_state: ClusterState,
 	) {
 		super(cluster_name);
+		this._definition = definition;
 		this._id = cluster_id;
 		this._name = cluster_name;
 		this._state = cluster_state;
@@ -58,6 +60,10 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem implements iDatab
 	}
 
 
+	get definition (): string {
+		return this._definition;
+	}
+
 	get cluster_name (): string {
 		return this._name;
 	}
@@ -76,7 +82,7 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem implements iDatab
 
 	static fromJson(jsonString: string): DatabricksClusterTreeItem {
 		let item: iDatabricksCluster = JSON.parse(jsonString);
-		return new DatabricksClusterTreeItem(item.cluster_id, item.cluster_name, item.state);
+		return new DatabricksClusterTreeItem(jsonString, item.cluster_id, item.cluster_name, item.state);
 	}
 
 	start(): void {
@@ -97,6 +103,10 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem implements iDatab
 		}, (error) => {
 			vscode.window.showErrorMessage(`ERROR: ${error}`);
 		});
+	}
+
+	showDefinition(): void {
+		ThisExtension.openTempFile(this._definition, this.cluster_name + '.json');
 	}
 
 	get(): void {
