@@ -51,25 +51,25 @@ All these settings can either be configured on a global/user or on a workspace l
 Using a workspace configuration also allows you separate differnt Databricks environments completely. 
 
 # Environments
--- ADD IMAGE HERE --
+![Environments](https://github.com/paiqo/Databricks-VSCode/blob/master/images/Environments.jpg "Environments")
 You can either work with a single environment or configure multiple environments. If you use multiple environments, you will see your list in the Environments view and icons indicating which one is currently active. To change the environment, simply click the "Activate" button next to an inactive environment. All other views will update automatically.
 
 # Workspace Browser
--- ADD IMAGE HERE --
+![Workspace Browser](https://github.com/paiqo/Databricks-VSCode/blob/master/images/WorkspaceBrowser.jpg "Workspace Browser")
 The workspace Browser connects directly to the Databricks workspace and loads the whole folder strucuture recursively. It displays folders, notebooks and libraries. Notebooks and folders and be up- and downloaded manually by simply clicking the corresponding item next them. If you do an up-/download on a whole folder or on the root, it will up-/download all items recursively.
 The files are stored in the **localSyncFolder** that you configured in your settings. If you click or doubleclick a file, it will be downloaded locally and opened as IPython notebook or respectively as native .r, .scala or .sql file.
 IPython notebooks can then be executed directly against the Databricks cluster again if Databricks-Connect is setup correctly ([Setup Databricks-Connect on AWS](https://docs.databricks.com/dev-tools/databricks-connect.html), [Setup Databricks-Connect on Azure](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/databricks-connect))
 
 # Cluster Manager
--- ADD IMAGE HERE --
+![Cluster Manager](https://github.com/paiqo/Databricks-VSCode/blob/master/images/ClusterManager.jpg "Cluster Manager")
 This VS Code extension also allows you to manage your Databricks clusters directly from within VS Code. So you do not need to open the web UI anymore to start or stop your clusters.
 In addition, it also allows you to script the definition of your cluster and store it locally - e.g. if you want to integrate it as part of your CI/CD. This cluster definition file can for example be used with the [DatabricksPS PowerShell Module](https://www.powershellgallery.com/packages/DatabricksPS) to automate the cluster deployment.
 
 # DBFS Browser
--- ADD IMAGE HERE --
+![DBFS Browser](https://github.com/paiqo/Databricks-VSCode/blob/master/images/DBFSBrowser.jpg "DBFS Browser")
 The DBFS Browser allows you to browse the whole Databricks File System including mountpoints!
 Up-/Download of files will also come soon!
 
 # Secrets Browser
--- ADD IMAGE HERE --
+![Secret Browser](https://github.com/paiqo/Databricks-VSCode/blob/master/images/SecretBrowser.jpg "Secret Browser")
 Another tool to help you working with Databricks locally is the Secrets Browser. It allows you to browse, create, update and delete your secret scopes and secrets.
