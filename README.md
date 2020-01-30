@@ -1,7 +1,7 @@
 # Databricks.VSCode
 This is a Visual Studio Code extension that allows you to work with Azure Databricks and Databricks on AWS in an efficient way having everything you need integrated into VS Code. 
 
-![Databricks.VSCode](https://github.com/paiqo/Databricks-VSCode/blob/master/images/Environments.jpg "Databricks.VSCode")
+![Databricks.VSCode](https://github.com/paiqo/Databricks-VSCode/blob/master/images/Databricks-VSCode.jpg "Databricks.VSCode")
 
 # Features
 - Workspace browser
