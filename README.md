@@ -1,13 +1,12 @@
-# Databricks.VSCode
-This is a Visual Studio Code extension that allows you to work with Azure Databricks and Databricks on AWS in an efficient way having everything you need integrated into VS Code. 
+# VS Code Extension for Databricks
+This is a Visual Studio Code extension that allows you to work with Azure Databricks and Databricks on AWS locally in an efficient way, having everything you need integrated into VS Code. 
 
-![Databricks.VSCode](https://github.com/paiqo/Databricks-VSCode/blob/master/images/Databricks-VSCode.jpg "Databricks.VSCode")
+![Databricks-VSCode](https://github.com/paiqo/Databricks-VSCode/blob/master/images/Databricks-VSCode.jpg "Databricks-VSCode")
 
 # Features
 - Workspace browser
 	- Up-/download of notebooks
-	- Execution of notebooks against Databricks Cluster 
-	(requires Databricks-Connect)
+	- Execution of notebooks against a Databricks Cluster (via [Databricks-Connect](https://docs.databricks.com/dev-tools/databricks-connect.html))
 - Cluster manager 
 	- Start/stop clusters
 	- Script cluster definition as JSON
@@ -19,7 +18,7 @@ This is a Visual Studio Code extension that allows you to work with Azure Databr
 - Easy confiugration via standard VS Code settings
 
 # Installation
-The extension can be downloaded directly from within VS Code. Simply go to the Extensions tab and search for "Databricks" and select and install the extension "databricks.vscode".
+The extension can be downloaded directly from within VS Code. Simply go to the Extensions tab and search for "Databricks" and select and install the extension "Databricks Integration" (ID: paiqo.databricks-vscode).
 
 Alternatively it can also be downloaded from the VS Code marketplace.
 
