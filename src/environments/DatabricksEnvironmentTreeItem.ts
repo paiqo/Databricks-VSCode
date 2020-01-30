@@ -43,7 +43,7 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 		this._port = port;
 		this._organizationId = organizationId;
 
-		this._isActive = this.displayName === ActiveDatabricksEnvironment.displayName;
+		this._isActive = this.displayName === ThisExtension.ActiveEnvironment;
 
 		super.iconPath = {
 			light: this.getIconPath("light"),
@@ -140,6 +140,7 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 
 	activate(): void {
 		vscode.window.showInformationMessage(`Activating Databricks environment '${this.displayName}' ...`);
+		
 		vscode.workspace.getConfiguration().update('databricks.connection.default.displayName', this.displayName, vscode.ConfigurationTarget.Workspace);
 		vscode.workspace.getConfiguration().update('databricks.connection.default.cloudProvider', this.cloudProvider, vscode.ConfigurationTarget.Workspace);
 		vscode.workspace.getConfiguration().update('databricks.connection.default.apiRootUrl', this.apiRootUrl, vscode.ConfigurationTarget.Workspace);
@@ -160,15 +161,16 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 
 
 		this._isActive = true;
+		ThisExtension.ActiveEnvironment = this.displayName;
 
 		DatabricksApiService.initialize(this);
 	
-		Helper.delay(1000);
+		//Helper.delay(1000);
 
-		vscode.commands.executeCommand("databricksEnvironments.refresh", this.displayName);
-		vscode.commands.executeCommand("databricksWorkspace.refresh");
-		vscode.commands.executeCommand("databricksClusters.refresh");
-		vscode.commands.executeCommand("databricksFS.refresh");
-		vscode.commands.executeCommand("databricksSecrets.refresh");
+		vscode.commands.executeCommand("databricksEnvironments.refresh", false);
+		vscode.commands.executeCommand("databricksWorkspace.refresh", false);
+		vscode.commands.executeCommand("databricksClusters.refresh", false);
+		vscode.commands.executeCommand("databricksFS.refresh", false);
+		vscode.commands.executeCommand("databricksSecrets.refresh", false);
 	}
 }

@@ -41,7 +41,7 @@
 			{
 				"name": "Databricks",
 				"type": "object",
-				"title": "Databricks Environment Configuration",
+				"title": "Databricks",
 				"required": [
 					"databricks.connection.default.displayName",
 					"databricks.connection.default.apiRootUrl",
@@ -56,13 +56,13 @@
 					"databricks.connection.default.displayName": {
 						"type": "string",
 						"default": "my Databricks workspace",
-						"description": "Name shown in the environment list of the Databricks VSCode extension.",
+						"description": "(Mandatory) Name shown in the environment list of the Databricks VSCode extension.",
 						"scope": "window"
 					},
 					"databricks.connection.default.apiRootUrl": {
 						"type": "string",
 						"default": "https://westeurope.azuredatabricks.net",
-						"description": "Root URL of the Databricks API. Azure: https://westeurope.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com",
+						"description": "(Mandatory) Root URL of the Databricks API. Azure: https://westeurope.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com",
 						"scope": "window"
 					},
 					"databricks.connection.default.cloudProvider": {
@@ -71,43 +71,43 @@
 							"Azure",
 							"AWS"
 						],
-						"description": "Cloud provider of your Databricks workspace.",
+						"description": "(Optional) Cloud provider of your Databricks workspace.",
 						"scope": "window"
 					},
 					"databricks.connection.default.personalAccessToken": {
 						"type": "string",
 						"default": "dapi123456789abcdef123456789abcdef",
-						"description": "The Personal Access Token (PAT) used to access the Databricks API.",
+						"description": "(Mandatory) The Personal Access Token (PAT) used to access the Databricks API.",
 						"scope": "window"
 					},
 					"databricks.connection.default.localSyncFolder": {
 						"type": "string",
 						"default": "C:\\Databricks_sync",
-						"description": "A local path where files (notebooks) that are downloaded from Databricks should be stored. This folder can then be integrated in your GIT repository",
+						"description": "(Mandatory) A local path where files (notebooks) that are downloaded from Databricks should be stored. This folder can then be integrated in your GIT repository.",
 						"scope": "window"
 					},
 					"databricks.connection.default.pythonInterpreter": {
 						"type": "string",
 						"default": "C:\\Anaconda3\\envs\\databricksconnect\\python.exe",
-						"description": "Path to python.exe of the interpreter to use. Is displayed whne setting the Python interpretor in VS Code",
+						"description": "(Optional, for Databricks-Connect) Path to python.exe of the interpreter to use. Is displayed whne setting the Python interpretor in VS Code",
 						"scope": "window"
 					},
 					"databricks.connection.default.organizationId": {
 						"type": "string",
 						"default": "1234567890392586",
-						"description": "Azure only! The organization ID of the Databricks workspace. Can be found in the URL when connected in the browser.",
+						"description": "(Optional, for Databricks-Connect, Azure only) The organization ID of the Databricks workspace. Can be found in the URL when connected in the browser.",
 						"scope": "window"
 					},
 					"databricks.connection.default.databricksConnectJars": {
 						"type": "string",
 						"default": "C:\\anaconda3\\envs\\databricksconnect\\lib\\site-packages\\pyspark\\jars",
-						"description": "Path to the Databricks-Connect Pyspark JARs. Can be obtained using 'databricks-connect get-jar-dir'.",
+						"description": "(Optional, for Databricks-Connect) Path to the Databricks-Connect Pyspark JARs. Can be obtained using 'databricks-connect get-jar-dir'.",
 						"scope": "window"
 					},
 					"databricks.connection.default.port": {
 						"type": "number",
 						"default": 15001,
-						"description": "The port to use when connecting using Databricks-Connect. Default is 15001.",
+						"description": "(Optional, for Databricks-Connect) The port to use when connecting using Databricks-Connect. Default is 15001.",
 						"scope": "window"
 					},
 					"databricks.connections": {
@@ -263,48 +263,40 @@
 				"command": "databricksWorkspace.download",
 				"title": "Download",
 				"icon": {
-					"light": "resources/light/download.svg",
-					"dark": "resources/dark/download.svg"
+					"light": "resources/light/download.png",
+					"dark": "resources/dark/download.png"
+				}
+			},
+			{
+				"command": "databricksWorkspace.sync",
+				"title": "Sync",
+				"icon": {
+					"light": "resources/light/sync.svg",
+					"dark": "resources/dark/sync.svg"
 				}
 			},
 			{
 				"command": "databricksWorkspace.upload",
 				"title": "Upload",
 				"icon": {
-					"light": "resources/light/upload.svg",
-					"dark": "resources/dark/upload.svg"
-				}
-			},
-			{
-				"command": "databricksWorkspaceItem.open",
-				"title": "Open",
-				"icon": {
-					"light": "resources/light/edit.svg",
-					"dark": "resources/dark/edit.svg"
-				}
-			},
-			{
-				"command": "databricksWorkspaceItem.edit",
-				"title": "Edit",
-				"icon": {
-					"light": "resources/light/edit.svg",
-					"dark": "resources/dark/edit.svg"
+					"light": "resources/light/upload.png",
+					"dark": "resources/dark/upload.png"
 				}
 			},
 			{
 				"command": "databricksWorkspaceItem.download",
 				"title": "Download",
 				"icon": {
-					"light": "resources/light/download.svg",
-					"dark": "resources/dark/download.svg"
+					"light": "resources/light/download.png",
+					"dark": "resources/dark/download.png"
 				}
 			},
 			{
 				"command": "databricksWorkspaceItem.upload",
 				"title": "Upload",
 				"icon": {
-					"light": "resources/light/upload.svg",
-					"dark": "resources/dark/upload.svg"
+					"light": "resources/light/upload.png",
+					"dark": "resources/dark/upload.png"
 				}
 			},
 			{
@@ -383,16 +375,16 @@
 				"command": "databricksFSItem.download",
 				"title": "download",
 				"icon": {
-					"light": "resources/light/download.svg",
-					"dark": "resources/dark/download.svg"
+					"light": "resources/light/download.png",
+					"dark": "resources/dark/download.png"
 				}
 			},
 			{
 				"command": "databricksFSItem.upload",
 				"title": "Upload",
 				"icon": {
-					"light": "resources/light/upload.svg",
-					"dark": "resources/dark/upload.svg"
+					"light": "resources/light/upload.png",
+					"dark": "resources/dark/upload.png"
 				}
 			},
 			{
@@ -451,17 +443,17 @@
 				{
 					"command": "databricksWorkspace.refresh",
 					"when": "view == databricksWorkspace",
-					"group": "navigation"
+					"group": "navigation@2"
 				},
 				{
 					"command": "databricksWorkspace.download",
 					"when": "view == databricksWorkspace",
-					"group": "navigation"
+					"group": "navigation@1"
 				},
 				{
 					"command": "databricksWorkspace.upload",
 					"when": "view == databricksWorkspace",
-					"group": "navigation"
+					"group": "navigation@1"
 				},
 				{
 					"command": "databricksClusters.refresh",
@@ -496,29 +488,19 @@
 					"group": "inline"
 				},
 				{
-					"command": "databricksWorkspaceItem.edit",
-					"when": "view == databricksWorkspace",
-					"group": "inline"
-				},
-				{
 					"command": "databricksWorkspaceItem.download",
 					"when": "view == databricksWorkspace && viewItem == CAN_SYNC",
-					"group": "inline"
+					"group": "inline@1"
 				},
 				{
 					"command": "databricksWorkspaceItem.upload",
 					"when": "view == databricksWorkspace && viewItem == CAN_SYNC",
-					"group": "inline"
-				},
-				{
-					"command": "databricksWorkspaceItem.sync",
-					"when": "view == databricksWorkspace && viewItem == CAN_SYNC",
-					"group": "inline"
+					"group": "inline@1"
 				},
 				{
 					"command": "databricksWorkspaceItem.delete",
 					"when": "view == databricksWorkspace",
-					"group": "inline"
+					"group": "inline@2"
 				},
 				{
 					"command": "databricksClusterItem.start",

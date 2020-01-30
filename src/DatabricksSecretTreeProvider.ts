@@ -10,8 +10,10 @@ export class DatabricksSecretTreeProvider implements vscode.TreeDataProvider<Dat
 
 	constructor() {	}
 
-	refresh(): void {
-		vscode.window.showInformationMessage(`Refreshing Secrets ...`);
+	refresh(showInfoMessage: boolean = false): void {
+		if(showInfoMessage){
+			vscode.window.showInformationMessage(`Refreshing Secrets ...`);
+		}
 		this._onDidChangeTreeData.fire();
 	}
 

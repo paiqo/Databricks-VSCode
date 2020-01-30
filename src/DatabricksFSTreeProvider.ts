@@ -8,8 +8,10 @@ export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<Databri
 
 	constructor() {	}
 
-	refresh(): void {
-		vscode.window.showInformationMessage(`Refreshing DBFS ...`);
+	refresh(showInfoMessage: boolean = false): void {
+		if(showInfoMessage){
+			vscode.window.showInformationMessage(`Refreshing DBFS ...`);
+		}
 		this._onDidChangeTreeData.fire();
 	}
 

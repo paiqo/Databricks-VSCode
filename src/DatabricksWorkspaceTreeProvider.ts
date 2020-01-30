@@ -11,8 +11,10 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 
 	constructor() {	}
 
-	refresh(): void {
-		vscode.window.showInformationMessage(`Refreshing Workspace ...`);
+	refresh(showInfoMessage: boolean = false): void {
+		if(showInfoMessage){
+			vscode.window.showInformationMessage(`Refreshing Workspace ...`);
+		}
 		this._onDidChangeTreeData.fire();
 	}
 

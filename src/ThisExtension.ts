@@ -4,6 +4,7 @@ import * as Path from 'path';
 import * as fs from 'fs';
 import * as UniqueFileName from 'uniquefilename';
 import { Helper } from './helpers/Helper';
+import { ActiveDatabricksEnvironment } from './environments/ActiveDatabricksEnvironment';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -12,15 +13,25 @@ export abstract class ThisExtension {
 	private static _context: vscode.ExtensionContext;
 	private static _extension: vscode.Extension<any>;
 	private static _tempFiles: string[];
+	private static _activeEnvironment: string;
 
 	static get rootPath(): string {
 		return this._context.extensionPath;
+	}
+
+	static set ActiveEnvironment(displayName: string) {
+		this._activeEnvironment = displayName;
+	}
+
+	static get ActiveEnvironment(): string {
+		return this._activeEnvironment;
 	}
 
 	static initialize(context: vscode.ExtensionContext): void {
 		this._context = context;
 
 		this._extension = vscode.extensions.getExtension(this.extension_id);
+		this._activeEnvironment = ActiveDatabricksEnvironment.displayName;
 
 		this.validateSettings();
 	}
