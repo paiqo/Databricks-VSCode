@@ -4,12 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { window } from 'vscode';
-
+import * as fs from 'fs';
+import * as fspath from 'path';
 
 export abstract class Helper
 {
-
-
 	static async showQuickPick(
 		items: string[],
 		toolTip: string,
@@ -56,5 +55,16 @@ export abstract class Helper
 			obj[key] = value;
 		}
 		return obj as T;
+	}
+
+	static ensureLocalFolder(path: string, pathIsFile: boolean = false): void {
+		let folder = path;
+		if(pathIsFile)
+		{
+			folder = fspath.dirname(path);
+		}
+		if (!fs.existsSync(folder)){
+			fs.mkdirSync(folder, { recursive: true });
+		}
 	}
 }

@@ -34,6 +34,5 @@ export class DatabricksSecretTreeProvider implements vscode.TreeDataProvider<Dat
 
 	addSecretScope(): void {
 		new DatabricksSecretTreeItem().addSecretScope();
-		vscode.commands.executeCommand("databricksSecrets.refresh");
 	}
 }

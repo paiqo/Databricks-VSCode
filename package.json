@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks Integration",
 	"description": "Databricks Integration",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"publisher": "paiqo",
 	"author": {
 		"name": "Gerhard Brueckl"
@@ -22,11 +22,23 @@
 	"engines": {
 		"vscode": "^1.39.0"
 	},
+	"galleryBanner": {
+		"color": "#0ea5ff",
+		"theme": "dark"
+	  },
 	"categories": [
 		"Debuggers",
 		"Azure",
 		"Extension Packs",
 		"Other"
+	],
+	"keywords": [
+		"databricks",
+		"spark",
+		"pyspark",
+		"remote",
+		"cluster",
+		"notebook"
 	],
 	"activationEvents": [
 		"onView:databricksEnvironments",

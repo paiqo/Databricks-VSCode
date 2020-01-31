@@ -17,6 +17,7 @@ import { iDatabricksSecret } from './secrets/iDatabricksSecret';
 import { DatabricksEnvironmentTreeItem } from './../environments/DatabricksEnvironmentTreeItem';
 import { iDatabricksEnvironment } from './../environments/iDatabricksEnvironment';
 import { ActiveDatabricksEnvironment } from './../environments/ActiveDatabricksEnvironment';
+import { Helper } from '../helpers/Helper';
 
 
 export abstract class DatabricksApiService {
@@ -37,11 +38,11 @@ export abstract class DatabricksApiService {
 	}
 
 	private static writeBase64toFile(base64String: string, filePath: string): void {
-		if (!fs.existsSync(filePath)){
-			fs.mkdirSync(filePath.split('\\').slice(0, -1).join('\\'), { recursive: true });
-		}
+		Helper.ensureLocalFolder(filePath, true);
 		fs.writeFile(filePath, base64String, {encoding: 'base64'}, function(err) {
-			vscode.window.showErrorMessage(`ERROR: ${err}`);
+			if(err){
+				vscode.window.showErrorMessage(`ERROR writing file: ${err}`);
+			}
 		});
 	}
 
@@ -102,6 +103,17 @@ export abstract class DatabricksApiService {
 			language: language,
 			overwrite: overwrite,
 			format: format
+		};
+
+		let response = await this._apiService.post(endpoint, body);
+		
+		let result = response.data;
+	}
+
+	static async createWorkspaceFolder(path: string): Promise<void> {
+		let endpoint = '2.0/workspace/mkdirs';
+		let body = {
+			path: path
 		};
 
 		let response = await this._apiService.post(endpoint, body);
@@ -216,7 +228,7 @@ export abstract class DatabricksApiService {
 
 	static async deleteSecretScope(scope: string) : Promise<object> {
 		// currently only sting values are supported!
-		let endpoint = '2.0/secrets/delete';
+		let endpoint = '2.0/secrets/scopes/delete';
 		let body = { 
 			scope: 			scope
 		};

@@ -110,17 +110,17 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 		let scopeName = await Helper.showInputBox("<name of scope>", "The name of the secret scope to create");
 		let managingPrincipal = await Helper.showQuickPick(["users"], "Which group/user is allowed to manage the secret scope");
 
-		DatabricksApiService.createSecretScopes(scopeName, managingPrincipal);
+		await DatabricksApiService.createSecretScopes(scopeName, managingPrincipal);
 
-		vscode.commands.executeCommand("databricksSecrets.refresh");
+		vscode.commands.executeCommand("databricksSecrets.refresh", false);
 	}
 
 	async deleteSecretScope(): Promise<void> {
 		if(this.itemType == 'SCOPE')
 		{
-			DatabricksApiService.deleteSecretScope(this.scope);
+			await DatabricksApiService.deleteSecretScope(this.scope);
 
-			vscode.commands.executeCommand("databricksSecrets.refresh");
+			vscode.commands.executeCommand("databricksSecrets.refresh", false);
 		}
 		else
 		{
@@ -132,17 +132,17 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 		let secretName = await Helper.showInputBox("<name of secret>", "The name of the secret to create");
 		let value = await Helper.showInputBox("<value for the secret>", "The value for the secret");
 
-		DatabricksApiService.setSecret(this.scope, secretName, value);
+		await DatabricksApiService.setSecret(this.scope, secretName, value);
 
-		vscode.commands.executeCommand("databricksSecrets.refresh");
+		vscode.commands.executeCommand("databricksSecrets.refresh", false);
 	}
 
 	async deleteSecret(): Promise<void> {
 		if(this.itemType == 'SECRET')
 		{
-			DatabricksApiService.deleteSecret(this.scope, this.secret);
+			await DatabricksApiService.deleteSecret(this.scope, this.secret);
 
-			vscode.commands.executeCommand("databricksSecrets.refresh");
+			vscode.commands.executeCommand("databricksSecrets.refresh", false);
 		}
 		else
 		{
