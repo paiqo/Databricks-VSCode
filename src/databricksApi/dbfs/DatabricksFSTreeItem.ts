@@ -9,7 +9,7 @@ import { iDatabricksFSItem } from './iDatabricksFSItem';
 export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricksFSItem {
 	private _path: string;
 	private _is_dir: boolean;
-	private _size: number;
+	private _fileSize: number;
 	
 	constructor(
 		path: string,
@@ -20,7 +20,7 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		super(path, collapsibleState);
 		this._path = path;
 		this._is_dir = is_dir;
-		this._size = size;
+		this._fileSize = size;
 
 		super.label = path.split('/').pop();
 		super.iconPath = {
@@ -41,14 +41,18 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 
 	// description is show next to the label
 	get description(): string {
-		return this.path;
+		return `${this.path} (${this.file_size} b)`;
 	}
 
-	// used in package.json to filter commands via viewItem == CANSTART
+	// used in package.json to filter commands via viewItem == FOLDER
 	get contextValue(): string {
-		if(!this.is_dir)
+		if(this.is_dir)
 		{
-			return 'CAN_DOWNLOAD';
+			return 'FOLDER';
+		}
+		else
+		{
+			return 'FILE';
 		}
 	}
 
@@ -65,13 +69,13 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		return this._is_dir;
 	}
 
-	get size (): number {
-		return this.size;
+	get file_size (): number {
+		return this._fileSize;
 	}
 
 	static fromJson(jsonString: string): DatabricksFSTreeItem {
 		let item: iDatabricksFSItem = JSON.parse(jsonString);
-		return new DatabricksFSTreeItem(item.path, item.is_dir, item.size);
+		return new DatabricksFSTreeItem(item.path, item.is_dir, item.file_size);
 	}
 
 	getChildren(): Thenable<DatabricksFSTreeItem[]> {
@@ -99,6 +103,31 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		else
 		{
 			throw new Error("Only a single file can be downloaded!");
+		}
+		
+	}
+
+	async add(): Promise<void> {
+		if(this.is_dir)
+		{
+			let files:vscode.Uri[] = await vscode.window.showOpenDialog({});
+
+			let file = files[0];
+			//for(let file in files)
+			//{
+			let dbfsPath = fspath.join(this.path, fspath.basename(file.fsPath)).split('\\').join('/');
+			let response = DatabricksApiService.uploadDBFSFile(file.fsPath, dbfsPath, true );
+
+				response.catch((error) => {
+					vscode.window.showErrorMessage(`ERROR: ${error}`);
+				}).then(() => {
+					vscode.window.showInformationMessage(`Upload of item ${this._path}) finished!`);
+				});
+			//}
+		}
+		else
+		{
+			throw new Error("A new file can only be added to a directory!");
 		}
 		
 	}

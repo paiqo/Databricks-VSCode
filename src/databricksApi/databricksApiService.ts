@@ -18,6 +18,7 @@ import { DatabricksEnvironmentTreeItem } from './../environments/DatabricksEnvir
 import { iDatabricksEnvironment } from './../environments/iDatabricksEnvironment';
 import { ActiveDatabricksEnvironment } from './../environments/ActiveDatabricksEnvironment';
 import { Helper } from '../helpers/Helper';
+import { resolve, promises } from 'dns';
 
 
 export abstract class DatabricksApiService {
@@ -63,6 +64,11 @@ export abstract class DatabricksApiService {
 		});
 	}
 
+	/*
+	----------------------------------------------------------------
+	-- W O R K S P A C E   A P I
+	----------------------------------------------------------------
+	*/
 	static async listWorkspaceItems(path: string) : Promise<DatabricksWorkspaceTreeItem[]> {
 		let endpoint = '2.0/workspace/list';
 		let body = { path: path };
@@ -121,6 +127,11 @@ export abstract class DatabricksApiService {
 		let result = response.data;
 	}
 
+	/*
+	----------------------------------------------------------------
+	-- C L U S T E R S   A P I
+	----------------------------------------------------------------
+	*/
 	static async listClusters() : Promise<DatabricksClusterTreeItem[]> {
 		let endpoint = '2.0/clusters/list';
 
@@ -166,6 +177,11 @@ export abstract class DatabricksApiService {
 		return result.versions;
 	}
 
+	/*
+	----------------------------------------------------------------
+	-- D B F S   A P I
+	----------------------------------------------------------------
+	*/
 	static async listDBFSItems(path: string) : Promise<DatabricksFSTreeItem[]> {
 		let endpoint = '2.0/dbfs/list';
 		let body = { path: path };
@@ -180,21 +196,100 @@ export abstract class DatabricksApiService {
 		let dbfsItems: DatabricksFSTreeItem[] = [];
 		if(items != undefined)
 		{
-			items.map(item => dbfsItems.push(new DatabricksFSTreeItem(item.path, item.is_dir, item.size)));
+			items.map(item => dbfsItems.push(new DatabricksFSTreeItem(item.path, item.is_dir, item.file_size)));
 			DatabricksApiService.sortArrayByProperty(dbfsItems, "label");
 		}
 		return dbfsItems;
 	}
 
-	static async downloadDBFSItem(path: string, localPath: string, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
+	static async downloadDBFSFile(path: string, localPath: string, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
 		vscode.window.showErrorMessage("Not yet implemented!");
 	}
 
-	static async uploadDBFSItem(localPath: string, path: string, language: WorkspaceItemLanguage, overwrite: boolean = true, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
-		vscode.window.showErrorMessage("Not yet implemented!");
+	static async createDBFSFolder(path: string): Promise<object> {
+		let endpoint = '2.0/dbfs/mkdirs';
+		let body = { 
+			path: 						path
+		};
+
+		let response = await this._apiService.post(endpoint, body);
+		
+		return response;
+	}
+
+	static async deleteDBFSItem(path: string, recursive: boolean): Promise<object> {
+		let endpoint = '2.0/dbfs/delete';
+		let body = { 
+			path: 						path,
+			recursive:					recursive
+		};
+
+		let response = await this._apiService.post(endpoint, body);
+		
+		return response;
+	}
+
+	static async createDBFSFile(path: string, overwrite: boolean): Promise<number> {
+		let endpoint = '2.0/dbfs/create';
+		let body = { 
+			path: 						path,
+			overwrite:					overwrite
+		};
+
+		let response = await this._apiService.post(endpoint, body);
+		
+		return response.data.handle as number;
+	}
+
+	static async appendDBFSFileContent(handle: number, base64Content: string): Promise<object> {
+		let endpoint = '2.0/dbfs/add-block';
+		let body = { 
+			data: 						base64Content,
+			handle:						handle
+		};
+
+		let response = await this._apiService.post(endpoint, body);
+
+		return response;
+	}
+
+	static async closeDBFSFile(handle: number): Promise<void> {
+		let endpoint = '2.0/dbfs/close';
+		let body = { 
+			handle: 						handle
+		};
+
+		let response = await this._apiService.post(endpoint, body);
+		
+		return response;
+	}
+
+	static async uploadDBFSFile(localPath: string, dbfsPath: string, overwrite: boolean, batchSize: number = 1048000): Promise<void> {
+		
+		// https://2ality.com/2018/04/async-iter-nodejs.html#reading-asynchronously-via-async-iteration
+
+		// this object is necessary so the single and asyncronous API calls are executed in the right order
+		let batchesLoaded: object[] = [];
+
+		let readStream = fs.createReadStream(localPath, { highWaterMark: batchSize });
+
+		let handle = await this.createDBFSFile(dbfsPath, overwrite);
+
+		for await (const chunk of readStream) {
+			let response:object = await this.appendDBFSFileContent(handle, chunk.toString('base64'));
+
+			batchesLoaded.push(response);
+		}
+
+		this.closeDBFSFile(handle);
 	}
 
 
+	/*
+	----------------------------------------------------------------
+	-- S E C R E T S   A P I
+	----------------------------------------------------------------
+	*/
 	static async listSecretScopes() : Promise<DatabricksSecretTreeItem[]> {
 		let endpoint = '2.0/secrets/scopes/list';
 		

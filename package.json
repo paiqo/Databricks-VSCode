@@ -1,8 +1,8 @@
 {
 	"name": "databricks-vscode",
-	"displayName": "Databricks Integration",
-	"description": "Databricks Integration",
-	"version": "0.0.2",
+	"displayName": "Databricks VSCode",
+	"description": "Databricks Extension for VSCode",
+	"version": "0.0.4",
 	"publisher": "paiqo",
 	"author": {
 		"name": "Gerhard Brueckl"
@@ -15,7 +15,7 @@
 	},
 	"bugs": {
 		"url": "https://github.com/paiqo/Databricks-VSCode/issues",
-		"email": "gbrueckl@paiqo.com"
+		"email": "databricks-vscode@paiqo.com"
 	},
 	"qna": "https://github.com/paiqo/Databricks-VSCode",
 	"enableProposedApi": true,
@@ -38,7 +38,9 @@
 		"pyspark",
 		"remote",
 		"cluster",
-		"notebook"
+		"notebook",
+		"azure",
+		"AWS"
 	],
 	"activationEvents": [
 		"onView:databricksEnvironments",
@@ -57,23 +59,17 @@
 				"required": [
 					"databricks.connection.default.displayName",
 					"databricks.connection.default.apiRootUrl",
-					"databricks.connection.default.cloudProvider",
 					"databricks.connection.default.personalAccessToken",
-					"databricks.connection.default.localSyncFolder",
-					"databricks.connection.default.pythonInterpreter",
-					"databricks.connection.default.databricksConnectJars",
-					"databricks.connection.default.port"
+					"databricks.connection.default.localSyncFolder"
 				],
 				"properties": {
 					"databricks.connection.default.displayName": {
 						"type": "string",
-						"default": "my Databricks workspace",
 						"description": "(Mandatory) Name shown in the environment list of the Databricks VSCode extension.",
 						"scope": "window"
 					},
 					"databricks.connection.default.apiRootUrl": {
 						"type": "string",
-						"default": "https://westeurope.azuredatabricks.net",
 						"description": "(Mandatory) Root URL of the Databricks API. Azure: https://westeurope.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com",
 						"scope": "window"
 					},
@@ -88,55 +84,36 @@
 					},
 					"databricks.connection.default.personalAccessToken": {
 						"type": "string",
-						"default": "dapi123456789abcdef123456789abcdef",
 						"description": "(Mandatory) The Personal Access Token (PAT) used to access the Databricks API.",
 						"scope": "window"
 					},
 					"databricks.connection.default.localSyncFolder": {
 						"type": "string",
-						"default": "C:\\Databricks_sync",
 						"description": "(Mandatory) A local path where files (notebooks) that are downloaded from Databricks should be stored. This folder can then be integrated in your GIT repository.",
 						"scope": "window"
 					},
 					"databricks.connection.default.pythonInterpreter": {
 						"type": "string",
-						"default": "C:\\Anaconda3\\envs\\databricksconnect\\python.exe",
 						"description": "(Optional, for Databricks-Connect) Path to python.exe of the interpreter to use. Is displayed whne setting the Python interpretor in VS Code",
 						"scope": "window"
 					},
 					"databricks.connection.default.organizationId": {
 						"type": "string",
-						"default": "1234567890392586",
 						"description": "(Optional, for Databricks-Connect, Azure only) The organization ID of the Databricks workspace. Can be found in the URL when connected in the browser.",
 						"scope": "window"
 					},
 					"databricks.connection.default.databricksConnectJars": {
 						"type": "string",
-						"default": "C:\\anaconda3\\envs\\databricksconnect\\lib\\site-packages\\pyspark\\jars",
 						"description": "(Optional, for Databricks-Connect) Path to the Databricks-Connect Pyspark JARs. Can be obtained using 'databricks-connect get-jar-dir'.",
 						"scope": "window"
 					},
 					"databricks.connection.default.port": {
 						"type": "number",
-						"default": 15001,
 						"description": "(Optional, for Databricks-Connect) The port to use when connecting using Databricks-Connect. Default is 15001.",
 						"scope": "window"
 					},
 					"databricks.connections": {
 						"type": "array",
-						"default": [
-							{
-								"displayName": "my Databricks workspace",
-								"cloudProvider": "Azure",
-								"personalAccessToken": "dapi123456789abcdef123456789abcdef",
-								"apiRootUrl": "https://westeurope.azuredatabricks.net",
-								"localSyncFolder": "C:\\Databricks_sync",
-								"pythonInterpreter": "C:\\Anaconda3\\envs\\DatabricksConnect\\python.exe",
-								"organizationId": "1234567890392586",
-								"databricksConnectJars": "C:\\anaconda3\\envs\\databricksconnect\\lib\\site-packages\\pyspark\\jars",
-								"port": 15001
-							}
-						],
 						"description": "An array of objects where each object represents a Databricks environment containing the same settings as defined for databricks.connection.default.* ",
 						"items": {
 							"type": "object",
@@ -384,6 +361,14 @@
 				}
 			},
 			{
+				"command": "databricksFS.add",
+				"title": "Add",
+				"icon": {
+					"light": "resources/light/add.svg",
+					"dark": "resources/dark/add.svg"
+				}
+			},
+			{
 				"command": "databricksFSItem.download",
 				"title": "download",
 				"icon": {
@@ -392,11 +377,11 @@
 				}
 			},
 			{
-				"command": "databricksFSItem.upload",
-				"title": "Upload",
+				"command": "databricksFSItem.add",
+				"title": "Add",
 				"icon": {
-					"light": "resources/light/upload.png",
-					"dark": "resources/dark/upload.png"
+					"light": "resources/light/add.svg",
+					"dark": "resources/dark/add.svg"
 				}
 			},
 			{
@@ -483,6 +468,11 @@
 					"group": "navigation"
 				},
 				{
+					"command": "databricksFS.add",
+					"when": "view == databricksFS",
+					"group": "navigation"
+				},
+				{
 					"command": "databricksSecrets.refresh",
 					"when": "view == databricksSecrets",
 					"group": "navigation"
@@ -534,6 +524,19 @@
 					"when": "view == databricksClusters",
 					"group": "inline"
 				},
+
+				{
+					"command": "databricksFSItem.add",
+					"when": "view == databricksFS && viewItem == FOLDER",
+					"group": "inline"
+				},
+
+				{
+					"command": "databricksFSItem.download",
+					"when": "view == databricksFS && viewItem == FILE",
+					"group": "inline"
+				},
+
 				{
 					"command": "databricksSecretItem.addSecret",
 					"when": "view == databricksSecrets && viewItem == SCOPE",

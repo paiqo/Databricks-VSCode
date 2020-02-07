@@ -21,13 +21,15 @@ import { iDatabricksEnvironment } from './environments/iDatabricksEnvironment';
 
 export function activate(context: vscode.ExtensionContext) {
 
-	let x: Map<string, any> = new Map<string, any>();
-	x.set("displayName", "adf");
-
-	let y: iDatabricksEnvironment = Helper.mapToObject(x);
-
 	ThisExtension.initialize(context);
+	if(!ThisExtension.IsValidated)
+	{
+		vscode.window.showErrorMessage("Please update Databricks settings and restart VSCode!");
+	}
+
 	DatabricksApiService.initialize();
+
+	//DatabricksApiService.uploadDBFSFile("D:\\Desktop\\FactInternetSales_data.csv", dbfsFile, true);
 
 	// register DatabricksEnvironmentTreeProvider
 	let databricksEnvironmentTreeProvider = new DatabricksEnvironmentTreeProvider();
@@ -69,7 +71,9 @@ export function activate(context: vscode.ExtensionContext) {
 	let databricksFSTreeProvider = new DatabricksFSTreeProvider();
 	vscode.window.registerTreeDataProvider('databricksFS', databricksFSTreeProvider);
 	vscode.commands.registerCommand('databricksFS.refresh', (showInfoMessage: boolean = true) => databricksFSTreeProvider.refresh(showInfoMessage));
+	vscode.commands.registerCommand('databricksFS.add', () => vscode.window.showErrorMessage(`Not yet implemented!`));
 
+	vscode.commands.registerCommand('databricksFSItem.add', (fsItem: DatabricksFSTreeItem) => fsItem.add());
 	vscode.commands.registerCommand('databricksFSItem.download', (fsItem: DatabricksFSTreeItem) => fsItem.download(ActiveDatabricksEnvironment.localSyncFolder));
 	
 	

@@ -29,7 +29,7 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 		localSyncFolder:		string,
 		databricksConnectJars:	string,
 		pythonInterpreter:		string,
-		port:					number = 8787,
+		port:					number = 15001,
 		organizationId:			string = undefined
 	) {
 		super(displayName);

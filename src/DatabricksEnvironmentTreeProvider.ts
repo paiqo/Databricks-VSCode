@@ -4,6 +4,7 @@ import { DatabricksEnvironmentTreeItem } from './environments/DatabricksEnvironm
 import { iDatabricksEnvironment } from './environments/iDatabricksEnvironment';
 import { Helper } from './helpers/Helper';
 import { ThisExtension } from './ThisExtension';
+import { ActiveDatabricksEnvironment } from './environments/ActiveDatabricksEnvironment';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class DatabricksEnvironmentTreeProvider implements vscode.TreeDataProvider<DatabricksEnvironmentTreeItem> {
@@ -29,21 +30,34 @@ export class DatabricksEnvironmentTreeProvider implements vscode.TreeDataProvide
 		const databricksEnvironments = vscode.workspace.getConfiguration().get('databricks.connections');
 
 		// array of file is in result.files
-		let items = databricksEnvironments as iDatabricksEnvironment[];
+		let items: iDatabricksEnvironment[] = databricksEnvironments as iDatabricksEnvironment[];
+		// add active environment in case only a single environment is used
+		
 		
 		let envItems: DatabricksEnvironmentTreeItem[] = [];
+		
 		if(items != undefined)
 		{
-			items.map(item => envItems.push(new DatabricksEnvironmentTreeItem(
-													item.displayName, 
-													item.cloudProvider, 
-													item.personalAccessToken, 
-													item.apiRootUrl, 
-													item.localSyncFolder,
-													item.databricksConnectJars,
-													item.pythonInterpreter,
-													item.port,
-													item.organizationId)));
+			// if multiple environments are not used
+			if(items.length == 0)
+			{
+				items.push(ActiveDatabricksEnvironment);
+			}
+			for (let i = 0; i < items.length; i++) 
+			{
+				let item = items[i];
+				
+				envItems.push(new DatabricksEnvironmentTreeItem(
+					item.displayName,
+					item.cloudProvider,
+					item.personalAccessToken,
+					item.apiRootUrl,
+					item.localSyncFolder,
+					item.databricksConnectJars,
+					item.pythonInterpreter,
+					item.port,
+					item.organizationId));
+			}
 		}
 		return Promise.resolve(envItems);
 	}
