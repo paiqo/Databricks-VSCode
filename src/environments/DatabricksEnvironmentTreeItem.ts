@@ -170,6 +170,7 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 		vscode.commands.executeCommand("databricksEnvironments.refresh", false);
 		vscode.commands.executeCommand("databricksWorkspace.refresh", false);
 		vscode.commands.executeCommand("databricksClusters.refresh", false);
+		vscode.commands.executeCommand("databricksJobs.refresh", false);
 		vscode.commands.executeCommand("databricksFS.refresh", false);
 		vscode.commands.executeCommand("databricksSecrets.refresh", false);
 	}

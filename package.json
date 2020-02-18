@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Databricks Extension for VSCode",
-	"version": "0.0.4",
+	"version": "0.1.0",
 	"publisher": "paiqo",
 	"author": {
 		"name": "Gerhard Brueckl"
@@ -46,6 +46,7 @@
 		"onView:databricksEnvironments",
 		"onView:databricksWorkspace",
 		"onView:databricksClusters",
+		"onView:databricksJobs",
 		"onView:databricksFS",
 		"onView:databricksSecrets"
 	],
@@ -206,6 +207,10 @@
 					"name": "Clusters"
 				},
 				{
+					"id": "databricksJobs",
+					"name": "Jobs"
+				},
+				{
 					"id": "databricksFS",
 					"name": "DBFS"
 				},
@@ -304,6 +309,8 @@
 					"dark": "resources/dark/delete.svg"
 				}
 			},
+
+
 			{
 				"command": "databricksClusters.refresh",
 				"title": "Refresh",
@@ -313,7 +320,7 @@
 				}
 			},
 			{
-				"command": "databricksClusters.addCluster",
+				"command": "databricksClusters.add",
 				"title": "Add",
 				"icon": {
 					"light": "resources/light/add.svg",
@@ -352,6 +359,58 @@
 					"dark": "resources/dark/delete.svg"
 				}
 			},
+
+
+			{
+				"command": "databricksJobs.refresh",
+				"title": "Refresh",
+				"icon": {
+					"light": "resources/light/refresh.svg",
+					"dark": "resources/dark/refresh.svg"
+				}
+			},
+			{
+				"command": "databricksJobs.add",
+				"title": "Refresh",
+				"icon": {
+					"light": "resources/light/add.svg",
+					"dark": "resources/dark/add.svg"
+				}
+			},
+			{
+				"command": "databricksJobItem.showDefinition",
+				"title": "JSON Definition",
+				"icon": {
+					"light": "resources/light/json.svg",
+					"dark": "resources/dark/json.svg"
+				}
+			},
+			{
+				"command": "databricksJobItem.start",
+				"title": "Start",
+				"icon": {
+					"light": "resources/light/start.svg",
+					"dark": "resources/dark/start.svg"
+				}
+			},
+			{
+				"command": "databricksJobItem.stop",
+				"title": "Stop",
+				"icon": {
+					"light": "resources/light/stop.svg",
+					"dark": "resources/dark/stop.svg"
+				}
+			},
+			{
+				"command": "databricksJobItem.openBrowser",
+				"title": "Open Browser",
+				"icon": {
+					"light": "resources/light/openBrowser.png",
+					"dark": "resources/dark//openBrowser.png"
+				}
+			},
+
+
 			{
 				"command": "databricksFS.refresh",
 				"title": "Refresh",
@@ -384,6 +443,8 @@
 					"dark": "resources/dark/add.svg"
 				}
 			},
+
+
 			{
 				"command": "databricksSecrets.refresh",
 				"title": "Refresh",
@@ -452,16 +513,32 @@
 					"when": "view == databricksWorkspace",
 					"group": "navigation@1"
 				},
+
+
 				{
 					"command": "databricksClusters.refresh",
 					"when": "view == databricksClusters",
 					"group": "navigation"
 				},
 				{
-					"command": "databricksClusters.addCluster",
+					"command": "databricksClusters.add",
 					"when": "view == databricksClusters",
 					"group": "navigation"
 				},
+
+
+				{
+					"command": "databricksJobs.refresh",
+					"when": "view == databricksJobs",
+					"group": "navigation"
+				},
+				{
+					"command": "databricksJobs.add",
+					"when": "view == databricksJobs",
+					"group": "navigation"
+				},
+
+
 				{
 					"command": "databricksFS.refresh",
 					"when": "view == databricksFS",
@@ -524,6 +601,29 @@
 					"when": "view == databricksClusters",
 					"group": "inline"
 				},
+
+
+				{
+					"command": "databricksJobItem.showDefinition",
+					"when": "view == databricksJobs",
+					"group": "inline"
+				},
+				{
+					"command": "databricksJobItem.start",
+					"when": "view == databricksJobs  && viewItem == JOB",
+					"group": "inline"
+				},
+				{
+					"command": "databricksJobItem.stop",
+					"when": "view == databricksJobs  && viewItem == RUNNING_JOB",
+					"group": "inline"
+				},
+				{
+					"command": "databricksJobItem.openBrowser",
+					"when": "view == databricksJobs",
+					"group": "inline"
+				},
+
 
 				{
 					"command": "databricksFSItem.add",

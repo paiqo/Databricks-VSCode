@@ -18,7 +18,8 @@ import { DatabricksEnvironmentTreeItem } from './../environments/DatabricksEnvir
 import { iDatabricksEnvironment } from './../environments/iDatabricksEnvironment';
 import { ActiveDatabricksEnvironment } from './../environments/ActiveDatabricksEnvironment';
 import { Helper } from '../helpers/Helper';
-import { resolve, promises } from 'dns';
+import { iDatabricksJobResponse, iDatabricksJobRunResponse } from './_types';
+
 
 
 export abstract class DatabricksApiService {
@@ -54,15 +55,6 @@ export abstract class DatabricksApiService {
 		return Buffer.from(bitmap).toString('base64');
 	}
 
-	private static sortArrayByProperty(unsortedArray: object[], property: string = "label")	{
-		unsortedArray.sort((t1, t2) => {
-			const name1 = t1[property].toLowerCase();
-			const name2 = t2[property].toLowerCase();
-			if (name1 > name2) { return 1; }
-			if (name1 < name2) { return -1; }
-			return 0;
-		});
-	}
 
 	/*
 	----------------------------------------------------------------
@@ -82,7 +74,7 @@ export abstract class DatabricksApiService {
 		if(items != undefined)
 		{
 			items.map(item => wsItems.push(new DatabricksWorkspaceTreeItem(item.path, item.object_type, item.object_id, item.language)));
-			DatabricksApiService.sortArrayByProperty(wsItems, "label");
+			Helper.sortArrayByProperty(wsItems, "label");
 		}
 		return wsItems;
 	}
@@ -144,7 +136,7 @@ export abstract class DatabricksApiService {
 		if(items != undefined)
 		{
 			items.map(item => cItems.push(new DatabricksClusterTreeItem(JSON.stringify(item, null, 4), item.cluster_id, item.cluster_name, item.state)));
-			DatabricksApiService.sortArrayByProperty(cItems, "label");
+			Helper.sortArrayByProperty(cItems, "label");
 		}
 		return cItems;
 	}
@@ -177,6 +169,80 @@ export abstract class DatabricksApiService {
 		return result.versions;
 	}
 
+
+	/*
+	----------------------------------------------------------------
+	-- J O B S   A P I
+	----------------------------------------------------------------
+	*/
+	static async listJobs(): Promise<iDatabricksJobResponse> {
+		let endpoint = '2.0/jobs/list';
+
+		let response = await this._apiService.get(endpoint);
+
+		let result = response.data as iDatabricksJobResponse;
+
+		return result;
+	}
+
+	static async listJobRuns(
+							job_id: number, 
+							active_only: boolean = true, 
+							completed_only: boolean = false,
+							offset: number = null, 
+							limit: number = null
+	): Promise<iDatabricksJobRunResponse> {
+		let endpoint = '2.0/jobs/runs/list';
+		let body = {
+			job_id: 	job_id,
+			active_only:	active_only,
+			completed_only:	completed_only,
+			offset: 	offset,
+			limit:		limit
+		};
+
+		let response = await this._apiService.get(endpoint, { params: body });
+
+		let result = response.data as iDatabricksJobRunResponse;
+
+		return result;
+	}
+
+	static async runJob(job_id: number): Promise<void> {
+		let endpoint = '2.0/jobs/run-now';
+		let body = {
+			job_id: job_id
+		};
+
+		let response = await this._apiService.post(endpoint, body);
+
+		return response;
+	}
+
+	static async cancelJunJob(run_id: number): Promise<void> {
+		let endpoint = '2.0/jobs/runs/cancel';
+		let body = {
+			run_id: run_id
+		};
+
+		let response = await this._apiService.post(endpoint, body);
+
+		return response;
+	}
+
+	static async exportJobRun(run_id: number, localPath: string): Promise<void> {
+		let endpoint = '2.0/jobs/runs/export';
+		let body = {
+			run_id: run_id
+		};
+
+		let response = await this._apiService.get(endpoint, { params: body });
+
+		let result = response.data;
+
+		this.writeBase64toFile(result.content, localPath);
+	}
+
 	/*
 	----------------------------------------------------------------
 	-- D B F S   A P I
@@ -197,13 +263,22 @@ export abstract class DatabricksApiService {
 		if(items != undefined)
 		{
 			items.map(item => dbfsItems.push(new DatabricksFSTreeItem(item.path, item.is_dir, item.file_size)));
-			DatabricksApiService.sortArrayByProperty(dbfsItems, "label");
+			Helper.sortArrayByProperty(dbfsItems, "label");
 		}
 		return dbfsItems;
 	}
 
-	static async downloadDBFSFile(path: string, localPath: string, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
-		vscode.window.showErrorMessage("Not yet implemented!");
+	static async readDBFSFileContent(path: string, offset: number, length: number): Promise<void> {
+		let endpoint = '2.0/dbfs/read';
+		let body = {
+			path: path,
+			offset: offset,
+			length: length
+		};
+
+		let response = await this._apiService.get(endpoint, { params: body });
+
+		return response;
 	}
 
 	static async createDBFSFolder(path: string): Promise<object> {
@@ -304,7 +379,7 @@ export abstract class DatabricksApiService {
 		if(items != undefined)
 		{
 			items.map(item => scopeItems.push(new DatabricksSecretTreeItem(item.name)));
-			DatabricksApiService.sortArrayByProperty(scopeItems, "label");
+			Helper.sortArrayByProperty(scopeItems, "label");
 		}
 		return scopeItems;
 	}
@@ -348,7 +423,7 @@ export abstract class DatabricksApiService {
 		if(items != undefined)
 		{
 			items.map(item => scopeItems.push(new DatabricksSecretTreeItem(scope, item.key)));
-			DatabricksApiService.sortArrayByProperty(scopeItems, "label");
+			Helper.sortArrayByProperty(scopeItems, "label");
 		}
 		return scopeItems;
 	}

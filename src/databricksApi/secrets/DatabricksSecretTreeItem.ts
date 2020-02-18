@@ -112,6 +112,7 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 
 		await DatabricksApiService.createSecretScopes(scopeName, managingPrincipal);
 
+		Helper.wait(1000);
 		vscode.commands.executeCommand("databricksSecrets.refresh", false);
 	}
 
@@ -120,6 +121,7 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 		{
 			await DatabricksApiService.deleteSecretScope(this.scope);
 
+			Helper.wait(1000);
 			vscode.commands.executeCommand("databricksSecrets.refresh", false);
 		}
 		else
@@ -134,6 +136,7 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 
 		await DatabricksApiService.setSecret(this.scope, secretName, value);
 
+		Helper.wait(1000);
 		vscode.commands.executeCommand("databricksSecrets.refresh", false);
 	}
 
@@ -142,6 +145,7 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 		{
 			await DatabricksApiService.deleteSecret(this.scope, this.secret);
 
+			Helper.wait(1000);
 			vscode.commands.executeCommand("databricksSecrets.refresh", false);
 		}
 		else

@@ -33,4 +33,8 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 			return Promise.resolve(DatabricksApiService.listClusters());
 		}
 	}
+
+	add(): void {
+		vscode.window.showErrorMessage(`Not yet implemented!`);
+	}
 }

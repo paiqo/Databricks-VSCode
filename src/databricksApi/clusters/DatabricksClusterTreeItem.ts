@@ -5,6 +5,7 @@ import { ThisExtension } from '../../ThisExtension';
 import { ClusterState } from './_types';
 import { iDatabricksCluster } from './iDatabricksCluster';
 import { iDatabricksRuntimeVersion } from './iDatabricksRuntimeVersion';
+import { Helper } from '../../helpers/Helper';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksClusterTreeItem extends vscode.TreeItem implements iDatabricksCluster {
@@ -93,6 +94,9 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem implements iDatab
 		}, (error) => {
 			vscode.window.showErrorMessage(`ERROR: ${error}`);
 		});
+
+		Helper.wait(5000);
+		vscode.commands.executeCommand("databricksClusters.refresh", false);
 	}
 
 	stop(): void {
@@ -103,10 +107,13 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem implements iDatab
 		}, (error) => {
 			vscode.window.showErrorMessage(`ERROR: ${error}`);
 		});
+
+		Helper.wait(5000);
+		vscode.commands.executeCommand("databricksClusters.refresh", false);
 	}
 
 	showDefinition(): void {
-		ThisExtension.openTempFile(this._definition, this.cluster_name + '.json');
+		Helper.openTempFile(this._definition, this.cluster_name + '.json');
 	}
 
 	get(): void {
