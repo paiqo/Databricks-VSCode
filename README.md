@@ -10,6 +10,11 @@ This is a Visual Studio Code extension that allows you to work with Azure Databr
 - Cluster manager 
 	- Start/stop clusters
 	- Script cluster definition as JSON
+- Job browser
+	- Start/stop jobs
+	- View job-run history + status
+	- Script job definition as JSON
+	- Script job-run output as JSON
 - DBFS browser
 - Secrets browser
 	- Create/delete secret scopes
@@ -58,7 +63,7 @@ You can either work with a single environment or configure multiple environments
 
 # Workspace Browser
 ![Workspace Browser](https://github.com/paiqo/Databricks-VSCode/blob/master/images/WorkspaceBrowser.jpg?raw=true "Workspace Browser")
-The workspace Browser connects directly to the Databricks workspace and loads the whole folder strucuture recursively. It displays folders, notebooks and libraries. Notebooks and folders and be up- and downloaded manually by simply clicking the corresponding item next them. If you do an up-/download on a whole folder or on the root, it will up-/download all items recursively.
+The workspace browser connects directly to the Databricks workspace and loads the whole folder strucuture recursively. It displays folders, notebooks and libraries. Notebooks and folders and be up- and downloaded manually by simply clicking the corresponding item next them. If you do an up-/download on a whole folder or on the root, it will up-/download all items recursively.
 The files are stored in the **localSyncFolder** that you configured in your settings. If you click or doubleclick a file, it will be downloaded locally and opened as IPython notebook or respectively as native .r, .scala or .sql file.
 IPython notebooks can then be executed directly against the Databricks cluster again if Databricks-Connect is setup correctly ([Setup Databricks-Connect on AWS](https://docs.databricks.com/dev-tools/databricks-connect.html), [Setup Databricks-Connect on Azure](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/databricks-connect))
 
@@ -66,6 +71,10 @@ IPython notebooks can then be executed directly against the Databricks cluster a
 ![Cluster Manager](https://github.com/paiqo/Databricks-VSCode/blob/master/images/ClusterManager.jpg?raw=true "Cluster Manager")
 This VS Code extension also allows you to manage your Databricks clusters directly from within VS Code. So you do not need to open the web UI anymore to start or stop your clusters.
 In addition, it also allows you to script the definition of your cluster and store it locally - e.g. if you want to integrate it as part of your CI/CD. This cluster definition file can for example be used with the [DatabricksPS PowerShell Module](https://www.powershellgallery.com/packages/DatabricksPS) to automate the cluster deployment.
+
+# Job Manager
+![Job Manager](https://github.com/paiqo/Databricks-VSCode/blob/master/images/JobManager.jpg?raw=true "Job Manager")
+The Job Manager allows you to manage all your existing Databricks jobs from within VS Code. It gives you information about currently deployed jobs and their different job-runs/executions. You can also start and stop new job-runs which will then be executed on the cluster. Similar to the Cluster Manager, you can also script the jobs to integrate them in automated CI/CD deployment pipelines using the [DatabricksPS PowerShell Module](https://www.powershellgallery.com/packages/DatabricksPS).
 
 # DBFS Browser
 ![DBFS Browser](https://github.com/paiqo/Databricks-VSCode/blob/master/images/DBFSBrowser.jpg?raw=true "DBFS Browser")

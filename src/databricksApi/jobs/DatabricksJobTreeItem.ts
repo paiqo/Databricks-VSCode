@@ -108,7 +108,7 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 	private getIconPath(theme: string): string {
 		let state: string = "job";
 		
-		if(this.contextValue == "JOB_RUN")
+		if (this.contextValue == "JOB_RUN" || this.contextValue == "RUNNING_JOB")
 		{
 			state = this.job_run_state;
 		}
@@ -139,7 +139,6 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 	get job_run_state(): string {
 		if(this.type == "JOB_RUN")
 		{
-
 			if (this.job_run_definition.state.result_state == "SUCCESS") {
 				return "succeeded";
 			}
