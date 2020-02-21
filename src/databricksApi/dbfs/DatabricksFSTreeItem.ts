@@ -3,6 +3,7 @@ import * as fspath from 'path';
 import { DatabricksApiService } from '../databricksApiService';
 import { ThisExtension } from '../../ThisExtension';
 import { iDatabricksFSItem } from './iDatabricksFSItem';
+import { Helper } from '../../helpers/Helper';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -41,7 +42,11 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 
 	// description is show next to the label
 	get description(): string {
-		return `${this.path} (${this.file_size} b)`;
+		if(this.is_dir)
+		{
+			return this.path;
+		}
+		return `${this.path} (${Helper.bytesToSize(this.file_size)})`;
 	}
 
 	// used in package.json to filter commands via viewItem == FOLDER
@@ -86,19 +91,15 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		return null;
 	}
 
-	download(localBasePath: string): void {
+	async download(): Promise<void> {
 		if(!this.is_dir)
 		{
-			throw new Error("Not implemented yet!");
-			/*
-			let response = DatabricksApiService.downloadWorkspaceItem(this._path, fspath.join(localBasePath, this._path + '.ipynb'));
+			let tempFile = await Helper.openTempFile('', this.path.split('/').slice(-1)[0], false);
+			await DatabricksApiService.downloadDBFSFile(this.path, tempFile, true);
 
-			response.catch((error) => {
-				vscode.window.showErrorMessage(`ERROR: ${error}`);
-			}).finally(() => {
-				vscode.window.showInformationMessage(`Download of item ${this._path}) finished!`);
-			});
-			*/
+			vscode.workspace
+				.openTextDocument(tempFile)
+				.then(vscode.window.showTextDocument);
 		}
 		else
 		{
@@ -110,25 +111,40 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 	async add(): Promise<void> {
 		if(this.is_dir)
 		{
-			let files:vscode.Uri[] = await vscode.window.showOpenDialog({});
+			let files: vscode.Uri[] = await vscode.window.showOpenDialog({ canSelectMany: true });
 
-			let file = files[0];
-			//for(let file in files)
-			//{
-			let dbfsPath = fspath.join(this.path, fspath.basename(file.fsPath)).split('\\').join('/');
-			let response = DatabricksApiService.uploadDBFSFile(file.fsPath, dbfsPath, true );
+			let file: vscode.Uri = files[0];
+			for(let fileNum in files)
+			{
+				let dbfsPath = fspath.join(this.path, fspath.basename(files[fileNum].fsPath)).split('\\').join('/');
+				let response = DatabricksApiService.uploadDBFSFile(files[fileNum].fsPath, dbfsPath, true );
 
 				response.catch((error) => {
 					vscode.window.showErrorMessage(`ERROR: ${error}`);
 				}).then(() => {
-					vscode.window.showInformationMessage(`Upload of item ${this._path}) finished!`);
+					vscode.window.showInformationMessage(`Upload of item ${dbfsPath} finished!`);
+
+					Helper.wait(500);
+					vscode.commands.executeCommand("databricksFS.refresh", false);
 				});
-			//}
+			}
 		}
 		else
 		{
 			throw new Error("A new file can only be added to a directory!");
 		}
-		
+	}
+
+	async delete(): Promise<void> {
+		if (!this.is_dir) {
+			DatabricksApiService.deleteDBFSItem(this.path, false);
+
+			await Helper.wait(500);
+			vscode.commands.executeCommand("databricksFS.refresh", false);
+		}
+		else {
+			throw new Error("For safety reasons, only a single file can be deleted!");
+		}
+
 	}
 }

@@ -240,7 +240,7 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 		return jobItems;
 	}
 
-	start(): void {
+	async start(): Promise<void> {
 		if(this.type == "JOB")
 		{
 			let response = DatabricksApiService.runJob(this.job_id);
@@ -252,11 +252,11 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 			});
 		}
 
-		Helper.wait(2000);
+		await Helper.wait(2000);
 		vscode.commands.executeCommand("databricksJobs.refresh", false);
 	}
 
-	stop(): void {
+	async stop(): Promise<void> {
 		if (this.type == "JOB_RUN") {
 			let response = DatabricksApiService.cancelJunJob(this.job_run_id);
 
@@ -267,7 +267,7 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 			});
 		}
 
-		Helper.wait(10000);
+		await Helper.wait(10000);
 		vscode.commands.executeCommand("databricksJobs.refresh", false);
 	}
 
@@ -284,9 +284,5 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 
 	openBrowser(): void {
 		Helper.openLink(this.link);
-	}
-
-	get(): void {
-
 	}
 }

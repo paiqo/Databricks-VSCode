@@ -98,20 +98,21 @@ export abstract class Helper
 		this._tempFiles.push(filePath);
 	}
 
-	static openTempFile(content: string = '', fileName: string = 'db-vscode-temp.json', ): string {
-		const tempDir = this.resolvePath(os.tmpdir());
-		const filePath = `${tempDir}${fspath.sep}${fileName}`;
-		const uniqueFilePath = UniqueFileName.get(filePath, {});
+	static async openTempFile(content: string = '', fileName: string = 'db-vscode-temp.json', open:boolean = true): Promise<string> {
+		let tempDir = this.resolvePath(os.tmpdir());
+		let filePath = `${tempDir}${fspath.sep}${fileName}`;
+		let uniqueFilePath = await UniqueFileName.get(filePath, {});
 
-		uniqueFilePath.then(path => {
-			fs.writeFile(path, content, (err) => vscode.window.showErrorMessage(err.message));
-			this.addTempFile(path);
+		
+		fs.writeFile(uniqueFilePath, content, (err) => vscode.window.showErrorMessage(err.message));
+		this.addTempFile(uniqueFilePath);
 
+		if(open)
+		{
 			vscode.workspace
-				.openTextDocument(path)
+				.openTextDocument(uniqueFilePath)
 				.then(vscode.window.showTextDocument);
-		}
-		);
+		}	
 
 		return uniqueFilePath;
 	}
@@ -136,11 +137,23 @@ export abstract class Helper
 		vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(link));
 	}
 
-	static wait(ms): void {
+	static async wait(ms): Promise<void> {
+		/*
 		let start = new Date().getTime();
 		let end = start;
 		while (end < start + ms) {
 			end = new Date().getTime();
 		}
+		*/
+		await setTimeout(() => {}, ms);
+		//const wait = (ms) => new Promise(res => setTimeout(res, ms));
+	}
+
+	static bytesToSize(bytes: number): string {
+		let sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+		if (bytes == 0) return '0 Byte';
+		
+		let i = Math.floor(Math.log(bytes) / Math.log(1024));
+		return Math.round(bytes / Math.pow(1024, i)) + ' ' + sizes[i];
 	}
 }

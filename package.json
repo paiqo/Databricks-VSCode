@@ -443,6 +443,14 @@
 					"dark": "resources/dark/add.svg"
 				}
 			},
+			{
+				"command": "databricksFSItem.delete",
+				"title": "Delete",
+				"icon": {
+					"light": "resources/light/delete.svg",
+					"dark": "resources/dark/delete.svg"
+				}
+			},
 
 
 			{
@@ -633,6 +641,12 @@
 
 				{
 					"command": "databricksFSItem.download",
+					"when": "view == databricksFS && viewItem == FILE",
+					"group": "inline"
+				},
+
+				{
+					"command": "databricksFSItem.delete",
 					"when": "view == databricksFS && viewItem == FILE",
 					"group": "inline"
 				},

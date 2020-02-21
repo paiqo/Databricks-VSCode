@@ -85,10 +85,11 @@ export function activate(context: vscode.ExtensionContext) {
 	let databricksFSTreeProvider = new DatabricksFSTreeProvider();
 	vscode.window.registerTreeDataProvider('databricksFS', databricksFSTreeProvider);
 	vscode.commands.registerCommand('databricksFS.refresh', (showInfoMessage: boolean = true) => databricksFSTreeProvider.refresh(showInfoMessage));
-	vscode.commands.registerCommand('databricksFS.add', () => vscode.window.showErrorMessage(`Not yet implemented!`));
+	vscode.commands.registerCommand('databricksFS.add', () => new DatabricksFSTreeItem("/", true, 0).add());
 
 	vscode.commands.registerCommand('databricksFSItem.add', (fsItem: DatabricksFSTreeItem) => fsItem.add());
-	vscode.commands.registerCommand('databricksFSItem.download', (fsItem: DatabricksFSTreeItem) => fsItem.download(ActiveDatabricksEnvironment.localSyncFolder));
+	vscode.commands.registerCommand('databricksFSItem.download', (fsItem: DatabricksFSTreeItem) => fsItem.download());
+	vscode.commands.registerCommand('databricksFSItem.delete', (fsItem: DatabricksFSTreeItem) => fsItem.delete());
 	
 	
 	// register DatabricksSecretTreeProvider
