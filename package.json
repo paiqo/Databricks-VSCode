@@ -278,6 +278,10 @@
 				}
 			},
 			{
+				"command": "databricksWorkspaceItem.click",
+				"title": "Open File"
+			},
+			{
 				"command": "databricksWorkspaceItem.download",
 				"title": "Download",
 				"icon": {
@@ -326,6 +330,10 @@
 					"light": "resources/light/add.svg",
 					"dark": "resources/dark/add.svg"
 				}
+			},
+			{
+				"command": "databricksClusterItem.click",
+				"title": "Open File"
 			},
 			{
 				"command": "databricksClusterItem.start",
@@ -386,6 +394,10 @@
 				}
 			},
 			{
+				"command": "databricksJobItem.click",
+				"title": "Open File"
+			},
+			{
 				"command": "databricksJobItem.start",
 				"title": "Start",
 				"icon": {
@@ -402,11 +414,19 @@
 				}
 			},
 			{
+				"command": "databricksJobItem.delete",
+				"title": "Delete",
+				"icon": {
+					"light": "resources/light/delete.svg",
+					"dark": "resources/dark/delete.svg"
+				}
+			},
+			{
 				"command": "databricksJobItem.openBrowser",
 				"title": "Open Browser",
 				"icon": {
 					"light": "resources/light/openBrowser.png",
-					"dark": "resources/dark//openBrowser.png"
+					"dark": "resources/dark/openBrowser.png"
 				}
 			},
 
@@ -629,6 +649,11 @@
 				{
 					"command": "databricksJobItem.openBrowser",
 					"when": "view == databricksJobs",
+					"group": "inline"
+				},
+				{
+					"command": "databricksJobItem.delete",
+					"when": "view == databricksJobs && viewItem == JOB",
 					"group": "inline"
 				},
 

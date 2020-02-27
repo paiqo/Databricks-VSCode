@@ -1,28 +1,29 @@
-import { ClusterState } from './_types';
+import { ClusterState, ClusterSource } from './_types';
 
 export interface iDatabricksCluster {
-	cluster_id:		string;
-	cluster_name:	string;
-	state:	ClusterState;
-	/*
-	num_workers:	bigint;
+	cluster_id:			string;
+	cluster_name:		string;
+	state:				ClusterState;
+	cluster_source: 	ClusterSource;
+	
+	num_workers:	number;
 	autoscale: {
-				min_workers:	bigint;
-				max_wokrers:	bigint;
+				min_workers:	number;
+				max_wokrers:	number;
 				};
 	spark_version:	string;
 	creator_user_name:	string;
 	node_type_id:	string;
 	driver_node_type_id:	string;
-	autotermination_minutes:	bigint;
+	autotermination_minutes: number;
 	state_message:	string;
-	start_time: bigint;
-	terminated_time:	bigint;
-	last_state_loss_time:	bigint;
-	last_activity_time:	bigint;
-	cluster_memory_mb:	bigint;
+	start_time: number;
+	terminated_time: number;
+	last_state_loss_time: number;
+	last_activity_time: number;
+	cluster_memory_mb: number;
 	cluster_cores:	number;
-	*/
+
 	/*
 	driver:	SparkNode
 	executors:	An array of SparkNode

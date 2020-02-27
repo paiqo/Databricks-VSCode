@@ -17,6 +17,8 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	private _object_id: number;
 	private _language: WorkspaceItemLanguage;
 	
+	private static _doubleClickTimerId;
+
 	constructor(
 		path: string,
 		object_type: WorkspaceItemType,
@@ -68,9 +70,8 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	}
 
 	readonly command = { 
-		command: 'databricksWorkspaceItem.open', title: "Open File", arguments: [this]
+		command: 'databricksWorkspaceItem.click', title: "Open File", arguments: [this]
 	};
-
 
 	get path (): string {
 		return this._path;
@@ -142,6 +143,7 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		if(this.object_type === 'NOTEBOOK')
 		{
 			try {
+				vscode.window.showInformationMessage(`Download of item ${this._path}) started ...`);
 				let response = await DatabricksApiService.downloadWorkspaceItem(this.path, this.localFilePath, this.exportFormat);
 				vscode.window.showInformationMessage(`Download of item ${this._path}) finished!`);
 			}
@@ -164,21 +166,13 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		if(this.object_type === 'NOTEBOOK')
 		{
 			try {
+				vscode.window.showInformationMessage(`Upload of item ${this.path}) started ...`);
 				let response = DatabricksApiService.uploadWorkspaceItem(this.localFilePath, this.path, this.language, true, this.exportFormat);
 				vscode.window.showInformationMessage(`Upload of item ${this.path}) finished!`);
 			}
 			catch (error) {
 				vscode.window.showErrorMessage(`ERROR: ${error}`);
 			}
-			/*
-			let response = DatabricksApiService.uploadWorkspaceItem(this.localFilePath, this.path, this.language, true, this.exportFormat);
-
-			response.catch((error) => {
-				vscode.window.showErrorMessage(`ERROR: ${error}`);
-			}).then(() => {
-				vscode.window.showInformationMessage(`Upload of item ${this._path}) finished!`);
-			});
-			*/
 		}
 		else if (this.object_type === 'DIRECTORY') {
 			DatabricksApiService.createWorkspaceFolder(this.localFolderPath);
@@ -188,23 +182,13 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 			{
 				item.upload();
 			}
-			/*
-			let items = this.getChildren();
-
-			items.then((items) => {
-					for (let item of items) {
-						item.upload();
-					}
-				}
-			);
-			*/
 		}
 	}
 
-	open(): void {
+	async open(): Promise<void> {
 		if(!this.localFileExists)
 		{
-			this.download();
+			await this.download();
 		}
 		else
 		{
@@ -214,6 +198,18 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		vscode.workspace
 				.openTextDocument(this.localFileUri)
 				.then(vscode.window.showTextDocument);
-		//vscode.window.showTextDocument(this.localFileUri);
+	}
+
+	async click(): Promise<void> {
+		Helper.singleVsDoubleClick(this, this.singleClick, this.doubleClick);
+	}
+
+	async doubleClick(): Promise<void> {
+		//vscode.window.showInformationMessage("DoubleClick");
+		await this.open();
+	}
+
+	async singleClick(): Promise<void> {
+		//vscode.window.showInformationMessage("SingleClick");
 	}
 }

@@ -12,6 +12,7 @@ import * as UniqueFileName from 'uniquefilename';
 export abstract class Helper
 {
 	private static _tempFiles: string[];
+	private static _doubleClickTimer: any;
 
 	static async showQuickPick(
 		items: string[],
@@ -155,5 +156,29 @@ export abstract class Helper
 		
 		let i = Math.floor(Math.log(bytes) / Math.log(1024));
 		return Math.round(bytes / Math.pow(1024, i)) + ' ' + sizes[i];
+	}
+
+	static async singleVsDoubleClick(
+		sourceObject: any, 
+		singleClickFunction: Function, 
+		doubleClickFunction: Function, 
+		timeout: number = 250): Promise<void> 
+	{
+		if (!Helper._doubleClickTimer) {
+			//if timer still exists, it's a double-click
+			Helper._doubleClickTimer = setTimeout(await sourceObject[singleClickFunction.name], timeout); //do single-click once timer has elapsed
+			setTimeout(this.resetDoubleClickTimer, timeout + 1);
+		}
+		else {
+			await Helper.resetDoubleClickTimer();
+
+			await sourceObject[doubleClickFunction.name]();
+		}
+	}
+
+	private static async resetDoubleClickTimer(): Promise<void> 
+	{
+		clearTimeout(Helper._doubleClickTimer); //cancel timer
+		Helper._doubleClickTimer = undefined;
 	}
 }

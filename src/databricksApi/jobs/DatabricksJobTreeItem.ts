@@ -115,6 +115,10 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 		return fspath.join(ThisExtension.rootPath, 'resources', theme, state + '.png');
 	}
 
+	readonly command = {
+		command: 'databricksJobItem.click', title: "Open File", arguments: [this]
+	};
+
 
 	get type(): JobTreeItemType {
 		return this._type;
@@ -271,18 +275,32 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 		vscode.commands.executeCommand("databricksJobs.refresh", false);
 	}
 
-	showDefinition(): void {
+	async delete(): Promise<void> {
+		vscode.window.showErrorMessage(`Not yet implemented!`);
+	}
+
+	async showDefinition(): Promise<void> {
 		if(this.type == "JOB")
 		{
-			Helper.openTempFile(this._definition, this.label + '-' + this.job_id + '.json');
+			await Helper.openTempFile(JSON.stringify(this.job_definition, null, "\t"), this.label + '-' + this.job_id + '.json');
 		}
 		else
 		{
-			Helper.openTempFile(this._definition, this.label + '-' + this.job_run_id + '.json');
+			await Helper.openTempFile(JSON.stringify(this.job_run_definition, null, "\t"), this.label + '-' + this.job_run_id + '.json');
 		}
 	}
 
-	openBrowser(): void {
-		Helper.openLink(this.link);
+	async openBrowser(): Promise<void> {
+		await Helper.openLink(this.link);
 	}
+
+	async click(): Promise<void> {
+		await Helper.singleVsDoubleClick(this, this.singleClick, this.doubleClick);
+	}
+
+	async doubleClick(): Promise<void> {
+		await this.showDefinition();
+	}
+
+	async singleClick(): Promise<void> {}
 }

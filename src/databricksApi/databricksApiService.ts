@@ -19,6 +19,7 @@ import { iDatabricksEnvironment } from './../environments/iDatabricksEnvironment
 import { ActiveDatabricksEnvironment } from './../environments/ActiveDatabricksEnvironment';
 import { Helper } from '../helpers/Helper';
 import { iDatabricksJobResponse, iDatabricksJobRunResponse } from './_types';
+import { iDatabricksCluster } from './clusters/iDatabricksCluster';
 
 
 
@@ -124,21 +125,15 @@ export abstract class DatabricksApiService {
 	-- C L U S T E R S   A P I
 	----------------------------------------------------------------
 	*/
-	static async listClusters() : Promise<DatabricksClusterTreeItem[]> {
+	static async listClusters() : Promise<iDatabricksCluster[]> {
 		let endpoint = '2.0/clusters/list';
 
 		let response = await this._apiService.get(endpoint);
 		
 		let result = response.data;
-		let items = result.clusters as DatabricksClusterTreeItem[];
+		let items = result.clusters as iDatabricksCluster[];
 
-		let cItems: DatabricksClusterTreeItem[] = [];
-		if(items != undefined)
-		{
-			items.map(item => cItems.push(new DatabricksClusterTreeItem(JSON.stringify(item, null, 4), item.cluster_id, item.cluster_name, item.state)));
-			Helper.sortArrayByProperty(cItems, "label");
-		}
-		return cItems;
+		return items;
 	}
 
 	static async startCluster(cluster_id: string): Promise<object> {

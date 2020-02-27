@@ -24,13 +24,11 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 	}
 
 	getChildren(element?: DatabricksClusterTreeItem): Thenable<DatabricksClusterTreeItem[]> {	
-		if (element != null && element != undefined) 
-		{
-			return Promise.resolve([]);
-		} 
-		else 
-		{
-			return Promise.resolve(DatabricksApiService.listClusters());
+		if (element != null && element != undefined) {
+			return element.getChildren();
+		}
+		else {
+			return DatabricksClusterTreeItem.getDummyItem("ROOT").getChildren();
 		}
 	}
 

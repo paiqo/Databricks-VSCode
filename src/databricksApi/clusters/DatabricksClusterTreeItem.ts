@@ -2,32 +2,37 @@ import * as vscode from 'vscode';
 import * as fspath from 'path';
 import { DatabricksApiService } from '../databricksApiService';
 import { ThisExtension } from '../../ThisExtension';
-import { ClusterState } from './_types';
+import { ClusterState, ClusterSource, ClusterTreeItemType } from './_types';
 import { iDatabricksCluster } from './iDatabricksCluster';
 import { iDatabricksRuntimeVersion } from './iDatabricksRuntimeVersion';
 import { Helper } from '../../helpers/Helper';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class DatabricksClusterTreeItem extends vscode.TreeItem implements iDatabricksCluster {
+export class DatabricksClusterTreeItem extends vscode.TreeItem {
+	private _item_type:	ClusterTreeItemType;
 	private _id: string;
 	private _name: string;
 	private _state: ClusterState;
-	private _definition: string;
+	private _definition: iDatabricksCluster;
+	private _source:	ClusterSource;
 	
 	constructor(
-		definition: string,
-		cluster_id: string,
-		cluster_name: string,
-		cluster_state: ClusterState,
+		type: ClusterTreeItemType,
+		definition: iDatabricksCluster
 	) {
-		super(cluster_name);
+		super(definition.cluster_name || "ROOT");
+		this._item_type = type;
 		this._definition = definition;
-		this._id = cluster_id;
-		this._name = cluster_name;
-		this._state = cluster_state;
+		this._id = definition.cluster_id;
+		this._name = definition.cluster_name;
+		this._state = definition.state;
+		this._source = definition.cluster_source;
 
 		// clusters are never expandable
 		super.collapsibleState = undefined;
+		if (["ROOT", "JOB_CLUSTER_DIR"].includes(this.item_type)) {
+			super.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+		}
 		super.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
@@ -35,16 +40,27 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem implements iDatab
 	}
 
 	get tooltip(): string {
+		if (["ROOT", "JOB_CLUSTER_DIR"].includes(this.item_type)) {
+			return null;
+		}
 		return `${this.cluster_id} (${this.state})`;
 	}
 
 	// description is show next to the label
 	get description(): string {
+		if (["ROOT", "JOB_CLUSTER_DIR"].includes(this.item_type)) {
+			return null;
+		}
 		return `${this.cluster_id} (${this.state})`;
 	}
 
 	// used in package.json to filter commands via viewItem == CANSTART
 	get contextValue(): string {
+		if (["ROOT", "JOB_CLUSTER_DIR"].includes(this.item_type)) 
+		{ 
+			return null;
+		}
+
 		if(['RUNNING', 'ERROR', 'UNKNOWN', 'PENDING'].includes(this.state))
 		{
 			return 'CAN_STOP';
@@ -57,11 +73,16 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem implements iDatab
 
 	private getIconPath(theme: string): string {
 		let state = (this.contextValue == "CAN_START" ? 'stop' : 'start');
+		if (["ROOT", "JOB_CLUSTER_DIR"].includes(this.item_type)) { state = fspath.join("workspace", "directory"); }
 		return fspath.join(ThisExtension.rootPath, 'resources', theme, state + '.svg');
 	}
 
+	readonly command = {
+		command: 'databricksClusterItem.click', title: "Open File", arguments: [this]
+	};
 
-	get definition (): string {
+
+	get definition (): iDatabricksCluster {
 		return this._definition;
 	}
 
@@ -81,12 +102,61 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem implements iDatab
 		return this._state;
 	}
 
-	static fromJson(jsonString: string): DatabricksClusterTreeItem {
-		let item: iDatabricksCluster = JSON.parse(jsonString);
-		return new DatabricksClusterTreeItem(jsonString, item.cluster_id, item.cluster_name, item.state);
+	get item_type(): ClusterTreeItemType {
+		return this._item_type;
 	}
 
-	start(): void {
+	get cluster_source(): ClusterSource {
+		return this._source;
+	}
+
+	async getChildren(): Promise<DatabricksClusterTreeItem[]> {
+		let clusters: iDatabricksCluster[] = await DatabricksApiService.listClusters();
+		let items: DatabricksClusterTreeItem[] = [];
+
+		if (this.item_type === 'ROOT') {
+			
+			let job_clusters_found: boolean = false;
+			for (let cluster of clusters) {
+				if (["API", "UI"].includes(cluster.cluster_source))
+				{
+					items.push(new DatabricksClusterTreeItem("CLUSTER", cluster));
+				}
+				if (["JOB"].includes(cluster.cluster_source)) {
+					job_clusters_found = true;
+				}
+			}
+
+			if(job_clusters_found)
+			{
+				items.push(DatabricksClusterTreeItem.getDummyItem("JOB_CLUSTER_DIR"));
+			}
+		}
+		else if (this.item_type === 'JOB_CLUSTER_DIR') {
+			for (let cluster of clusters) {
+				if (["JOB"].includes(cluster.cluster_source)) {
+					items.push(new DatabricksClusterTreeItem("CLUSTER", cluster));
+				}
+			}
+		}
+		return items;
+	}
+
+	static fromJson(jsonString: string): DatabricksClusterTreeItem {
+		let item: iDatabricksCluster = JSON.parse(jsonString);
+		return new DatabricksClusterTreeItem("CLUSTER", item);
+	}
+
+	static getDummyItem(item_type: ClusterTreeItemType): DatabricksClusterTreeItem {
+		let def: any = { cluster_name: item_type}; // cluster_name is the only mandatory property!
+
+		if(item_type == "JOB_CLUSTER_DIR") {
+			def.cluster_name = 'Job Clusters';
+		}
+		return new DatabricksClusterTreeItem(item_type, def);
+	}
+
+	async start(): Promise<void> {
 		let response = DatabricksApiService.startCluster(this.cluster_id);
 
 		response.then((response) => {
@@ -95,11 +165,11 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem implements iDatab
 			vscode.window.showErrorMessage(`ERROR: ${error}`);
 		});
 
-		Helper.wait(5000);
+		await Helper.wait(5000);
 		vscode.commands.executeCommand("databricksClusters.refresh", false);
 	}
 
-	stop(): void {
+	async stop(): Promise<void> {
 		let response = DatabricksApiService.stopCluster(this.cluster_id);
 
 		response.then((response) => {
@@ -108,15 +178,25 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem implements iDatab
 			vscode.window.showErrorMessage(`ERROR: ${error}`);
 		});
 
-		Helper.wait(5000);
+		await Helper.wait(5000);
 		vscode.commands.executeCommand("databricksClusters.refresh", false);
 	}
 
-	showDefinition(): void {
-		Helper.openTempFile(this._definition, this.cluster_name + '.json');
+	async delete(): Promise<void> {
+		vscode.window.showErrorMessage(`Not yet implemented!`);
 	}
 
-	get(): void {
-
+	async showDefinition(): Promise<void> {
+		await Helper.openTempFile(JSON.stringify(this.definition, null, "\t"), this.cluster_name + '.json');
 	}
+
+	async click(): Promise<void> {
+		await Helper.singleVsDoubleClick(this, this.singleClick, this.doubleClick);
+	}
+
+	async doubleClick(): Promise<void> {
+		await this.showDefinition();
+	}
+
+	async singleClick(): Promise<void> { }
 }

@@ -31,8 +31,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	DatabricksApiService.initialize();
 
-	//DatabricksApiService.uploadDBFSFile("D:\\Desktop\\FactInternetSales_data.csv", dbfsFile, true);
-
 	// register DatabricksEnvironmentTreeProvider
 	let databricksEnvironmentTreeProvider = new DatabricksEnvironmentTreeProvider();
 	vscode.window.registerTreeDataProvider('databricksEnvironments', databricksEnvironmentTreeProvider);
@@ -48,7 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksWorkspace.download', () => databricksWorkspaceTreeProvider.download());
 	vscode.commands.registerCommand('databricksWorkspace.upload', () => databricksWorkspaceTreeProvider.upload());
 
-	vscode.commands.registerCommand('databricksWorkspaceItem.open', (workspaceItem: DatabricksWorkspaceTreeItem) => workspaceItem.open());
+	vscode.commands.registerCommand('databricksWorkspaceItem.click', (workspaceItem: DatabricksWorkspaceTreeItem) => workspaceItem.click());
 	vscode.commands.registerCommand('databricksWorkspaceItem.download', (workspaceItem: DatabricksWorkspaceTreeItem) => workspaceItem.download());
 	vscode.commands.registerCommand('databricksWorkspaceItem.upload', (workspaceItem: DatabricksWorkspaceTreeItem) => workspaceItem.upload());
 	
@@ -63,10 +61,11 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksClusters.refresh', (showInfoMessage: boolean = true) => databricksClusterTreeProvider.refresh(showInfoMessage));
 	vscode.commands.registerCommand('databricksClusters.add', () => databricksClusterTreeProvider.add());
 	
+	vscode.commands.registerCommand('databricksClusterItem.click', (cluster: DatabricksClusterTreeItem) => cluster.click());
 	vscode.commands.registerCommand('databricksClusterItem.start', (cluster: DatabricksClusterTreeItem) => cluster.start());
 	vscode.commands.registerCommand('databricksClusterItem.stop', (cluster: DatabricksClusterTreeItem) => cluster.stop());
 	vscode.commands.registerCommand('databricksClusterItem.showDefinition', (cluster: DatabricksClusterTreeItem) => cluster.showDefinition());
-	vscode.commands.registerCommand('databricksClusterItem.delete', (cluster: DatabricksClusterTreeItem) => vscode.window.showErrorMessage(`Not yet implemented!`));
+	vscode.commands.registerCommand('databricksClusterItem.delete', (cluster: DatabricksClusterTreeItem) => cluster.delete());
 
 
 	// register DatabricksJobsTreeProvider
@@ -75,11 +74,12 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksJobs.refresh', (showInfoMessage: boolean = true) => databricksJobsTreeProvider.refresh(showInfoMessage));
 	vscode.commands.registerCommand('databricksJobs.add', () => databricksJobsTreeProvider.add());
 
+	vscode.commands.registerCommand('databricksJobItem.click', (job: DatabricksJobTreeItem) => job.click());
 	vscode.commands.registerCommand('databricksJobItem.showDefinition', (job: DatabricksJobTreeItem) => job.showDefinition());
 	vscode.commands.registerCommand('databricksJobItem.start', (job: DatabricksJobTreeItem) => job.start());
 	vscode.commands.registerCommand('databricksJobItem.stop', (job_run: DatabricksJobTreeItem) => job_run.stop());
 	vscode.commands.registerCommand('databricksJobItem.openBrowser', (job: DatabricksJobTreeItem) => job.openBrowser());
-
+	vscode.commands.registerCommand('databricksJobItem.delete', (job: DatabricksJobTreeItem) => job.delete());
 
 	// register DatabricksFSTreeProvider
 	let databricksFSTreeProvider = new DatabricksFSTreeProvider();
