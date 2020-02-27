@@ -16,6 +16,8 @@ This is a Visual Studio Code extension that allows you to work with Azure Databr
 	- Script job definition as JSON
 	- Script job-run output as JSON
 - DBFS browser
+	- Upload files
+	- Download files
 - Secrets browser
 	- Create/delete secret scopes
 	- Create/delete secrets
@@ -25,7 +27,7 @@ This is a Visual Studio Code extension that allows you to work with Azure Databr
 # Installation
 The extension can be downloaded directly from within VS Code. Simply go to the Extensions tab and search for "Databricks" and select and install the extension "Databricks Integration" (ID: paiqo.databricks-vscode).
 
-Alternatively it can also be downloaded from the VS Code marketplace.
+Alternatively it can also be downloaded from the VS Code marketplace: [Databricks VSCode](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode).
 
 # Setup and Configuration
 The configuration happens directly via VS Code. Simply open the settings via File -> Preferences -> Settings or by using the keyboard shortcut ```CTRL + ,```
@@ -69,8 +71,8 @@ IPython notebooks can then be executed directly against the Databricks cluster a
 
 # Cluster Manager
 ![Cluster Manager](https://github.com/paiqo/Databricks-VSCode/blob/master/images/ClusterManager.jpg?raw=true "Cluster Manager")
-This VS Code extension also allows you to manage your Databricks clusters directly from within VS Code. So you do not need to open the web UI anymore to start or stop your clusters.
-In addition, it also allows you to script the definition of your cluster and store it locally - e.g. if you want to integrate it as part of your CI/CD. This cluster definition file can for example be used with the [DatabricksPS PowerShell Module](https://www.powershellgallery.com/packages/DatabricksPS) to automate the cluster deployment.
+This VS Code extension also allows you to manage your Databricks clusters directly from within VS Code. So you do not need to open the web UI anymore to start or stop your clusters. It also distinguishes between regular clusters and job clusters which will be displayed in a separate folder.
+In addition, the Cluster manager also allows you to script the definition of your cluster and store it locally - e.g. if you want to integrate it as part of your CI/CD. This cluster definition file can for example be used with the [DatabricksPS PowerShell Module](https://www.powershellgallery.com/packages/DatabricksPS) to automate the cluster deployment.
 
 # Job Manager
 ![Job Manager](https://github.com/paiqo/Databricks-VSCode/blob/master/images/JobManager.jpg?raw=true "Job Manager")
@@ -78,8 +80,7 @@ The Job Manager allows you to manage all your existing Databricks jobs from with
 
 # DBFS Browser
 ![DBFS Browser](https://github.com/paiqo/Databricks-VSCode/blob/master/images/DBFSBrowser.jpg?raw=true "DBFS Browser")
-The DBFS Browser allows you to browse the whole Databricks File System including mountpoints!
-Up-/Download of files will also come soon!
+The DBFS Browser allows you to browse the whole Databricks File System including mountpoints! You can also download files, view or modify them locally and upload them again. For viewing files I highly recommend installing the extension [Data Preview](https://marketplace.visualstudio.com/items?itemName=RandomFractalsInc.vscode-data-preview) as it supports most formats communly used with Databricks.
 
 # Secrets Browser
 ![Secret Browser](https://github.com/paiqo/Databricks-VSCode/blob/master/images/SecretBrowser.jpg?raw=true "Secret Browser")
