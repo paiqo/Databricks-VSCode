@@ -16,8 +16,7 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	private _object_type: WorkspaceItemType;
 	private _object_id: number;
 	private _language: WorkspaceItemLanguage;
-	
-	private static _doubleClickTimerId;
+	private _onlinePathExists: boolean = true;
 
 	constructor(
 		path: string,
@@ -32,6 +31,11 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		this._object_id = object_id;
 		this._language = language;
 
+		if(object_type.startsWith('LOCAL_'))
+		{
+			this._onlinePathExists = false;
+			this._object_type = object_type.replace('LOCAL_', '') as WorkspaceItemType;
+		}
 		
 		super.label = path.split('/').pop();
 		super.iconPath = {
@@ -47,9 +51,22 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	}
 
 	
-
 	get tooltip(): string {
-		return `${this.path}-${this._object_type}`;
+		let tooltip: string = this.path + "\n";
+
+		if(this.onlinePathExists && !this.localPathExists)
+		{
+			tooltip += "[Online only]\n";
+		}
+		if(!this.onlinePathExists && this.localPathExists)
+		{
+			tooltip += "[Offline only]\n";
+		}
+		if (this.onlinePathExists && this.localPathExists)
+		{
+			tooltip += "[Synced]\n";
+		}
+		return tooltip;
 	}
 
 	// description is show next to the label
@@ -66,7 +83,12 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	}
 
 	private getIconPath(theme: string): string {
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, 'workspace', this.object_type.toLowerCase() + '.svg');
+		let sync_state: string = "";
+
+		if (this.localPathExists && !this.onlinePathExists) { sync_state = "_OFFLINE"; }
+		if (!this.localPathExists && this.onlinePathExists) { sync_state = "_ONLINE"; }
+
+		return fspath.join(ThisExtension.rootPath, 'resources', theme, 'workspace', this.object_type.toLowerCase() + sync_state + '.png');
 	}
 
 	readonly command = { 
@@ -112,12 +134,25 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		return vscode.Uri.parse("file:///" + this.localFilePath);
 	}
 
-	get localFileExists(): boolean {
-		return fs.existsSync(this.localFilePath);
+	get localPathExists(): boolean {
+		if(this.object_type == "DIRECTORY")
+		{
+			return fs.existsSync(this.localFolderPath);
+		}
+		else 
+		{
+			return fs.existsSync(this.localFilePath);
+		}
+	}
+
+	get onlinePathExists(): boolean {
+		return this._onlinePathExists;
 	}
 
 	get localFileExtension(): string {
+		if(!this.language) { return ""; }
 		if(this.language == "PYTHON") { return "ipynb"; }
+
 		return this.language.toLowerCase();
 	}
 
@@ -131,21 +166,76 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		return new DatabricksWorkspaceTreeItem(item.path, item.object_type, item.object_id);
 	}
 
-	getChildren(): Thenable<DatabricksWorkspaceTreeItem[]> {
-		if(this.object_type === 'DIRECTORY')
+	async getChildren(): Promise<DatabricksWorkspaceTreeItem[]> {
+		if(this.object_type != 'DIRECTORY')
 		{
-			return DatabricksApiService.listWorkspaceItems(this.path);
+			return null;
 		}
-		return null;
+
+		let onlineItems: DatabricksWorkspaceTreeItem[] = [];
+		if(this.onlinePathExists)
+		{
+			onlineItems = await DatabricksApiService.listWorkspaceItems(this.path);
+			
+		}
+		let onlinePaths: string[] = onlineItems.map((x) => x.path);
+
+		let localItems: DatabricksWorkspaceTreeItem[] = [];
+		if(this.localPathExists)
+		{
+			let localContent: string[] = fs.readdirSync(this.localFolderPath);
+
+			for(let local of localContent)
+			{
+				let localFile:fspath.ParsedPath = fspath.parse(local);
+				let localRelativePath = (this.path + '/' + localFile.name).replace('//', '/');
+				let localFullPath = fspath.join(this.localFolderPath, local);
+				
+				if (!onlinePaths.includes(localRelativePath))
+				{
+					let localType: WorkspaceItemType = 'LOCAL_DIRECTORY';
+					let language: WorkspaceItemLanguage = undefined;
+					if (fs.lstatSync(localFullPath).isFile())
+					{
+						localType = 'LOCAL_NOTEBOOK';
+
+						if ([".r", ".sql", ".scala"].includes(localFile.ext.toLocaleLowerCase()))
+						{
+							language = localFile.ext.replace('.', '').toUpperCase() as WorkspaceItemLanguage;
+						}
+						else if (localFile.ext.toLocaleLowerCase() == ".ipynb") {
+							language = "PYTHON";
+						}
+						else
+						{
+							vscode.window.showWarningMessage("File " + localFullPath + " has no valid extension and will be ignored! Supported extensions are .r, .sql, .scala and .ipynb");
+							continue;
+						}
+					}
+					
+					localItems.push(new DatabricksWorkspaceTreeItem(localRelativePath, localType, -1, language));
+				}
+			}
+		}
+
+		let allItems = onlineItems.concat(localItems);
+		Helper.sortArrayByProperty(allItems, "label", "ASC");
+
+		return allItems;
 	}
 
 	async download(): Promise<void> {
 		if(this.object_type === 'NOTEBOOK')
 		{
 			try {
-				vscode.window.showInformationMessage(`Download of item ${this._path}) started ...`);
+				//vscode.window.showInformationMessage(`Download of item ${this._path}) started ...`);
 				let response = await DatabricksApiService.downloadWorkspaceItem(this.path, this.localFilePath, this.exportFormat);
 				vscode.window.showInformationMessage(`Download of item ${this._path}) finished!`);
+
+				if (ThisExtension.RefreshAfterUpDownload) {
+					Helper.wait(500);
+					vscode.commands.executeCommand("databricksWorkspace.refresh", false);
+				}
 			}
 			catch (error) {
 				vscode.window.showErrorMessage(`ERROR: ${error}`);
@@ -166,9 +256,15 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		if(this.object_type === 'NOTEBOOK')
 		{
 			try {
-				vscode.window.showInformationMessage(`Upload of item ${this.path}) started ...`);
+				//vscode.window.showInformationMessage(`Upload of item ${this.path}) started ...`);
 				let response = DatabricksApiService.uploadWorkspaceItem(this.localFilePath, this.path, this.language, true, this.exportFormat);
 				vscode.window.showInformationMessage(`Upload of item ${this.path}) finished!`);
+
+				if(ThisExtension.RefreshAfterUpDownload)
+				{
+					Helper.wait(500);
+					vscode.commands.executeCommand("databricksWorkspace.refresh", false);
+				}
 			}
 			catch (error) {
 				vscode.window.showErrorMessage(`ERROR: ${error}`);
@@ -186,7 +282,7 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	}
 
 	async open(): Promise<void> {
-		if(!this.localFileExists)
+		if(!this.localPathExists)
 		{
 			await this.download();
 		}
@@ -210,6 +306,8 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	}
 
 	async singleClick(): Promise<void> {
+		// TODO: This is not working properly as the "this" cannot be passed when used insided setTimeout?!?
+
 		//vscode.window.showInformationMessage("SingleClick");
 	}
 }

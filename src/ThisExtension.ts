@@ -12,20 +12,23 @@ export abstract class ThisExtension {
 
 	private static _context: vscode.ExtensionContext;
 	private static _extension: vscode.Extension<any>;
-	private static _tempFiles: string[];
-	private static _activeEnvironment: string;
+	private static _activeEnvironmentName: string;
 	private static _isValidated: boolean;
 
 	static get rootPath(): string {
 		return this._context.extensionPath;
 	}
 
-	static set ActiveEnvironment(displayName: string) {
-		this._activeEnvironment = displayName;
+	static set ActiveEnvironmentName(displayName: string) {
+		this._activeEnvironmentName = displayName;
 	}
 
-	static get ActiveEnvironment(): string {
-		return this._activeEnvironment;
+	static get ActiveEnvironmentName(): string {
+		return this._activeEnvironmentName;
+	}
+
+	static get RefreshAfterUpDownload(): boolean {
+		return true;
 	}
 
 	static get IsValidated(): boolean {
@@ -37,7 +40,7 @@ export abstract class ThisExtension {
 		this._extension = vscode.extensions.getExtension(this.extension_id);
 		this.validateSettings();
 		
-		this._activeEnvironment = ActiveDatabricksEnvironment.displayName;
+		this._activeEnvironmentName = ActiveDatabricksEnvironment.displayName;
 	}
 
 	static validateSettings(): void {

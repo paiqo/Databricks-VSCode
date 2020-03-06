@@ -417,8 +417,6 @@ export abstract class DatabricksApiService {
 		} while (offset < totalSize);
 
 		writeStream.close();
-
-		vscode.window.showInformationMessage("Download of " + dbfsPath + " (" + totalSize + " bytes) completed!");
 	}
 
 
