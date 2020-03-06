@@ -43,7 +43,7 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 		this._port = port;
 		this._organizationId = organizationId;
 
-		this._isActive = this.displayName === ThisExtension.ActiveEnvironment;
+		this._isActive = this.displayName === ThisExtension.ActiveEnvironmentName;
 
 		super.iconPath = {
 			light: this.getIconPath("light"),
@@ -75,7 +75,7 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 
 	private getIconPath(theme: string): string {
 		let state = this.isActive ? 'connected' : 'disconnected';
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, state + '.svg');
+		return fspath.join(ThisExtension.rootPath, 'resources', theme, state + '.png');
 	}
 
 
@@ -161,7 +161,7 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 
 
 		this._isActive = true;
-		ThisExtension.ActiveEnvironment = this.displayName;
+		ThisExtension.ActiveEnvironmentName = this.displayName;
 
 		DatabricksApiService.initialize(this);
 	

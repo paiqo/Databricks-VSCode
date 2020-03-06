@@ -188,7 +188,7 @@
 				{
 					"id": "databricks",
 					"title": "Databricks",
-					"icon": "resources/databricks.svg"
+					"icon": "resources/databricks.png"
 				}
 			]
 		},
@@ -225,32 +225,32 @@
 				"command": "databricksEnvironments.refresh",
 				"title": "Refresh",
 				"icon": {
-					"light": "resources/light/refresh.svg",
-					"dark": "resources/dark/refresh.svg"
+					"light": "resources/light/refresh.png",
+					"dark": "resources/dark/refresh.png"
 				}
 			},
 			{
 				"command": "databricksEnvironments.add",
 				"title": "Add",
 				"icon": {
-					"light": "resources/light/add.svg",
-					"dark": "resources/dark/add.svg"
+					"light": "resources/light/add.png",
+					"dark": "resources/dark/add.png"
 				}
 			},
 			{
 				"command": "databricksEnvironmentItem.activate",
 				"title": "Activate",
 				"icon": {
-					"light": "resources/light/connected.svg",
-					"dark": "resources/dark/connected.svg"
+					"light": "resources/light/connected.png",
+					"dark": "resources/dark/connected.png"
 				}
 			},
 			{
 				"command": "databricksWorkspace.refresh",
 				"title": "Refresh",
 				"icon": {
-					"light": "resources/light/refresh.svg",
-					"dark": "resources/dark/refresh.svg"
+					"light": "resources/light/refresh.png",
+					"dark": "resources/dark/refresh.png"
 				}
 			},
 			{
@@ -265,8 +265,8 @@
 				"command": "databricksWorkspace.sync",
 				"title": "Sync",
 				"icon": {
-					"light": "resources/light/sync.svg",
-					"dark": "resources/dark/sync.svg"
+					"light": "resources/light/sync.png",
+					"dark": "resources/dark/sync.png"
 				}
 			},
 			{
@@ -301,16 +301,16 @@
 				"command": "databricksWorkspaceItem.sync",
 				"title": "Sync",
 				"icon": {
-					"light": "resources/light/sync.svg",
-					"dark": "resources/dark/sync.svg"
+					"light": "resources/light/sync.png",
+					"dark": "resources/dark/sync.png"
 				}
 			},
 			{
 				"command": "databricksWorkspaceItem.delete",
 				"title": "Delete",
 				"icon": {
-					"light": "resources/light/delete.svg",
-					"dark": "resources/dark/delete.svg"
+					"light": "resources/light/delete.png",
+					"dark": "resources/dark/delete.png"
 				}
 			},
 
@@ -319,16 +319,16 @@
 				"command": "databricksClusters.refresh",
 				"title": "Refresh",
 				"icon": {
-					"light": "resources/light/refresh.svg",
-					"dark": "resources/dark/refresh.svg"
+					"light": "resources/light/refresh.png",
+					"dark": "resources/dark/refresh.png"
 				}
 			},
 			{
 				"command": "databricksClusters.add",
 				"title": "Add",
 				"icon": {
-					"light": "resources/light/add.svg",
-					"dark": "resources/dark/add.svg"
+					"light": "resources/light/add.png",
+					"dark": "resources/dark/add.png"
 				}
 			},
 			{
@@ -339,32 +339,32 @@
 				"command": "databricksClusterItem.start",
 				"title": "Start",
 				"icon": {
-					"light": "resources/light/start.svg",
-					"dark": "resources/dark/start.svg"
+					"light": "resources/light/start.png",
+					"dark": "resources/dark/start.png"
 				}
 			},
 			{
 				"command": "databricksClusterItem.stop",
 				"title": "Stop",
 				"icon": {
-					"light": "resources/light/stop.svg",
-					"dark": "resources/dark/stop.svg"
+					"light": "resources/light/stop.png",
+					"dark": "resources/dark/stop.png"
 				}
 			},
 			{
 				"command": "databricksClusterItem.showDefinition",
 				"title": "JSON Definition",
 				"icon": {
-					"light": "resources/light/json.svg",
-					"dark": "resources/dark/json.svg"
+					"light": "resources/light/json.png",
+					"dark": "resources/dark/json.png"
 				}
 			},
 			{
 				"command": "databricksClusterItem.delete",
 				"title": "Delete",
 				"icon": {
-					"light": "resources/light/delete.svg",
-					"dark": "resources/dark/delete.svg"
+					"light": "resources/light/delete.png",
+					"dark": "resources/dark/delete.png"
 				}
 			},
 
@@ -373,24 +373,24 @@
 				"command": "databricksJobs.refresh",
 				"title": "Refresh",
 				"icon": {
-					"light": "resources/light/refresh.svg",
-					"dark": "resources/dark/refresh.svg"
+					"light": "resources/light/refresh.png",
+					"dark": "resources/dark/refresh.png"
 				}
 			},
 			{
 				"command": "databricksJobs.add",
 				"title": "Refresh",
 				"icon": {
-					"light": "resources/light/add.svg",
-					"dark": "resources/dark/add.svg"
+					"light": "resources/light/add.png",
+					"dark": "resources/dark/add.png"
 				}
 			},
 			{
 				"command": "databricksJobItem.showDefinition",
 				"title": "JSON Definition",
 				"icon": {
-					"light": "resources/light/json.svg",
-					"dark": "resources/dark/json.svg"
+					"light": "resources/light/json.png",
+					"dark": "resources/dark/json.png"
 				}
 			},
 			{
@@ -401,24 +401,24 @@
 				"command": "databricksJobItem.start",
 				"title": "Start",
 				"icon": {
-					"light": "resources/light/start.svg",
-					"dark": "resources/dark/start.svg"
+					"light": "resources/light/start.png",
+					"dark": "resources/dark/start.png"
 				}
 			},
 			{
 				"command": "databricksJobItem.stop",
 				"title": "Stop",
 				"icon": {
-					"light": "resources/light/stop.svg",
-					"dark": "resources/dark/stop.svg"
+					"light": "resources/light/stop.png",
+					"dark": "resources/dark/stop.png"
 				}
 			},
 			{
 				"command": "databricksJobItem.delete",
 				"title": "Delete",
 				"icon": {
-					"light": "resources/light/delete.svg",
-					"dark": "resources/dark/delete.svg"
+					"light": "resources/light/delete.png",
+					"dark": "resources/dark/delete.png"
 				}
 			},
 			{
@@ -435,16 +435,16 @@
 				"command": "databricksFS.refresh",
 				"title": "Refresh",
 				"icon": {
-					"light": "resources/light/refresh.svg",
-					"dark": "resources/dark/refresh.svg"
+					"light": "resources/light/refresh.png",
+					"dark": "resources/dark/refresh.png"
 				}
 			},
 			{
 				"command": "databricksFS.add",
 				"title": "Add",
 				"icon": {
-					"light": "resources/light/add.svg",
-					"dark": "resources/dark/add.svg"
+					"light": "resources/light/add.png",
+					"dark": "resources/dark/add.png"
 				}
 			},
 			{
@@ -456,19 +456,23 @@
 				}
 			},
 			{
+				"command": "databricksFSItem.click",
+				"title": "Preview File"
+			},
+			{
 				"command": "databricksFSItem.add",
 				"title": "Add",
 				"icon": {
-					"light": "resources/light/add.svg",
-					"dark": "resources/dark/add.svg"
+					"light": "resources/light/add.png",
+					"dark": "resources/dark/add.png"
 				}
 			},
 			{
 				"command": "databricksFSItem.delete",
 				"title": "Delete",
 				"icon": {
-					"light": "resources/light/delete.svg",
-					"dark": "resources/dark/delete.svg"
+					"light": "resources/light/delete.png",
+					"dark": "resources/dark/delete.png"
 				}
 			},
 
@@ -477,40 +481,40 @@
 				"command": "databricksSecrets.refresh",
 				"title": "Refresh",
 				"icon": {
-					"light": "resources/light/refresh.svg",
-					"dark": "resources/dark/refresh.svg"
+					"light": "resources/light/refresh.png",
+					"dark": "resources/dark/refresh.png"
 				}
 			},
 			{
 				"command": "databricksSecrets.addSecretScope",
 				"title": "Add",
 				"icon": {
-					"light": "resources/light/add.svg",
-					"dark": "resources/dark/add.svg"
+					"light": "resources/light/add.png",
+					"dark": "resources/dark/add.png"
 				}
 			},
 			{
 				"command": "databricksSecretItem.deleteSecretScope",
 				"title": "Delete",
 				"icon": {
-					"light": "resources/light/delete.svg",
-					"dark": "resources/dark/delete.svg"
+					"light": "resources/light/delete.png",
+					"dark": "resources/dark/delete.png"
 				}
 			},
 			{
 				"command": "databricksSecretItem.addSecret",
 				"title": "Add",
 				"icon": {
-					"light": "resources/light/add.svg",
-					"dark": "resources/dark/add.svg"
+					"light": "resources/light/add.png",
+					"dark": "resources/dark/add.png"
 				}
 			},
 			{
 				"command": "databricksSecretItem.deleteSecret",
 				"title": "Delete",
 				"icon": {
-					"light": "resources/light/delete.svg",
-					"dark": "resources/dark/delete.svg"
+					"light": "resources/light/delete.png",
+					"dark": "resources/dark/delete.png"
 				}
 			}
 		],

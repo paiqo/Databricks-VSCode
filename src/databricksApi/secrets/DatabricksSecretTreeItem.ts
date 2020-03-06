@@ -57,7 +57,7 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 
 	private getIconPath(theme: string): string {
 		let image = (this.itemType == 'SECRET' ? 'secret' : fspath.join('workspace', 'directory'));
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, image + '.svg');
+		return fspath.join(ThisExtension.rootPath, 'resources', theme, image + '.png');
 	}
 
 	private getCommand(): vscode.Command {

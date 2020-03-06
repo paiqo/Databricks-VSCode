@@ -63,8 +63,12 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 
 	private getIconPath(theme: string): string {
 		let itemType = (this.is_dir ? 'directory' : 'notebook');
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, 'workspace', itemType + '.svg');
+		return fspath.join(ThisExtension.rootPath, 'resources', theme, 'workspace', itemType + '.png');
 	}
+
+	readonly command = {
+		command: 'databricksFSItem.click', title: "Preview File", arguments: [this]
+	};
 
 	get path (): string {
 		return this._path;
@@ -91,15 +95,34 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		return null;
 	}
 
-	async download(): Promise<void> {
+	async download(action:"PREVIEW" | "SAVE"): Promise<void> {
 		if(!this.is_dir)
 		{
-			let tempFile = await Helper.openTempFile('', this.path.split('/').slice(-1)[0], false);
-			await DatabricksApiService.downloadDBFSFile(this.path, tempFile, true);
+			if (action == "PREVIEW")
+			{
+				let tempFile = await Helper.openTempFile('', this.path.split('/').slice(-1)[0], false);
+				await DatabricksApiService.downloadDBFSFile(this.path, tempFile, true);
 
-			vscode.workspace
-				.openTextDocument(tempFile)
-				.then(vscode.window.showTextDocument);
+				
+				vscode.workspace
+					.openTextDocument(tempFile)
+					.then(vscode.window.showTextDocument);
+			}
+			else if(action == "SAVE")
+			{
+				const options: vscode.SaveDialogOptions = {
+					saveLabel: 'Download',
+					defaultUri: vscode.Uri.parse("file:///" + this.label)
+				};
+
+				vscode.window.showSaveDialog(options).then(async fileUri => {
+					if (fileUri) {
+						await DatabricksApiService.downloadDBFSFile(this.path, fileUri.fsPath, true);
+
+						vscode.window.showInformationMessage("Download to " + fileUri.fsPath + " (" + this.file_size + " bytes) completed!");
+					}
+				});
+			}
 		}
 		else
 		{
@@ -124,8 +147,11 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 				}).then(() => {
 					vscode.window.showInformationMessage(`Upload of item ${dbfsPath} finished!`);
 
-					Helper.wait(500);
-					vscode.commands.executeCommand("databricksFS.refresh", false);
+					if(ThisExtension.RefreshAfterUpDownload)
+					{
+						Helper.wait(500);
+						vscode.commands.executeCommand("databricksFS.refresh", false);
+					}
 				});
 			}
 		}
@@ -139,7 +165,7 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		if (!this.is_dir) {
 			DatabricksApiService.deleteDBFSItem(this.path, false);
 
-			await Helper.wait(500);
+			Helper.wait(500);
 			vscode.commands.executeCommand("databricksFS.refresh", false);
 		}
 		else {

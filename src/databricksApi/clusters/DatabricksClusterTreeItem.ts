@@ -74,7 +74,7 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 	private getIconPath(theme: string): string {
 		let state = (this.contextValue == "CAN_START" ? 'stop' : 'start');
 		if (["ROOT", "JOB_CLUSTER_DIR"].includes(this.item_type)) { state = fspath.join("workspace", "directory"); }
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, state + '.svg');
+		return fspath.join(ThisExtension.rootPath, 'resources', theme, state + '.png');
 	}
 
 	readonly command = {
