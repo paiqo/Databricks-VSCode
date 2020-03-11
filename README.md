@@ -56,6 +56,20 @@ To configure multiple Databricks environments/workspaces, you need to use the JS
 		...
 ```
 
+Another important setting which requires modifying the JSON directly are the export formats which can be used to define the format in which notebooks are up-/downloaded. Again, there is a default/current setting **databricks.connection.default.exportFormats** and it can also configured per environment:
+``` json
+		...
+		"databricks.connection.default.exportFormats": 
+		{
+			"Scala": ".scala",
+			"Python": ".py.ipynb",
+			"SQL": ".sql",
+			"R": ".r"
+		},
+		...
+```
+Each filetype can either be exported as raw/source file (.scala, .py, .sql, .r) or as a notebook (.scala.ipynb, .py.ipynb, .sql.ipynb, .r.ipynb). This is also very important if you want to upload a local file as these also have to match these extension and will be ignored otherwise!
+
 All these settings can either be configured on a global/user or on a workspace level. The recommendation is to use workspace configurations and then to include the localSyncFolders into your workspace for easy access to your notebooks and sync to GIT. 
 Using a workspace configuration also allows you separate differnt Databricks environments completely. 
 

@@ -129,7 +129,8 @@
 						"examples": [
 							"https://westeurope.azuredatabricks.net",
 							"https://abc-12345-xaz.cloud.databricks.com"
-						]
+						],
+						"format": "hostname"
 					},
 					"databricks.connection.default.cloudProvider": {
 						"type": "string",
@@ -156,12 +157,14 @@
 							"Windows: C:\\mySyncFolder",
 							"Linux/Unix: /home/myUser/mySyncFolder",
 							"macOS: myUser/mySyncFolder  (Please do not use leading / on macOS!)"
-						]
+						],
+						"format": "uri"
 					},
 					"databricks.connection.default.pythonInterpreter": {
 						"type": "string",
 						"description": "(Optional, for Databricks-Connect) Path to python.exe of the interpreter to use. Is displayed whne setting the Python interpretor in VS Code",
-						"scope": "window"
+						"scope": "window",
+						"format": "uri"
 					},
 					"databricks.connection.default.organizationId": {
 						"type": "string",
@@ -174,7 +177,8 @@
 					"databricks.connection.default.databricksConnectJars": {
 						"type": "string",
 						"description": "(Optional, for Databricks-Connect) Path to the Databricks-Connect Pyspark JARs. Can be obtained using 'databricks-connect get-jar-dir'.",
-						"scope": "window"
+						"scope": "window",
+						"format": "uri"
 					},
 					"databricks.connection.default.port": {
 						"type": "number",
@@ -187,6 +191,59 @@
 						"items": {
 							"type": "object",
 							"properties": {
+								"exportFormats": {
+									"type": "object",
+									"default": {
+										"Scala": ".scala",
+										"Python": ".py.ipynb",
+										"SQL": ".sql",
+										"R": ".r"
+									},
+									"description": "(Optional) The different file extension used when downloading notebooks from Databricks.",
+									"scope": "window",
+									"properties": {
+										"Scala": {
+											"type": "string",
+											"default": ".scala",
+											"enum": [
+												".scala",
+												".scala.ipynb"
+											],
+											"description": "The file extension used when downloading Scala notebooks from Databricks.",
+											"scope": "window"
+										},
+										"Python": {
+											"type": "string",
+											"default": ".py.ipynb",
+											"enum": [
+												".py",
+												".py.ipynb"
+											],
+											"description": "The file extension used when downloading Python notebooks from Databricks.",
+											"scope": "window"
+										},
+										"SQL": {
+											"type": "string",
+											"default": ".sql",
+											"enum": [
+												".sql",
+												".sql.ipynb"
+											],
+											"description": "The file extension used when downloading SQL notebooks from Databricks.",
+											"scope": "window"
+										},
+										"R": {
+											"type": "string",
+											"default": ".r",
+											"enum": [
+												".r",
+												".r.ipynb"
+											],
+											"description": "The file extension used when downloading R notebooks from Databricks.",
+											"scope": "window"
+										}
+									}
+								},
 								"displayName": {
 									"type": "string",
 									"default": "my Databricks workspace",
