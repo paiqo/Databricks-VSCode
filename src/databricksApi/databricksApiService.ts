@@ -20,6 +20,7 @@ import { ActiveDatabricksEnvironment } from './../environments/ActiveDatabricksE
 import { Helper } from '../helpers/Helper';
 import { iDatabricksJobResponse, iDatabricksJobRunResponse } from './_types';
 import { iDatabricksCluster } from './clusters/iDatabricksCluster';
+import { ThisExtension } from '../ThisExtension';
 
 
 
@@ -28,6 +29,7 @@ export abstract class DatabricksApiService {
 	private static _apiService: any;
 
 	static initialize(environment: iDatabricksEnvironment = ActiveDatabricksEnvironment): void {
+		ThisExtension.log("Initializing Databricks API Service ...");
 		const axios = require('axios');
 		// Set config defaults when creating the instance
 		this._apiService = axios.create({
@@ -38,6 +40,8 @@ export abstract class DatabricksApiService {
 		this._apiService.defaults.headers.common['Authorization'] = "Bearer " + environment.personalAccessToken;
 		this._apiService.defaults.headers.common['Content-Type'] = 'application/json';
 		this._apiService.defaults.headers.common['Accept'] = 'application/json';
+
+		ThisExtension.log("Databricks API Service initialized!");
 	}
 
 	private static writeBase64toFile(base64String: string, filePath: string): void {
