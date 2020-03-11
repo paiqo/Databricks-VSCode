@@ -22,10 +22,10 @@ import { DatabricksSecretTreeItem } from './databricksApi/secrets/DatabricksSecr
 import { iDatabricksEnvironment } from './environments/iDatabricksEnvironment';
 
 export function activate(context: vscode.ExtensionContext) {
-
 	ThisExtension.initialize(context);
 	if(!ThisExtension.IsValidated)
 	{
+		ThisExtension.log("Please update Databricks settings and restart VSCode!");
 		vscode.window.showErrorMessage("Please update Databricks settings and restart VSCode!");
 	}
 
