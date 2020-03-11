@@ -8,6 +8,7 @@ import { ThisExtension } from '../../ThisExtension';
 import { DatabricksApiService } from '../databricksApiService';
 import { ActiveDatabricksEnvironment } from './../../environments/ActiveDatabricksEnvironment';
 import { Helper } from '../../helpers/Helper';
+import { LanguageFileExtensionMapper } from './LanguageFileExtensionMapper';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -17,6 +18,7 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	private _object_id: number;
 	private _language: WorkspaceItemLanguage;
 	private _onlinePathExists: boolean = true;
+	private _languageFileExtension: LanguageFileExtensionMapper;
 
 	constructor(
 		path: string,
@@ -34,7 +36,11 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		if(object_type.startsWith('LOCAL_'))
 		{
 			this._onlinePathExists = false;
-			this._object_type = object_type.replace('LOCAL_', '') as WorkspaceItemType;
+			this._object_type = object_type.replace('LOCAL_', '') as WorkspaceItemType; 
+		}
+
+		if (language != undefined && this.object_type == "NOTEBOOK") {
+			this._languageFileExtension = LanguageFileExtensionMapper.fromLanguage(language);
 		}
 		
 		super.label = path.split('/').pop();
@@ -71,6 +77,10 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 
 	// description is show next to the label
 	get description(): string {
+		if(this.object_type == "NOTEBOOK") {
+		return "[" + this.language + "] - " + this.path;
+		}
+
 		return this.path;
 	}
 
@@ -127,11 +137,13 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	}
 
 	get localFilePath(): string {
-		return fspath.join(this.localFolderPath, fspath.basename(this.path) + '.' + this.localFileExtension);
+		return fspath.join(this.localFolderPath, fspath.basename(this.path) + this.localFileExtension);
 	}
 
 	get localFileUri(): vscode.Uri {
-		return vscode.Uri.parse("file:///" + this.localFilePath);
+		// three '/' in the beginning indicate a local path
+		// however, there are issues if this.localFilePath also starts with a '/' so we do a replace in this special case
+		return vscode.Uri.parse(("file:///" + this.localFilePath).replace('////', '///'));
 	}
 
 	get localPathExists(): boolean {
@@ -150,15 +162,11 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	}
 
 	get localFileExtension(): string {
-		if(!this.language) { return ""; }
-		if(this.language == "PYTHON") { return "ipynb"; }
-
-		return this.language.toLowerCase();
+		return this._languageFileExtension.extension;
 	}
 
 	get exportFormat(): WorkspaceItemExportFormat {
-		if(this.language == "PYTHON") { return "JUPYTER"; }
-		return "SOURCE";
+		return this._languageFileExtension.exportFormat;
 	}
 
 	static fromJson(jsonString: string): DatabricksWorkspaceTreeItem {
@@ -188,7 +196,9 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 			for(let local of localContent)
 			{
 				let localFile:fspath.ParsedPath = fspath.parse(local);
-				let localRelativePath = (this.path + '/' + localFile.name).replace('//', '/');
+				let localRelativePath = (this.path + '/' 
+							+ localFile.base.replace(LanguageFileExtensionMapper.extensionFromFileName(localFile.base), '')) // remove extension
+							.replace('//', '/');
 				let localFullPath = fspath.join(this.localFolderPath, local);
 				
 				if (!onlinePaths.includes(localRelativePath))
@@ -198,17 +208,15 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 					if (fs.lstatSync(localFullPath).isFile())
 					{
 						localType = 'LOCAL_NOTEBOOK';
+						let ext = LanguageFileExtensionMapper.extensionFromFileName(localFile.base);
 
-						if ([".r", ".sql", ".scala"].includes(localFile.ext.toLocaleLowerCase()))
+						if (LanguageFileExtensionMapper.supportedFileExtensions.includes(ext))
 						{
-							language = localFile.ext.replace('.', '').toUpperCase() as WorkspaceItemLanguage;
-						}
-						else if (localFile.ext.toLocaleLowerCase() == ".ipynb") {
-							language = "PYTHON";
+							language = LanguageFileExtensionMapper.fromExtension(ext).language;
 						}
 						else
 						{
-							vscode.window.showWarningMessage("File " + localFullPath + " has no valid extension and will be ignored! Supported extensions are .r, .sql, .scala and .ipynb");
+							vscode.window.showWarningMessage("File " + localFullPath + " has no valid extension and will be ignored! Supported extensions can be confiugred using setting 'exportFormats'.");
 							continue;
 						}
 					}

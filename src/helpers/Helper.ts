@@ -73,6 +73,18 @@ export abstract class Helper
 		}
 	}
 
+	static trimChar(text: string, charToRemove: string) {
+		while (text.charAt(0) == charToRemove) {
+			text = text.substring(1);
+		}
+
+		while (text.charAt(text.length - 1) == charToRemove) {
+			text = text.substring(0, text.length - 1);
+		}
+
+		return text;
+	}
+
 	static sortArrayByProperty(unsortedArray: object[], property: string = "label", direction:"ASC" | "DESC" = "ASC") {
 		let direction_num: number = (direction == "ASC" ? 1 : -1);
 		

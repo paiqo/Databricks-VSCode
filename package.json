@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Databricks Extension for VSCode",
-	"version": "0.2.0",
+	"version": "0.2.5",
 	"publisher": "paiqo",
 	"author": {
 		"name": "Gerhard Brueckl"
@@ -64,6 +64,59 @@
 					"databricks.connection.default.localSyncFolder"
 				],
 				"properties": {
+					"databricks.connection.default.exportFormats": {
+						"type": "object",
+						"default": {
+							"Scala": ".scala",
+							"Python": ".py.ipynb",
+							"SQL": ".sql",
+							"R": ".r"
+						},
+						"description": "(Optional) The different file extension used when downloading notebooks from Databricks.",
+						"scope": "window",
+						"properties": {
+							"Scala": {
+								"type": "string",
+								"default": ".scala",
+								"enum": [
+									".scala",
+									".scala.ipynb"
+								],
+								"description": "The file extension used when downloading Scala notebooks from Databricks.",
+								"scope": "window"
+							},
+							"Python": {
+								"type": "string",
+								"default": ".py.ipynb",
+								"enum": [
+									".py",
+									".py.ipynb"
+								],
+								"description": "The file extension used when downloading Python notebooks from Databricks.",
+								"scope": "window"
+							},
+							"SQL": {
+								"type": "string",
+								"default": ".sql",
+								"enum": [
+									".sql",
+									".sql.ipynb"
+								],
+								"description": "The file extension used when downloading SQL notebooks from Databricks.",
+								"scope": "window"
+							},
+							"R": {
+								"type": "string",
+								"default": ".r",
+								"enum": [
+									".r",
+									".r.ipynb"
+								],
+								"description": "The file extension used when downloading R notebooks from Databricks.",
+								"scope": "window"
+							}
+						}
+					},
 					"databricks.connection.default.displayName": {
 						"type": "string",
 						"description": "(Mandatory) Name shown in the environment list of the Databricks VSCode extension.",
@@ -72,7 +125,11 @@
 					"databricks.connection.default.apiRootUrl": {
 						"type": "string",
 						"description": "(Mandatory) Root URL of the Databricks API. Azure: https://westeurope.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com",
-						"scope": "window"
+						"scope": "window",
+						"examples": [
+							"https://westeurope.azuredatabricks.net",
+							"https://abc-12345-xaz.cloud.databricks.com"
+						]
 					},
 					"databricks.connection.default.cloudProvider": {
 						"type": "string",
@@ -86,12 +143,20 @@
 					"databricks.connection.default.personalAccessToken": {
 						"type": "string",
 						"description": "(Mandatory) The Personal Access Token (PAT) used to access the Databricks API.",
-						"scope": "window"
+						"scope": "window",
+						"examples": [
+							"dapi0123456789abcdef0123456789abcdef"
+						]
 					},
 					"databricks.connection.default.localSyncFolder": {
 						"type": "string",
-						"description": "(Mandatory) A local path where files (notebooks) that are downloaded from Databricks should be stored. This folder can then be integrated in your GIT repository.",
-						"scope": "window"
+						"description": "(Mandatory) A local path where files (notebooks) that are downloaded from Databricks should be stored. This folder can then be integrated in your GIT repository. \nExamples: \nWindows - C:\\mySyncFolder \nLinux/Unix - /home/myUser/mySyncFolder \nmacOS - myUser/mySyncFolder  (Please do not use leading / on macOS!)",
+						"scope": "window",
+						"examples": [
+							"Windows: C:\\mySyncFolder",
+							"Linux/Unix: /home/myUser/mySyncFolder",
+							"macOS: myUser/mySyncFolder  (Please do not use leading / on macOS!)"
+						]
 					},
 					"databricks.connection.default.pythonInterpreter": {
 						"type": "string",
@@ -101,7 +166,10 @@
 					"databricks.connection.default.organizationId": {
 						"type": "string",
 						"description": "(Optional, for Databricks-Connect, Azure only) The organization ID of the Databricks workspace. Can be found in the URL when connected in the browser.",
-						"scope": "window"
+						"scope": "window",
+						"examples": [
+							"1234567890123456"
+						]
 					},
 					"databricks.connection.default.databricksConnectJars": {
 						"type": "string",

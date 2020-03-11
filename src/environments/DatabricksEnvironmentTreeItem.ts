@@ -37,6 +37,7 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 		this._cloudProvider = cloudProvider;
 		this._personalAccessToken = personalAccessToken;
 		this._apiRootUrl = apiRootUrl;
+		//this._localSyncFolder = Helper.trimChar(localSyncFolder, '/');
 		this._localSyncFolder = localSyncFolder;
 		this._databricksConnectJars = databricksConnectJars;
 		this._pythonInterpreter = pythonInterpreter;
