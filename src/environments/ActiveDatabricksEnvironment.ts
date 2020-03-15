@@ -46,6 +46,10 @@ export abstract class ActiveDatabricksEnvironment {
 		return vscode.workspace.getConfiguration().get<ExportFormatsConfiguration>('databricks.connection.default.exportFormats');
 	}
 
+	static get allowAllSupportedFileExtensions(): boolean {
+		return true;
+	}
+
 	static get environment (): iDatabricksEnvironment {
 		return {
 			displayName: 			this.displayName,

@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import * as UniqueFileName from 'uniquefilename';
 import { Helper } from './helpers/Helper';
 import { ActiveDatabricksEnvironment } from './environments/ActiveDatabricksEnvironment';
+import { WorkspaceItemLanguage } from './databricksApi/workspaces/_types';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -47,6 +48,46 @@ export abstract class ThisExtension {
 		this._activeEnvironmentName = ActiveDatabricksEnvironment.displayName;
 	}
 
+	static get allFileExtensions(): string[] {
+		let config = ThisExtension.configuration.packageJSON.contributes.configuration[0];
+		let exportFormats = config.properties["databricks.connection.default.exportFormats"].properties;
+
+		let extensions: string[] = [];
+		for (let format of Object.values(exportFormats))
+		{
+			(format["enum"] as string[]).forEach(element => {
+				extensions.push(element);
+			});
+		}	
+
+		return extensions;
+	}
+
+	static allLanguageFileExtensions(language: WorkspaceItemLanguage): string[] {
+		let config = ThisExtension.configuration.packageJSON.contributes.configuration[0];
+		let exportFormats = config.properties["databricks.connection.default.exportFormats"].properties;
+
+		let extensions: string[] = [];
+
+		switch (language) {
+			case "PYTHON":
+				extensions = exportFormats["Python"]["enum"];
+				break;
+			case "R":
+				extensions = exportFormats["R"]["enum"];
+				break;
+			case "SCALA":
+				extensions = exportFormats["Scala"]["enum"];
+				break;
+			case "SQL":
+				extensions = exportFormats["SQL"]["enum"];
+				break;
+			default: throw new Error("ExportFormat for Language '" + language + "' is not defined!");
+		}
+
+		return extensions;
+	}
+
 	static log(text: string, newLine: boolean = true): void {
 		if(newLine) {
 			this._logger.appendLine(text);
@@ -77,7 +118,7 @@ export abstract class ThisExtension {
 		this.log("Settings validated!");
 	}
 
-	static get configuration(): any {
+	static get configuration(): vscode.Extension<any> {
 		return this._extension;
 	}
 }

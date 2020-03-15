@@ -14,9 +14,9 @@ export class LanguageFileExtensionMapper  {
 	private _extension: string;
 	private _languageExtension: string;
 	private _notebookExtension: string;
+	private _originalExtension: string;
 	private _exportFormat: WorkspaceItemExportFormat;
-	private _asNotebook: boolean;
-
+	private _isNotebook: boolean;
 
 	constructor() {}
 
@@ -38,6 +38,8 @@ export class LanguageFileExtensionMapper  {
 	}
 
 	get extension(): string {
+		if(this._originalExtension) { return this._originalExtension; }
+
 		return this._extension;
 	}
 
@@ -49,8 +51,16 @@ export class LanguageFileExtensionMapper  {
 		return this._notebookExtension;
 	}
 
+	get originalExtension(): string {
+		return this._originalExtension;
+	}
+
 	get exportFormat(): WorkspaceItemExportFormat {
 		return this._exportFormat;
+	}
+
+	get isNotebook(): boolean {
+		return this._isNotebook;
 	}
 	
 	static fromLanguage(language: WorkspaceItemLanguage): LanguageFileExtensionMapper {
@@ -76,14 +86,14 @@ export class LanguageFileExtensionMapper  {
 
 		let tokens = ret.extension.split('.'); // e.g. '.py.ipynb'
 		if (ret.extension.endsWith('.ipynb')) {
-			ret._asNotebook = true;
+			ret._isNotebook = true;
 			ret._notebookExtension = '.ipynb';
 			ret._languageExtension = tokens[1];
 			ret._exportFormat = "JUPYTER";
 		}
 		else
 		{
-			ret._asNotebook = false;
+			ret._isNotebook = false;
 			ret._notebookExtension = '';
 			ret._languageExtension = tokens[1];
 			ret._exportFormat = "SOURCE";
@@ -96,16 +106,17 @@ export class LanguageFileExtensionMapper  {
 		let ret: LanguageFileExtensionMapper = new LanguageFileExtensionMapper();
 
 		ret._extension = extension;
+		ret._originalExtension = extension;
 
 		let tokens = ret.extension.split('.'); // e.g. '.py.ipynb'
 		if (ret.extension.endsWith('.ipynb')) {
-			ret._asNotebook = true;
+			ret._isNotebook = true;
 			ret._notebookExtension = '.ipynb';
 			ret._languageExtension = '.' + tokens[1];
 			ret._exportFormat = "JUPYTER";
 		}
 		else {
-			ret._asNotebook = false;
+			ret._isNotebook = false;
 			ret._notebookExtension = '';
 			ret._languageExtension = '.' + tokens[1];
 			ret._exportFormat = "SOURCE";

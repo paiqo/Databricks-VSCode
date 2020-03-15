@@ -8,11 +8,16 @@ import * as os from 'os';
 import * as fspath from 'path';
 import * as fs from 'fs';
 import * as UniqueFileName from 'uniquefilename';
+import { ThisExtension } from '../ThisExtension';
 
 export abstract class Helper
 {
+	private static openAsNotebookSettingName: string = 'python.dataScience.useNotebookEditor';
+
 	private static _tempFiles: string[];
 	private static _doubleClickTimer: any;
+	
+	private static _openAsNotebookOriginalSetting: boolean;
 
 	static async showQuickPick(
 		items: string[],
@@ -136,10 +141,44 @@ export abstract class Helper
 		}
 	}
 
+	private static initOpenAsNotebookOriginalSetting(): void {
+		if (this._openAsNotebookOriginalSetting == undefined) {
+			this._openAsNotebookOriginalSetting = vscode.workspace.getConfiguration().get(this.openAsNotebookSettingName);
+		}
+	}
+
+	static disableOpenAsNotebook(): void {
+		this.initOpenAsNotebookOriginalSetting();
+
+		if (this._openAsNotebookOriginalSetting) {
+			ThisExtension.log("Temporary setting " + this.openAsNotebookSettingName + " to false for proper DIFF ...");
+			vscode.workspace.getConfiguration().update(this.openAsNotebookSettingName, false, vscode.ConfigurationTarget.Workspace);
+		}
+	}
+
+	static resetOpenAsNotebook(): void {
+		this.initOpenAsNotebookOriginalSetting();
+		
+		ThisExtension.log("Setting " + this.openAsNotebookSettingName + " back to " + this._openAsNotebookOriginalSetting);
+		vscode.workspace.getConfiguration().update("python.dataScience.useNotebookEditor", this._openAsNotebookOriginalSetting, vscode.ConfigurationTarget.Workspace);
+	}
+
+	static async showDiff(filePath1: string, filePath2: string): Promise<void> {
+		let localFileUri = vscode.Uri.file(filePath1);
+		let onlnieFileUri = vscode.Uri.file(filePath2);
+
+		let options: vscode.TextDocumentShowOptions = {
+			"preserveFocus": true,
+			"preview": false
+		};
+
+		vscode.commands.executeCommand("vscode.diff", localFileUri, onlnieFileUri, "Online <-> Local", options);
+	}
+
 	private static resolvePath(filepath: string): string {
 		if (filepath[0] === '~') {
-			const hoveVar = process.platform === 'win32' ? 'USERPROFILE' : 'HOME';
-			return fspath.join(process.env[hoveVar], filepath.slice(1));
+			const homeVar = process.platform === 'win32' ? 'USERPROFILE' : 'HOME';
+			return fspath.join(process.env[homeVar], filepath.slice(1));
 		}
 		else {
 			return fspath.resolve(filepath);

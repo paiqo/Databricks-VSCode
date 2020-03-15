@@ -18,7 +18,7 @@
 		"email": "databricks-vscode@paiqo.com"
 	},
 	"qna": "https://github.com/paiqo/Databricks-VSCode",
-	"enableProposedApi": true,
+	"enableProposedApi": false,
 	"engines": {
 		"vscode": "^1.39.0"
 	},
@@ -423,6 +423,14 @@
 				}
 			},
 			{
+				"command": "databricksWorkspaceItem.compare",
+				"title": "Compare",
+				"icon": {
+					"light": "resources/light/compare.png",
+					"dark": "resources/dark/compare.png"
+				}
+			},
+			{
 				"command": "databricksWorkspaceItem.sync",
 				"title": "Sync",
 				"icon": {
@@ -725,11 +733,16 @@
 				},
 				{
 					"command": "databricksWorkspaceItem.download",
-					"when": "view == databricksWorkspace && viewItem == CAN_SYNC",
+					"when": "view == databricksWorkspace && viewItem == CAN_SYNC || viewItem == CAN_DOWNLOAD",
 					"group": "inline@1"
 				},
 				{
 					"command": "databricksWorkspaceItem.upload",
+					"when": "view == databricksWorkspace && viewItem == CAN_SYNC || viewItem == CAN_UPLOAD",
+					"group": "inline@1"
+				},
+				{
+					"command": "databricksWorkspaceItem.compare",
 					"when": "view == databricksWorkspace && viewItem == CAN_SYNC",
 					"group": "inline@1"
 				},

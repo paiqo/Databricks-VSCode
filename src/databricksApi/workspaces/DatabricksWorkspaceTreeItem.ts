@@ -16,7 +16,6 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	private _path: string;
 	private _object_type: WorkspaceItemType;
 	private _object_id: number;
-	private _language: WorkspaceItemLanguage;
 	private _onlinePathExists: boolean = true;
 	private _languageFileExtension: LanguageFileExtensionMapper;
 
@@ -24,14 +23,13 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		path: string,
 		object_type: WorkspaceItemType,
 		object_id: number,
-		language: WorkspaceItemLanguage = undefined,
+		language: WorkspaceItemLanguage | LanguageFileExtensionMapper = undefined,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
 		super(path, collapsibleState);
 		this._path = path;
 		this._object_type = object_type;
 		this._object_id = object_id;
-		this._language = language;
 
 		if(object_type.startsWith('LOCAL_'))
 		{
@@ -39,8 +37,15 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 			this._object_type = object_type.replace('LOCAL_', '') as WorkspaceItemType; 
 		}
 
-		if (language != undefined && this.object_type == "NOTEBOOK") {
-			this._languageFileExtension = LanguageFileExtensionMapper.fromLanguage(language);
+		if (this.object_type == "NOTEBOOK")
+		{
+			if(language instanceof LanguageFileExtensionMapper) {
+				this._languageFileExtension = language as LanguageFileExtensionMapper;
+			}
+			else
+			{
+				this._languageFileExtension = LanguageFileExtensionMapper.fromLanguage(language as WorkspaceItemLanguage);
+			}
 		}
 		
 		super.label = path.split('/').pop();
@@ -86,7 +91,13 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 
 	// used in package.json to filter commands via viewItem == CANSTART
 	get contextValue(): string {
-		if(this.object_type == 'NOTEBOOK' || this.object_type == "DIRECTORY")
+		if(this.object_type == 'NOTEBOOK')
+		{
+			if (this.localPathExists && this.onlinePathExists) { return 'CAN_SYNC'; }
+			if (!this.localPathExists && this.onlinePathExists) { return 'CAN_DOWNLOAD'; }
+			if (this.localPathExists && !this.onlinePathExists) { return 'CAN_UPLOAD'; }
+		}
+		if (this.object_type == "DIRECTORY")
 		{
 			return 'CAN_SYNC';
 		}
@@ -122,7 +133,7 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	}
 
 	get language(): WorkspaceItemLanguage {
-		return this._language;
+		return this._languageFileExtension.language;
 	}
 
 	get localFolderPath(): string {
@@ -153,6 +164,20 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		}
 		else 
 		{
+			if(ActiveDatabricksEnvironment.allowAllSupportedFileExtensions)
+			{
+				for(let ext of ThisExtension.allLanguageFileExtensions(this.language))
+				{
+					let pathToCheck = this.localFilePath.replace(this.localFileExtension, ext);
+
+					if (fs.existsSync(pathToCheck))
+					{
+						this._languageFileExtension = LanguageFileExtensionMapper.fromExtension(ext);
+						return true;
+					}
+				}
+				return false;
+			}
 			return fs.existsSync(this.localFilePath);
 		}
 	}
@@ -204,15 +229,16 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 				if (!onlinePaths.includes(localRelativePath))
 				{
 					let localType: WorkspaceItemType = 'LOCAL_DIRECTORY';
-					let language: WorkspaceItemLanguage = undefined;
+					let language: WorkspaceItemLanguage | LanguageFileExtensionMapper = undefined;
 					if (fs.lstatSync(localFullPath).isFile())
 					{
 						localType = 'LOCAL_NOTEBOOK';
 						let ext = LanguageFileExtensionMapper.extensionFromFileName(localFile.base);
 
-						if (LanguageFileExtensionMapper.supportedFileExtensions.includes(ext))
+						if (LanguageFileExtensionMapper.supportedFileExtensions.includes(ext)
+						|| (ActiveDatabricksEnvironment.allowAllSupportedFileExtensions && ThisExtension.allFileExtensions.includes(ext)))
 						{
-							language = LanguageFileExtensionMapper.fromExtension(ext).language;
+							language = LanguageFileExtensionMapper.fromFileName(localFile.base);
 						}
 						else
 						{
@@ -232,18 +258,28 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		return allItems;
 	}
 
-	async download(): Promise<void> {
+	async download(asTempFile:boolean = false): Promise<string> {
 		if(this.object_type === 'NOTEBOOK')
 		{
 			try {
 				//vscode.window.showInformationMessage(`Download of item ${this._path}) started ...`);
-				let response = await DatabricksApiService.downloadWorkspaceItem(this.path, this.localFilePath, this.exportFormat);
+				let localPath = this.localFilePath;
+				if(asTempFile)
+				{
+					localPath = await Helper.openTempFile('', this.label + '-ONLINE', false);
+					localPath += this.localFileExtension;
+				}
+				
+				let response = await DatabricksApiService.downloadWorkspaceItem(this.path, localPath, this.exportFormat);
+
 				vscode.window.showInformationMessage(`Download of item ${this._path}) finished!`);
 
-				if (ThisExtension.RefreshAfterUpDownload) {
+				if (ThisExtension.RefreshAfterUpDownload && !asTempFile) {
 					Helper.wait(500);
 					vscode.commands.executeCommand("databricksWorkspace.refresh", false);
 				}
+
+				return localPath;
 			}
 			catch (error) {
 				vscode.window.showErrorMessage(`ERROR: ${error}`);
@@ -255,7 +291,7 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 
 			for(let item of items)
 			{
-				item.download();
+				item.download(asTempFile);
 			}
 		}
 	}
@@ -289,13 +325,14 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		}
 	}
 
-	async open(): Promise<void> {
+	async open(showWarning:boolean = true): Promise<void> {
 		if(!this.localPathExists)
 		{
 			await this.download();
 		}
 		else
 		{
+			if(showWarning)
 			vscode.window.showWarningMessage("Opening local cached file. To open most recent file from Databricks, please manually download it first!");
 		}
 
@@ -305,6 +342,7 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	}
 
 	async click(): Promise<void> {
+		//if (this._languageFileExtension.isNotebook) { Helper.resetOpenAsNotebook(); }
 		Helper.singleVsDoubleClick(this, this.singleClick, this.doubleClick);
 	}
 
@@ -317,5 +355,17 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		// TODO: This is not working properly as the "this" cannot be passed when used insided setTimeout?!?
 
 		//vscode.window.showInformationMessage("SingleClick");
+	}
+
+	async compare(): Promise<void> {
+		if(this._languageFileExtension.isNotebook)
+		{
+			vscode.window.showErrorMessage("DIFF is currently not supported when using notebooks. You can change the export formats to work around this issue!");
+			return;
+		}
+		let onlineFileTempPath:string = await this.download(true);
+
+		// if(this._languageFileExtension.isNotebook) { await Helper.disableOpenAsNotebook(); }
+		Helper.showDiff(onlineFileTempPath, this.localFilePath);
 	}
 }
