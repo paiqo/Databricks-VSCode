@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Databricks Extension for VSCode",
-	"version": "0.2.5",
+	"version": "0.3.0",
 	"publisher": "paiqo",
 	"author": {
 		"name": "Gerhard Brueckl"
@@ -20,7 +20,7 @@
 	"qna": "https://github.com/paiqo/Databricks-VSCode",
 	"enableProposedApi": false,
 	"engines": {
-		"vscode": "^1.39.0"
+		"vscode": "^1.43.0"
 	},
 	"galleryBanner": {
 		"color": "#0ea5ff",

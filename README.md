@@ -6,6 +6,7 @@ This is a Visual Studio Code extension that allows you to work with Azure Databr
 # Features
 - Workspace browser
 	- Up-/download of notebooks
+	- Compare/Diff of local vs online notebook (currently only supported for raw files but not for notebooks)
 	- Execution of notebooks against a Databricks Cluster (via [Databricks-Connect](https://docs.databricks.com/dev-tools/databricks-connect.html))
 - Cluster manager 
 	- Start/stop clusters
