@@ -25,7 +25,7 @@
 	"galleryBanner": {
 		"color": "#0ea5ff",
 		"theme": "dark"
-	  },
+	},
 	"categories": [
 		"Debuggers",
 		"Azure",
@@ -446,8 +446,6 @@
 					"dark": "resources/dark/delete.png"
 				}
 			},
-
-
 			{
 				"command": "databricksClusters.refresh",
 				"title": "Refresh",
@@ -500,8 +498,6 @@
 					"dark": "resources/dark/delete.png"
 				}
 			},
-
-
 			{
 				"command": "databricksJobs.refresh",
 				"title": "Refresh",
@@ -562,8 +558,6 @@
 					"dark": "resources/dark/openBrowser.png"
 				}
 			},
-
-
 			{
 				"command": "databricksFS.refresh",
 				"title": "Refresh",
@@ -608,8 +602,6 @@
 					"dark": "resources/dark/delete.png"
 				}
 			},
-
-
 			{
 				"command": "databricksSecrets.refresh",
 				"title": "Refresh",
@@ -678,8 +670,6 @@
 					"when": "view == databricksWorkspace",
 					"group": "navigation@1"
 				},
-
-
 				{
 					"command": "databricksClusters.refresh",
 					"when": "view == databricksClusters",
@@ -690,8 +680,6 @@
 					"when": "view == databricksClusters",
 					"group": "navigation"
 				},
-
-
 				{
 					"command": "databricksJobs.refresh",
 					"when": "view == databricksJobs",
@@ -702,8 +690,6 @@
 					"when": "view == databricksJobs",
 					"group": "navigation"
 				},
-
-
 				{
 					"command": "databricksFS.refresh",
 					"when": "view == databricksFS",
@@ -771,8 +757,6 @@
 					"when": "view == databricksClusters",
 					"group": "inline"
 				},
-
-
 				{
 					"command": "databricksJobItem.showDefinition",
 					"when": "view == databricksJobs",
@@ -798,26 +782,21 @@
 					"when": "view == databricksJobs && viewItem == JOB",
 					"group": "inline"
 				},
-
-
 				{
 					"command": "databricksFSItem.add",
 					"when": "view == databricksFS && viewItem == FOLDER",
 					"group": "inline"
 				},
-
 				{
 					"command": "databricksFSItem.download",
 					"when": "view == databricksFS && viewItem == FILE",
 					"group": "inline"
 				},
-
 				{
 					"command": "databricksFSItem.delete",
 					"when": "view == databricksFS && viewItem == FILE",
 					"group": "inline"
 				},
-
 				{
 					"command": "databricksSecretItem.addSecret",
 					"when": "view == databricksSecrets && viewItem == SCOPE",
@@ -843,11 +822,11 @@
 	},
 	"devDependencies": {
 		"@types/mkdirp": "^0.5.2",
-		"@types/node": "^10.17.13",
-		"@types/rimraf": "^2.0.2",
-		"@types/vscode": "^1.39.0",
+		"@types/node": "^10.17.17",
+		"@types/rimraf": "^2.0.3",
+		"@types/vscode": "^1.43.0",
 		"tslint": "^5.20.1",
-		"typescript": "^3.5.1"
+		"typescript": "^3.8.3"
 	},
 	"dependencies": {
 		"@angular/common": "^8.2.14",
@@ -857,13 +836,14 @@
 		"file-saver": "^2.0.2",
 		"ftp": "^0.3.10",
 		"jsonc-parser": "^0.4.2",
+		"minimist": "^1.2.5",
 		"mkdirp": "^0.5.1",
 		"promise.prototype.finally": "^3.1.2",
-		"request": "^2.88.0",
+		"request": "^2.88.2",
 		"rimraf": "^2.6.2",
 		"rxjs": "^6.5.3",
 		"sync-request": "^6.1.0",
-		"typed-rest-client": "^1.7.1",
+		"typed-rest-client": "^1.7.2",
 		"uniquefilename": "^1.1.2"
 	}
 }
