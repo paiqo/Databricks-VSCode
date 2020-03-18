@@ -106,9 +106,11 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	private getIconPath(theme: string): string {
 		let sync_state: string = "";
 
-		if (this.localPathExists && !this.onlinePathExists) { sync_state = "_OFFLINE"; }
-		if (!this.localPathExists && this.onlinePathExists) { sync_state = "_ONLINE"; }
-
+		if(this.object_type != "LIBRARY") // libraries cannot be synced yet hence there is no SyncState
+		{
+			if (this.localPathExists && !this.onlinePathExists) { sync_state = "_OFFLINE"; }
+			if (!this.localPathExists && this.onlinePathExists) { sync_state = "_ONLINE"; }
+		}
 		return fspath.join(ThisExtension.rootPath, 'resources', theme, 'workspace', this.object_type.toLowerCase() + sync_state + '.png');
 	}
 
@@ -162,7 +164,7 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		{
 			return fs.existsSync(this.localFolderPath);
 		}
-		else 
+		else if (this.object_type == "NOTEBOOK")
 		{
 			if(ActiveDatabricksEnvironment.allowAllSupportedFileExtensions)
 			{
@@ -179,6 +181,10 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 				return false;
 			}
 			return fs.existsSync(this.localFilePath);
+		}
+		else if (this.object_type == "LIBRARY") 
+		{
+			return false;
 		}
 	}
 
