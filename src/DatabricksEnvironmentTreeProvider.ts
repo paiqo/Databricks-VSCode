@@ -17,7 +17,7 @@ export class DatabricksEnvironmentTreeProvider implements vscode.TreeDataProvide
 
 	refresh(showInfoMessage: boolean = false): void {
 		if(showInfoMessage){
-			vscode.window.showInformationMessage(`Refreshing Environments ...`);
+			vscode.window.showInformationMessage('Refreshing Environments ...');
 		}
 		this._onDidChangeTreeData.fire();
 	}

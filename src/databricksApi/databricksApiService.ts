@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import { DatabricksWorkspaceTreeItem } from './workspaces/DatabricksWorkspaceTreeItem';
 import { iDatabricksWorkspaceItem } from './workspaces/iDatabricksworkspaceItem';
-import { WorkspaceItemExportFormat, WorkspaceItemType, WorkspaceItemLanguage } from './workspaces/_types';
+import { WorkspaceItemExportFormat,  WorkspaceItemLanguage } from './workspaces/_types';
 
 import { DatabricksClusterTreeItem } from './clusters/DatabricksClusterTreeItem';
 import { iDatabricksRuntimeVersion } from './clusters/iDatabricksRuntimeVersion';
@@ -66,7 +65,7 @@ export abstract class DatabricksApiService {
 	-- W O R K S P A C E   A P I
 	----------------------------------------------------------------
 	*/
-	static async listWorkspaceItems(path: string) : Promise<DatabricksWorkspaceTreeItem[]> {
+	static async listWorkspaceItems(path: string) : Promise<iDatabricksWorkspaceItem[]> {
 		let endpoint = '2.0/workspace/list';
 		let body = { path: path };
 		
@@ -75,13 +74,8 @@ export abstract class DatabricksApiService {
 		let result = response.data;
 		let items = result.objects as iDatabricksWorkspaceItem[];
 
-		let wsItems: DatabricksWorkspaceTreeItem[] = [];
-		if(items != undefined)
-		{
-			items.map(item => wsItems.push(new DatabricksWorkspaceTreeItem(item.path, item.object_type, item.object_id, item.language)));
-			Helper.sortArrayByProperty(wsItems, "label");
-		}
-		return wsItems;
+		Helper.sortArrayByProperty(items, "path");
+		return items;
 	}
 
 	static async downloadWorkspaceItem(path: string, localPath: string, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {

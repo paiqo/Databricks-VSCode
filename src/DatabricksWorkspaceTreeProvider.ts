@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
-import { DatabricksApiService} from './databricksApi/databricksApiService';
 import { DatabricksWorkspaceTreeItem } from './databricksApi/workspaces/DatabricksWorkspaceTreeItem';
-import { DatabricksClusterTreeItem } from './databricksApi/clusters/DatabricksClusterTreeItem';
+import { DatabricksWorkspaceDirectory } from './databricksApi/workspaces/DatabricksWorkspaceDirectory';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<DatabricksWorkspaceTreeItem> {
@@ -13,12 +12,12 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 
 	refresh(showInfoMessage: boolean = false): void {
 		if(showInfoMessage){
-			vscode.window.showInformationMessage(`Refreshing Workspace ...`);
+			vscode.window.showInformationMessage('Refreshing Workspace ...');
 		}
 		this._onDidChangeTreeData.fire();
 	}
 
-	getTreeItem(element: DatabricksWorkspaceTreeItem): vscode.TreeItem {
+	getTreeItem(element: DatabricksWorkspaceTreeItem): DatabricksWorkspaceTreeItem {
 		return element;
 	}
 
@@ -29,15 +28,15 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 		} 
 		else 
 		{
-			return new DatabricksWorkspaceTreeItem("/", "DIRECTORY", -1).getChildren();
+			return new DatabricksWorkspaceDirectory("/", -1, "Online").getChildren();
 		}
 	}
 
 	download(): void {
-		new DatabricksWorkspaceTreeItem("/", "DIRECTORY", -1).download();
+		new DatabricksWorkspaceDirectory("/", -1, "Online").download();
 	}
 
 	upload(): void {
-		new DatabricksWorkspaceTreeItem("/", "DIRECTORY", -1).upload();
+		new DatabricksWorkspaceDirectory("/", -1, "Online").upload();
 	}
 }
