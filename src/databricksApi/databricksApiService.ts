@@ -59,6 +59,30 @@ export abstract class DatabricksApiService {
 		return Buffer.from(bitmap).toString('base64');
 	}
 
+	private static logResponse(response: any): void {
+		ThisExtension.log(JSON.stringify(response.data));
+	}
+
+	private static async get(endpoint: string, params: object = null): Promise<any>
+	{
+		ThisExtension.log("GET " + endpoint);
+		ThisExtension.log("Params:" + JSON.stringify(params));
+
+		let response = await this._apiService.get(endpoint, params);
+		this.logResponse(response);
+
+		return response;
+	}
+
+	private static async post(endpoint: string, body: object): Promise<any> {
+		ThisExtension.log("POST " + endpoint);
+		ThisExtension.log("Body:" + JSON.stringify(body));
+
+		let response =  await this._apiService.post(endpoint, body);
+		this.logResponse(response);
+
+		return response;
+	}
 
 	/*
 	----------------------------------------------------------------
@@ -69,8 +93,8 @@ export abstract class DatabricksApiService {
 		let endpoint = '2.0/workspace/list';
 		let body = { path: path };
 		
-		let response = await this._apiService.get(endpoint, { params: body});
-		
+		let response = await this.get(endpoint, { params: body });
+
 		let result = response.data;
 		let items = result.objects as iDatabricksWorkspaceItem[];
 
@@ -85,8 +109,8 @@ export abstract class DatabricksApiService {
 			format: format
 		};
 		
-		let response = await this._apiService.get(endpoint, { params: body});
-		
+		let response = await this.get(endpoint, { params: body});	
+
 		let result = response.data;
 
 		this.writeBase64toFile(result.content, localPath);
@@ -102,8 +126,8 @@ export abstract class DatabricksApiService {
 			format: format
 		};
 
-		let response = await this._apiService.post(endpoint, body);
-		
+		let response = await this.post(endpoint, body);
+
 		let result = response.data;
 	}
 
@@ -113,7 +137,7 @@ export abstract class DatabricksApiService {
 			path: path
 		};
 
-		let response = await this._apiService.post(endpoint, body);
+		let response = await this.post(endpoint, body);
 		
 		let result = response.data;
 	}
@@ -126,8 +150,8 @@ export abstract class DatabricksApiService {
 	static async listClusters() : Promise<iDatabricksCluster[]> {
 		let endpoint = '2.0/clusters/list';
 
-		let response = await this._apiService.get(endpoint);
-		
+		let response = await this.get(endpoint);
+
 		let result = response.data;
 		let items = result.clusters as iDatabricksCluster[];
 
@@ -138,8 +162,8 @@ export abstract class DatabricksApiService {
 		let endpoint = '2.0/clusters/start';
 		let body = { cluster_id: cluster_id };
 
-		let response = await this._apiService.post(endpoint, body);
-		
+		let response = await this.post(endpoint, body);
+
 		return response;
 	}
 
@@ -147,16 +171,16 @@ export abstract class DatabricksApiService {
 		let endpoint = '2.0/clusters/delete';
 		let body = { cluster_id: cluster_id };
 
-		let response = this._apiService.post(endpoint, body);
-		
+		let response = this.post(endpoint, body);
+
 		return response;
 	}
 
 	static async listRuntimeVersions(path: string) : Promise<iDatabricksRuntimeVersion[]> {
 		let endpoint = '2.0/clusters/spark-versions';
 
-		let response = await this._apiService.get(endpoint);
-		
+		let response = await this.get(endpoint);
+
 		let result = response.data;
 
 		return result.versions;
@@ -171,7 +195,7 @@ export abstract class DatabricksApiService {
 	static async listJobs(): Promise<iDatabricksJobResponse> {
 		let endpoint = '2.0/jobs/list';
 
-		let response = await this._apiService.get(endpoint);
+		let response = await this.get(endpoint);
 
 		let result = response.data as iDatabricksJobResponse;
 
@@ -194,7 +218,7 @@ export abstract class DatabricksApiService {
 			limit:		limit
 		};
 
-		let response = await this._apiService.get(endpoint, { params: body });
+		let response = await this.get(endpoint, { params: body });
 
 		let result = response.data as iDatabricksJobRunResponse;
 
@@ -207,7 +231,7 @@ export abstract class DatabricksApiService {
 			job_id: job_id
 		};
 
-		let response = await this._apiService.post(endpoint, body);
+		let response = await this.post(endpoint, body);
 
 		return response;
 	}
@@ -218,7 +242,7 @@ export abstract class DatabricksApiService {
 			run_id: run_id
 		};
 
-		let response = await this._apiService.post(endpoint, body);
+		let response = await this.post(endpoint, body);
 
 		return response;
 	}
@@ -229,7 +253,7 @@ export abstract class DatabricksApiService {
 			run_id: run_id
 		};
 
-		let response = await this._apiService.get(endpoint, { params: body });
+		let response = await this.get(endpoint, { params: body });
 
 		let result = response.data;
 
@@ -245,8 +269,8 @@ export abstract class DatabricksApiService {
 		let endpoint = '2.0/dbfs/list';
 		let body = { path: path };
 		
-		let response = await this._apiService.get(endpoint, { params: body});
-		
+		let response = await this.get(endpoint, { params: body});
+
 		let result = response.data;
 
 		// array of file is in result.files
@@ -265,7 +289,7 @@ export abstract class DatabricksApiService {
 		let endpoint = '2.0/dbfs/get-status';
 		let body = { path: path };
 
-		let response = await this._apiService.get(endpoint, { params: body });
+		let response = await this.get(endpoint, { params: body });
 
 		let result = response.data;
 
@@ -281,7 +305,9 @@ export abstract class DatabricksApiService {
 			length: length
 		};
 
+		// we do not want to log every single file content!
 		let response = await this._apiService.get(endpoint, { params: body });
+		//this.logResponse(response);
 
 		return response;
 	}
@@ -292,8 +318,8 @@ export abstract class DatabricksApiService {
 			path: 						path
 		};
 
-		let response = await this._apiService.post(endpoint, body);
-		
+		let response = await this.post(endpoint, body);
+
 		return response;
 	}
 
@@ -304,8 +330,8 @@ export abstract class DatabricksApiService {
 			recursive:					recursive
 		};
 
-		let response = await this._apiService.post(endpoint, body);
-		
+		let response = await this.post(endpoint, body);
+
 		return response;
 	}
 
@@ -316,8 +342,8 @@ export abstract class DatabricksApiService {
 			overwrite:					overwrite
 		};
 
-		let response = await this._apiService.post(endpoint, body);
-		
+		let response = await this.post(endpoint, body);
+
 		return response.data.handle as number;
 	}
 
@@ -328,7 +354,7 @@ export abstract class DatabricksApiService {
 			handle:						handle
 		};
 
-		let response = await this._apiService.post(endpoint, body);
+		let response = await this.post(endpoint, body);
 
 		return response;
 	}
@@ -339,8 +365,8 @@ export abstract class DatabricksApiService {
 			handle: 						handle
 		};
 
-		let response = await this._apiService.post(endpoint, body);
-		
+		let response = await this.post(endpoint, body);
+
 		return response;
 	}
 
@@ -351,7 +377,7 @@ export abstract class DatabricksApiService {
 			recursive:	recursive
 		};
 
-		let response = await this._apiService.post(endpoint, body);
+		let response = await this.post(endpoint, body);
 
 		return response;
 	}
@@ -426,8 +452,8 @@ export abstract class DatabricksApiService {
 	static async listSecretScopes() : Promise<DatabricksSecretTreeItem[]> {
 		let endpoint = '2.0/secrets/scopes/list';
 		
-		let response = await this._apiService.get(endpoint);
-		
+		let response = await this.get(endpoint);
+
 		let result = response.data;
 
 		// array of scopes is in result.scopes
@@ -449,8 +475,8 @@ export abstract class DatabricksApiService {
 			initial_manage_principal: 	initial_manage_principal
 		};
 
-		let response = await this._apiService.post(endpoint, body);
-		
+		let response = await this.post(endpoint, body);
+
 		return response;
 	}
 
@@ -461,8 +487,8 @@ export abstract class DatabricksApiService {
 			scope: 			scope
 		};
 
-		let response = await this._apiService.post(endpoint, body);
-		
+		let response = await this.post(endpoint, body);
+
 		return response;
 	}
 
@@ -470,8 +496,8 @@ export abstract class DatabricksApiService {
 		let endpoint = '2.0/secrets/list';
 		let body = { scope: scope };
 		
-		let response = await this._apiService.get(endpoint, { params: body});
-		
+		let response = await this.get(endpoint, { params: body});
+
 		let result = response.data;
 
 		// array of secrets is in result.secrets
@@ -495,8 +521,8 @@ export abstract class DatabricksApiService {
 			string_value: 	value
 		};
 
-		let response = await this._apiService.post(endpoint, body);
-		
+		let response = await this.post(endpoint, body);
+
 		return response;
 	}
 
@@ -508,8 +534,8 @@ export abstract class DatabricksApiService {
 			key: 			secret
 		};
 
-		let response = await this._apiService.post(endpoint, body);
-		
+		let response = await this.post(endpoint, body);
+
 		return response;
 	}
 }
