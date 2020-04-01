@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { iDatabricksWorkspaceItem } from './workspaces/iDatabricksworkspaceItem';
-import { WorkspaceItemExportFormat,  WorkspaceItemLanguage } from './workspaces/_types';
+import { WorkspaceItemExportFormat, WorkspaceItemLanguage } from './workspaces/_types';
 
 import { DatabricksClusterTreeItem } from './clusters/DatabricksClusterTreeItem';
 import { iDatabricksRuntimeVersion } from './clusters/iDatabricksRuntimeVersion';
@@ -34,7 +34,7 @@ export abstract class DatabricksApiService {
 		this._apiService = axios.create({
 			baseURL: environment.apiRootUrl + this.API_SUB_URL
 		});
-		
+
 		// Alter defaults after instance has been created
 		this._apiService.defaults.headers.common['Authorization'] = "Bearer " + environment.personalAccessToken;
 		this._apiService.defaults.headers.common['Content-Type'] = 'application/json';
@@ -45,8 +45,8 @@ export abstract class DatabricksApiService {
 
 	private static writeBase64toFile(base64String: string, filePath: string): void {
 		Helper.ensureLocalFolder(filePath, true);
-		fs.writeFile(filePath, base64String, {encoding: 'base64'}, function(err) {
-			if(err){
+		fs.writeFile(filePath, base64String, { encoding: 'base64' }, function (err) {
+			if (err) {
 				vscode.window.showErrorMessage(`ERROR writing file: ${err}`);
 			}
 		});
@@ -60,16 +60,34 @@ export abstract class DatabricksApiService {
 	}
 
 	private static logResponse(response: any): void {
+		ThisExtension.log("Response: ");
 		ThisExtension.log(JSON.stringify(response.data));
 	}
 
-	private static async get(endpoint: string, params: object = null): Promise<any>
-	{
+	private static async get(endpoint: string, params: object = null): Promise<any> {
 		ThisExtension.log("GET " + endpoint);
 		ThisExtension.log("Params:" + JSON.stringify(params));
 
-		let response = await this._apiService.get(endpoint, params);
-		this.logResponse(response);
+		let response: any = "Request not yet executed!";
+		try {
+			response = await this._apiService.get(endpoint, params);
+			this.logResponse(response);
+		} catch (error) {
+			let errResponse = error.response;
+
+			let errorMessage = errResponse.data.message;
+			if (!errorMessage) {
+				errorMessage = errResponse.headers["x-databricks-reason-phrase"];
+			}
+
+			ThisExtension.log("ERROR: " + error.message);
+			ThisExtension.log("ERROR: " + errorMessage);
+			ThisExtension.log("ERROR: " + JSON.stringify(errResponse.data));
+
+			vscode.window.showErrorMessage(errorMessage);
+
+			return undefined;
+		}
 
 		return response;
 	}
@@ -78,8 +96,26 @@ export abstract class DatabricksApiService {
 		ThisExtension.log("POST " + endpoint);
 		ThisExtension.log("Body:" + JSON.stringify(body));
 
-		let response =  await this._apiService.post(endpoint, body);
-		this.logResponse(response);
+		let response: any = "Request not yet executed!";
+		try {
+			response = await this._apiService.post(endpoint, body);
+			this.logResponse(response);
+		} catch (error) {
+			let errResponse = error.response;
+
+			let errorMessage = errResponse.data.message;
+			if (!errorMessage) {
+				errorMessage = errResponse.headers["x-databricks-reason-phrase"];
+			}
+
+			ThisExtension.log("ERROR: " + error.message);
+			ThisExtension.log("ERROR: " + errorMessage);
+			ThisExtension.log("ERROR: " + JSON.stringify(errResponse.data));
+
+			vscode.window.showErrorMessage(errorMessage);
+
+			return undefined;
+		}
 
 		return response;
 	}
@@ -89,10 +125,10 @@ export abstract class DatabricksApiService {
 	-- W O R K S P A C E   A P I
 	----------------------------------------------------------------
 	*/
-	static async listWorkspaceItems(path: string) : Promise<iDatabricksWorkspaceItem[]> {
+	static async listWorkspaceItems(path: string): Promise<iDatabricksWorkspaceItem[]> {
 		let endpoint = '2.0/workspace/list';
 		let body = { path: path };
-		
+
 		let response = await this.get(endpoint, { params: body });
 
 		let result = response.data;
@@ -104,12 +140,12 @@ export abstract class DatabricksApiService {
 
 	static async downloadWorkspaceItem(path: string, localPath: string, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
 		let endpoint = '2.0/workspace/export';
-		let body = { 
+		let body = {
 			path: path,
 			format: format
 		};
-		
-		let response = await this.get(endpoint, { params: body});	
+
+		let response = await this.get(endpoint, { params: body });
 
 		let result = response.data;
 
@@ -138,7 +174,7 @@ export abstract class DatabricksApiService {
 		};
 
 		let response = await this.post(endpoint, body);
-		
+
 		let result = response.data;
 	}
 
@@ -147,7 +183,7 @@ export abstract class DatabricksApiService {
 	-- C L U S T E R S   A P I
 	----------------------------------------------------------------
 	*/
-	static async listClusters() : Promise<iDatabricksCluster[]> {
+	static async listClusters(): Promise<iDatabricksCluster[]> {
 		let endpoint = '2.0/clusters/list';
 
 		let response = await this.get(endpoint);
@@ -176,7 +212,7 @@ export abstract class DatabricksApiService {
 		return response;
 	}
 
-	static async listRuntimeVersions(path: string) : Promise<iDatabricksRuntimeVersion[]> {
+	static async listRuntimeVersions(path: string): Promise<iDatabricksRuntimeVersion[]> {
 		let endpoint = '2.0/clusters/spark-versions';
 
 		let response = await this.get(endpoint);
@@ -203,19 +239,19 @@ export abstract class DatabricksApiService {
 	}
 
 	static async listJobRuns(
-							job_id: number, 
-							active_only: boolean = true, 
-							completed_only: boolean = false,
-							offset: number = null, 
-							limit: number = null
+		job_id: number,
+		active_only: boolean = true,
+		completed_only: boolean = false,
+		offset: number = null,
+		limit: number = null
 	): Promise<iDatabricksJobRunResponse> {
 		let endpoint = '2.0/jobs/runs/list';
 		let body = {
-			job_id: 	job_id,
-			active_only:	active_only,
-			completed_only:	completed_only,
-			offset: 	offset,
-			limit:		limit
+			job_id: job_id,
+			active_only: active_only,
+			completed_only: completed_only,
+			offset: offset,
+			limit: limit
 		};
 
 		let response = await this.get(endpoint, { params: body });
@@ -265,20 +301,19 @@ export abstract class DatabricksApiService {
 	-- D B F S   A P I
 	----------------------------------------------------------------
 	*/
-	static async listDBFSItems(path: string) : Promise<DatabricksFSTreeItem[]> {
+	static async listDBFSItems(path: string): Promise<DatabricksFSTreeItem[]> {
 		let endpoint = '2.0/dbfs/list';
 		let body = { path: path };
-		
-		let response = await this.get(endpoint, { params: body});
+
+		let response = await this.get(endpoint, { params: body });
 
 		let result = response.data;
 
 		// array of file is in result.files
 		let items = result.files as iDatabricksFSItem[];
-		
+
 		let dbfsItems: DatabricksFSTreeItem[] = [];
-		if(items != undefined)
-		{
+		if (items != undefined) {
 			items.map(item => dbfsItems.push(new DatabricksFSTreeItem(item.path, item.is_dir, item.file_size)));
 			Helper.sortArrayByProperty(dbfsItems, "label");
 		}
@@ -314,8 +349,8 @@ export abstract class DatabricksApiService {
 
 	static async createDBFSFolder(path: string): Promise<object> {
 		let endpoint = '2.0/dbfs/mkdirs';
-		let body = { 
-			path: 						path
+		let body = {
+			path: path
 		};
 
 		let response = await this.post(endpoint, body);
@@ -325,9 +360,9 @@ export abstract class DatabricksApiService {
 
 	static async deleteDBFSItem(path: string, recursive: boolean): Promise<object> {
 		let endpoint = '2.0/dbfs/delete';
-		let body = { 
-			path: 						path,
-			recursive:					recursive
+		let body = {
+			path: path,
+			recursive: recursive
 		};
 
 		let response = await this.post(endpoint, body);
@@ -337,9 +372,9 @@ export abstract class DatabricksApiService {
 
 	static async createDBFSFile(path: string, overwrite: boolean): Promise<number> {
 		let endpoint = '2.0/dbfs/create';
-		let body = { 
-			path: 						path,
-			overwrite:					overwrite
+		let body = {
+			path: path,
+			overwrite: overwrite
 		};
 
 		let response = await this.post(endpoint, body);
@@ -349,9 +384,9 @@ export abstract class DatabricksApiService {
 
 	static async appendDBFSFileContent(handle: number, base64Content: string): Promise<object> {
 		let endpoint = '2.0/dbfs/add-block';
-		let body = { 
-			data: 						base64Content,
-			handle:						handle
+		let body = {
+			data: base64Content,
+			handle: handle
 		};
 
 		let response = await this.post(endpoint, body);
@@ -361,8 +396,8 @@ export abstract class DatabricksApiService {
 
 	static async closeDBFSFile(handle: number): Promise<void> {
 		let endpoint = '2.0/dbfs/close';
-		let body = { 
-			handle: 						handle
+		let body = {
+			handle: handle
 		};
 
 		let response = await this.post(endpoint, body);
@@ -373,8 +408,8 @@ export abstract class DatabricksApiService {
 	static async deleteDBFSitem(path: string, recursive: boolean = false): Promise<void> {
 		let endpoint = '2.0/dbfs/delete';
 		let body = {
-			path:		path,
-			recursive:	recursive
+			path: path,
+			recursive: recursive
 		};
 
 		let response = await this.post(endpoint, body);
@@ -383,7 +418,7 @@ export abstract class DatabricksApiService {
 	}
 
 	static async uploadDBFSFile(localPath: string, dbfsPath: string, overwrite: boolean, batchSize: number = 1048000): Promise<void> {
-		
+
 		// https://2ality.com/2018/04/async-iter-nodejs.html#reading-asynchronously-via-async-iteration
 
 		// this object is necessary so the single and asyncronous API calls are executed in the right order
@@ -394,7 +429,7 @@ export abstract class DatabricksApiService {
 		let handle = await this.createDBFSFile(dbfsPath, overwrite);
 
 		for await (const chunk of readStream) {
-			let response:object = await this.appendDBFSFileContent(handle, chunk.toString('base64'));
+			let response: object = await this.appendDBFSFileContent(handle, chunk.toString('base64'));
 
 			batchesLoaded.push(response);
 		}
@@ -406,8 +441,7 @@ export abstract class DatabricksApiService {
 
 		let dbfsItem: iDatabricksFSItem = await this.getDBFSItem(dbfsPath);
 
-		if(dbfsItem.is_dir)
-		{
+		if (dbfsItem.is_dir) {
 			throw "The specified path is a directory and not a file!";
 		}
 
@@ -418,23 +452,22 @@ export abstract class DatabricksApiService {
 
 		let totalSize = dbfsItem.file_size;
 		let offset = 0;
-		let content:{data: {bytes_read:number, data:string}};
+		let content: { data: { bytes_read: number, data: string } };
 
-		let writeStream = fs.createWriteStream(localPath, { highWaterMark: batchSize, encoding: 'base64' },);
+		let writeStream = fs.createWriteStream(localPath, { highWaterMark: batchSize, encoding: 'base64' });
 
 		do {
-			if(offset + batchSize > totalSize)
-			{
+			if (offset + batchSize > totalSize) {
 				batchSize = totalSize - offset;
 			}
-			
+
 			content = await this.readDBFSFileContent(dbfsPath, offset, batchSize);
-			
+
 			writeStream.write(content.data.data, 'base64', function (err) {
-					if (err) {
-						vscode.window.showErrorMessage(`ERROR writing file: ${err}`);
-					}
+				if (err) {
+					vscode.window.showErrorMessage(`ERROR writing file: ${err}`);
 				}
+			}
 			);
 
 			offset = offset + batchSize;
@@ -449,30 +482,29 @@ export abstract class DatabricksApiService {
 	-- S E C R E T S   A P I
 	----------------------------------------------------------------
 	*/
-	static async listSecretScopes() : Promise<DatabricksSecretTreeItem[]> {
+	static async listSecretScopes(): Promise<DatabricksSecretTreeItem[]> {
 		let endpoint = '2.0/secrets/scopes/list';
-		
+
 		let response = await this.get(endpoint);
 
 		let result = response.data;
 
 		// array of scopes is in result.scopes
 		let items = result.scopes as iDatabricksSecretScope[];
-		
+
 		let scopeItems: DatabricksSecretTreeItem[] = [];
-		if(items != undefined)
-		{
+		if (items != undefined) {
 			items.map(item => scopeItems.push(new DatabricksSecretTreeItem(item.name)));
 			Helper.sortArrayByProperty(scopeItems, "label");
 		}
 		return scopeItems;
 	}
 
-	static async createSecretScopes(scope: string, initial_manage_principal: string = "users") : Promise<object> {
+	static async createSecretScopes(scope: string, initial_manage_principal: string = "users"): Promise<object> {
 		let endpoint = '2.0/secrets/scopes/create';
-		let body = { 
-			scope: 						scope, 
-			initial_manage_principal: 	initial_manage_principal
+		let body = {
+			scope: scope,
+			initial_manage_principal: initial_manage_principal
 		};
 
 		let response = await this.post(endpoint, body);
@@ -480,11 +512,11 @@ export abstract class DatabricksApiService {
 		return response;
 	}
 
-	static async deleteSecretScope(scope: string) : Promise<object> {
+	static async deleteSecretScope(scope: string): Promise<object> {
 		// currently only sting values are supported!
 		let endpoint = '2.0/secrets/scopes/delete';
-		let body = { 
-			scope: 			scope
+		let body = {
+			scope: scope
 		};
 
 		let response = await this.post(endpoint, body);
@@ -492,33 +524,32 @@ export abstract class DatabricksApiService {
 		return response;
 	}
 
-	static async listSecrets(scope: string) : Promise<DatabricksSecretTreeItem[]> {
+	static async listSecrets(scope: string): Promise<DatabricksSecretTreeItem[]> {
 		let endpoint = '2.0/secrets/list';
 		let body = { scope: scope };
-		
-		let response = await this.get(endpoint, { params: body});
+
+		let response = await this.get(endpoint, { params: body });
 
 		let result = response.data;
 
 		// array of secrets is in result.secrets
 		let items = result.secrets as iDatabricksSecret[];
-		
+
 		let scopeItems: DatabricksSecretTreeItem[] = [];
-		if(items != undefined)
-		{
+		if (items != undefined) {
 			items.map(item => scopeItems.push(new DatabricksSecretTreeItem(scope, item.key)));
 			Helper.sortArrayByProperty(scopeItems, "label");
 		}
 		return scopeItems;
 	}
 
-	static async setSecret(scope: string, secret: string, value: string) : Promise<object> {
+	static async setSecret(scope: string, secret: string, value: string): Promise<object> {
 		// currently only sting values are supported!
 		let endpoint = '2.0/secrets/put';
-		let body = { 
-			scope: 			scope, 
-			key: 			secret,
-			string_value: 	value
+		let body = {
+			scope: scope,
+			key: secret,
+			string_value: value
 		};
 
 		let response = await this.post(endpoint, body);
@@ -526,12 +557,12 @@ export abstract class DatabricksApiService {
 		return response;
 	}
 
-	static async deleteSecret(scope: string, secret: string) : Promise<object> {
+	static async deleteSecret(scope: string, secret: string): Promise<object> {
 		// currently only sting values are supported!
 		let endpoint = '2.0/secrets/delete';
-		let body = { 
-			scope: 			scope, 
-			key: 			secret
+		let body = {
+			scope: scope,
+			key: secret
 		};
 
 		let response = await this.post(endpoint, body);
