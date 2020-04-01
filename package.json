@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Databricks Extension for VSCode",
-	"version": "0.3.4",
+	"version": "0.3.5",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
