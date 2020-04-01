@@ -23,7 +23,7 @@ This is a Visual Studio Code extension that allows you to work with Azure Databr
 	- Create/delete secret scopes
 	- Create/delete secrets
 - Support for multiple Databricks workspaces
-- Easy confiugration via standard VS Code settings
+- Easy configuration via standard VS Code settings
 
 # Installation
 The extension can be downloaded directly from within VS Code. Simply go to the Extensions tab and search for "Databricks" and select and install the extension "Databricks Integration" (ID: paiqo.databricks-vscode).
