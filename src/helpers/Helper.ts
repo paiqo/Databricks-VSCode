@@ -10,13 +10,12 @@ import * as fs from 'fs';
 import * as UniqueFileName from 'uniquefilename';
 import { ThisExtension } from '../ThisExtension';
 
-export abstract class Helper
-{
+export abstract class Helper {
 	private static openAsNotebookSettingName: string = 'python.dataScience.useNotebookEditor';
 
 	private static _tempFiles: string[];
 	private static _doubleClickTimer: any;
-	
+
 	private static _openAsNotebookOriginalSetting: boolean;
 
 	static async showQuickPick(
@@ -56,7 +55,7 @@ export abstract class Helper
 
 
 	static async delay(ms: number) {
-		return new Promise( resolve => setTimeout(resolve, ms) );
+		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 
 	static mapToObject<T>(map: Map<string, any>): T {
@@ -69,30 +68,17 @@ export abstract class Helper
 
 	static ensureLocalFolder(path: string, pathIsFile: boolean = false): void {
 		let folder = path;
-		if(pathIsFile)
-		{
+		if (pathIsFile) {
 			folder = fspath.dirname(path);
 		}
-		if (!fs.existsSync(folder)){
+		if (!fs.existsSync(folder)) {
 			fs.mkdirSync(folder, { recursive: true });
 		}
 	}
 
-	static trimChar(text: string, charToRemove: string) {
-		while (text.charAt(0) == charToRemove) {
-			text = text.substring(1);
-		}
-
-		while (text.charAt(text.length - 1) == charToRemove) {
-			text = text.substring(0, text.length - 1);
-		}
-
-		return text;
-	}
-
-	static sortArrayByProperty(unsortedArray: object[], property: string = "label", direction:"ASC" | "DESC" = "ASC") {
+	static sortArrayByProperty(unsortedArray: object[], property: string = "label", direction: "ASC" | "DESC" = "ASC") {
 		let direction_num: number = (direction == "ASC" ? 1 : -1);
-		
+
 		unsortedArray.sort((t1, t2) => {
 			const name1 = t1[property].toString().toLowerCase();
 			const name2 = t2[property].toString().toLowerCase();
@@ -116,21 +102,20 @@ export abstract class Helper
 		this._tempFiles.push(filePath);
 	}
 
-	static async openTempFile(content: string = '', fileName: string = 'db-vscode-temp.json', open:boolean = true): Promise<string> {
+	static async openTempFile(content: string = '', fileName: string = 'db-vscode-temp.json', open: boolean = true): Promise<string> {
 		let tempDir = this.resolvePath(os.tmpdir());
 		let filePath = `${tempDir}${fspath.sep}${fileName}`;
 		let uniqueFilePath = await UniqueFileName.get(filePath, {});
 
-		
+
 		fs.writeFile(uniqueFilePath, content, (err) => vscode.window.showErrorMessage(err.message));
 		this.addTempFile(uniqueFilePath);
 
-		if(open)
-		{
+		if (open) {
 			vscode.workspace
 				.openTextDocument(uniqueFilePath)
 				.then(vscode.window.showTextDocument);
-		}	
+		}
 
 		return uniqueFilePath;
 	}
@@ -147,6 +132,18 @@ export abstract class Helper
 		}
 	}
 
+	static trimChar(text: string, charToRemove: string, fromLeft: boolean = true, fromRight: boolean = true) {
+		while (text.charAt(0) == charToRemove && fromLeft) {
+			text = text.substring(1);
+		}
+
+		while (text.charAt(text.length - 1) == charToRemove && fromRight) {
+			text = text.substring(0, text.length - 1);
+		}
+
+		return text;
+	}
+
 	static disableOpenAsNotebook(): void {
 		this.initOpenAsNotebookOriginalSetting();
 
@@ -158,7 +155,7 @@ export abstract class Helper
 
 	static resetOpenAsNotebook(): void {
 		this.initOpenAsNotebookOriginalSetting();
-		
+
 		ThisExtension.log("Setting " + this.openAsNotebookSettingName + " back to " + this._openAsNotebookOriginalSetting);
 		vscode.workspace.getConfiguration().update("python.dataScience.useNotebookEditor", this._openAsNotebookOriginalSetting, vscode.ConfigurationTarget.Workspace);
 	}
@@ -197,24 +194,23 @@ export abstract class Helper
 			end = new Date().getTime();
 		}
 		*/
-		await setTimeout(() => {}, ms);
+		await setTimeout(() => { }, ms);
 		//const wait = (ms) => new Promise(res => setTimeout(res, ms));
 	}
 
 	static bytesToSize(bytes: number): string {
 		let sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
 		if (bytes == 0) return '0 Byte';
-		
+
 		let i = Math.floor(Math.log(bytes) / Math.log(1024));
 		return Math.round(bytes / Math.pow(1024, i)) + ' ' + sizes[i];
 	}
 
 	static async singleVsDoubleClick(
-		sourceObject: any, 
-		singleClickFunction: Function, 
-		doubleClickFunction: Function, 
-		timeout: number = 250): Promise<void> 
-	{
+		sourceObject: any,
+		singleClickFunction: Function,
+		doubleClickFunction: Function,
+		timeout: number = 250): Promise<void> {
 		if (!Helper._doubleClickTimer) {
 			//if timer still exists, it's a double-click
 			Helper._doubleClickTimer = setTimeout(await sourceObject[singleClickFunction.name], timeout); //do single-click once timer has elapsed
@@ -227,8 +223,7 @@ export abstract class Helper
 		}
 	}
 
-	private static async resetDoubleClickTimer(): Promise<void> 
-	{
+	private static async resetDoubleClickTimer(): Promise<void> {
 		clearTimeout(Helper._doubleClickTimer); //cancel timer
 		Helper._doubleClickTimer = undefined;
 	}

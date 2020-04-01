@@ -10,33 +10,33 @@ import { Helper } from '../helpers/Helper';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iDatabricksEnvironment {
-	_displayName:			string;
-	_cloudProvider:			CloudProvider;
-	_personalAccessToken:	string;
-	_apiRootUrl: 			string;
-	_localSyncFolder:		string;
-	_databricksConnectJars:	string;
-	_pythonInterpreter:		string;
-	_port:					number;
-	_organizationId:		string;
-	_isActive:				boolean;
-	
+	_displayName: string;
+	_cloudProvider: CloudProvider;
+	_personalAccessToken: string;
+	_apiRootUrl: string;
+	_localSyncFolder: string;
+	_databricksConnectJars: string;
+	_pythonInterpreter: string;
+	_port: number;
+	_organizationId: string;
+	_isActive: boolean;
+
 	constructor(
-		displayName:			string,
-		cloudProvider:			CloudProvider,
-		personalAccessToken:	string,
-		apiRootUrl: 			string,
-		localSyncFolder:		string,
-		databricksConnectJars:	string,
-		pythonInterpreter:		string,
-		port:					number = 15001,
-		organizationId:			string = undefined
+		displayName: string,
+		cloudProvider: CloudProvider,
+		personalAccessToken: string,
+		apiRootUrl: string,
+		localSyncFolder: string,
+		databricksConnectJars: string = undefined,
+		pythonInterpreter: string = undefined,
+		port: number = 15001,
+		organizationId: string = undefined
 	) {
 		super(displayName);
 		this._displayName = displayName;
 		this._cloudProvider = cloudProvider;
 		this._personalAccessToken = personalAccessToken;
-		this._apiRootUrl = apiRootUrl;
+		this._apiRootUrl = Helper.trimChar(apiRootUrl, '/', false, true);
 		//this._localSyncFolder = Helper.trimChar(localSyncFolder, '/');
 		this._localSyncFolder = localSyncFolder;
 		this._databricksConnectJars = databricksConnectJars;
@@ -67,8 +67,7 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 
 	// used in package.json to filter commands via viewItem == ACTIVE
 	get contextValue(): string {
-		if(this.displayName == ActiveDatabricksEnvironment.displayName)
-		{
+		if (this.displayName == ActiveDatabricksEnvironment.displayName) {
 			return 'ACTIVE';
 		}
 		return 'INACTIVE';
@@ -80,44 +79,44 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 	}
 
 
-	get displayName (): string {
+	get displayName(): string {
 		return this._displayName;
 	}
 
-	get cloudProvider (): CloudProvider {
+	get cloudProvider(): CloudProvider {
 		return this._cloudProvider;
 	}
 
-	get apiRootUrl (): string {
+	get apiRootUrl(): string {
 		return this._apiRootUrl;
 	}
 
-	get personalAccessToken (): string {
+	get personalAccessToken(): string {
 		return this._personalAccessToken;
 	}
 
-	get localSyncFolder (): string {
+	get localSyncFolder(): string {
 		return this._localSyncFolder;
 	}
 
-	get databricksConnectJars (): string {
+	get databricksConnectJars(): string {
 		return this._databricksConnectJars;
 	}
-	
-	get pythonInterpreter (): string {
+
+	get pythonInterpreter(): string {
 		return this._pythonInterpreter;
 	}
 
-	get port (): number {
+	get port(): number {
 		return this._port;
 	}
 
-	get organizationId (): string {
+	get organizationId(): string {
 		return this._organizationId;
 	}
 
 
-	get isActive (): boolean {
+	get isActive(): boolean {
 		return this._isActive;
 	}
 
@@ -128,12 +127,12 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 
 	static fromEnvironment(environment: iDatabricksEnvironment) {
 		return new DatabricksEnvironmentTreeItem(
-			environment.displayName, 
-			environment.cloudProvider, 
-			environment.personalAccessToken, 
-			environment.apiRootUrl, 
-			environment.localSyncFolder, 
-			environment.databricksConnectJars, 
+			environment.displayName,
+			environment.cloudProvider,
+			environment.personalAccessToken,
+			environment.apiRootUrl,
+			environment.localSyncFolder,
+			environment.databricksConnectJars,
 			environment.pythonInterpreter,
 			environment.port,
 			environment.organizationId);
@@ -141,7 +140,7 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 
 	activate(): void {
 		vscode.window.showInformationMessage(`Activating Databricks environment '${this.displayName}' ...`);
-		
+
 		vscode.workspace.getConfiguration().update('databricks.connection.default.displayName', this.displayName, vscode.ConfigurationTarget.Workspace);
 		vscode.workspace.getConfiguration().update('databricks.connection.default.cloudProvider', this.cloudProvider, vscode.ConfigurationTarget.Workspace);
 		vscode.workspace.getConfiguration().update('databricks.connection.default.apiRootUrl', this.apiRootUrl, vscode.ConfigurationTarget.Workspace);
@@ -165,7 +164,7 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 		ThisExtension.ActiveEnvironmentName = this.displayName;
 
 		DatabricksApiService.initialize(this);
-	
+
 		//Helper.delay(1000);
 
 		vscode.commands.executeCommand("databricksEnvironments.refresh", false);
