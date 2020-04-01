@@ -163,7 +163,7 @@
 					},
 					"databricks.connection.default.pythonInterpreter": {
 						"type": "string",
-						"description": "(Optional, for Databricks-Connect) Path to python.exe of the interpreter to use. Is displayed whne setting the Python interpretor in VS Code",
+						"description": "(Optional, for Databricks-Connect) Path to python.exe of the interpreter to use. Is displayed when setting the Python interpretor in VS Code",
 						"scope": "window",
 						"format": "uri"
 					},
@@ -281,7 +281,7 @@
 								"pythonInterpreter": {
 									"type": "string",
 									"default": "C:\\Anaconda3\\envs\\databricksconnect\\python.exe",
-									"description": "Path to python.exe of the interpreter to use. Is displayed whne setting the Python interpretor in VS Code",
+									"description": "Path to python.exe of the interpreter to use. Is displayed when setting the Python interpretor in VS Code",
 									"scope": "window"
 								},
 								"organizationId": {
