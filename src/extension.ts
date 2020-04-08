@@ -22,13 +22,16 @@ import { DatabricksWorkspaceDirectory } from './databricksApi/workspaces/Databri
 export function activate(context: vscode.ExtensionContext) {
 
 	ThisExtension.initialize(context);
-	if(!ThisExtension.IsValidated)
-	{
+	if (!ThisExtension.IsValidated) {
 		ThisExtension.log("Please update Databricks settings and restart VSCode!");
 		vscode.window.showErrorMessage("Please update Databricks settings and restart VSCode!");
 	}
 
-	let x = ThisExtension.allFileExtensions;
+	ThisExtension.setSecureSetting("myTest", "Pass@word123").then(
+		(x) => ThisExtension.getSecureSetting("myTest").then(
+			(y) => ThisExtension.log(y)
+		)
+	);
 
 	DatabricksApiService.initialize();
 
@@ -39,7 +42,7 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksEnvironments.add', () => databricksEnvironmentTreeProvider.add());
 
 	vscode.commands.registerCommand('databricksEnvironmentItem.activate', (envItem: DatabricksEnvironmentTreeItem) => envItem.activate());
-		
+
 	// register DatabricksWorkspaceTreeProvider
 	let databricksWorkspaceTreeProvider = new DatabricksWorkspaceTreeProvider();
 	vscode.window.registerTreeDataProvider('databricksWorkspace', databricksWorkspaceTreeProvider);
@@ -51,18 +54,18 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksWorkspaceItem.download', (workspaceItem: DatabricksWorkspaceNotebook | DatabricksWorkspaceDirectory) => workspaceItem.download());
 	vscode.commands.registerCommand('databricksWorkspaceItem.upload', (workspaceItem: DatabricksWorkspaceNotebook | DatabricksWorkspaceDirectory) => workspaceItem.upload());
 	vscode.commands.registerCommand('databricksWorkspaceItem.compare', (workspaceItem: DatabricksWorkspaceNotebook) => workspaceItem.compare());
-	
+
 	vscode.commands.registerCommand('databricksWorkspaceItem.edit', (workspaceItem: DatabricksWorkspaceNotebook) => vscode.window.showErrorMessage(`Not yet implemented!`));
 	vscode.commands.registerCommand('databricksWorkspaceItem.delete', (workspaceItem: DatabricksWorkspaceNotebook | DatabricksWorkspaceDirectory) => vscode.window.showErrorMessage(`Not yet implemented!`));
 	vscode.commands.registerCommand('databricksWorkspaceItem.sync', (workspaceItem: DatabricksWorkspaceNotebook | DatabricksWorkspaceDirectory) => vscode.window.showErrorMessage(`Not yet implemented!`));
-	
+
 
 	// register DatabricksWorkspaceTreeProvider
 	let databricksClusterTreeProvider = new DatabricksClusterTreeProvider();
 	vscode.window.registerTreeDataProvider('databricksClusters', databricksClusterTreeProvider);
 	vscode.commands.registerCommand('databricksClusters.refresh', (showInfoMessage: boolean = true) => databricksClusterTreeProvider.refresh(showInfoMessage));
 	vscode.commands.registerCommand('databricksClusters.add', () => databricksClusterTreeProvider.add());
-	
+
 	vscode.commands.registerCommand('databricksClusterItem.click', (cluster: DatabricksClusterTreeItem) => cluster.click());
 	vscode.commands.registerCommand('databricksClusterItem.start', (cluster: DatabricksClusterTreeItem) => cluster.start());
 	vscode.commands.registerCommand('databricksClusterItem.stop', (cluster: DatabricksClusterTreeItem) => cluster.stop());
@@ -93,8 +96,8 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksFSItem.add', (fsItem: DatabricksFSTreeItem) => fsItem.add());
 	vscode.commands.registerCommand('databricksFSItem.download', (fsItem: DatabricksFSTreeItem) => fsItem.download("SAVE"));
 	vscode.commands.registerCommand('databricksFSItem.delete', (fsItem: DatabricksFSTreeItem) => fsItem.delete());
-	
-	
+
+
 	// register DatabricksSecretTreeProvider
 	let databricksSecretTreeProvider = new DatabricksSecretTreeProvider();
 	vscode.window.registerTreeDataProvider('databricksSecrets', databricksSecretTreeProvider);
@@ -108,5 +111,5 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 export function deactivate() {
-	Helper.removeTempFiles();
+	ThisExtension.cleanUp();
 }

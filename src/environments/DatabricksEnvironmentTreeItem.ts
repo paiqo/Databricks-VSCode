@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fspath from 'path';
 import { DatabricksApiService } from '../databricksApi/databricksApiService';
-import { ThisExtension } from '../ThisExtension';
+import { ThisExtension, ExportFormatsConfiguration } from '../ThisExtension';
 import { CloudProvider } from './_types';
 import { iDatabricksEnvironment } from './iDatabricksEnvironment';
 import { ActiveDatabricksEnvironment } from './ActiveDatabricksEnvironment';
@@ -20,6 +20,7 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 	_port: number;
 	_organizationId: string;
 	_isActive: boolean;
+	_exportFormatsConfiguration: ExportFormatsConfiguration;
 
 	constructor(
 		displayName: string,
@@ -30,7 +31,8 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 		databricksConnectJars: string = undefined,
 		pythonInterpreter: string = undefined,
 		port: number = 15001,
-		organizationId: string = undefined
+		organizationId: string = undefined,
+		exportFormatsConfiguration: ExportFormatsConfiguration = undefined
 	) {
 		super(displayName);
 		this._displayName = displayName;
@@ -43,6 +45,7 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 		this._pythonInterpreter = pythonInterpreter;
 		this._port = port;
 		this._organizationId = organizationId;
+		this._exportFormatsConfiguration = exportFormatsConfiguration;
 
 		this._isActive = this.displayName === ThisExtension.ActiveEnvironmentName;
 
@@ -115,6 +118,10 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 		return this._organizationId;
 	}
 
+	get exportFormatsConfiguration(): ExportFormatsConfiguration {
+		return this._exportFormatsConfiguration;
+	}
+
 
 	get isActive(): boolean {
 		return this._isActive;
@@ -141,6 +148,7 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 	activate(): void {
 		vscode.window.showInformationMessage(`Activating Databricks environment '${this.displayName}' ...`);
 
+		ThisExtension.EnvironmentManager.activateEnvironment(this.displayName);
 		vscode.workspace.getConfiguration().update('databricks.connection.default.displayName', this.displayName, vscode.ConfigurationTarget.Workspace);
 		vscode.workspace.getConfiguration().update('databricks.connection.default.cloudProvider', this.cloudProvider, vscode.ConfigurationTarget.Workspace);
 		vscode.workspace.getConfiguration().update('databricks.connection.default.apiRootUrl', this.apiRootUrl, vscode.ConfigurationTarget.Workspace);

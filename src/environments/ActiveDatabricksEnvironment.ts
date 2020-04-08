@@ -1,9 +1,7 @@
 import * as vscode from 'vscode';
 import { CloudProvider } from './_types';
 import { iDatabricksEnvironment } from './iDatabricksEnvironment';
-import { WorkspaceItemLanguage } from '../databricksApi/workspaces/_types';
-import { stringify } from 'querystring';
-import { ThisExtension, ExportFormatsConfiguration } from '../ThisExtension';
+import { ExportFormatsConfiguration } from '../ThisExtension';
 import { Helper } from '../helpers/Helper';
 
 export abstract class ActiveDatabricksEnvironment {
@@ -67,7 +65,8 @@ export abstract class ActiveDatabricksEnvironment {
 			databricksConnectJars: this.databricksConnectJars,
 			pythonInterpreter: this.pythonInterpreter,
 			port: this.port,
-			organizationId: this.organizationId
+			organizationId: this.organizationId,
+			exportFormatsConfiguration: this.exportFormatsConfiguration
 		};
 	}
 }

@@ -1,11 +1,9 @@
 import * as vscode from 'vscode';
-import * as os from 'os';
-import * as Path from 'path';
-import * as fs from 'fs';
-import * as UniqueFileName from 'uniquefilename';
-import { Helper } from './helpers/Helper';
 import { ActiveDatabricksEnvironment } from './environments/ActiveDatabricksEnvironment';
 import { WorkspaceItemLanguage } from './databricksApi/workspaces/_types';
+import { DatabricksEnvironmentManager } from './environments/DatabricksEnvironmentManager';
+import { Helper } from './helpers/Helper';
+import { iDatabricksEnvironment } from './environments/iDatabricksEnvironment';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -16,6 +14,8 @@ export abstract class ThisExtension {
 	private static _activeEnvironmentName: string;
 	private static _isValidated: boolean;
 	private static _logger: vscode.OutputChannel;
+	private static _keytar;
+	private static _environmentManager: DatabricksEnvironmentManager;
 
 	static get rootPath(): string {
 		return this._context.extensionPath;
@@ -43,9 +43,24 @@ export abstract class ThisExtension {
 
 		this._context = context;
 		this._extension = vscode.extensions.getExtension(this.extension_id);
+
+		this._environmentManager = new DatabricksEnvironmentManager();
+
 		this.validateSettings();
-		
-		this._activeEnvironmentName = ActiveDatabricksEnvironment.displayName;
+
+		this._activeEnvironmentName = this.EnvironmentManager.ActiveEnvironmentName; // ActiveDatabricksEnvironment.displayName;
+
+		this._keytar = require('keytar');
+
+
+	}
+
+	static cleanUp(): void {
+		Helper.removeTempFiles();
+	}
+
+	static get EnvironmentManager(): DatabricksEnvironmentManager {
+		return this._environmentManager;
 	}
 
 	static get allFileExtensions(): string[] {
@@ -53,12 +68,11 @@ export abstract class ThisExtension {
 		let exportFormats = config.properties["databricks.connection.default.exportFormats"].properties;
 
 		let extensions: string[] = [];
-		for (let format of Object.values(exportFormats))
-		{
+		for (let format of Object.values(exportFormats)) {
 			(format["enum"] as string[]).forEach(element => {
 				extensions.push(element);
 			});
-		}	
+		}
 
 		return extensions;
 	}
@@ -89,30 +103,19 @@ export abstract class ThisExtension {
 	}
 
 	static log(text: string, newLine: boolean = true): void {
-		if(newLine) {
+		if (newLine) {
 			this._logger.appendLine(text);
 		}
-		else{
-			this._logger.appendLine(text);
+		else {
+			this._logger.append(text);
 		}
 	}
 
 	static validateSettings(): void {
 		this.log("Validating settings ...");
-		let config = this._extension.packageJSON.contributes.configuration[0];
-		let requiredSettings = config.required;
 
-		this._isValidated = true;
-		for(let setting of requiredSettings) {
-			let currentValue = vscode.workspace.getConfiguration().get(setting);
-
-			if(currentValue == undefined || currentValue == null || currentValue == "") {
-				this._isValidated = false;
-				vscode.window.showErrorMessage("Databricks not configured correctly! Please populate all mandatory configuration settings in VSCode settings!");
-				//let settingConfig = config.properties[setting];
-				//let newValue = Helper.showInputBox(settingConfig.default, settingConfig.description);
-				//vscode.workspace.getConfiguration().update(setting, newValue, vscode.ConfigurationTarget.Workspace);
-			}
+		if (this.EnvironmentManager.Environments.length == 0) {
+			vscode.window.showErrorMessage("No environments have been configured! Please add new Environments using the VSCode Settings dialog!");
 		}
 
 		this.log("Settings validated!");
@@ -120,6 +123,15 @@ export abstract class ThisExtension {
 
 	static get configuration(): vscode.Extension<any> {
 		return this._extension;
+	}
+
+	static async getSecureSetting(setting: string): Promise<string> {
+		let value: string = await this._keytar.getPassword(this.extension_id, setting);
+		return value;
+	}
+
+	static async setSecureSetting(setting: string, value: string): Promise<void> {
+		await this._keytar.setPassword(this.extension_id, setting, value);
 	}
 }
 
@@ -130,3 +142,16 @@ export type ExportFormatsConfiguration = {
 	R: string;
 	SQL: string;
 };
+
+// 
+export interface iWorkspaceConfiguration {
+	workspaceGuid: string;
+	lastActiveEnvironment: string;
+}
+
+// represents the structure how the ExportFormats and FileExtensions for the different language are defined in the VS Code settings
+export interface iUserWorkspaceConfiguration {
+	workspaceConfig: iWorkspaceConfiguration;
+	connections: iDatabricksEnvironment[];
+}
+

@@ -34,8 +34,9 @@ Alternatively it can also be downloaded from the VS Code marketplace: [Databrick
 The configuration happens directly via VS Code. Simply open the settings via File -> Preferences -> Settings or by using the keyboard shortcut ```CTRL + ,```
 Then either search for "Databricks" or expand Extensions -> Databricks.
 The settings themselves are very well described and it should be easy for you to populate them. Also, not all of them are mandatory! Some of the optional settings allow better integration with Databricks-Connect but this is still work in progress.
-To configure multiple Databricks environments/workspaces, you need to use the JSON editor. 
-
+To configure multiple Databricks environments/workspaces, you need to use the JSON editor.
+ 
+NOTE: Settings for ```personalAccessToken``` are currently stored in **CLEAR TEXT** in the workspace file or in the global user settings!
 ``` json
 		...
 		"databricks.connections": [

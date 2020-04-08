@@ -133,6 +133,8 @@ export abstract class Helper {
 	}
 
 	static trimChar(text: string, charToRemove: string, fromLeft: boolean = true, fromRight: boolean = true) {
+		if (text == undefined) { return undefined; }
+		if (text.length == 0) { return text; }
 		while (text.charAt(0) == charToRemove && fromLeft) {
 			text = text.substring(1);
 		}
@@ -180,6 +182,22 @@ export abstract class Helper {
 		else {
 			return fspath.resolve(filepath);
 		}
+
+		/*
+		Migrate to Portable mode
+		You can also migrate an existing installation to Portable mode:
+
+		Download the VS Code ZIP distribution for your platform.
+		Create the data or code-portable-data folder as above.
+		Copy the user data directory Code to data and rename it to user-data:
+		Windows %APPDATA%\Code
+		macOS $HOME/Library/Application Support/Code
+		Linux $HOME/.config/Code
+		Copy the extensions directory to data:
+		Windows %USERPROFILE%\.vscode\extensions
+		macOS ~/.vscode/extensions
+		Linux ~/.vscode/extensions
+		*/
 	}
 
 	static openLink(link: string): void {
@@ -226,5 +244,17 @@ export abstract class Helper {
 	private static async resetDoubleClickTimer(): Promise<void> {
 		clearTimeout(Helper._doubleClickTimer); //cancel timer
 		Helper._doubleClickTimer = undefined;
+	}
+
+	public static localUserFolder(): string {
+		return "";
+	}
+
+	static newGuid() {
+		return 'xxxxxxxx-xxxx-2120-xxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+			var r = Math.random() * 16 | 0,
+				v = c == 'x' ? r : (r & 0x3 | 0x8);
+			return v.toString(16);
+		});
 	}
 }
