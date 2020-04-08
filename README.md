@@ -34,7 +34,7 @@ Alternatively it can also be downloaded from the VS Code marketplace: [Databrick
 The configuration happens directly via VS Code. Simply open the settings via File -> Preferences -> Settings or by using the keyboard shortcut ```CTRL + ,```
 Then either search for "Databricks" or expand Extensions -> Databricks.
 The settings themselves are very well described and it should be easy for you to populate them. Also, not all of them are mandatory! Some of the optional settings allow better integration with Databricks-Connect but this is still work in progress.
-To configure multiple Databricks environments/workspaces, you need to use the JSON editor.
+To configure multiple Databricks Connections/workspaces, you need to use the JSON editor.
  
 NOTE: Settings for ```personalAccessToken``` are currently stored in **CLEAR TEXT** in the workspace file or in the global user settings!
 ``` json
@@ -58,7 +58,7 @@ NOTE: Settings for ```personalAccessToken``` are currently stored in **CLEAR TEX
 		...
 ```
 
-Another important setting which requires modifying the JSON directly are the export formats which can be used to define the format in which notebooks are up-/downloaded. Again, there is a default/current setting **databricks.connection.default.exportFormats** and it can also configured per environment:
+Another important setting which requires modifying the JSON directly are the export formats which can be used to define the format in which notebooks are up-/downloaded. Again, there is a default/current setting **databricks.connection.default.exportFormats** and it can also configured per Connection:
 ``` json
 		...
 		"databricks.connection.default.exportFormats": 
@@ -73,18 +73,18 @@ Another important setting which requires modifying the JSON directly are the exp
 Each filetype can either be exported as raw/source file (.scala, .py, .sql, .r) or as a notebook (.scala.ipynb, .py.ipynb, .sql.ipynb, .r.ipynb). This is also very important if you want to upload a local file as these also have to match these extension and will be ignored otherwise!
 
 All these settings can either be configured on a global/user or on a workspace level. The recommendation is to use workspace configurations and then to include the localSyncFolders into your workspace for easy access to your notebooks and sync to GIT. 
-Using a workspace configuration also allows you separate differnt Databricks environments completely. 
+Using a workspace configuration also allows you separate differnt Databricks Connections completely. 
 
-# Environments
-![Environments](https://github.com/paiqo/Databricks-VSCode/blob/master/images/Environments.jpg?raw=true "Environments")
+# Connections
+![Connections](https://github.com/paiqo/Databricks-VSCode/blob/master/images/Connections.jpg?raw=true "Connections")
 
-You can either work with a single environment or configure multiple environments. If you use multiple environments, you will see your list in the Environments view and icons indicating which one is currently active. To change the environment, simply click the "Activate" button next to an inactive environment. All other views will update automatically.
+You can either work with a single Connection or configure multiple Connections. If you use multiple Connections, you will see your list in the Connections view and icons indicating which one is currently active. To change the Connection, simply click the "Activate" button next to an inactive Connection. All other views will update automatically.
 
 # Workspace Browser
 ![Workspace Browser](https://github.com/paiqo/Databricks-VSCode/blob/master/images/WorkspaceBrowser.jpg?raw=true "Workspace Browser")
 
 The workspace browser connects directly to the Databricks workspace and loads the whole folder strucuture recursively. It displays folders, notebooks and libraries. Notebooks and folders can be up- and downloaded manually by simply clicking the corresponding item next them. If you do an up-/download on a whole folder or on the root, it will up-/download all items recursively.
-The files are stored in the **databricks.connection.default.localSyncFolder** (or your environment) that you configured in your settings/for your environment. If you doubleclick a file, it will be downloaded locally and opened. Depending on the ExportFormats that you have defined in **databricks.connection.default.exportFormats** (or your environment), the item will be downloaded in the corresponding format - basically you can decide between Notebook format and raw/source format.
+The files are stored in the **databricks.connection.default.localSyncFolder** (or your Connection) that you configured in your settings/for your Connection. If you doubleclick a file, it will be downloaded locally and opened. Depending on the ExportFormats that you have defined in **databricks.connection.default.exportFormats** (or your Connection), the item will be downloaded in the corresponding format - basically you can decide between Notebook format and raw/source format.
 The downloaded files can then be executed directly against the Databricks cluster if Databricks-Connect is setup correctly ([Setup Databricks-Connect on AWS](https://docs.databricks.com/dev-tools/databricks-connect.html), [Setup Databricks-Connect on Azure](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/databricks-connect))
 
 The up-/downloaded state of the single items are also reflected in their icons:

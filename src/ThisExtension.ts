@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
-import { ActiveDatabricksEnvironment } from './environments/ActiveDatabricksEnvironment';
 import { WorkspaceItemLanguage } from './databricksApi/workspaces/_types';
-import { DatabricksEnvironmentManager } from './environments/DatabricksEnvironmentManager';
+import { DatabricksConnectionManager } from './connections/DatabricksConnectionManager';
 import { Helper } from './helpers/Helper';
-import { iDatabricksEnvironment } from './environments/iDatabricksEnvironment';
+import { iDatabricksConnection } from './connections/iDatabricksConnection';
+import { DatabricksConnection } from './connections/DatabricksConnection';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -11,22 +11,25 @@ export abstract class ThisExtension {
 
 	private static _context: vscode.ExtensionContext;
 	private static _extension: vscode.Extension<any>;
-	private static _activeEnvironmentName: string;
-	private static _isValidated: boolean;
+	private static _isValidated: boolean = false;
 	private static _logger: vscode.OutputChannel;
 	private static _keytar;
-	private static _environmentManager: DatabricksEnvironmentManager;
+	private static _connectionManager: DatabricksConnectionManager;
 
 	static get rootPath(): string {
 		return this._context.extensionPath;
 	}
 
-	static set ActiveEnvironmentName(displayName: string) {
-		this._activeEnvironmentName = displayName;
+	static set ActiveConnectionName(displayName: string) {
+		this.ConnectionManager.activateConnection(displayName);
 	}
 
-	static get ActiveEnvironmentName(): string {
-		return this._activeEnvironmentName;
+	static get ActiveConnectionName(): string {
+		return this.ConnectionManager.ActiveConnectionName;
+	}
+
+	static get ActiveConnection(): DatabricksConnection {
+		return this.ConnectionManager.ActiveConnection;
 	}
 
 	static get RefreshAfterUpDownload(): boolean {
@@ -44,23 +47,19 @@ export abstract class ThisExtension {
 		this._context = context;
 		this._extension = vscode.extensions.getExtension(this.extension_id);
 
-		this._environmentManager = new DatabricksEnvironmentManager();
+		this._connectionManager = new DatabricksConnectionManager();
 
 		this.validateSettings();
 
-		this._activeEnvironmentName = this.EnvironmentManager.ActiveEnvironmentName; // ActiveDatabricksEnvironment.displayName;
-
 		this._keytar = require('keytar');
-
-
 	}
 
 	static cleanUp(): void {
 		Helper.removeTempFiles();
 	}
 
-	static get EnvironmentManager(): DatabricksEnvironmentManager {
-		return this._environmentManager;
+	static get ConnectionManager(): DatabricksConnectionManager {
+		return this._connectionManager;
 	}
 
 	static get allFileExtensions(): string[] {
@@ -114,9 +113,11 @@ export abstract class ThisExtension {
 	static validateSettings(): void {
 		this.log("Validating settings ...");
 
-		if (this.EnvironmentManager.Environments.length == 0) {
-			vscode.window.showErrorMessage("No environments have been configured! Please add new Environments using the VSCode Settings dialog!");
+		if (this.ConnectionManager.Connections.length == 0) {
+			//vscode.window.showErrorMessage("No Connections have been configured! Please add new Connections using the VSCode Settings dialog!");
 		}
+
+		this._isValidated = true;
 
 		this.log("Settings validated!");
 	}
@@ -146,12 +147,12 @@ export type ExportFormatsConfiguration = {
 // 
 export interface iWorkspaceConfiguration {
 	workspaceGuid: string;
-	lastActiveEnvironment: string;
+	lastActiveConnection: string;
 }
 
 // represents the structure how the ExportFormats and FileExtensions for the different language are defined in the VS Code settings
 export interface iUserWorkspaceConfiguration {
 	workspaceConfig: iWorkspaceConfiguration;
-	connections: iDatabricksEnvironment[];
+	connections: iDatabricksConnection[];
 }
 

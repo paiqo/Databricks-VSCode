@@ -44,7 +44,7 @@
 		"AWS"
 	],
 	"activationEvents": [
-		"onView:databricksEnvironments",
+		"onView:DatabricksConnections",
 		"onView:databricksWorkspace",
 		"onView:databricksClusters",
 		"onView:databricksJobs",
@@ -68,9 +68,9 @@
 								"type": "string",
 								"description": "A GUID uniquely identifying the VSCode workspace for Databricks specific configurations."
 							},
-							"lastActiveEnvironment": {
+							"lastActiveConnection": {
 								"type": "string",
-								"description": "The display name of the environment that was active the last time the extension was used."
+								"description": "The display name of the Connection that was active the last time the extension was used."
 							}
 						}
 					},
@@ -87,7 +87,7 @@
 								},
 								"connections": {
 									"type": "array",
-									"description": "An array of objects where each object represents a Databricks environment containing the same settings as defined for databricks.connection.default.* ",
+									"description": "An array of objects where each object represents a Databricks Connection containing the same settings as defined for databricks.connection.default.* ",
 									"items": {
 										"type": "object",
 										"properties": {
@@ -138,7 +138,7 @@
 											},
 											"displayName": {
 												"type": "string",
-												"description": "Name shown in the environment list of the Databricks VSCode extension."
+												"description": "Name shown in the Connection list of the Databricks VSCode extension."
 											},
 											"apiRootUrl": {
 												"type": "string",
@@ -239,7 +239,7 @@
 					},
 					"databricks.connection.default.displayName": {
 						"type": "string",
-						"description": "(Mandatory) Name shown in the environment list of the Databricks VSCode extension.",
+						"description": "(Mandatory) Name shown in the Connection list of the Databricks VSCode extension.",
 						"scope": "window"
 					},
 					"databricks.connection.default.apiRootUrl": {
@@ -307,7 +307,7 @@
 					},
 					"databricks.connections": {
 						"type": "array",
-						"description": "An array of objects where each object represents a Databricks environment containing the same settings as defined for databricks.connection.default.* ",
+						"description": "An array of objects where each object represents a Databricks Connection containing the same settings as defined for databricks.connection.default.* ",
 						"items": {
 							"type": "object",
 							"properties": {
@@ -367,7 +367,7 @@
 								"displayName": {
 									"type": "string",
 									"default": "my Databricks workspace",
-									"description": "Name shown in the environment list of the Databricks VSCode extension.",
+									"description": "Name shown in the Connection list of the Databricks VSCode extension.",
 									"scope": "window"
 								},
 								"apiRootUrl": {
@@ -440,8 +440,8 @@
 		"views": {
 			"databricks": [
 				{
-					"id": "databricksEnvironments",
-					"name": "Environments"
+					"id": "DatabricksConnections",
+					"name": "Connections"
 				},
 				{
 					"id": "databricksWorkspace",
@@ -467,7 +467,7 @@
 		},
 		"commands": [
 			{
-				"command": "databricksEnvironments.refresh",
+				"command": "DatabricksConnections.refresh",
 				"title": "Refresh",
 				"icon": {
 					"light": "resources/light/refresh.png",
@@ -475,7 +475,7 @@
 				}
 			},
 			{
-				"command": "databricksEnvironments.add",
+				"command": "DatabricksConnections.add",
 				"title": "Add",
 				"icon": {
 					"light": "resources/light/add.png",
@@ -483,7 +483,7 @@
 				}
 			},
 			{
-				"command": "databricksEnvironmentItem.activate",
+				"command": "DatabricksConnectionItem.activate",
 				"title": "Activate",
 				"icon": {
 					"light": "resources/light/connected.png",
@@ -766,13 +766,13 @@
 		"menus": {
 			"view/title": [
 				{
-					"command": "databricksEnvironments.refresh",
-					"when": "view == databricksEnvironments",
+					"command": "DatabricksConnections.refresh",
+					"when": "view == DatabricksConnections",
 					"group": "navigation"
 				},
 				{
-					"command": "databricksEnvironments.add",
-					"when": "view == databricksEnvironments",
+					"command": "DatabricksConnections.add",
+					"when": "view == DatabricksConnections",
 					"group": "navigation"
 				},
 				{
@@ -833,8 +833,8 @@
 			],
 			"view/item/context": [
 				{
-					"command": "databricksEnvironmentItem.activate",
-					"when": "view == databricksEnvironments && viewItem == INACTIVE",
+					"command": "DatabricksConnectionItem.activate",
+					"when": "view == DatabricksConnections && viewItem == INACTIVE",
 					"group": "inline"
 				},
 				{

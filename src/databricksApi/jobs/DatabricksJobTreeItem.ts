@@ -5,22 +5,21 @@ import { ThisExtension } from '../../ThisExtension';
 import { JobTreeItemType, iDatabricksJobRun } from './_types';
 import { iDatabricksJob } from './_types';
 import { Helper } from '../../helpers/Helper';
-import { ActiveDatabricksEnvironment } from '../../environments/ActiveDatabricksEnvironment';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksJobTreeItem extends vscode.TreeItem {
-	private _type:	JobTreeItemType;
+	private _type: JobTreeItemType;
 	private _job_id: number;
 	private _jobDef: iDatabricksJob;
 
 	private _job_run_id: number;
 	private _jobRunDef: iDatabricksJobRun;
-	
+
 	private _name: string;
 	private _definition: string;
-	
+
 	constructor(
-		type: 	JobTreeItemType,
+		type: JobTreeItemType,
 		definition: string
 	) {
 		super(type);
@@ -28,17 +27,15 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 		this._type = type;
 		this._definition = definition;
 
-		if(type == "ROOT")
-		{
+		if (type == "ROOT") {
 			this._job_id = -1;
 			this._jobDef = null;
 			this._jobRunDef = null;
 			this._name = '';
-			
+
 			super.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
 		}
-		else if (type == "JOB")
-		{
+		else if (type == "JOB") {
 			let jobDef: iDatabricksJob = JSON.parse(definition);
 
 			this._job_id = jobDef.job_id;
@@ -47,8 +44,7 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 
 			super.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
 		}
-		else if (type == "JOB_RUN") 
-		{
+		else if (type == "JOB_RUN") {
 			let jobRunDef: iDatabricksJobRun = JSON.parse(definition);
 
 			this._job_id = jobRunDef.job_id;
@@ -58,8 +54,8 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 
 			super.collapsibleState = undefined;
 		}
-		
-		
+
+
 		super.label = this._name;
 
 		super.iconPath = {
@@ -71,7 +67,7 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 	get tooltip(): string {
 		let ret: string;
 		if (this.type == "JOB_RUN") {
-			ret =  `${JSON.stringify(this.job_run_definition.state)})`;
+			ret = `${JSON.stringify(this.job_run_definition.state)})`;
 		}
 		if (this.type == "JOB") {
 			ret = this.task_details;
@@ -81,14 +77,11 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 
 	// description is show next to the label
 	get description(): string {
-		if(this.type == "JOB_RUN")
-		{
+		if (this.type == "JOB_RUN") {
 			return `(${this.job_run_definition.state.result_state || this.job_run_definition.state.life_cycle_state}), ${this.job_run_definition.creator_user_name}`;
 		}
-		if(this.type == "JOB")
-		{
-			if(this.job_definition.settings.schedule)
-			{
+		if (this.type == "JOB") {
+			if (this.job_definition.settings.schedule) {
 				return `(${this.task_type}, ${this.job_definition.settings.schedule.quartz_cron_expression})`;
 			}
 			return `(MANUALLY)`;
@@ -98,8 +91,7 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 
 	// used in package.json to filter commands via viewItem == CANSTART
 	get contextValue(): string {
-		if(this.job_run_state == "running")
-		{
+		if (this.job_run_state == "running") {
 			return "RUNNING_JOB";
 		}
 		return this.type;
@@ -107,9 +99,8 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 
 	private getIconPath(theme: string): string {
 		let state: string = "job";
-		
-		if (this.contextValue == "JOB_RUN" || this.contextValue == "RUNNING_JOB")
-		{
+
+		if (this.contextValue == "JOB_RUN" || this.contextValue == "RUNNING_JOB") {
 			state = this.job_run_state;
 		}
 		return fspath.join(ThisExtension.rootPath, 'resources', theme, state + '.png');
@@ -141,12 +132,11 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 	}
 
 	get job_run_state(): string {
-		if(this.type == "JOB_RUN")
-		{
+		if (this.type == "JOB_RUN") {
 			if (this.job_run_definition.state.result_state == "SUCCESS") {
 				return "succeeded";
 			}
-			else if (this.job_run_definition.state.result_state == "FAILED" 
+			else if (this.job_run_definition.state.result_state == "FAILED"
 				|| this.job_run_definition.state.result_state == "CANCELED"
 				|| this.job_run_definition.state.result_state == "TIMEDOUT") {
 				return "failed";
@@ -159,16 +149,15 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 	}
 
 	get created_at(): number {
-		if(this.type == "JOB")
-		{
+		if (this.type == "JOB") {
 			return this.job_definition.created_time;
 		}
 		return this.job_run_definition.start_time;
 	}
 
-	get link(): string 
-	{
-		let link: string = `${ActiveDatabricksEnvironment.apiRootUrl}/?o=${ActiveDatabricksEnvironment.organizationId}#job/${this.job_id}`;
+	get link(): string {
+		let actConn = ThisExtension.ActiveConnection;
+		let link: string = `${actConn.apiRootUrl}/?o=${actConn.organizationId}#job/${this.job_id}`;
 		if (this.type == "JOB") {
 			return link;
 		}
@@ -178,21 +167,18 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 		return null;
 	}
 
-	get task_type(): string 
-	{
-		if(this.type == "JOB")
-		{
+	get task_type(): string {
+		if (this.type == "JOB") {
 			if (this.job_definition.settings.notebook_task) { return "Notebook"; }
 			if (this.job_definition.settings.spark_jar_task) { return "JAR"; }
 			if (this.job_definition.settings.spark_python_task) { return "Python"; }
 			if (this.job_definition.settings.spark_submit_task) { return "Submit"; }
 		}
-		
+
 		return "";
 	}
 
-	get task_details(): string
-	{
+	get task_details(): string {
 		if (this.type == "JOB") {
 			if (this.job_definition.settings.notebook_task) { return JSON.stringify(this.job_definition.settings.notebook_task); }
 			if (this.job_definition.settings.spark_jar_task) { return JSON.stringify(this.job_definition.settings.spark_jar_task); }
@@ -245,8 +231,7 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 	}
 
 	async start(): Promise<void> {
-		if(this.type == "JOB")
-		{
+		if (this.type == "JOB") {
 			let response = DatabricksApiService.runJob(this.job_id);
 
 			response.then((response) => {
@@ -280,12 +265,10 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 	}
 
 	async showDefinition(): Promise<void> {
-		if(this.type == "JOB")
-		{
+		if (this.type == "JOB") {
 			await Helper.openTempFile(JSON.stringify(this.job_definition, null, "\t"), this.label + '-' + this.job_id + '.json');
 		}
-		else
-		{
+		else {
 			await Helper.openTempFile(JSON.stringify(this.job_run_definition, null, "\t"), this.label + '-' + this.job_run_id + '.json');
 		}
 	}
@@ -302,5 +285,5 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 		await this.showDefinition();
 	}
 
-	async singleClick(): Promise<void> {}
+	async singleClick(): Promise<void> { }
 }

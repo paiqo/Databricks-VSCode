@@ -1,14 +1,15 @@
 import * as vscode from 'vscode';
 import { CloudProvider } from './_types';
-import { iDatabricksEnvironment } from './iDatabricksEnvironment';
+import { iDatabricksConnection } from './iDatabricksConnection';
 import { ExportFormatsConfiguration } from '../ThisExtension';
 import { Helper } from '../helpers/Helper';
 
-export class DatabricksEnvironment implements iDatabricksEnvironment {
+export class DatabricksConnection implements iDatabricksConnection {
 
 	private _apiRootUrl: string;
 
 	displayName: string;
+	apiRootUrl: string;
 	cloudProvider: CloudProvider;
 	personalAccessToken: string;
 	localSyncFolder: string;
@@ -18,26 +19,6 @@ export class DatabricksEnvironment implements iDatabricksEnvironment {
 	organizationId: string;
 	exportFormatsConfiguration: ExportFormatsConfiguration;
 
-	get apiRootUrl(): string {
-		let value: string = vscode.workspace.getConfiguration().get('databricks.connection.default.apiRootUrl');
-
-		if (value.endsWith('/')) {
-			vscode.window.showWarningMessage("The setting 'Api Root Url' seems to have a trailing '\' which was automatically removed!");
-			return Helper.trimChar(value, '/', false, true);
-		}
-		return value;
-	}
-
-	set apiRootUrl(value: string) {
-		if (value.endsWith('/')) {
-			//vscode.window.showWarningMessage("The setting 'Api Root Url' seems to have a trailing '\' which was automatically removed!");
-			this._apiRootUrl = Helper.trimChar(value, '/', false, true);
-		}
-		else {
-			this._apiRootUrl = value;
-		}
-	}
-
 	get isValid(): boolean {
 		if (this.displayName != undefined && this.displayName != "") {
 			return true;
@@ -45,7 +26,11 @@ export class DatabricksEnvironment implements iDatabricksEnvironment {
 		return false;
 	}
 
-	get environment(): iDatabricksEnvironment {
+	get allowAllSupportedFileExtensions(): boolean {
+		return true;
+	}
+
+	get Connection(): iDatabricksConnection {
 		return {
 			displayName: this.displayName,
 			cloudProvider: this.cloudProvider,

@@ -1,34 +1,38 @@
 import * as vscode from 'vscode';
 import { CloudProvider } from './_types';
-import { iDatabricksEnvironment } from './iDatabricksEnvironment';
+import { iDatabricksConnection } from './iDatabricksConnection';
 import { Helper } from '../helpers/Helper';
 import { ExportFormatsConfiguration, iWorkspaceConfiguration, iUserWorkspaceConfiguration, ThisExtension } from '../ThisExtension';
-import { DatabricksEnvironment } from './DatabricksEnvironment';
+import { DatabricksConnection } from './DatabricksConnection';
+import { DatabricksApiService } from '../databricksApi/databricksApiService';
 
-export class DatabricksEnvironmentManager {
+export class DatabricksConnectionManager {
 
 	private _workspaceConfig: iWorkspaceConfiguration;
-	private _environments: DatabricksEnvironment[];
-	private _activeEnvironment: iDatabricksEnvironment;
+	private _connections: DatabricksConnection[];
+	private _activeConnection: DatabricksConnection;
+
+	private _initialized: boolean;
 
 	constructor() {
+		this._initialized = false;
 		this._workspaceConfig = vscode.workspace.getConfiguration().get('databricks.workspaceConfiguration');
 
 		if (this._workspaceConfig.workspaceGuid == undefined) {
 			this._workspaceConfig.workspaceGuid = Helper.newGuid();
 		}
 
-		this.loadEnvironments();
+		this.loadConnections();
 
 		this.updateUserWorkspaceConfig();
 
-		if (this._workspaceConfig.lastActiveEnvironment == undefined) {
-			this._workspaceConfig.lastActiveEnvironment = this._environments[0].displayName;
+		if (this._workspaceConfig.lastActiveConnection == undefined) {
+			this._workspaceConfig.lastActiveConnection = this._connections[0].displayName;
 		}
-		this.activateEnvironment(this._workspaceConfig.lastActiveEnvironment);
+		this.activateConnection(this._workspaceConfig.lastActiveConnection);
 	}
 
-	loadEnvironments(): void {
+	loadConnections(): void {
 		/*
 		there are 3 different areas from where Connections can be loaded from:
 		1) the VSCode Workspace configuration using a list of connections in setting 'databricks.connections'
@@ -38,57 +42,60 @@ export class DatabricksEnvironmentManager {
 		1) and 2) are used to add new or update existing connections hence they have priority over 3)
 		*/
 
-		this._environments = this.getConnectionsFromWorkspace();
+		this._connections = this.getConnectionsFromWorkspace();
 
 		let defaultConnectionFromWorkspace = this.getDefaultConnectionFromWorkspace();
 		let connectionsFromUserConfig = this.getConnectionsFromUserConfig();
 
-		if (!this._environments.map((x) => x.displayName).includes(defaultConnectionFromWorkspace.displayName) && defaultConnectionFromWorkspace.isValid) {
-			this._environments.push(defaultConnectionFromWorkspace);
+		if (!this._connections.map((x) => x.displayName).includes(defaultConnectionFromWorkspace.displayName) && defaultConnectionFromWorkspace.isValid) {
+			this._connections.push(defaultConnectionFromWorkspace);
 		}
 
-		let newConnectionsFromWorkspace: DatabricksEnvironment[] = connectionsFromUserConfig.filter((x) => !(this._environments.map((y) => y.displayName).includes(x.displayName)));
+		let newConnectionsFromWorkspace: DatabricksConnection[] = connectionsFromUserConfig.filter((x) => !(this._connections.map((y) => y.displayName).includes(x.displayName)));
 
-		this._environments = this._environments.concat(newConnectionsFromWorkspace);
+		this._connections = this._connections.concat(newConnectionsFromWorkspace);
+
+		this._initialized = true;
 	}
 
-	activateEnvironment(displayName: string): iDatabricksEnvironment {
+	activateConnection(displayName: string): DatabricksConnection {
 
-		let filteredEnvironments: iDatabricksEnvironment[] = this.Environments.filter((x) => x.displayName == displayName);
+		let filteredConnections: DatabricksConnection[] = this.Connections.filter((x) => x.displayName == displayName);
 
-		if (filteredEnvironments.length == 1) {
-			this._activeEnvironment = filteredEnvironments[0];
-			this._workspaceConfig.lastActiveEnvironment = displayName;
+		if (filteredConnections.length == 1) {
+			this._activeConnection = filteredConnections[0];
+			this._workspaceConfig.lastActiveConnection = displayName;
+
+			DatabricksApiService.initialize(this.ActiveConnection);
+
 			this.updateWorkspaceConfig();
 
-			return this._activeEnvironment;
+			return this._activeConnection;
 		}
 		else {
-			throw new Error("Environment with name  '" + displayName + "' could not be found!");
+			throw new Error("Connection with name  '" + displayName + "' could not be found!");
 		}
 	}
 
-	private getConnectionsFromUserConfig(): DatabricksEnvironment[] {
+	private getConnectionsFromUserConfig(): DatabricksConnection[] {
 		let currentUserWorkspaceConfig: iUserWorkspaceConfiguration = this.CurrentUserWorkspaceConfiguration;
 
-		let updatedUserWorkspaceConfigs: iUserWorkspaceConfiguration[] = [];
-
 		if (currentUserWorkspaceConfig != undefined) {
-			return currentUserWorkspaceConfig.connections as DatabricksEnvironment[];
+			return currentUserWorkspaceConfig.connections as DatabricksConnection[];
 		}
 		else {
 			return [];
 		}
 	}
 
-	private getConnectionsFromWorkspace(): DatabricksEnvironment[] {
-		let envs: DatabricksEnvironment[] = vscode.workspace.getConfiguration().get('databricks.connections');
+	private getConnectionsFromWorkspace(): DatabricksConnection[] {
+		let envs: DatabricksConnection[] = vscode.workspace.getConfiguration().get('databricks.connections');
 
 		return envs;
 	}
 
-	private getDefaultConnectionFromWorkspace(): DatabricksEnvironment {
-		let defaultCon: DatabricksEnvironment = new DatabricksEnvironment();
+	private getDefaultConnectionFromWorkspace(): DatabricksConnection {
+		let defaultCon: DatabricksConnection = new DatabricksConnection();
 		defaultCon.displayName = vscode.workspace.getConfiguration().get('databricks.connection.default.displayName');
 		defaultCon.cloudProvider = vscode.workspace.getConfiguration().get('databricks.connection.default.cloudProvider');
 		defaultCon.apiRootUrl = vscode.workspace.getConfiguration().get('databricks.connection.default.apiRootUrl');
@@ -100,8 +107,6 @@ export class DatabricksEnvironmentManager {
 		defaultCon.port = vscode.workspace.getConfiguration().get<number>('databricks.connection.default.port');
 		defaultCon.organizationId = vscode.workspace.getConfiguration().get('databricks.connection.default.organizationId');
 		defaultCon.exportFormatsConfiguration = vscode.workspace.getConfiguration().get<ExportFormatsConfiguration>('databricks.connection.default.exportFormats');
-
-		let allowAllSupportedFileExtensions: boolean = true;
 
 		return defaultCon;
 	}
@@ -131,7 +136,7 @@ export class DatabricksEnvironmentManager {
 	private get CurrentWorkspaceConfiguration(): iUserWorkspaceConfiguration {
 		return {
 			"workspaceConfig": this._workspaceConfig,
-			"connections": this.Environments
+			"connections": this.Connections
 		};
 	}
 
@@ -184,19 +189,17 @@ export class DatabricksEnvironmentManager {
 		this.cleanDefaultConnectionFromConfig();
 	}
 
-	get ActiveEnvironment(): iDatabricksEnvironment {
-		return this._activeEnvironment;
+	get ActiveConnection(): DatabricksConnection {
+		return this._activeConnection;
 	}
 
-	get ActiveEnvironmentName(): string {
-		return this.ActiveEnvironment.displayName;
+	get ActiveConnectionName(): string {
+		return this.ActiveConnection.displayName;
 	}
 
+	get Connections(): DatabricksConnection[] {
+		while (!this._initialized) { Helper.wait(500); }
 
-
-	get Environments(): DatabricksEnvironment[] {
-		return this._environments;
+		return this._connections;
 	}
-
-
 }

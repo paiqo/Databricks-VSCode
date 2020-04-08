@@ -108,7 +108,7 @@ export abstract class Helper {
 		let uniqueFilePath = await UniqueFileName.get(filePath, {});
 
 
-		fs.writeFile(uniqueFilePath, content, (err) => vscode.window.showErrorMessage(err.message));
+		fs.writeFile(uniqueFilePath, content, (err) => { if (err) { vscode.window.showErrorMessage(err.message); } });
 		this.addTempFile(uniqueFilePath);
 
 		if (open) {
@@ -122,7 +122,7 @@ export abstract class Helper {
 
 	static removeTempFiles(): void {
 		for (const tempFile of Helper.tempFiles) {
-			fs.unlink(tempFile, (err) => vscode.window.showErrorMessage(err.message));
+			fs.unlink(tempFile, (err) => { if (err) { vscode.window.showErrorMessage(err.message); } });
 		}
 	}
 

@@ -3,13 +3,12 @@ import * as fspath from 'path';
 import { DatabricksApiService } from '../databricksApi/databricksApiService';
 import { ThisExtension, ExportFormatsConfiguration } from '../ThisExtension';
 import { CloudProvider } from './_types';
-import { iDatabricksEnvironment } from './iDatabricksEnvironment';
-import { ActiveDatabricksEnvironment } from './ActiveDatabricksEnvironment';
+import { iDatabricksConnection } from './iDatabricksConnection';
 import { Helper } from '../helpers/Helper';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iDatabricksEnvironment {
+export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDatabricksConnection {
 	_displayName: string;
 	_cloudProvider: CloudProvider;
 	_personalAccessToken: string;
@@ -47,13 +46,13 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 		this._organizationId = organizationId;
 		this._exportFormatsConfiguration = exportFormatsConfiguration;
 
-		this._isActive = this.displayName === ThisExtension.ActiveEnvironmentName;
+		this._isActive = this.displayName === ThisExtension.ActiveConnectionName;
 
 		super.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
-		// Environments are never expandable
+		// Connections are never expandable
 		super.collapsibleState = undefined;
 
 		this._isActive = false;
@@ -70,7 +69,7 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 
 	// used in package.json to filter commands via viewItem == ACTIVE
 	get contextValue(): string {
-		if (this.displayName == ActiveDatabricksEnvironment.displayName) {
+		if (this.displayName == ThisExtension.ActiveConnectionName) {
 			return 'ACTIVE';
 		}
 		return 'INACTIVE';
@@ -127,28 +126,29 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 		return this._isActive;
 	}
 
-	static fromJson(jsonString: string): DatabricksEnvironmentTreeItem {
-		let item: iDatabricksEnvironment = JSON.parse(jsonString);
-		return DatabricksEnvironmentTreeItem.fromEnvironment(item);
+	static fromJson(jsonString: string): DatabricksConnectionTreeItem {
+		let item: iDatabricksConnection = JSON.parse(jsonString);
+		return DatabricksConnectionTreeItem.fromConnection(item);
 	}
 
-	static fromEnvironment(environment: iDatabricksEnvironment) {
-		return new DatabricksEnvironmentTreeItem(
-			environment.displayName,
-			environment.cloudProvider,
-			environment.personalAccessToken,
-			environment.apiRootUrl,
-			environment.localSyncFolder,
-			environment.databricksConnectJars,
-			environment.pythonInterpreter,
-			environment.port,
-			environment.organizationId);
+	static fromConnection(Connection: iDatabricksConnection) {
+		return new DatabricksConnectionTreeItem(
+			Connection.displayName,
+			Connection.cloudProvider,
+			Connection.personalAccessToken,
+			Connection.apiRootUrl,
+			Connection.localSyncFolder,
+			Connection.databricksConnectJars,
+			Connection.pythonInterpreter,
+			Connection.port,
+			Connection.organizationId);
 	}
 
 	activate(): void {
-		vscode.window.showInformationMessage(`Activating Databricks environment '${this.displayName}' ...`);
+		vscode.window.showInformationMessage(`Activating Databricks Connection '${this.displayName}' ...`);
 
-		ThisExtension.EnvironmentManager.activateEnvironment(this.displayName);
+		ThisExtension.ConnectionManager.activateConnection(this.displayName);
+		/*
 		vscode.workspace.getConfiguration().update('databricks.connection.default.displayName', this.displayName, vscode.ConfigurationTarget.Workspace);
 		vscode.workspace.getConfiguration().update('databricks.connection.default.cloudProvider', this.cloudProvider, vscode.ConfigurationTarget.Workspace);
 		vscode.workspace.getConfiguration().update('databricks.connection.default.apiRootUrl', this.apiRootUrl, vscode.ConfigurationTarget.Workspace);
@@ -166,16 +166,13 @@ export class DatabricksEnvironmentTreeItem extends vscode.TreeItem implements iD
 		// update the actual Python interpreter
 		vscode.workspace.getConfiguration().update('python.pythonPath', this.pythonInterpreter, vscode.ConfigurationTarget.Workspace);
 		vscode.workspace.getConfiguration().update('python.pythonPath', this.pythonInterpreter, vscode.ConfigurationTarget.Global);
-
+		*/
 
 		this._isActive = true;
-		ThisExtension.ActiveEnvironmentName = this.displayName;
-
-		DatabricksApiService.initialize(this);
 
 		//Helper.delay(1000);
 
-		vscode.commands.executeCommand("databricksEnvironments.refresh", false);
+		vscode.commands.executeCommand("DatabricksConnections.refresh", false);
 		vscode.commands.executeCommand("databricksWorkspace.refresh", false);
 		vscode.commands.executeCommand("databricksClusters.refresh", false);
 		vscode.commands.executeCommand("databricksJobs.refresh", false);

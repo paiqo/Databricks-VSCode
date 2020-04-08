@@ -5,8 +5,8 @@ import { ThisExtension } from './ThisExtension';
 import { Helper } from './helpers/Helper';
 
 import { DatabricksApiService } from './databricksApi/databricksApiService';
-import { DatabricksEnvironmentTreeProvider } from './DatabricksEnvironmentTreeProvider';
-import { DatabricksEnvironmentTreeItem } from './environments/DatabricksEnvironmentTreeItem';
+import { DatabricksConnectionTreeProvider } from './DatabricksConnectionTreeProvider';
+import { DatabricksConnectionTreeItem } from './connections/DatabricksConnectionTreeItem';
 import { DatabricksWorkspaceTreeProvider } from './DatabricksWorkspaceTreeProvider';
 import { DatabricksClusterTreeProvider } from './DatabricksClusterTreeProvider';
 import { DatabricksClusterTreeItem } from './databricksApi/clusters/DatabricksClusterTreeItem';
@@ -35,13 +35,13 @@ export function activate(context: vscode.ExtensionContext) {
 
 	DatabricksApiService.initialize();
 
-	// register DatabricksEnvironmentTreeProvider
-	let databricksEnvironmentTreeProvider = new DatabricksEnvironmentTreeProvider();
-	vscode.window.registerTreeDataProvider('databricksEnvironments', databricksEnvironmentTreeProvider);
-	vscode.commands.registerCommand('databricksEnvironments.refresh', (showInfoMessage: boolean = true) => databricksEnvironmentTreeProvider.refresh(showInfoMessage));
-	vscode.commands.registerCommand('databricksEnvironments.add', () => databricksEnvironmentTreeProvider.add());
+	// register DatabricksConnectionTreeProvider
+	let databricksConnectionTreeProvider = new DatabricksConnectionTreeProvider();
+	vscode.window.registerTreeDataProvider('DatabricksConnections', databricksConnectionTreeProvider);
+	vscode.commands.registerCommand('DatabricksConnections.refresh', (showInfoMessage: boolean = true) => databricksConnectionTreeProvider.refresh(showInfoMessage));
+	vscode.commands.registerCommand('DatabricksConnections.add', () => databricksConnectionTreeProvider.add());
 
-	vscode.commands.registerCommand('databricksEnvironmentItem.activate', (envItem: DatabricksEnvironmentTreeItem) => envItem.activate());
+	vscode.commands.registerCommand('DatabricksConnectionItem.activate', (envItem: DatabricksConnectionTreeItem) => envItem.activate());
 
 	// register DatabricksWorkspaceTreeProvider
 	let databricksWorkspaceTreeProvider = new DatabricksWorkspaceTreeProvider();

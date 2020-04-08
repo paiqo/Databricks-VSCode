@@ -3,7 +3,6 @@ import * as fs from 'fs';
 import { iDatabricksWorkspaceItem } from './workspaces/iDatabricksworkspaceItem';
 import { WorkspaceItemExportFormat, WorkspaceItemLanguage } from './workspaces/_types';
 
-import { DatabricksClusterTreeItem } from './clusters/DatabricksClusterTreeItem';
 import { iDatabricksRuntimeVersion } from './clusters/iDatabricksRuntimeVersion';
 
 import { DatabricksFSTreeItem } from './dbfs/DatabricksFSTreeItem';
@@ -13,13 +12,11 @@ import { DatabricksSecretTreeItem } from './secrets/DatabricksSecretTreeItem';
 import { iDatabricksSecretScope } from './secrets/iDatabricksSecretScope';
 import { iDatabricksSecret } from './secrets/iDatabricksSecret';
 
-import { DatabricksEnvironmentTreeItem } from './../environments/DatabricksEnvironmentTreeItem';
-import { iDatabricksEnvironment } from './../environments/iDatabricksEnvironment';
-import { ActiveDatabricksEnvironment } from './../environments/ActiveDatabricksEnvironment';
 import { Helper } from '../helpers/Helper';
 import { iDatabricksJobResponse, iDatabricksJobRunResponse } from './_types';
 import { iDatabricksCluster } from './clusters/iDatabricksCluster';
 import { ThisExtension } from '../ThisExtension';
+import { DatabricksConnection } from '../connections/DatabricksConnection';
 
 
 
@@ -27,16 +24,16 @@ export abstract class DatabricksApiService {
 	private static API_SUB_URL: string = "/api/";
 	private static _apiService: any;
 
-	static initialize(environment: iDatabricksEnvironment = ActiveDatabricksEnvironment): void {
+	static initialize(Connection: DatabricksConnection = ThisExtension.ActiveConnection): void {
 		ThisExtension.log("Initializing Databricks API Service ...");
 		const axios = require('axios');
 		// Set config defaults when creating the instance
 		this._apiService = axios.create({
-			baseURL: environment.apiRootUrl + this.API_SUB_URL
+			baseURL: Helper.trimChar(Connection.apiRootUrl, '/') + this.API_SUB_URL
 		});
 
 		// Alter defaults after instance has been created
-		this._apiService.defaults.headers.common['Authorization'] = "Bearer " + environment.personalAccessToken;
+		this._apiService.defaults.headers.common['Authorization'] = "Bearer " + Connection.personalAccessToken;
 		this._apiService.defaults.headers.common['Content-Type'] = 'application/json';
 		this._apiService.defaults.headers.common['Accept'] = 'application/json';
 

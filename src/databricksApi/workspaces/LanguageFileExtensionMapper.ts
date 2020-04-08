@@ -4,12 +4,8 @@ import * as fs from 'fs';
 
 import { WorkspaceItemExportFormat, WorkspaceItemLanguage } from './_types';
 import { ThisExtension, ExportFormatsConfiguration } from '../../ThisExtension';
-import { ActiveDatabricksEnvironment } from '../../environments/ActiveDatabricksEnvironment';
-import { Helper } from '../../helpers/Helper';
 
-
-
-export class LanguageFileExtensionMapper  {
+export class LanguageFileExtensionMapper {
 	private _language: WorkspaceItemLanguage;
 	private _extension: string;
 	private _languageExtension: string;
@@ -18,10 +14,10 @@ export class LanguageFileExtensionMapper  {
 	private _exportFormat: WorkspaceItemExportFormat;
 	private _isNotebook: boolean;
 
-	constructor() {}
+	constructor() { }
 
 	static get exportFormatConfigs(): ExportFormatsConfiguration {
-		return ActiveDatabricksEnvironment.exportFormatsConfiguration;
+		return ThisExtension.ActiveConnection.exportFormatsConfiguration;
 	}
 
 	static get supportedFileExtensions(): string[] {
@@ -38,7 +34,7 @@ export class LanguageFileExtensionMapper  {
 	}
 
 	get extension(): string {
-		if(this._originalExtension) { return this._originalExtension; }
+		if (this._originalExtension) { return this._originalExtension; }
 
 		return this._extension;
 	}
@@ -62,23 +58,23 @@ export class LanguageFileExtensionMapper  {
 	get isNotebook(): boolean {
 		return this._isNotebook;
 	}
-	
+
 	static fromLanguage(language: WorkspaceItemLanguage): LanguageFileExtensionMapper {
 		let ret: LanguageFileExtensionMapper = new LanguageFileExtensionMapper();
 
 		ret._language = language;
 
 		switch (language) {
-			case "PYTHON": 
+			case "PYTHON":
 				ret._extension = this.exportFormatConfigs.Python;
 				break;
-			case "R": 
+			case "R":
 				ret._extension = this.exportFormatConfigs.R;
 				break;
-			case "SCALA": 
+			case "SCALA":
 				ret._extension = this.exportFormatConfigs.Scala;
 				break;
-			case "SQL": 
+			case "SQL":
 				ret._extension = this.exportFormatConfigs.SQL;
 				break;
 			default: throw new Error("ExportFormat for Language '" + language + "' is not defined!");
@@ -91,8 +87,7 @@ export class LanguageFileExtensionMapper  {
 			ret._languageExtension = tokens[1];
 			ret._exportFormat = "JUPYTER";
 		}
-		else
-		{
+		else {
 			ret._isNotebook = false;
 			ret._notebookExtension = '';
 			ret._languageExtension = tokens[1];

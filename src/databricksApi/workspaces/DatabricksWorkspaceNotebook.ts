@@ -6,7 +6,6 @@ import { WorkspaceItemExportFormat, WorkspaceItemLanguage, WorkspaceItemType } f
 import { iDatabricksWorkspaceItem } from './iDatabricksworkspaceItem';
 import { ThisExtension } from '../../ThisExtension';
 import { DatabricksApiService } from '../databricksApiService';
-import { ActiveDatabricksEnvironment } from '../../environments/ActiveDatabricksEnvironment';
 import { Helper } from '../../helpers/Helper';
 import { LanguageFileExtensionMapper } from './LanguageFileExtensionMapper';
 import { DatabricksWorkspaceTreeItem } from './DatabricksWorkspaceTreeItem';
@@ -33,13 +32,11 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 			this._onlinePathExists = false;
 		}
 
-		if (language instanceof LanguageFileExtensionMapper)
-		{
+		if (language instanceof LanguageFileExtensionMapper) {
 			this._language = language.language;
 			this._languageFileExtension = language;
 		}
-		else
-		{
+		else {
 			this._language = language;
 			this._languageFileExtension = LanguageFileExtensionMapper.fromLanguage(language);
 		}
@@ -83,7 +80,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 	}
 
 	protected getIconPath(theme: string): string {
-		if(!this._isInitialized ) { return null; }
+		if (!this._isInitialized) { return null; }
 
 		let sync_state: string = "";
 
@@ -98,7 +95,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 	};
 
 	get localFolderPath(): string {
-		return fspath.join(ActiveDatabricksEnvironment.localSyncFolder, fspath.dirname(this.path));
+		return fspath.join(ThisExtension.ActiveConnection.localSyncFolder, fspath.dirname(this.path));
 	}
 
 	get localFilePath(): string {
@@ -112,7 +109,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 	}
 
 	get localPathExists(): boolean {
-		if (ActiveDatabricksEnvironment.allowAllSupportedFileExtensions) {
+		if (ThisExtension.ActiveConnection.allowAllSupportedFileExtensions) {
 			for (let ext of ThisExtension.allLanguageFileExtensions(this.language)) {
 				let pathToCheck = this.localFilePath.replace(this.localFileExtension, ext);
 
@@ -131,8 +128,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 	}
 
 	get localFileExtension(): string {
-		if(this._languageFileExtension == undefined)
-		{
+		if (this._languageFileExtension == undefined) {
 			return LanguageFileExtensionMapper.fromLanguage(this.language).extension;
 		}
 		return this._languageFileExtension.extension;

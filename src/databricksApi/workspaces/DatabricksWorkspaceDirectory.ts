@@ -6,7 +6,6 @@ import { WorkspaceItemExportFormat, WorkspaceItemLanguage, WorkspaceItemType } f
 import { iDatabricksWorkspaceItem } from './iDatabricksworkspaceItem';
 import { ThisExtension } from '../../ThisExtension';
 import { DatabricksApiService } from '../databricksApiService';
-import { ActiveDatabricksEnvironment } from '../../environments/ActiveDatabricksEnvironment';
 import { Helper } from '../../helpers/Helper';
 import { LanguageFileExtensionMapper } from './LanguageFileExtensionMapper';
 import { DatabricksWorkspaceTreeItem } from './DatabricksWorkspaceTreeItem';
@@ -77,7 +76,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 	}
 
 	get localPath(): string {
-		return fspath.join(ActiveDatabricksEnvironment.localSyncFolder, this.path);
+		return fspath.join(ThisExtension.ActiveConnection.localSyncFolder, this.path);
 	}
 
 	get localPathExists(): boolean {
@@ -104,14 +103,14 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 
 			if (webServiceItems != undefined) {
 				for (let item of webServiceItems) {
-					switch(item.object_type) {
-						case "LIBRARY": 
+					switch (item.object_type) {
+						case "LIBRARY":
 							onlineItems.push(DatabricksWorkspaceLibrary.fromInterface(item));
 							break;
-						case "NOTEBOOK": 
+						case "NOTEBOOK":
 							onlineItems.push(DatabricksWorkspaceNotebook.fromInterface(item));
 							break;
-						case "DIRECTORY": 
+						case "DIRECTORY":
 							onlineItems.push(DatabricksWorkspaceDirectory.fromInterface(item));
 							break;
 					}
@@ -138,7 +137,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 						let ext = LanguageFileExtensionMapper.extensionFromFileName(localFile.base);
 
 						if (LanguageFileExtensionMapper.supportedFileExtensions.includes(ext)
-							|| (ActiveDatabricksEnvironment.allowAllSupportedFileExtensions && ThisExtension.allFileExtensions.includes(ext))) {
+							|| (ThisExtension.ActiveConnection.allowAllSupportedFileExtensions && ThisExtension.allFileExtensions.includes(ext))) {
 							languageFileExtension = LanguageFileExtensionMapper.fromFileName(localFile.base);
 						}
 						else {
@@ -147,8 +146,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 						}
 						localItems.push(new DatabricksWorkspaceNotebook(localRelativePath, -1, "Local", languageFileExtension));
 					}
-					else
-					{
+					else {
 						localItems.push(new DatabricksWorkspaceDirectory(localRelativePath, -1, "Local"));
 					}
 				}
@@ -167,10 +165,10 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 
 		for (let item of items) {
 			switch (item.object_type) {
-				case "NOTEBOOK": 
+				case "NOTEBOOK":
 					DatabricksWorkspaceNotebook.fromInterface(item).download();
 					break;
-				case "DIRECTORY": 
+				case "DIRECTORY":
 					DatabricksWorkspaceDirectory.fromInterface(item).download();
 					break;
 			}
@@ -183,10 +181,10 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 
 		for (let item of items) {
 			switch (item.object_type) {
-				case "NOTEBOOK": 
+				case "NOTEBOOK":
 					DatabricksWorkspaceNotebook.fromInterface(item).upload();
 					break;
-				case "DIRECTORY": 
+				case "DIRECTORY":
 					DatabricksWorkspaceDirectory.fromInterface(item).upload();
 					break;
 			}

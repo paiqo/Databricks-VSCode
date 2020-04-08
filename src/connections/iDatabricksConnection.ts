@@ -2,7 +2,7 @@ import { CloudProvider } from './_types';
 import { ExportFormatsConfiguration } from '../ThisExtension';
 
 
-export interface iDatabricksEnvironment {
+export interface iDatabricksConnection {
 	displayName: string;
 	cloudProvider: CloudProvider;
 	personalAccessToken: string;
