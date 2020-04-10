@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as fspath from 'path';
-import { DatabricksApiService } from '../databricksApi/databricksApiService';
 import { ThisExtension, ExportFormatsConfiguration } from '../ThisExtension';
 import { CloudProvider } from './_types';
 import { iDatabricksConnection } from './iDatabricksConnection';

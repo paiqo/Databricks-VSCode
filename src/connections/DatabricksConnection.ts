@@ -2,11 +2,9 @@ import * as vscode from 'vscode';
 import { CloudProvider } from './_types';
 import { iDatabricksConnection } from './iDatabricksConnection';
 import { ExportFormatsConfiguration } from '../ThisExtension';
-import { Helper } from '../helpers/Helper';
+import * as fspath from 'path';
 
 export class DatabricksConnection implements iDatabricksConnection {
-
-	private _apiRootUrl: string;
 
 	displayName: string;
 	apiRootUrl: string;
@@ -28,20 +26,5 @@ export class DatabricksConnection implements iDatabricksConnection {
 
 	get allowAllSupportedFileExtensions(): boolean {
 		return true;
-	}
-
-	get Connection(): iDatabricksConnection {
-		return {
-			displayName: this.displayName,
-			cloudProvider: this.cloudProvider,
-			personalAccessToken: this.personalAccessToken,
-			apiRootUrl: this.apiRootUrl,
-			localSyncFolder: this.localSyncFolder,
-			databricksConnectJars: this.databricksConnectJars,
-			pythonInterpreter: this.pythonInterpreter,
-			port: this.port,
-			organizationId: this.organizationId,
-			exportFormatsConfiguration: this.exportFormatsConfiguration
-		};
 	}
 }

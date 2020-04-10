@@ -1,6 +1,4 @@
 import * as vscode from 'vscode';
-import { CloudProvider } from './_types';
-import { iDatabricksConnection } from './iDatabricksConnection';
 import { Helper } from '../helpers/Helper';
 import { ExportFormatsConfiguration, iWorkspaceConfiguration, iUserWorkspaceConfiguration, ThisExtension } from '../ThisExtension';
 import { DatabricksConnection } from './DatabricksConnection';
@@ -201,5 +199,17 @@ export class DatabricksConnectionManager {
 		while (!this._initialized) { Helper.wait(500); }
 
 		return this._connections;
+	}
+
+	static get WorkspaceSubFolder(): string {
+		return "Workspace";
+	}
+
+	static get ClustersSubFolder(): string {
+		return "Clusters";
+	}
+
+	static get JobsSubFolder(): string {
+		return "Jobs";
 	}
 }

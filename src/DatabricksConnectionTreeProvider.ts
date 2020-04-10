@@ -1,14 +1,11 @@
 import * as vscode from 'vscode';
 import { DatabricksConnectionTreeItem } from './connections/DatabricksConnectionTreeItem';
-import { iDatabricksConnection } from './connections/iDatabricksConnection';
 import { Helper } from './helpers/Helper';
 import { ThisExtension } from './ThisExtension';
 import { DatabricksConnection } from './connections/DatabricksConnection';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class DatabricksConnectionTreeProvider implements vscode.TreeDataProvider<DatabricksConnectionTreeItem> {
-	private _activeConnection: iDatabricksConnection;
-
 	private _onDidChangeTreeData: vscode.EventEmitter<DatabricksConnectionTreeItem | undefined> = new vscode.EventEmitter<DatabricksConnectionTreeItem | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<DatabricksConnectionTreeItem | undefined> = this._onDidChangeTreeData.event;
 
@@ -66,9 +63,9 @@ export class DatabricksConnectionTreeProvider implements vscode.TreeDataProvider
 		}
 
 		//let newEnv = DatabricksConnectionTreeItem.fromJson(JSON.stringify(newEnvConfig));
-		let newEnv: iDatabricksConnection = Helper.mapToObject<iDatabricksConnection>(newEnvConfig);
+		let newEnv: DatabricksConnection = Helper.mapToObject<DatabricksConnection>(newEnvConfig);
 
-		let currentConnections: iDatabricksConnection[] = vscode.workspace.getConfiguration().get('databricks.connections');
+		let currentConnections: DatabricksConnection[] = vscode.workspace.getConfiguration().get('databricks.connections');
 
 		currentConnections.push(newEnv);
 

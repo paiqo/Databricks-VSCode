@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { WorkspaceItemLanguage } from './databricksApi/workspaces/_types';
 import { DatabricksConnectionManager } from './connections/DatabricksConnectionManager';
 import { Helper } from './helpers/Helper';
-import { iDatabricksConnection } from './connections/iDatabricksConnection';
 import { DatabricksConnection } from './connections/DatabricksConnection';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
@@ -153,6 +152,6 @@ export interface iWorkspaceConfiguration {
 // represents the structure how the ExportFormats and FileExtensions for the different language are defined in the VS Code settings
 export interface iUserWorkspaceConfiguration {
 	workspaceConfig: iWorkspaceConfiguration;
-	connections: iDatabricksConnection[];
+	connections: DatabricksConnection[];
 }
 
