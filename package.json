@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Databricks Extension for VSCode",
-	"version": "0.3.5",
+	"version": "0.4.0",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -71,6 +71,11 @@
 							"lastActiveConnection": {
 								"type": "string",
 								"description": "The display name of the Connection that was active the last time the extension was used."
+							},
+							"whereAreMySettings": {
+								"type": "string",
+								"description": "Please use the VSCode user settings and search for the 'workspaceGuid' to configure the connections for this workspace.",
+								"default": "Please use the VSCode user settings and search for the 'workspaceGuid' to configure the connections for this workspace."
 							}
 						}
 					},
