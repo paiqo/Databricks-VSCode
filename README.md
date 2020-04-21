@@ -22,8 +22,27 @@ This is a Visual Studio Code extension that allows you to work with Azure Databr
 - Secrets browser
 	- Create/delete secret scopes
 	- Create/delete secrets
-- Support for multiple Databricks workspaces
+- Integration for CI/CD using [DatabricksPS](https://www.powershellgallery.com/packages/DatabricksPS)
+- Support for multiple Databricks workspace connections
 - Easy configuration via standard VS Code settings
+
+# Relase Notes
+**v0.4.0**:
+- Moved configuration from VSCode Workspace-settings to VSCode User-settings
+	- avoids accidential check-in of sensitive information (Databricks API token) to GIT
+	- allows you to use the same configuratino across multiple workspaces on the same machine
+- added subfolders for different components (Workspace, clusters, jobs, ...) for better integration with [DatabricksPS](https://www.powershellgallery.com/packages/DatabricksPS)
+- internally reworked configuration management
+- Updated logo
+
+**v0.3.5**:
+- extended logging for all API calls 
+- fixes for iOS and Linux users
+
+**v0.3.0**:
+- added feature to compare notebooks (currently only works for regular files but not for notebooks)
+- added logging for all API calls to separate VS Code output channel ```paiqo.databricks-vscode```
+- added configuration option for export formats
 
 # Installation
 The extension can be downloaded directly from within VS Code. Simply go to the Extensions tab and search for "Databricks" and select and install the extension "Databricks Integration" (ID: paiqo.databricks-vscode).
@@ -31,12 +50,10 @@ The extension can be downloaded directly from within VS Code. Simply go to the E
 Alternatively it can also be downloaded from the VS Code marketplace: [Databricks VSCode](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode).
 
 # Setup and Configuration
-The configuration happens directly via VS Code. Simply open the settings via File -> Preferences -> Settings or by using the keyboard shortcut ```CTRL + ,```
+The configuration happens directly via VS Code. Simply open the settings via File -> Preferences -> Settings or by using the (Windows) keyboard shortcut ```CTRL + ,```
 Then either search for "Databricks" or expand Extensions -> Databricks.
 The settings themselves are very well described and it should be easy for you to populate them. Also, not all of them are mandatory! Some of the optional settings allow better integration with Databricks-Connect but this is still work in progress.
 To configure multiple Databricks Connections/workspaces, you need to use the JSON editor.
- 
-NOTE: Settings for ```personalAccessToken``` are currently stored in **CLEAR TEXT** in the workspace file or in the global user settings!
 ``` json
 		...
 		"databricks.connections": [
@@ -57,8 +74,10 @@ NOTE: Settings for ```personalAccessToken``` are currently stored in **CLEAR TEX
 		],
 		...
 ```
+Even though the values are configured in the Workspace settings, they are not persisted there! Instead, they are converted and stored in the User settings to avoid any sensitive information like the ```personalAccessToken``` to be check-in to GIT accidentially. The workspace only contains a link to the User settings then.
+Existing connections can be updated by using the UI and specifying the ```displayName``` you want to update. Also, new connections can be added this way at any time. To delete a connection, you need to manually remove it from the User settings at the moment (will be improved in future versions1). This works for single connections via ```databricks.connection.default.*``` but also via ```databricks.connections.[]``` if you want to add/modify multiple connections at once
 
-Another important setting which requires modifying the JSON directly are the export formats which can be used to define the format in which notebooks are up-/downloaded. Again, there is a default/current setting **databricks.connection.default.exportFormats** and it can also configured per Connection:
+Another important setting which requires modifying the JSON directly are the export formats which can be used to define the format in which notebooks are up-/downloaded. Again, there is a default/current setting ```databricks.connection.default.exportFormats``` and it can also configured per Connection:
 ``` json
 		...
 		"databricks.connection.default.exportFormats": 
@@ -84,13 +103,15 @@ You can either work with a single Connection or configure multiple Connections. 
 ![Workspace Browser](https://github.com/paiqo/Databricks-VSCode/blob/master/images/WorkspaceBrowser.jpg?raw=true "Workspace Browser")
 
 The workspace browser connects directly to the Databricks workspace and loads the whole folder strucuture recursively. It displays folders, notebooks and libraries. Notebooks and folders can be up- and downloaded manually by simply clicking the corresponding item next them. If you do an up-/download on a whole folder or on the root, it will up-/download all items recursively.
-The files are stored in the **databricks.connection.default.localSyncFolder** (or your Connection) that you configured in your settings/for your Connection. If you doubleclick a file, it will be downloaded locally and opened. Depending on the ExportFormats that you have defined in **databricks.connection.default.exportFormats** (or your Connection), the item will be downloaded in the corresponding format - basically you can decide between Notebook format and raw/source format.
+The files are stored in the ```databricks.connection.default.localSyncFolder``` (or your Connection) that you configured in your settings/for your Connection. If you doubleclick a file, it will be downloaded locally and opened. Depending on the ExportFormats that you have defined in ```databricks.connection.default.exportFormats``` (or your Connection), the item will be downloaded in the corresponding format - basically you can decide between Notebook format and raw/source format.
 The downloaded files can then be executed directly against the Databricks cluster if Databricks-Connect is setup correctly ([Setup Databricks-Connect on AWS](https://docs.databricks.com/dev-tools/databricks-connect.html), [Setup Databricks-Connect on Azure](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/databricks-connect))
 
 The up-/downloaded state of the single items are also reflected in their icons:
 ![Workspace Browser Icons](https://github.com/paiqo/Databricks-VSCode/blob/master/images/WorkspaceBrowser_Icons.jpg?raw=true "Workspace Browser Icons")
-- A small red dot at the top right of an item indicates that it only exists online in the Databricks workspace but has not yet been downloaded to the **localSyncFolder**.
-- A small blue dot at the bottom right of an item indicates that it only exists locally but has not yet been uploaded to the Databricks workspace. Please note that only local files that match the file extensions defined in **exportFormats** will be considered for an upload. For all other files you will see a warning in VS Code.
+
+**NOTE: The logic is currently not recursive - if a folder exists online and locally, does not mean that also all sub-folders and files exist online and locally!**
+- A small red dot at the top right of an item indicates that it only exists online in the Databricks workspace but has not yet been downloaded to the ```localSyncFolder``` into the subfolder ```Workspace```.
+- A small blue dot at the bottom right of an item indicates that it only exists locally but has not yet been uploaded to the Databricks workspace. Please note that only local files that match the file extensions defined in ```exportFormats``` will be considered for an upload. For all other files you will see a warning in VS Code.
 - If there is no blue or red dot in the icon then the file/folder exists locally and also in the Databricks workspace. However, this does not mean that the files have to be in sync. It is up to you to know which file is more recent and then sync them accordingly!
 
 # Cluster Manager

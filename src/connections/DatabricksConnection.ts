@@ -15,7 +15,7 @@ export class DatabricksConnection implements iDatabricksConnection {
 	pythonInterpreter: string;
 	port: number;
 	organizationId: string;
-	exportFormatsConfiguration: ExportFormatsConfiguration;
+	exportFormats: ExportFormatsConfiguration;
 
 	get isValid(): boolean {
 		if (this.displayName != undefined && this.displayName != "") {

@@ -131,6 +131,9 @@ export abstract class DatabricksApiService {
 		let result = response.data;
 		let items = result.objects as iDatabricksWorkspaceItem[];
 
+		if (items == undefined) {
+			return [];
+		}
 		Helper.sortArrayByProperty(items, "path");
 		return items;
 	}
@@ -188,6 +191,10 @@ export abstract class DatabricksApiService {
 		let result = response.data;
 		let items = result.clusters as iDatabricksCluster[];
 
+		if (items == undefined) {
+			return [];
+		}
+
 		return items;
 	}
 
@@ -232,6 +239,10 @@ export abstract class DatabricksApiService {
 
 		let result = response.data as iDatabricksJobResponse;
 
+		if (result == undefined) {
+			return { jobs: [] };
+		}
+
 		return result;
 	}
 
@@ -254,6 +265,10 @@ export abstract class DatabricksApiService {
 		let response = await this.get(endpoint, { params: body });
 
 		let result = response.data as iDatabricksJobRunResponse;
+
+		if (result == undefined) {
+			return { runs: [], has_more: false };
+		}
 
 		return result;
 	}
@@ -310,10 +325,12 @@ export abstract class DatabricksApiService {
 		let items = result.files as iDatabricksFSItem[];
 
 		let dbfsItems: DatabricksFSTreeItem[] = [];
-		if (items != undefined) {
-			items.map(item => dbfsItems.push(new DatabricksFSTreeItem(item.path, item.is_dir, item.file_size)));
-			Helper.sortArrayByProperty(dbfsItems, "label");
+		if (items == undefined) {
+			return dbfsItems;
 		}
+
+		items.map(item => dbfsItems.push(new DatabricksFSTreeItem(item.path, item.is_dir, item.file_size)));
+		Helper.sortArrayByProperty(dbfsItems, "label");
 		return dbfsItems;
 	}
 
@@ -490,10 +507,12 @@ export abstract class DatabricksApiService {
 		let items = result.scopes as iDatabricksSecretScope[];
 
 		let scopeItems: DatabricksSecretTreeItem[] = [];
-		if (items != undefined) {
-			items.map(item => scopeItems.push(new DatabricksSecretTreeItem(item.name)));
-			Helper.sortArrayByProperty(scopeItems, "label");
+		if (items == undefined) {
+			return scopeItems;
 		}
+
+		items.map(item => scopeItems.push(new DatabricksSecretTreeItem(item.name)));
+		Helper.sortArrayByProperty(scopeItems, "label");
 		return scopeItems;
 	}
 
@@ -533,10 +552,12 @@ export abstract class DatabricksApiService {
 		let items = result.secrets as iDatabricksSecret[];
 
 		let scopeItems: DatabricksSecretTreeItem[] = [];
-		if (items != undefined) {
-			items.map(item => scopeItems.push(new DatabricksSecretTreeItem(scope, item.key)));
-			Helper.sortArrayByProperty(scopeItems, "label");
+		if (items == undefined) {
+			return scopeItems;
 		}
+
+		items.map(item => scopeItems.push(new DatabricksSecretTreeItem(scope, item.key)));
+		Helper.sortArrayByProperty(scopeItems, "label");
 		return scopeItems;
 	}
 

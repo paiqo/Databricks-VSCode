@@ -18,7 +18,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 	_port: number;
 	_organizationId: string;
 	_isActive: boolean;
-	_exportFormatsConfiguration: ExportFormatsConfiguration;
+	_exportFormats: ExportFormatsConfiguration;
 
 	constructor(
 		displayName: string,
@@ -30,7 +30,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		pythonInterpreter: string = undefined,
 		port: number = 15001,
 		organizationId: string = undefined,
-		exportFormatsConfiguration: ExportFormatsConfiguration = undefined
+		exportFormats: ExportFormatsConfiguration = undefined
 	) {
 		super(displayName);
 		this._displayName = displayName;
@@ -43,7 +43,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		this._pythonInterpreter = pythonInterpreter;
 		this._port = port;
 		this._organizationId = organizationId;
-		this._exportFormatsConfiguration = exportFormatsConfiguration;
+		this._exportFormats = exportFormats;
 
 		this._isActive = this.displayName === ThisExtension.ActiveConnectionName;
 
@@ -116,8 +116,8 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		return this._organizationId;
 	}
 
-	get exportFormatsConfiguration(): ExportFormatsConfiguration {
-		return this._exportFormatsConfiguration;
+	get exportFormats(): ExportFormatsConfiguration {
+		return this._exportFormats;
 	}
 
 

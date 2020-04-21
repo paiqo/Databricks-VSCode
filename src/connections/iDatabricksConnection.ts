@@ -12,5 +12,5 @@ export interface iDatabricksConnection {
 	pythonInterpreter: string;
 	port: number;
 	organizationId: string;
-	exportFormatsConfiguration: ExportFormatsConfiguration;
+	exportFormats: ExportFormatsConfiguration;
 }

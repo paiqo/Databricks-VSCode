@@ -16,16 +16,16 @@ export class LanguageFileExtensionMapper {
 
 	constructor() { }
 
-	static get exportFormatConfigs(): ExportFormatsConfiguration {
-		return ThisExtension.ActiveConnection.exportFormatsConfiguration;
+	static get exportFormat(): ExportFormatsConfiguration {
+		return ThisExtension.ActiveConnection.exportFormats;
 	}
 
 	static get supportedFileExtensions(): string[] {
 		return [
-			this.exportFormatConfigs.Python,
-			this.exportFormatConfigs.R,
-			this.exportFormatConfigs.SQL,
-			this.exportFormatConfigs.Scala
+			this.exportFormat.Python,
+			this.exportFormat.R,
+			this.exportFormat.SQL,
+			this.exportFormat.Scala
 		];
 	}
 
@@ -62,20 +62,24 @@ export class LanguageFileExtensionMapper {
 	static fromLanguage(language: WorkspaceItemLanguage): LanguageFileExtensionMapper {
 		let ret: LanguageFileExtensionMapper = new LanguageFileExtensionMapper();
 
+		let x = ThisExtension.ActiveConnection;
+		let x1 = ThisExtension.ConnectionManager.ActiveConnection;
+		let y = ThisExtension.ActiveConnectionName;
+		let y1 = ThisExtension.ConnectionManager.ActiveConnectionName;
 		ret._language = language;
 
 		switch (language) {
 			case "PYTHON":
-				ret._extension = this.exportFormatConfigs.Python;
+				ret._extension = this.exportFormat.Python;
 				break;
 			case "R":
-				ret._extension = this.exportFormatConfigs.R;
+				ret._extension = this.exportFormat.R;
 				break;
 			case "SCALA":
-				ret._extension = this.exportFormatConfigs.Scala;
+				ret._extension = this.exportFormat.Scala;
 				break;
 			case "SQL":
-				ret._extension = this.exportFormatConfigs.SQL;
+				ret._extension = this.exportFormat.SQL;
 				break;
 			default: throw new Error("ExportFormat for Language '" + language + "' is not defined!");
 		}

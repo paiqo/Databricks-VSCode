@@ -140,7 +140,8 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 	}
 
 	public static fromInterface(item: iDatabricksWorkspaceItem): DatabricksWorkspaceNotebook {
-		return new DatabricksWorkspaceNotebook(item.path, item.object_id, "Online", item.language);
+		let ret = new DatabricksWorkspaceNotebook(item.path, item.object_id, "Online", item.language);
+		return ret;
 	}
 
 	public static fromJSON(jsonString: string): DatabricksWorkspaceNotebook {

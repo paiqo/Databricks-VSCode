@@ -22,8 +22,6 @@ export class DatabricksConnectionManager {
 
 		this.loadConnections();
 
-		this.updateUserWorkspaceConfig();
-
 		if (this._workspaceConfig.lastActiveConnection == undefined) {
 			this._workspaceConfig.lastActiveConnection = this._connections[0].displayName;
 		}
@@ -54,6 +52,8 @@ export class DatabricksConnectionManager {
 		this._connections = this._connections.concat(newConnectionsFromWorkspace);
 
 		this._initialized = true;
+
+		this.updateUserWorkspaceConfig();
 	}
 
 	activateConnection(displayName: string): DatabricksConnection {
@@ -104,7 +104,7 @@ export class DatabricksConnectionManager {
 		defaultCon.pythonInterpreter = vscode.workspace.getConfiguration().get('databricks.connection.default.pythonInterpreter');
 		defaultCon.port = vscode.workspace.getConfiguration().get<number>('databricks.connection.default.port');
 		defaultCon.organizationId = vscode.workspace.getConfiguration().get('databricks.connection.default.organizationId');
-		defaultCon.exportFormatsConfiguration = vscode.workspace.getConfiguration().get<ExportFormatsConfiguration>('databricks.connection.default.exportFormats');
+		defaultCon.exportFormats = vscode.workspace.getConfiguration().get<ExportFormatsConfiguration>('databricks.connection.default.exportFormats');
 
 		return defaultCon;
 	}
@@ -162,7 +162,7 @@ export class DatabricksConnectionManager {
 	private updateUserWorkspaceConfig(): void {
 		ThisExtension.log("Updating user setting 'databricks.userWorkspaceConfigurations' ...");
 		let AllUserWorkspaceConfigurations: iUserWorkspaceConfiguration[] = this.AllUserWorkspaceConfigurations;
-		let currentUserWorkspaceConfig: iUserWorkspaceConfiguration = this.CurrentUserWorkspaceConfiguration;
+		let currentUserWorkspaceConfig: iUserWorkspaceConfiguration = this.CurrentWorkspaceConfiguration;
 
 		let updatedUserWorkspaceConfigs: iUserWorkspaceConfiguration[] = [];
 

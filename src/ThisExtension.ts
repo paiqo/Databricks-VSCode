@@ -19,6 +19,10 @@ export abstract class ThisExtension {
 		return this._context.extensionPath;
 	}
 
+	static get extensionContext(): vscode.ExtensionContext {
+		return this._context;
+	}
+
 	static set ActiveConnectionName(displayName: string) {
 		this.ConnectionManager.activateConnection(displayName);
 	}

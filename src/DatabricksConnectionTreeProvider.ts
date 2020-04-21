@@ -15,6 +15,7 @@ export class DatabricksConnectionTreeProvider implements vscode.TreeDataProvider
 		if (showInfoMessage) {
 			vscode.window.showInformationMessage('Refreshing Connections ...');
 		}
+		ThisExtension.ConnectionManager.loadConnections();
 		this._onDidChangeTreeData.fire();
 	}
 
@@ -41,7 +42,7 @@ export class DatabricksConnectionTreeProvider implements vscode.TreeDataProvider
 				item.pythonInterpreter,
 				item.port,
 				item.organizationId,
-				item.exportFormatsConfiguration));
+				item.exportFormats));
 		}
 		return Promise.resolve(envItems);
 	}
