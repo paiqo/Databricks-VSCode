@@ -3,6 +3,8 @@ import { WorkspaceItemLanguage } from './databricksApi/workspaces/_types';
 import { DatabricksConnectionManager } from './connections/DatabricksConnectionManager';
 import { Helper } from './helpers/Helper';
 import { DatabricksConnection } from './connections/DatabricksConnection';
+import { iDatabricksConnection } from './connections/iDatabricksConnection';
+import { DatabricksApiService } from './databricksApi/databricksApiService';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -50,9 +52,11 @@ export abstract class ThisExtension {
 		this._context = context;
 		this._extension = vscode.extensions.getExtension(this.extension_id);
 
+		this.log("Initializing ConnectionManager ...");
 		this._connectionManager = new DatabricksConnectionManager();
 
-		this.validateSettings();
+		this.log("Initializing Databricks API Service ...");
+		DatabricksApiService.initialize();
 
 		this._keytar = require('keytar');
 	}
@@ -113,18 +117,6 @@ export abstract class ThisExtension {
 		}
 	}
 
-	static validateSettings(): void {
-		this.log("Validating settings ...");
-
-		if (this.ConnectionManager.Connections.length == 0) {
-			//vscode.window.showErrorMessage("No Connections have been configured! Please add new Connections using the VSCode Settings dialog!");
-		}
-
-		this._isValidated = true;
-
-		this.log("Settings validated!");
-	}
-
 	static get configuration(): vscode.Extension<any> {
 		return this._extension;
 	}
@@ -147,15 +139,15 @@ export type ExportFormatsConfiguration = {
 	SQL: string;
 };
 
-// 
+// represents the structure how the reference to the VSCode User settings are stored in the VSCode workspace settings
 export interface iWorkspaceConfiguration {
 	workspaceGuid: string;
 	lastActiveConnection: string;
 }
 
-// represents the structure how the ExportFormats and FileExtensions for the different language are defined in the VS Code settings
+// represents the structure how workspace configurations are stored in VSCode User Settings
 export interface iUserWorkspaceConfiguration {
 	workspaceConfig: iWorkspaceConfiguration;
-	connections: DatabricksConnection[];
+	connections: iDatabricksConnection[];
 }
 

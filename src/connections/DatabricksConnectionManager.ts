@@ -3,6 +3,7 @@ import { Helper } from '../helpers/Helper';
 import { ExportFormatsConfiguration, iWorkspaceConfiguration, iUserWorkspaceConfiguration, ThisExtension } from '../ThisExtension';
 import { DatabricksConnection } from './DatabricksConnection';
 import { DatabricksApiService } from '../databricksApi/databricksApiService';
+import { iDatabricksConnection } from './iDatabricksConnection';
 
 export class DatabricksConnectionManager {
 
@@ -22,10 +23,17 @@ export class DatabricksConnectionManager {
 
 		this.loadConnections();
 
-		if (this._workspaceConfig.lastActiveConnection == undefined) {
-			this._workspaceConfig.lastActiveConnection = this._connections[0].displayName;
+		if (this.Connections.length == 0) {
+			let msg: string = "No connections have been configured yet! Please add a connection via the VSCode Settings -> Databricks before proceeding!";
+			ThisExtension.log(msg);
+			vscode.window.showErrorMessage(msg);
 		}
-		this.activateConnection(this._workspaceConfig.lastActiveConnection);
+		else {
+			if (this._workspaceConfig.lastActiveConnection == undefined) {
+				this._workspaceConfig.lastActiveConnection = this._connections[0].displayName;
+			}
+			this.activateConnection(this._workspaceConfig.lastActiveConnection);
+		}
 	}
 
 	loadConnections(): void {
@@ -43,7 +51,7 @@ export class DatabricksConnectionManager {
 		let defaultConnectionFromWorkspace = this.getDefaultConnectionFromWorkspace();
 		let connectionsFromUserConfig = this.getConnectionsFromUserConfig();
 
-		if (!this._connections.map((x) => x.displayName).includes(defaultConnectionFromWorkspace.displayName) && defaultConnectionFromWorkspace.isValid) {
+		if (defaultConnectionFromWorkspace != null && !this._connections.map((x) => x.displayName).includes(defaultConnectionFromWorkspace.displayName)) {
 			this._connections.push(defaultConnectionFromWorkspace);
 		}
 
@@ -78,8 +86,17 @@ export class DatabricksConnectionManager {
 	private getConnectionsFromUserConfig(): DatabricksConnection[] {
 		let currentUserWorkspaceConfig: iUserWorkspaceConfiguration = this.CurrentUserWorkspaceConfiguration;
 
+		let ret: DatabricksConnection[] = [];
+
 		if (currentUserWorkspaceConfig != undefined) {
-			return currentUserWorkspaceConfig.connections as DatabricksConnection[];
+			for (let con of currentUserWorkspaceConfig.connections) {
+				let dbCon = new DatabricksConnection(con);
+				if (dbCon.validate()) {
+					ret.push(dbCon);
+				}
+			}
+
+			return ret;
 		}
 		else {
 			return [];
@@ -87,24 +104,41 @@ export class DatabricksConnectionManager {
 	}
 
 	private getConnectionsFromWorkspace(): DatabricksConnection[] {
-		let envs: DatabricksConnection[] = vscode.workspace.getConfiguration().get('databricks.connections');
+		let cons: iDatabricksConnection[] = vscode.workspace.getConfiguration().get('databricks.connections');
 
-		return envs;
+		let ret: DatabricksConnection[] = [];
+
+		for (let con of cons) {
+			let dbCon = new DatabricksConnection(con);
+			if (dbCon.validate()) {
+				ret.push(dbCon);
+			}
+		}
+
+		return ret;
 	}
 
 	private getDefaultConnectionFromWorkspace(): DatabricksConnection {
-		let defaultCon: DatabricksConnection = new DatabricksConnection();
-		defaultCon.displayName = vscode.workspace.getConfiguration().get('databricks.connection.default.displayName');
-		defaultCon.cloudProvider = vscode.workspace.getConfiguration().get('databricks.connection.default.cloudProvider');
-		defaultCon.apiRootUrl = vscode.workspace.getConfiguration().get('databricks.connection.default.apiRootUrl');
-		defaultCon.personalAccessToken = vscode.workspace.getConfiguration().get('databricks.connection.default.personalAccessToken');
-		defaultCon.localSyncFolder = vscode.workspace.getConfiguration().get('databricks.connection.default.localSyncFolder');
 
-		defaultCon.databricksConnectJars = vscode.workspace.getConfiguration().get('databricks.connection.default.databricksConnectJars');
-		defaultCon.pythonInterpreter = vscode.workspace.getConfiguration().get('databricks.connection.default.pythonInterpreter');
-		defaultCon.port = vscode.workspace.getConfiguration().get<number>('databricks.connection.default.port');
-		defaultCon.organizationId = vscode.workspace.getConfiguration().get('databricks.connection.default.organizationId');
-		defaultCon.exportFormats = vscode.workspace.getConfiguration().get<ExportFormatsConfiguration>('databricks.connection.default.exportFormats');
+		let con: iDatabricksConnection = {
+			displayName: vscode.workspace.getConfiguration().get('databricks.connection.default.displayName'),
+			cloudProvider: vscode.workspace.getConfiguration().get('databricks.connection.default.cloudProvider'),
+			apiRootUrl: vscode.workspace.getConfiguration().get('databricks.connection.default.apiRootUrl'),
+			personalAccessToken: vscode.workspace.getConfiguration().get('databricks.connection.default.personalAccessToken'),
+			localSyncFolder: vscode.workspace.getConfiguration().get('databricks.connection.default.localSyncFolder'),
+
+			databricksConnectJars: vscode.workspace.getConfiguration().get('databricks.connection.default.databricksConnectJars'),
+			pythonInterpreter: vscode.workspace.getConfiguration().get('databricks.connection.default.pythonInterpreter'),
+			port: vscode.workspace.getConfiguration().get<number>('databricks.connection.default.port'),
+			organizationId: vscode.workspace.getConfiguration().get('databricks.connection.default.organizationId'),
+			exportFormats: vscode.workspace.getConfiguration().get<ExportFormatsConfiguration>('databricks.connection.default.exportFormats')
+		};
+
+		let defaultCon: DatabricksConnection = new DatabricksConnection(con);
+
+		if (defaultCon.displayName == "" || !defaultCon.validate()) {
+			return null;
+		}
 
 		return defaultCon;
 	}

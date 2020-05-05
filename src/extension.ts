@@ -2,9 +2,7 @@
 
 import * as vscode from 'vscode';
 import { ThisExtension } from './ThisExtension';
-import { Helper } from './helpers/Helper';
 
-import { DatabricksApiService } from './databricksApi/databricksApiService';
 import { DatabricksConnectionTreeProvider } from './DatabricksConnectionTreeProvider';
 import { DatabricksConnectionTreeItem } from './connections/DatabricksConnectionTreeItem';
 import { DatabricksWorkspaceTreeProvider } from './DatabricksWorkspaceTreeProvider';
@@ -27,13 +25,13 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showErrorMessage("Please update Databricks settings and restart VSCode!");
 	}
 
+	/*
 	ThisExtension.setSecureSetting("myTest", "Pass@word123").then(
 		(x) => ThisExtension.getSecureSetting("myTest").then(
 			(y) => ThisExtension.log(y)
 		)
 	);
-
-	DatabricksApiService.initialize();
+	*/
 
 	// register DatabricksConnectionTreeProvider
 	let databricksConnectionTreeProvider = new DatabricksConnectionTreeProvider();
