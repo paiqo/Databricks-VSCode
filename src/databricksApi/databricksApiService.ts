@@ -24,20 +24,26 @@ export abstract class DatabricksApiService {
 	private static API_SUB_URL: string = "/api/";
 	private static _apiService: any;
 
-	static initialize(Connection: DatabricksConnection = ThisExtension.ActiveConnection): void {
-		ThisExtension.log("Initializing Databricks API Service ...");
-		const axios = require('axios');
-		// Set config defaults when creating the instance
-		this._apiService = axios.create({
-			baseURL: Helper.trimChar(Connection.apiRootUrl, '/') + this.API_SUB_URL
-		});
+	static initialize(Connection: DatabricksConnection = ThisExtension.ActiveConnection): boolean {
+		try {
+			ThisExtension.log("Initializing Databricks API Service ...");
+			const axios = require('axios');
+			// Set config defaults when creating the instance
+			this._apiService = axios.create({
+				baseURL: Helper.trimChar(Connection.apiRootUrl, '/') + this.API_SUB_URL
+			});
 
-		// Alter defaults after instance has been created
-		this._apiService.defaults.headers.common['Authorization'] = "Bearer " + Connection.personalAccessToken;
-		this._apiService.defaults.headers.common['Content-Type'] = 'application/json';
-		this._apiService.defaults.headers.common['Accept'] = 'application/json';
+			// Alter defaults after instance has been created
+			this._apiService.defaults.headers.common['Authorization'] = "Bearer " + Connection.personalAccessToken;
+			this._apiService.defaults.headers.common['Content-Type'] = 'application/json';
+			this._apiService.defaults.headers.common['Accept'] = 'application/json';
 
-		ThisExtension.log("Databricks API Service initialized!");
+			return true;
+
+			ThisExtension.log("Databricks API Service initialized!");
+		} catch (error) {
+			return false;
+		}
 	}
 
 	private static writeBase64toFile(base64String: string, filePath: string): void {

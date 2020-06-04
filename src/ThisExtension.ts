@@ -45,20 +45,28 @@ export abstract class ThisExtension {
 		return this._isValidated;
 	}
 
-	static initialize(context: vscode.ExtensionContext): void {
-		this._logger = vscode.window.createOutputChannel(ThisExtension.extension_id);
-		this.log("Logger initialized!");
+	static initialize(context: vscode.ExtensionContext): boolean {
+		try {
+			this._logger = vscode.window.createOutputChannel(ThisExtension.extension_id);
+			this.log("Logger initialized!");
 
-		this._context = context;
-		this._extension = vscode.extensions.getExtension(this.extension_id);
+			this._context = context;
+			this._extension = vscode.extensions.getExtension(this.extension_id);
 
-		this.log("Initializing ConnectionManager ...");
-		this._connectionManager = new DatabricksConnectionManager();
+			this.log("Initializing ConnectionManager ...");
+			this._connectionManager = new DatabricksConnectionManager();
 
-		this.log("Initializing Databricks API Service ...");
-		DatabricksApiService.initialize();
+			this.log("Initializing Databricks API Service ...");
 
-		this._keytar = require('keytar');
+
+			this._keytar = require('keytar');
+
+			DatabricksApiService.initialize();
+
+			return true;
+		} catch (error) {
+			return false;
+		}
 	}
 
 	static cleanUp(): void {

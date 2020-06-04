@@ -19,6 +19,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 	_organizationId: string;
 	_isActive: boolean;
 	_exportFormats: ExportFormatsConfiguration;
+	_useCodeCells: boolean;
 
 	constructor(
 		displayName: string,
@@ -30,7 +31,8 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		pythonInterpreter: string = undefined,
 		port: number = 15001,
 		organizationId: string = undefined,
-		exportFormats: ExportFormatsConfiguration = undefined
+		exportFormats: ExportFormatsConfiguration = undefined,
+		useCodeCells: boolean = false
 	) {
 		super(displayName);
 		this._displayName = displayName;
@@ -44,6 +46,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		this._port = port;
 		this._organizationId = organizationId;
 		this._exportFormats = exportFormats;
+		this._useCodeCells = useCodeCells;
 
 		this._isActive = this.displayName === ThisExtension.ActiveConnectionName;
 
@@ -120,6 +123,10 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		return this._exportFormats;
 	}
 
+	get useCodeCells(): boolean {
+		return this._useCodeCells;
+	}
+
 
 	get isActive(): boolean {
 		return this._isActive;
@@ -140,32 +147,15 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 			Connection.databricksConnectJars,
 			Connection.pythonInterpreter,
 			Connection.port,
-			Connection.organizationId);
+			Connection.organizationId,
+			Connection.exportFormats,
+			Connection.useCodeCells);
 	}
 
 	activate(): void {
 		vscode.window.showInformationMessage(`Activating Databricks Connection '${this.displayName}' ...`);
 
 		ThisExtension.ConnectionManager.activateConnection(this.displayName);
-		/*
-		vscode.workspace.getConfiguration().update('databricks.connection.default.displayName', this.displayName, vscode.ConfigurationTarget.Workspace);
-		vscode.workspace.getConfiguration().update('databricks.connection.default.cloudProvider', this.cloudProvider, vscode.ConfigurationTarget.Workspace);
-		vscode.workspace.getConfiguration().update('databricks.connection.default.apiRootUrl', this.apiRootUrl, vscode.ConfigurationTarget.Workspace);
-		vscode.workspace.getConfiguration().update('databricks.connection.default.personalAccessToken', this.personalAccessToken, vscode.ConfigurationTarget.Workspace);
-		vscode.workspace.getConfiguration().update('databricks.connection.default.localSyncFolder', this.localSyncFolder, vscode.ConfigurationTarget.Workspace);
-		vscode.workspace.getConfiguration().update('databricks.connection.default.databricksConnectJars', this.databricksConnectJars, vscode.ConfigurationTarget.Workspace);
-		vscode.workspace.getConfiguration().update('databricks.connection.default.pythonInterpreter', this.pythonInterpreter, vscode.ConfigurationTarget.Workspace);
-
-		// update the venvPath for Databricks-Connect
-		//vscode.workspace.getConfiguration().update('python.venvPath', this.databricksConnectJars, vscode.ConfigurationTarget.Workspace);
-		//vscode.workspace.getConfiguration().update('python.venvPath', this.databricksConnectJars, vscode.ConfigurationTarget.Global);
-		vscode.workspace.getConfiguration().update('python.linting.enabled', false, vscode.ConfigurationTarget.Workspace);
-		vscode.workspace.getConfiguration().update('python.linting.enabled', false, vscode.ConfigurationTarget.Global);
-
-		// update the actual Python interpreter
-		vscode.workspace.getConfiguration().update('python.pythonPath', this.pythonInterpreter, vscode.ConfigurationTarget.Workspace);
-		vscode.workspace.getConfiguration().update('python.pythonPath', this.pythonInterpreter, vscode.ConfigurationTarget.Global);
-		*/
 
 		this._isActive = true;
 

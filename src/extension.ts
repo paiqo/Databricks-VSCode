@@ -16,13 +16,14 @@ import { DatabricksSecretTreeProvider } from './DatabricksSecretTreeProvider';
 import { DatabricksSecretTreeItem } from './databricksApi/secrets/DatabricksSecretTreeItem';
 import { DatabricksWorkspaceNotebook } from './databricksApi/workspaces/DatabricksWorkspaceNotebook';
 import { DatabricksWorkspaceDirectory } from './databricksApi/workspaces/DatabricksWorkspaceDirectory';
+import { Helper } from './helpers/Helper';
 
 export function activate(context: vscode.ExtensionContext) {
 
-	ThisExtension.initialize(context);
-	if (!ThisExtension.IsValidated) {
-		ThisExtension.log("Please update Databricks settings and restart VSCode!");
-		vscode.window.showErrorMessage("Please update Databricks settings and restart VSCode!");
+	let isValidated: boolean = ThisExtension.initialize(context);
+	if (!isValidated) {
+		ThisExtension.log("Issue initializing extension - Please update Databricks settings and restart VSCode!");
+		vscode.window.showErrorMessage("Issue initializing extension - Please update Databricks settings and restart VSCode!");
 	}
 
 	/*

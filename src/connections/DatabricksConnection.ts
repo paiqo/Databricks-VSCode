@@ -15,6 +15,7 @@ export class DatabricksConnection implements iDatabricksConnection {
 	port: number;
 	organizationId: string;
 	exportFormats: ExportFormatsConfiguration;
+	useCodeCells: boolean;
 
 	constructor(
 		config: iDatabricksConnection
@@ -30,6 +31,7 @@ export class DatabricksConnection implements iDatabricksConnection {
 		this.port = config.port;
 		this.organizationId = config.organizationId;
 		this.exportFormats = config.exportFormats;
+		this.useCodeCells = config.useCodeCells;
 	}
 
 	private propertyIsValid(value): boolean {
@@ -73,7 +75,7 @@ export class DatabricksConnection implements iDatabricksConnection {
 			// get the default from the config of this extension
 			let defaultFromConfig = ThisExtension.configuration.packageJSON.contributes.configuration[0].properties["databricks.userWorkspaceConfigurations"].items.properties.connections.items.properties.exportFormats.default;
 			this.exportFormats = defaultFromConfig;
-			msg = 'Configuration ' + this.displayName + ': Property "exportFormats" was not provided - using the default value!';
+			msg = 'Configuration ' + this.displayName + ': Property "exportFormats" was not provided - using the default value "' + defaultFromConfig + '"!';
 			ThisExtension.log(msg);
 			vscode.window.showWarningMessage(msg);
 		}
@@ -91,7 +93,15 @@ export class DatabricksConnection implements iDatabricksConnection {
 			// get the default from the config of this extension
 			let defaultFromConfig = ThisExtension.configuration.packageJSON.contributes.configuration[0].properties["databricks.userWorkspaceConfigurations"].items.properties.connections.items.properties.port.default;
 			this.port = defaultFromConfig;
-			msg = 'Configuration ' + this.displayName + ': Property "port" was not provided - using the default value!';
+			msg = 'Configuration ' + this.displayName + ': Property "port" was not provided - using the default value "' + defaultFromConfig + '"!';
+			ThisExtension.log(msg);
+			vscode.window.showWarningMessage(msg);
+		}
+		if (this.useCodeCells == undefined) { // this.propertyIsValid does not work for booleans !!!
+			// get the default from the config of this extension
+			let defaultFromConfig = ThisExtension.configuration.packageJSON.contributes.configuration[0].properties["databricks.userWorkspaceConfigurations"].items.properties.connections.items.properties.useCodeCells.default;
+			this.useCodeCells = defaultFromConfig;
+			msg = 'Configuration ' + this.displayName + ': Property "useCodeCells" was not provided - using the default value "' + defaultFromConfig + '"!';
 			ThisExtension.log(msg);
 			vscode.window.showWarningMessage(msg);
 		}

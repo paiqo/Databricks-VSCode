@@ -131,7 +131,9 @@ export class DatabricksConnectionManager {
 			pythonInterpreter: vscode.workspace.getConfiguration().get('databricks.connection.default.pythonInterpreter'),
 			port: vscode.workspace.getConfiguration().get<number>('databricks.connection.default.port'),
 			organizationId: vscode.workspace.getConfiguration().get('databricks.connection.default.organizationId'),
-			exportFormats: vscode.workspace.getConfiguration().get<ExportFormatsConfiguration>('databricks.connection.default.exportFormats')
+			exportFormats: vscode.workspace.getConfiguration().get<ExportFormatsConfiguration>('databricks.connection.default.exportFormats'),
+
+			useCodeCells: vscode.workspace.getConfiguration().get('databricks.connection.default.useCodeCells')
 		};
 
 		let defaultCon: DatabricksConnection = new DatabricksConnection(con);
@@ -159,6 +161,8 @@ export class DatabricksConnectionManager {
 		vscode.workspace.getConfiguration().update('databricks.connection.default.port', undefined, vscode.ConfigurationTarget.Workspace);
 		vscode.workspace.getConfiguration().update('databricks.connection.default.organizationId', undefined, vscode.ConfigurationTarget.Workspace);
 		vscode.workspace.getConfiguration().update('databricks.connection.default.exportFormats', undefined, vscode.ConfigurationTarget.Workspace);
+
+		vscode.workspace.getConfiguration().update('databricks.connection.default.useCodeCells', undefined, vscode.ConfigurationTarget.Workspace);
 	}
 
 	private updateWorkspaceConfig(): void {

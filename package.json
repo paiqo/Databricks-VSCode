@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Databricks Extension for VSCode",
-	"version": "0.4.1",
+	"version": "0.5.0",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -182,6 +182,11 @@
 												"type": "number",
 												"default": 15001,
 												"description": "The port to use when connecting using Databricks-Connect. Default is 15001."
+											},
+											"useCodeCells": {
+												"type": "boolean",
+												"default": false,
+												"description": "If true, Code Cell tags (# %%) will be added when downloading raw source files."
 											}
 										}
 									}
@@ -310,6 +315,11 @@
 						"description": "(Optional, for Databricks-Connect) The port to use when connecting using Databricks-Connect. Default is 15001.",
 						"scope": "window"
 					},
+					"databricks.connection.default.useCodeCells": {
+						"type": "boolean",
+						"description": "If true, Code Cell tags (# %%) will be added when downloading raw source files.",
+						"scope": "window"
+					},
 					"databricks.connections": {
 						"type": "array",
 						"description": "An array of objects where each object represents a Databricks Connection containing the same settings as defined for databricks.connection.default.* ",
@@ -424,6 +434,12 @@
 									"type": "number",
 									"default": 15001,
 									"description": "The port to use when connecting using Databricks-Connect. Default is 15001.",
+									"scope": "window"
+								},
+								"useCodeCells": {
+									"type": "boolean",
+									"default": false,
+									"description": "If true, Code Cell tags (# %%) will be added when downloading raw source files.",
 									"scope": "window"
 								}
 							}
@@ -965,6 +981,7 @@
 		"minimist": "^1.2.5",
 		"mkdirp": "^0.5.1",
 		"promise.prototype.finally": "^3.1.2",
+		"replace-in-file": "^6.0.0",
 		"request": "^2.88.2",
 		"rimraf": "^2.6.2",
 		"rxjs": "^6.5.3",

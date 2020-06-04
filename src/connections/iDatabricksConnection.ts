@@ -13,4 +13,5 @@ export interface iDatabricksConnection {
 	port: number;
 	organizationId: string;
 	exportFormats: ExportFormatsConfiguration;
+	useCodeCells: boolean;
 }

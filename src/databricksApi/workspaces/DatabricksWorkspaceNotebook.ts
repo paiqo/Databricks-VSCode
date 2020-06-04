@@ -167,6 +167,11 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 				vscode.commands.executeCommand("databricksWorkspace.refresh", false);
 			}
 
+			if (!this._languageFileExtension.isNotebook && ThisExtension.ActiveConnection.useCodeCells) {
+				ThisExtension.log("Adding Code Cells!");
+				Helper.addCodeCells(localPath);
+			}
+
 			return localPath;
 		}
 		catch (error) {
@@ -176,7 +181,11 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 
 	async upload(): Promise<void> {
 		try {
-			//vscode.window.showInformationMessage(`Upload of item ${this.path}) started ...`);
+			if (!this._languageFileExtension.isNotebook && ThisExtension.ActiveConnection.useCodeCells) {
+				// 1. copy to temporary file
+				// 2. replace on temporary file using Helper.removeCodeCells(tempFilePath)
+				// 3. upload temp file
+			}
 			let response = DatabricksApiService.uploadWorkspaceItem(this.localFilePath, this.path, this.language, true, this.exportFormat);
 			vscode.window.showInformationMessage(`Upload of item ${this.path}) finished!`);
 

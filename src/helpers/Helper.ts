@@ -11,6 +11,8 @@ import * as UniqueFileName from 'uniquefilename';
 import { ThisExtension } from '../ThisExtension';
 
 export abstract class Helper {
+	private static CodeCellTag: string = "# %% Code Cell";
+	private static DatabricksCommandTag: string = "# COMMAND ----------";
 	private static openAsNotebookSettingName: string = 'python.dataScience.useNotebookEditor';
 
 	private static _tempFiles: string[];
@@ -256,5 +258,52 @@ export abstract class Helper {
 				v = c == 'x' ? r : (r & 0x3 | 0x8);
 			return v.toString(16);
 		});
+	}
+
+	static async addCodeCells(filePath: string): Promise<void> {
+		try {
+			const replace = require('replace-in-file');
+			let regex = new RegExp(this.DatabricksCommandTag, 'g');
+			let options = {
+				files: filePath,
+				from: regex,
+				to: this.DatabricksCommandTag + '\n' + this.CodeCellTag
+			};
+
+
+			let results = await replace(options);
+			ThisExtension.log('Replacement results:', results[0].hasChanged);
+
+			// remove duplicat code cells that might have been added
+			regex = new RegExp(this.CodeCellTag + '[\\r\\n]' + this.CodeCellTag, 'g');
+			options = {
+				files: filePath,
+				from: regex,
+				to: this.CodeCellTag
+			};
+
+			results = await replace(options);
+			ThisExtension.log('Replacement results:', results[0].hasChanged);
+		}
+		catch (error) {
+			ThisExtension.log('Error occurred:', error);
+		}
+	}
+	static async removeCodeCells(filePath: string): Promise<void> {
+		try {
+			const replace = require('replace-in-file');
+			const regex = new RegExp(this.DatabricksCommandTag + '[\\r\\n]*' + this.CodeCellTag, 'g');
+			const options = {
+				files: filePath,
+				from: regex,
+				to: this.DatabricksCommandTag,
+			};
+
+			const results = await replace(options);
+			ThisExtension.log('Replacement results:', results[0].hasChanged);
+		}
+		catch (error) {
+			ThisExtension.log('Error occurred:', error);
+		}
 	}
 }
