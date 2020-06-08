@@ -100,7 +100,7 @@
 												"type": "object",
 												"default": {
 													"Scala": ".scala",
-													"Python": ".py.ipynb",
+													"Python": ".ipynb",
 													"SQL": ".sql",
 													"R": ".r"
 												},
@@ -110,8 +110,7 @@
 													"Scala": {
 														"type": "string",
 														"enum": [
-															".scala",
-															".scala.ipynb"
+															".scala"
 														],
 														"description": "The file extension used when downloading Scala notebooks from Databricks."
 													},
@@ -119,15 +118,15 @@
 														"type": "string",
 														"enum": [
 															".py",
-															".py.ipynb"
+															".py.ipynb",
+															".ipynb"
 														],
 														"description": "The file extension used when downloading Python notebooks from Databricks."
 													},
 													"SQL": {
 														"type": "string",
 														"enum": [
-															".sql",
-															".sql.ipynb"
+															".sql"
 														],
 														"description": "The file extension used when downloading SQL notebooks from Databricks."
 													},
@@ -135,7 +134,7 @@
 														"type": "string",
 														"enum": [
 															".r",
-															".r.ipynb"
+															".Rmd"
 														],
 														"description": "The file extension used when downloading R notebooks from Databricks."
 													}
@@ -198,7 +197,7 @@
 						"type": "object",
 						"default": {
 							"Scala": ".scala",
-							"Python": ".py.ipynb",
+							"Python": ".ipynb",
 							"SQL": ".sql",
 							"R": ".r"
 						},
@@ -207,43 +206,34 @@
 						"properties": {
 							"Scala": {
 								"type": "string",
-								"default": ".scala",
 								"enum": [
-									".scala",
-									".scala.ipynb"
+									".scala"
 								],
-								"description": "The file extension used when downloading Scala notebooks from Databricks.",
-								"scope": "window"
+								"description": "The file extension used when downloading Scala notebooks from Databricks."
 							},
 							"Python": {
 								"type": "string",
-								"default": ".py.ipynb",
 								"enum": [
 									".py",
-									".py.ipynb"
+									".py.ipynb",
+									".ipynb"
 								],
-								"description": "The file extension used when downloading Python notebooks from Databricks.",
-								"scope": "window"
+								"description": "The file extension used when downloading Python notebooks from Databricks."
 							},
 							"SQL": {
 								"type": "string",
-								"default": ".sql",
 								"enum": [
-									".sql",
-									".sql.ipynb"
+									".sql"
 								],
-								"description": "The file extension used when downloading SQL notebooks from Databricks.",
-								"scope": "window"
+								"description": "The file extension used when downloading SQL notebooks from Databricks."
 							},
 							"R": {
 								"type": "string",
-								"default": ".r",
 								"enum": [
 									".r",
-									".r.ipynb"
+									".Rmd"
 								],
-								"description": "The file extension used when downloading R notebooks from Databricks.",
-								"scope": "window"
+								"description": "The file extension used when downloading R notebooks from Databricks."
 							}
 						}
 					},
@@ -330,7 +320,7 @@
 									"type": "object",
 									"default": {
 										"Scala": ".scala",
-										"Python": ".py.ipynb",
+										"Python": ".ipynb",
 										"SQL": ".sql",
 										"R": ".r"
 									},
@@ -339,43 +329,34 @@
 									"properties": {
 										"Scala": {
 											"type": "string",
-											"default": ".scala",
 											"enum": [
-												".scala",
-												".scala.ipynb"
+												".scala"
 											],
-											"description": "The file extension used when downloading Scala notebooks from Databricks.",
-											"scope": "window"
+											"description": "The file extension used when downloading Scala notebooks from Databricks."
 										},
 										"Python": {
 											"type": "string",
-											"default": ".py.ipynb",
 											"enum": [
 												".py",
-												".py.ipynb"
+												".py.ipynb",
+												".ipynb"
 											],
-											"description": "The file extension used when downloading Python notebooks from Databricks.",
-											"scope": "window"
+											"description": "The file extension used when downloading Python notebooks from Databricks."
 										},
 										"SQL": {
 											"type": "string",
-											"default": ".sql",
 											"enum": [
-												".sql",
-												".sql.ipynb"
+												".sql"
 											],
-											"description": "The file extension used when downloading SQL notebooks from Databricks.",
-											"scope": "window"
+											"description": "The file extension used when downloading SQL notebooks from Databricks."
 										},
 										"R": {
 											"type": "string",
-											"default": ".r",
 											"enum": [
 												".r",
-												".r.ipynb"
+												".Rmd"
 											],
-											"description": "The file extension used when downloading R notebooks from Databricks.",
-											"scope": "window"
+											"description": "The file extension used when downloading R notebooks from Databricks."
 										}
 									}
 								},

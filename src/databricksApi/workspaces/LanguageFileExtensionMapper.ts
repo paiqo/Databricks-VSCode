@@ -1,16 +1,9 @@
-import * as vscode from 'vscode';
-import * as fspath from 'path';
-import * as fs from 'fs';
-
 import { WorkspaceItemExportFormat, WorkspaceItemLanguage } from './_types';
 import { ThisExtension, ExportFormatsConfiguration } from '../../ThisExtension';
 
 export class LanguageFileExtensionMapper {
 	private _language: WorkspaceItemLanguage;
 	private _extension: string;
-	private _languageExtension: string;
-	private _notebookExtension: string;
-	private _originalExtension: string;
 	private _exportFormat: WorkspaceItemExportFormat;
 	private _isNotebook: boolean;
 
@@ -34,21 +27,7 @@ export class LanguageFileExtensionMapper {
 	}
 
 	get extension(): string {
-		if (this._originalExtension) { return this._originalExtension; }
-
 		return this._extension;
-	}
-
-	get languageExtension(): string {
-		return this._languageExtension;
-	}
-
-	get notebookExtension(): string {
-		return this._notebookExtension;
-	}
-
-	get originalExtension(): string {
-		return this._originalExtension;
 	}
 
 	get exportFormat(): WorkspaceItemExportFormat {
@@ -62,10 +41,6 @@ export class LanguageFileExtensionMapper {
 	static fromLanguage(language: WorkspaceItemLanguage): LanguageFileExtensionMapper {
 		let ret: LanguageFileExtensionMapper = new LanguageFileExtensionMapper();
 
-		let x = ThisExtension.ActiveConnection;
-		let x1 = ThisExtension.ConnectionManager.ActiveConnection;
-		let y = ThisExtension.ActiveConnectionName;
-		let y1 = ThisExtension.ConnectionManager.ActiveConnectionName;
 		ret._language = language;
 
 		switch (language) {
@@ -84,17 +59,12 @@ export class LanguageFileExtensionMapper {
 			default: throw new Error("ExportFormat for Language '" + language + "' is not defined!");
 		}
 
-		let tokens = ret.extension.split('.'); // e.g. '.py.ipynb'
 		if (ret.extension.endsWith('.ipynb')) {
 			ret._isNotebook = true;
-			ret._notebookExtension = '.ipynb';
-			ret._languageExtension = tokens[1];
 			ret._exportFormat = "JUPYTER";
 		}
 		else {
 			ret._isNotebook = false;
-			ret._notebookExtension = '';
-			ret._languageExtension = tokens[1];
 			ret._exportFormat = "SOURCE";
 		}
 
@@ -104,28 +74,24 @@ export class LanguageFileExtensionMapper {
 	static fromExtension(extension: string): LanguageFileExtensionMapper {
 		let ret: LanguageFileExtensionMapper = new LanguageFileExtensionMapper();
 
-		ret._extension = extension;
-		ret._originalExtension = extension;
+		ret._extension = extension.toLowerCase();
 
-		let tokens = ret.extension.split('.'); // e.g. '.py.ipynb'
-		if (ret.extension.endsWith('.ipynb')) {
-			ret._isNotebook = true;
-			ret._notebookExtension = '.ipynb';
-			ret._languageExtension = '.' + tokens[1];
-			ret._exportFormat = "JUPYTER";
-		}
-		else {
-			ret._isNotebook = false;
-			ret._notebookExtension = '';
-			ret._languageExtension = '.' + tokens[1];
-			ret._exportFormat = "SOURCE";
-		}
+		ret._isNotebook = false;
+		ret._exportFormat = "SOURCE";
 
-		switch (ret.languageExtension) {
+		switch (ret.extension) {
 			case ".py":
 				ret._language = "PYTHON";
 				break;
+			case ".ipynb":
+				ret._language = "PYTHON";
+				ret._isNotebook = true;
+				ret._exportFormat = "JUPYTER";
+				break;
 			case ".r":
+				ret._language = "R";
+				break;
+			case ".Rmd":
 				ret._language = "R";
 				break;
 			case ".scala":
@@ -134,7 +100,7 @@ export class LanguageFileExtensionMapper {
 			case ".sql":
 				ret._language = "SQL";
 				break;
-			default: throw new Error("Language for extensions '" + ret.languageExtension + "' is not defined!");
+			default: throw new Error("Language for extension '" + ret.extension + "' is not defined!");
 		}
 
 		return ret;
@@ -142,14 +108,8 @@ export class LanguageFileExtensionMapper {
 
 	static extensionFromFileName(fileName: string): string {
 		let tokens = fileName.split('.'); // e.g. '.py.ipynb'
-		let extensionTokens: string[];
-		if (tokens.slice(-1)[0] == "ipynb") {
-			extensionTokens = tokens.slice(-2);
-		}
-		else {
-			extensionTokens = tokens.slice(-1);
-		}
-		return '.' + extensionTokens.join('.');
+
+		return "." + tokens.slice(-1)[0];
 	}
 
 	static fromFileName(fileName: string): LanguageFileExtensionMapper {
