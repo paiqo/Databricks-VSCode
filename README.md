@@ -1,7 +1,7 @@
-# VS Code Extension for Databricks
-This is a Visual Studio Code extension that allows you to work with Azure Databricks and Databricks on AWS locally in an efficient way, having everything you need integrated into VS Code. 
-
 ![Databricks-VSCode](https://github.com/paiqo/Databricks-VSCode/blob/master/images/Databricks-VSCode.jpg?raw=true "Databricks-VSCode")
+
+# VS Code Extension for Databricks
+This is a Visual Studio Code extension that allows you to work with Azure Databricks and Databricks on AWS locally in an efficient way, having everything you need integrated into VS Code. It can be downloaded from the official Visual Studio Code extension gallery: [Databricks VSCode](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
 
 # Features
 - Workspace browser
@@ -29,6 +29,8 @@ This is a Visual Studio Code extension that allows you to work with Azure Databr
 - Easy configuration via standard VS Code settings
 
 # Relase Notes
+**v0.5.1**:
+- fix issues with unsupported file extensions (e.g. .scala.ipynb)
 **v0.5.0**:
 - added support for [Code Cells](https://code.visualstudio.com/docs/python/jupyter-support-py#_jupyter-code-cells) which can be enabled using the new configuration property "useCodeCells"
 - minor fixes for connection manager
