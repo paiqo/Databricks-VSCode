@@ -950,7 +950,7 @@
 	"dependencies": {
 		"@angular/common": "^8.2.14",
 		"@angular/core": "^8.2.14",
-		"angular": "^1.7.9",
+		"angular": "^1.8.0",
 		"axios": "^0.19.1",
 		"file-saver": "^2.0.2",
 		"ftp": "^0.3.10",
