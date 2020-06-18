@@ -83,6 +83,7 @@ export class LanguageFileExtensionMapper {
 			case ".py":
 				ret._language = "PYTHON";
 				break;
+			case ".py.ipynb":
 			case ".ipynb":
 				ret._language = "PYTHON";
 				ret._isNotebook = true;
@@ -107,7 +108,11 @@ export class LanguageFileExtensionMapper {
 	}
 
 	static extensionFromFileName(fileName: string): string {
-		let tokens = fileName.split('.'); // e.g. '.py.ipynb'
+		if (fileName.endsWith(".py.ipynb")) {
+			return ".py.ipynb";
+		}
+
+		let tokens = fileName.split('.'); // e.g. '.ipynb' or '.scala'
 
 		return "." + tokens.slice(-1)[0];
 	}

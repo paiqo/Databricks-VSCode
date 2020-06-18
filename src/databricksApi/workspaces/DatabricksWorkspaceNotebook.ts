@@ -61,16 +61,28 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 		}
 		if (!this.onlinePathExists && this.localPathExists) {
 			tooltip += "[Offline only]\n";
+			tooltip += "Local file extension: " + this.localFileExtension + "\n";
 		}
 		if (this.onlinePathExists && this.localPathExists) {
 			tooltip += "[Synced]\n";
+			tooltip += "Local file extension: " + this.localFileExtension + "\n";
 		}
 		return tooltip;
 	}
 
 	// description is show next to the label
 	get description(): string {
-		return "[" + this.language + "] - " + this.path;
+		let ret: string;
+
+		ret = "[" + this.language;
+
+		if (this._languageFileExtension.isNotebook) {
+			ret += ", Notebook";
+		}
+
+		ret += "] - " + this.path;
+
+		return ret;
 	}
 
 	// used in package.json to filter commands via viewItem == CANSTART
@@ -167,11 +179,6 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 				vscode.commands.executeCommand("databricksWorkspace.refresh", false);
 			}
 
-			if (!this._languageFileExtension.isNotebook && ThisExtension.ActiveConnection.useCodeCells) {
-				ThisExtension.log("Adding Code Cells!");
-				Helper.addCodeCells(localPath);
-			}
-
 			return localPath;
 		}
 		catch (error) {
@@ -181,11 +188,6 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 
 	async upload(): Promise<void> {
 		try {
-			if (!this._languageFileExtension.isNotebook && ThisExtension.ActiveConnection.useCodeCells) {
-				// 1. copy to temporary file
-				// 2. replace on temporary file using Helper.removeCodeCells(tempFilePath)
-				// 3. upload temp file
-			}
 			let response = DatabricksApiService.uploadWorkspaceItem(this.localFilePath, this.path, this.language, true, this.exportFormat);
 			vscode.window.showInformationMessage(`Upload of item ${this.path}) finished!`);
 

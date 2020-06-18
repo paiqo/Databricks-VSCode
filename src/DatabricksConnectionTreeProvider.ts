@@ -16,6 +16,7 @@ export class DatabricksConnectionTreeProvider implements vscode.TreeDataProvider
 			vscode.window.showInformationMessage('Refreshing Connections ...');
 		}
 		ThisExtension.ConnectionManager.loadConnections();
+		ThisExtension.ConnectionManager.activateConnection(ThisExtension.ActiveConnectionName);
 		this._onDidChangeTreeData.fire();
 	}
 

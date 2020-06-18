@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Databricks Extension for VSCode",
-	"version": "0.5.1",
+	"version": "0.5.2",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -118,7 +118,6 @@
 														"type": "string",
 														"enum": [
 															".py",
-															".py.ipynb",
 															".ipynb"
 														],
 														"description": "The file extension used when downloading Python notebooks from Databricks."
@@ -215,7 +214,6 @@
 								"type": "string",
 								"enum": [
 									".py",
-									".py.ipynb",
 									".ipynb"
 								],
 								"description": "The file extension used when downloading Python notebooks from Databricks."
@@ -338,7 +336,6 @@
 											"type": "string",
 											"enum": [
 												".py",
-												".py.ipynb",
 												".ipynb"
 											],
 											"description": "The file extension used when downloading Python notebooks from Databricks."
