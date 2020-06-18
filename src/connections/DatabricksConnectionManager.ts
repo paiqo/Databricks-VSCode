@@ -76,6 +76,13 @@ export class DatabricksConnectionManager {
 
 			this.updateWorkspaceConfig();
 
+			if (this.ActiveConnection.useCodeCells) {
+				vscode.workspace.getConfiguration().update("python.dataScience.codeRegularExpression", "^(# COMMAND ----------|#\\s*%%|#\\s*\\<codecell\\>|#\\s*In\\[\\d*?\\]|#\\s*In\\[ \\])", vscode.ConfigurationTarget.Workspace);
+			}
+			else {
+				vscode.workspace.getConfiguration().update("python.dataScience.codeRegularExpression", undefined, vscode.ConfigurationTarget.Workspace);
+			}
+
 			return this._activeConnection;
 		}
 		else {
