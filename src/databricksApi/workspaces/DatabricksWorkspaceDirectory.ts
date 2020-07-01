@@ -125,15 +125,19 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 
 			for (let local of localContent) {
 				let localFile: fspath.ParsedPath = fspath.parse(local);
-				let localRelativePath = (this.path + '/'
-					+ localFile.base.replace(LanguageFileExtensionMapper.extensionFromFileName(localFile.base), '')) // remove extension
-					.replace('//', '/');
 				let localFullPath = fspath.join(this.localPath, local);
+				let shownLocalFile = localFile.base;
+				let isFile = fs.lstatSync(localFullPath).isFile();
+				if (isFile) // remove extension
+				{
+					shownLocalFile = shownLocalFile.replace(LanguageFileExtensionMapper.extensionFromFileName(shownLocalFile), '');
+				}
+				let localRelativePath = (this.path + '/' + shownLocalFile).replace('//', '/');
 
 				if (!onlinePaths.includes(localRelativePath)) {
 					let languageFileExtension: LanguageFileExtensionMapper = undefined;
 
-					if (fs.lstatSync(localFullPath).isFile()) {
+					if (isFile) {
 						let ext = LanguageFileExtensionMapper.extensionFromFileName(localFile.base);
 
 						if (LanguageFileExtensionMapper.supportedFileExtensions.includes(ext)
