@@ -29,15 +29,22 @@ This is a Visual Studio Code extension that allows you to work with Azure Databr
 - Easy configuration via standard VS Code settings
 
 # Relase Notes
+**v0.5.3**:
+- fix issue with dots ('.') in folder names (e.g. in user-folders) - Thanks to [JacekPliszka9](https://github.com/JacekPliszka)
+- another fix issue with deprecated '.py.ipynb' file extensions
+
 **v0.5.2**:
 - fix issues with deprecated file extension '.py.ipynb'. Also removed it from configuration settings (but it still works)
 - reworked UseCodeCells to now use the code cell tags provided by Databricks instead of adding new ones
 - refresh on Connections Tab now also re-activates the current connection to reload the configuration
+
 **v0.5.1**:
 - fix issues with unsupported file extensions (e.g. .scala.ipynb)
+
 **v0.5.0**:
 - added support for [Code Cells](https://code.visualstudio.com/docs/python/jupyter-support-py#_jupyter-code-cells) which can be enabled using the new configuration property "useCodeCells"
 - minor fixes for connection manager
+
 **v0.4.0**:
 - Moved configuration from VSCode Workspace-settings to VSCode User-settings
 	- avoids accidential check-in of sensitive information (Databricks API token) to GIT
