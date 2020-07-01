@@ -100,6 +100,7 @@ export abstract class ThisExtension {
 		switch (language) {
 			case "PYTHON":
 				extensions = exportFormats["Python"]["enum"];
+				extensions.push(".py.ipynb"); // workaround to support legacy file extension - will be removed in the future
 				break;
 			case "R":
 				extensions = exportFormats["R"]["enum"];
