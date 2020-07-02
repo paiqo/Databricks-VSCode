@@ -254,6 +254,10 @@ export class DatabricksConnectionManager {
 		return "Clusters";
 	}
 
+	static get DatabricksFSSubFolder(): string {
+		return "DBFS";
+	}
+
 	static get JobsSubFolder(): string {
 		return "Jobs";
 	}

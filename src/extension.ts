@@ -94,6 +94,7 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksFSItem.click', (fsItem: DatabricksFSTreeItem) => fsItem.download("PREVIEW"));
 	vscode.commands.registerCommand('databricksFSItem.add', (fsItem: DatabricksFSTreeItem) => fsItem.add());
 	vscode.commands.registerCommand('databricksFSItem.download', (fsItem: DatabricksFSTreeItem) => fsItem.download("SAVE"));
+	vscode.commands.registerCommand('databricksFSItem.upload', (fsItem: DatabricksFSTreeItem) => fsItem.upload());
 	vscode.commands.registerCommand('databricksFSItem.delete', (fsItem: DatabricksFSTreeItem) => fsItem.delete());
 
 

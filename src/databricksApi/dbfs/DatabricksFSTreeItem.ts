@@ -1,9 +1,11 @@
 import * as vscode from 'vscode';
 import * as fspath from 'path';
+import * as fs from 'fs';
 import { DatabricksApiService } from '../databricksApiService';
 import { ThisExtension } from '../../ThisExtension';
 import { iDatabricksFSItem } from './iDatabricksFSItem';
 import { Helper } from '../../helpers/Helper';
+import { DatabricksConnectionManager } from '../../connections/DatabricksConnectionManager';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -55,6 +57,15 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		{
 			return 'FOLDER';
 		}
+		let localFilePath = fspath.join(
+			ThisExtension.ActiveConnection.localSyncFolder,
+			DatabricksConnectionManager.DatabricksFSSubFolder,
+			this.path
+		);
+		if (fs.existsSync(localFilePath))
+		{
+			return 'FILE_WITH_LOCAL_COPY';
+		}
 		else
 		{
 			return 'FILE';
@@ -100,12 +111,16 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		{
 			if (action == "PREVIEW")
 			{
-				let tempFile = await Helper.openTempFile('', this.path.split('/').slice(-1)[0], false);
-				await DatabricksApiService.downloadDBFSFile(this.path, tempFile, true);
+				let localFilePath = fspath.join(
+					ThisExtension.ActiveConnection.localSyncFolder,
+					DatabricksConnectionManager.DatabricksFSSubFolder,
+					this.path
+				);
+				Helper.ensureLocalFolder(localFilePath, true);
+				await DatabricksApiService.downloadDBFSFile(this.path, localFilePath, true);
 
-				
 				vscode.workspace
-					.openTextDocument(tempFile)
+					.openTextDocument(localFilePath)
 					.then(vscode.window.showTextDocument);
 			}
 			else if(action == "SAVE")
@@ -128,7 +143,35 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		{
 			throw new Error("Only a single file can be downloaded!");
 		}
-		
+	}
+
+	async upload(): Promise<void> {
+		if(!this.is_dir)
+		{
+			try {
+				let localFilePath = fspath.join(
+					ThisExtension.ActiveConnection.localSyncFolder,
+					DatabricksConnectionManager.DatabricksFSSubFolder,
+					this.path
+				);
+				if (!fs.existsSync(localFilePath)) {
+					throw new Error(`Local file ${localFilePath} does not exist!`);
+				}
+				let response = DatabricksApiService.uploadDBFSFile(localFilePath, this.path, true);
+				vscode.window.showInformationMessage(`Upload of item ${this.path}) finished!`);
+				if (ThisExtension.RefreshAfterUpDownload) {
+					Helper.wait(500);
+					vscode.commands.executeCommand("databricksFS.refresh", false);
+				}
+			}
+			catch (error) {
+				vscode.window.showErrorMessage(`ERROR: ${error}`);
+			}
+		}
+		else
+		{
+			throw new Error("Only a single file can be uploaded at the moment!");
+		}
 	}
 
 	async add(): Promise<void> {

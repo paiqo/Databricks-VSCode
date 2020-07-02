@@ -695,10 +695,18 @@
 			},
 			{
 				"command": "databricksFSItem.download",
-				"title": "download",
+				"title": "Download",
 				"icon": {
 					"light": "resources/light/download.png",
 					"dark": "resources/dark/download.png"
+				}
+			},
+			{
+				"command": "databricksFSItem.upload",
+				"title": "Upload",
+				"icon": {
+					"light": "resources/light/upload.png",
+					"dark": "resources/dark/upload.png"
 				}
 			},
 			{
@@ -908,12 +916,17 @@
 				},
 				{
 					"command": "databricksFSItem.download",
-					"when": "view == databricksFS && viewItem == FILE",
+					"when": "view == databricksFS && viewItem == FILE || viewItem == FILE_WITH_LOCAL_COPY",
+					"group": "inline"
+				},
+				{
+					"command": "databricksFSItem.upload",
+					"when": "view == databricksFS && viewItem == FILE_WITH_LOCAL_COPY",
 					"group": "inline"
 				},
 				{
 					"command": "databricksFSItem.delete",
-					"when": "view == databricksFS && viewItem == FILE",
+					"when": "view == databricksFS && viewItem == FILE || viewItem == FILE_WITH_LOCAL_COPY",
 					"group": "inline"
 				},
 				{
