@@ -154,9 +154,6 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 					DatabricksConnectionManager.DatabricksFSSubFolder,
 					this.path
 				);
-				if (!fs.existsSync(localFilePath)) {
-					throw new Error(`Local file ${localFilePath} does not exist!`);
-				}
 				let response = DatabricksApiService.uploadDBFSFile(localFilePath, this.path, true);
 				vscode.window.showInformationMessage(`Upload of item ${this.path}) finished!`);
 				if (ThisExtension.RefreshAfterUpDownload) {
