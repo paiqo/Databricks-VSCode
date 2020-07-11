@@ -85,6 +85,14 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		return this._path;
 	}
 
+	get local_path (): string {
+		return fspath.join(
+			ThisExtension.ActiveConnection.localSyncFolder,
+			DatabricksConnectionManager.DatabricksFSSubFolder,
+			this.path
+		);
+	}
+
 	get is_dir (): boolean {
 		return this._is_dir;
 	}
@@ -106,42 +114,38 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		return null;
 	}
 
-	async download(action:"PREVIEW" | "SAVE"): Promise<void> {
-		if(!this.is_dir)
+	async click(): Promise<void> {
+		if(this.is_dir)
 		{
-			if (action == "PREVIEW")
-			{
-				let localFilePath = fspath.join(
-					ThisExtension.ActiveConnection.localSyncFolder,
-					DatabricksConnectionManager.DatabricksFSSubFolder,
-					this.path
-				);
-				Helper.ensureLocalFolder(localFilePath, true);
-				await DatabricksApiService.downloadDBFSFile(this.path, localFilePath, true);
-
-				vscode.workspace
-					.openTextDocument(localFilePath)
-					.then(vscode.window.showTextDocument);
-			}
-			else if(action == "SAVE")
-			{
-				const options: vscode.SaveDialogOptions = {
-					saveLabel: 'Download',
-					defaultUri: vscode.Uri.parse("file:///" + this.label)
-				};
-
-				vscode.window.showSaveDialog(options).then(async fileUri => {
-					if (fileUri) {
-						await DatabricksApiService.downloadDBFSFile(this.path, fileUri.fsPath, true);
-
-						vscode.window.showInformationMessage("Download to " + fileUri.fsPath + " (" + this.file_size + " bytes) completed!");
-					}
-				});
-			}
+			throw new Error("Opening of whole directory is not implemented!");
 		}
 		else
 		{
-			throw new Error("Only a single file can be downloaded!");
+			let localFilePath = this.local_path;
+			if(!fs.existsSync(localFilePath)) {
+				await this.download();
+			}
+			vscode.workspace
+				.openTextDocument(localFilePath)
+				.then(vscode.window.showTextDocument);
+		}
+	}
+
+	async download(): Promise<void> {
+		if(this.is_dir)
+		{
+			throw new Error("Download of whole directory not yet implemented!");
+		}
+		else
+		{
+			let localFilePath = this.local_path;
+			if(!fs.existsSync(localFilePath))
+			Helper.ensureLocalFolder(localFilePath, true);
+			await DatabricksApiService.downloadDBFSFile(this.path, localFilePath, true);
+			if (ThisExtension.RefreshAfterUpDownload) {
+				Helper.wait(500);
+				vscode.commands.executeCommand("databricksFS.refresh", false);
+			}
 		}
 	}
 
