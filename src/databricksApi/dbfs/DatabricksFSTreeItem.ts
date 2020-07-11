@@ -57,12 +57,7 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		{
 			return 'FOLDER';
 		}
-		let localFilePath = fspath.join(
-			ThisExtension.ActiveConnection.localSyncFolder,
-			DatabricksConnectionManager.DatabricksFSSubFolder,
-			this.path
-		);
-		if (fs.existsSync(localFilePath))
+		else if (fs.existsSync(this.local_path))
 		{
 			return 'FILE_WITH_LOCAL_COPY';
 		}
