@@ -134,7 +134,6 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		else
 		{
 			let localFilePath = this.local_path;
-			if(!fs.existsSync(localFilePath))
 			Helper.ensureLocalFolder(localFilePath, true);
 			await DatabricksApiService.downloadDBFSFile(this.path, localFilePath, true);
 			if (ThisExtension.RefreshAfterUpDownload) {
