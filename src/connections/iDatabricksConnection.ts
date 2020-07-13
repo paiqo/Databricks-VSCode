@@ -8,10 +8,6 @@ export interface iDatabricksConnection {
 	personalAccessToken: string;
 	apiRootUrl: string;
 	localSyncFolder: string;
-	databricksConnectJars: string;
-	pythonInterpreter: string;
-	port: number;
-	organizationId: string;
 	exportFormats: ExportFormatsConfiguration;
 	useCodeCells: boolean;
 }

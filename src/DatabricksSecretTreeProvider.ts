@@ -14,7 +14,7 @@ export class DatabricksSecretTreeProvider implements vscode.TreeDataProvider<Dat
 		if(showInfoMessage){
 			vscode.window.showInformationMessage('Refreshing Secrets ...');
 		}
-		this._onDidChangeTreeData.fire();
+		this._onDidChangeTreeData.fire(null);
 	}
 
 	getTreeItem(element: DatabricksSecretTreeItem): vscode.TreeItem {

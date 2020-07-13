@@ -17,6 +17,8 @@ import { DatabricksSecretTreeItem } from './databricksApi/secrets/DatabricksSecr
 import { DatabricksWorkspaceNotebook } from './databricksApi/workspaces/DatabricksWorkspaceNotebook';
 import { DatabricksWorkspaceDirectory } from './databricksApi/workspaces/DatabricksWorkspaceDirectory';
 import { Helper } from './helpers/Helper';
+import { DatabricksFSFile } from './databricksApi/dbfs/DatabricksFSFile';
+import { DatabricksFSDirectory } from './databricksApi/dbfs/DatabricksFSDirectory';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -89,13 +91,13 @@ export function activate(context: vscode.ExtensionContext) {
 	let databricksFSTreeProvider = new DatabricksFSTreeProvider();
 	vscode.window.registerTreeDataProvider('databricksFS', databricksFSTreeProvider);
 	vscode.commands.registerCommand('databricksFS.refresh', (showInfoMessage: boolean = true) => databricksFSTreeProvider.refresh(showInfoMessage));
-	vscode.commands.registerCommand('databricksFS.add', () => new DatabricksFSTreeItem("/", true, 0).add());
+	vscode.commands.registerCommand('databricksFS.add', () => new DatabricksFSDirectory("/", "Online").add());
 
-	vscode.commands.registerCommand('databricksFSItem.click', (fsItem: DatabricksFSTreeItem) => fsItem.click());
-	vscode.commands.registerCommand('databricksFSItem.add', (fsItem: DatabricksFSTreeItem) => fsItem.add());
-	vscode.commands.registerCommand('databricksFSItem.download', (fsItem: DatabricksFSTreeItem) => fsItem.download());
-	vscode.commands.registerCommand('databricksFSItem.upload', (fsItem: DatabricksFSTreeItem) => fsItem.upload());
-	vscode.commands.registerCommand('databricksFSItem.delete', (fsItem: DatabricksFSTreeItem) => fsItem.delete());
+	vscode.commands.registerCommand('databricksFSItem.click', (fsItem: DatabricksFSFile) => fsItem.click());
+	vscode.commands.registerCommand('databricksFSItem.add', (fsItem: DatabricksFSFile | DatabricksFSDirectory) => fsItem.add());
+	vscode.commands.registerCommand('databricksFSItem.download', (fsItem: DatabricksFSFile | DatabricksFSDirectory) => fsItem.download());
+	vscode.commands.registerCommand('databricksFSItem.upload', (fsItem: DatabricksFSFile | DatabricksFSDirectory) => fsItem.upload());
+	vscode.commands.registerCommand('databricksFSItem.delete', (fsItem: DatabricksFSFile | DatabricksFSDirectory) => fsItem.delete());
 
 
 	// register DatabricksSecretTreeProvider

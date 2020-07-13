@@ -194,4 +194,9 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 			}
 		}
 	}
+
+	async compare(): Promise<void> {
+		vscode.window.showErrorMessage("[Compare] is currently only supported on a single notebook!");
+		return;
+	}
 }

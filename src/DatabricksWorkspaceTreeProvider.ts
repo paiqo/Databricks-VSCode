@@ -19,7 +19,7 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 		if (showInfoMessage) {
 			vscode.window.showInformationMessage('Refreshing Workspace ...');
 		}
-		this._onDidChangeTreeData.fire();
+		this._onDidChangeTreeData.fire(null);
 	}
 
 	getTreeItem(element: DatabricksWorkspaceTreeItem): DatabricksWorkspaceTreeItem {
@@ -34,7 +34,7 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 			let workspaceRootFolder = fspath.join(ThisExtension.ActiveConnection.localSyncFolder, DatabricksConnectionManager.WorkspaceSubFolder);
 			if (!fs.existsSync(workspaceRootFolder)) {
 				Helper.ensureLocalFolder(workspaceRootFolder);
-				vscode.window.showWarningMessage("With release v5.0.0 the sub-folder 'Workspace' was added for synced Workspace items. This supports better integratino with CI/CD and DatabricksPS PowerShell module. Please move your local files manually to '" + workspaceRootFolder + "' or sync them again! This message will only show up once!");
+				//vscode.window.showWarningMessage("With release v5.0.0 the sub-folder 'Workspace' was added for synced Workspace items. This supports better integratino with CI/CD and DatabricksPS PowerShell module. Please move your local files manually to '" + workspaceRootFolder + "' or sync them again! This message will only show up once!");
 				return Promise.resolve([]);
 			}
 			else {

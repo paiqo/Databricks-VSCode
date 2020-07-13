@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Databricks Extension for VSCode",
-	"version": "0.5.3",
+	"version": "0.6.0",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -164,23 +164,6 @@
 												"type": "string",
 												"description": "A local path where files (notebooks) that are downloaded from Databricks should be stored. This folder can then be integrated in your GIT repository"
 											},
-											"pythonInterpreter": {
-												"type": "string",
-												"description": "Path to python.exe of the interpreter to use. Is displayed when setting the Python interpretor in VS Code"
-											},
-											"organizationId": {
-												"type": "string",
-												"description": "Azure only! The organization ID of the Databricks workspace. Can be found in the URL when connected in the browser."
-											},
-											"databricksConnectJars": {
-												"type": "string",
-												"description": "Path to the Databricks-Connect Pyspark JARs. Can be obtained using 'databricks-connect get-jar-dir'."
-											},
-											"port": {
-												"type": "number",
-												"default": 15001,
-												"description": "The port to use when connecting using Databricks-Connect. Default is 15001."
-											},
 											"useCodeCells": {
 												"type": "boolean",
 												"default": false,
@@ -278,31 +261,6 @@
 						],
 						"format": "uri"
 					},
-					"databricks.connection.default.pythonInterpreter": {
-						"type": "string",
-						"description": "(Optional, for Databricks-Connect) Path to python.exe of the interpreter to use. Is displayed when setting the Python interpretor in VS Code",
-						"scope": "window",
-						"format": "uri"
-					},
-					"databricks.connection.default.organizationId": {
-						"type": "string",
-						"description": "(Optional, for Databricks-Connect, Azure only) The organization ID of the Databricks workspace. Can be found in the URL when connected in the browser.",
-						"scope": "window",
-						"examples": [
-							"1234567890123456"
-						]
-					},
-					"databricks.connection.default.databricksConnectJars": {
-						"type": "string",
-						"description": "(Optional, for Databricks-Connect) Path to the Databricks-Connect Pyspark JARs. Can be obtained using 'databricks-connect get-jar-dir'.",
-						"scope": "window",
-						"format": "uri"
-					},
-					"databricks.connection.default.port": {
-						"type": "number",
-						"description": "(Optional, for Databricks-Connect) The port to use when connecting using Databricks-Connect. Default is 15001.",
-						"scope": "window"
-					},
 					"databricks.connection.default.useCodeCells": {
 						"type": "boolean",
 						"description": "If true, Code Cell tags (# %%) will be added when downloading raw source files.",
@@ -388,30 +346,6 @@
 									"type": "string",
 									"default": "C:\\Databricks_sync",
 									"description": "A local path where files (notebooks) that are downloaded from Databricks should be stored. This folder can then be integrated in your GIT repository",
-									"scope": "window"
-								},
-								"pythonInterpreter": {
-									"type": "string",
-									"default": "C:\\Anaconda3\\envs\\databricksconnect\\python.exe",
-									"description": "Path to python.exe of the interpreter to use. Is displayed when setting the Python interpretor in VS Code",
-									"scope": "window"
-								},
-								"organizationId": {
-									"type": "string",
-									"default": "1234567890392586",
-									"description": "Azure only! The organization ID of the Databricks workspace. Can be found in the URL when connected in the browser.",
-									"scope": "window"
-								},
-								"databricksConnectJars": {
-									"type": "string",
-									"default": "C:\\anaconda3\\envs\\databricksconnect\\lib\\site-packages\\pyspark\\jars",
-									"description": "Path to the Databricks-Connect Pyspark JARs. Can be obtained using 'databricks-connect get-jar-dir'.",
-									"scope": "window"
-								},
-								"port": {
-									"type": "number",
-									"default": 15001,
-									"description": "The port to use when connecting using Databricks-Connect. Default is 15001.",
 									"scope": "window"
 								},
 								"useCodeCells": {

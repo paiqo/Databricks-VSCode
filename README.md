@@ -29,6 +29,12 @@ This is a Visual Studio Code extension that allows you to work with Azure Databr
 - Easy configuration via standard VS Code settings
 
 # Relase Notes
+**v0.6.0**:
+- Reworked DBFS browser - Thanks to [JacekPliszka9](https://github.com/JacekPliszka)
+	- now also downloads to local sync folder (similar to Workspace browser)
+	- supports up-/download from/to local file
+- potential fix for "enableProposedAPI"
+
 **v0.5.3**:
 - fix issue with dots ('.') in folder names (e.g. in user-folders) - Thanks to [JacekPliszka9](https://github.com/JacekPliszka)
 - another fix issue with deprecated '.py.ipynb' file extensions

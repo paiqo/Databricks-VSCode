@@ -46,10 +46,24 @@ export class DatabricksConnectionManager {
 		1) and 2) are used to add new or update existing connections hence they have priority over 3)
 		*/
 
+		ThisExtension.log("Loading connections array from Workspace (databricks.connections)...");
 		this._connections = this.getConnectionsFromWorkspace();
+		ThisExtension.log(`${this._connections.length} connection(s) loaded from Workspace!`);
 
+		ThisExtension.log("Loading default connection from Workspace/UserSettings (databricks.connection.default.*) ...");
 		let defaultConnectionFromWorkspace = this.getDefaultConnectionFromWorkspace();
+		if(defaultConnectionFromWorkspace)
+		{
+			ThisExtension.log(`Default connection loaded from Workspace/UserSettings!`);
+		}
+		else
+		{
+			ThisExtension.log(`No Default connection found in Workspace/UserSettings!`);
+		}
+
+		ThisExtension.log("Loading connections array from UserSetting (databricks.userWorkspaceConfigurations)...");
 		let connectionsFromUserConfig = this.getConnectionsFromUserConfig();
+		ThisExtension.log(`${connectionsFromUserConfig.length} connection(s) loaded from UserSetting!`);
 
 		if (defaultConnectionFromWorkspace != null && !this._connections.map((x) => x.displayName).includes(defaultConnectionFromWorkspace.displayName)) {
 			this._connections.push(defaultConnectionFromWorkspace);
@@ -64,8 +78,8 @@ export class DatabricksConnectionManager {
 		this.updateUserWorkspaceConfig();
 	}
 
-	activateConnection(displayName: string): DatabricksConnection {
 
+	activateConnection(displayName: string): DatabricksConnection {
 		let filteredConnections: DatabricksConnection[] = this.Connections.filter((x) => x.displayName == displayName);
 
 		if (filteredConnections.length == 1) {
@@ -87,26 +101,6 @@ export class DatabricksConnectionManager {
 		}
 		else {
 			throw new Error("Connection with name  '" + displayName + "' could not be found!");
-		}
-	}
-
-	private getConnectionsFromUserConfig(): DatabricksConnection[] {
-		let currentUserWorkspaceConfig: iUserWorkspaceConfiguration = this.CurrentUserWorkspaceConfiguration;
-
-		let ret: DatabricksConnection[] = [];
-
-		if (currentUserWorkspaceConfig != undefined) {
-			for (let con of currentUserWorkspaceConfig.connections) {
-				let dbCon = new DatabricksConnection(con);
-				if (dbCon.validate()) {
-					ret.push(dbCon);
-				}
-			}
-
-			return ret;
-		}
-		else {
-			return [];
 		}
 	}
 
@@ -134,12 +128,7 @@ export class DatabricksConnectionManager {
 			personalAccessToken: vscode.workspace.getConfiguration().get('databricks.connection.default.personalAccessToken'),
 			localSyncFolder: vscode.workspace.getConfiguration().get('databricks.connection.default.localSyncFolder'),
 
-			databricksConnectJars: vscode.workspace.getConfiguration().get('databricks.connection.default.databricksConnectJars'),
-			pythonInterpreter: vscode.workspace.getConfiguration().get('databricks.connection.default.pythonInterpreter'),
-			port: vscode.workspace.getConfiguration().get<number>('databricks.connection.default.port'),
-			organizationId: vscode.workspace.getConfiguration().get('databricks.connection.default.organizationId'),
 			exportFormats: vscode.workspace.getConfiguration().get<ExportFormatsConfiguration>('databricks.connection.default.exportFormats'),
-
 			useCodeCells: vscode.workspace.getConfiguration().get('databricks.connection.default.useCodeCells')
 		};
 
@@ -151,6 +140,28 @@ export class DatabricksConnectionManager {
 
 		return defaultCon;
 	}
+
+	private getConnectionsFromUserConfig(): DatabricksConnection[] {
+		let currentUserWorkspaceConfig: iUserWorkspaceConfiguration = this.CurrentUserWorkspaceConfiguration;
+
+		let ret: DatabricksConnection[] = [];
+
+		if (currentUserWorkspaceConfig != undefined) {
+			for (let con of currentUserWorkspaceConfig.connections) {
+				let dbCon = new DatabricksConnection(con);
+				if (dbCon.validate()) {
+					ret.push(dbCon);
+				}
+			}
+
+			return ret;
+		}
+		else {
+			return [];
+		}
+	}
+
+	
 
 	private cleanConnectionsFromConfig(): void {
 		vscode.workspace.getConfiguration().update('databricks.connections', undefined, vscode.ConfigurationTarget.Workspace);

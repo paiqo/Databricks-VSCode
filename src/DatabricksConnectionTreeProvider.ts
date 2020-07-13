@@ -17,7 +17,7 @@ export class DatabricksConnectionTreeProvider implements vscode.TreeDataProvider
 		}
 		ThisExtension.ConnectionManager.loadConnections();
 		ThisExtension.ConnectionManager.activateConnection(ThisExtension.ActiveConnectionName);
-		this._onDidChangeTreeData.fire();
+		this._onDidChangeTreeData.fire(null);
 	}
 
 	getTreeItem(element: DatabricksConnectionTreeItem): vscode.TreeItem {
@@ -39,10 +39,6 @@ export class DatabricksConnectionTreeProvider implements vscode.TreeDataProvider
 				item.personalAccessToken,
 				item.apiRootUrl,
 				item.localSyncFolder,
-				item.databricksConnectJars,
-				item.pythonInterpreter,
-				item.port,
-				item.organizationId,
 				item.exportFormats));
 		}
 		return Promise.resolve(envItems);

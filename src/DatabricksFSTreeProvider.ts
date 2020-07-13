@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { DatabricksFSTreeItem } from './databricksApi/dbfs/DatabricksFSTreeItem';
+import { DatabricksFSDirectory } from './databricksApi/dbfs/DatabricksFSDirectory';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<DatabricksFSTreeItem> {
@@ -12,7 +13,7 @@ export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<Databri
 		if(showInfoMessage){
 			vscode.window.showInformationMessage('Refreshing DBFS ...');
 		}
-		this._onDidChangeTreeData.fire();
+		this._onDidChangeTreeData.fire(null);
 	}
 
 	getTreeItem(element: DatabricksFSTreeItem): vscode.TreeItem {
@@ -26,7 +27,7 @@ export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<Databri
 		} 
 		else 
 		{
-			return new DatabricksFSTreeItem("/", true, 0).getChildren();
+			return new DatabricksFSDirectory("/", "Online").getChildren();
 		}
 	}
 }

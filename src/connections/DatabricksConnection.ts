@@ -10,10 +10,6 @@ export class DatabricksConnection implements iDatabricksConnection {
 	cloudProvider: CloudProvider;
 	personalAccessToken: string;
 	localSyncFolder: string;
-	databricksConnectJars: string;
-	pythonInterpreter: string;
-	port: number;
-	organizationId: string;
 	exportFormats: ExportFormatsConfiguration;
 	useCodeCells: boolean;
 
@@ -26,10 +22,6 @@ export class DatabricksConnection implements iDatabricksConnection {
 		this.cloudProvider = config.cloudProvider;
 		this.personalAccessToken = config.personalAccessToken;
 		this.localSyncFolder = config.localSyncFolder;
-		this.databricksConnectJars = config.databricksConnectJars;
-		this.pythonInterpreter = config.pythonInterpreter;
-		this.port = config.port;
-		this.organizationId = config.organizationId;
 		this.exportFormats = config.exportFormats;
 		this.useCodeCells = config.useCodeCells;
 	}
@@ -88,14 +80,6 @@ export class DatabricksConnection implements iDatabricksConnection {
 			}
 			msg = 'Configuration ' + this.displayName + ': Setting Configuration property "cloudProvider" to "' + this.cloudProvider + '" based on the property "apiRootUrl"';
 			ThisExtension.log(msg);
-		}
-		if (!this.propertyIsValid(this.port) || this.port == 0) {
-			// get the default from the config of this extension
-			let defaultFromConfig = ThisExtension.configuration.packageJSON.contributes.configuration[0].properties["databricks.userWorkspaceConfigurations"].items.properties.connections.items.properties.port.default;
-			this.port = defaultFromConfig;
-			msg = 'Configuration ' + this.displayName + ': Property "port" was not provided - using the default value "' + defaultFromConfig + '"!';
-			ThisExtension.log(msg);
-			vscode.window.showWarningMessage(msg);
 		}
 		if (this.useCodeCells == undefined) { // this.propertyIsValid does not work for booleans !!!
 			// get the default from the config of this extension

@@ -14,7 +14,7 @@ export class DatabricksJobTreeProvider implements vscode.TreeDataProvider<Databr
 		if(showInfoMessage){
 			vscode.window.showInformationMessage('Refreshing Jobs ...');
 		}
-		this._onDidChangeTreeData.fire();
+		this._onDidChangeTreeData.fire(null);
 	}
 
 	getTreeItem(element: DatabricksJobTreeItem): vscode.TreeItem {

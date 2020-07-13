@@ -1,0 +1,204 @@
+import * as vscode from 'vscode';
+import * as fspath from 'path';
+import * as fs from 'fs';
+import { DatabricksApiService } from '../databricksApiService';
+import { ThisExtension } from '../../ThisExtension';
+import { iDatabricksFSItem } from './iDatabricksFSItem';
+import { Helper } from '../../helpers/Helper';
+import { DatabricksConnectionManager } from '../../connections/DatabricksConnectionManager';
+import { DatabricksFSTreeItem } from './DatabricksFSTreeItem';
+
+
+// https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
+export class DatabricksFSFile extends DatabricksFSTreeItem {
+
+	protected _isInitialized: boolean = false;
+	private _onlinePathExists: boolean = true;
+
+	constructor(
+		path: string,
+		size: number,
+		source: "Online" | "Local"
+	) {
+		super(path, false, size, vscode.TreeItemCollapsibleState.None);
+		
+		if (source == "Local") {
+			this._onlinePathExists = false;
+		}
+
+		super.label = path.split('/').pop();
+		super.iconPath = {
+			light: this.getIconPath("light"),
+			dark: this.getIconPath("dark")
+		};
+	}
+
+	get tooltip(): string {
+		let tooltip: string = "Path: " + this.path + "\n";
+
+		if (!this.localPathExists) {
+			tooltip += "Local Path: [not yet downloaded] " + this.localFilePath + "\n";
+		}
+		else
+		{
+			tooltip += "Local Path: [downloaded] " + this.localFilePath + "\n";
+		}
+
+		tooltip += `Size: ${Helper.bytesToSize(this.file_size)}`;
+
+		return tooltip;
+	}
+
+	// description is show next to the label
+	get description(): string {
+		return `${this.path} (${Helper.bytesToSize(this.file_size)})`;
+	}
+
+	// used in package.json to filter commands via viewItem == FOLDER
+	get contextValue(): string {
+		if (this.localPathExists)
+		{
+			return 'FILE_WITH_LOCAL_COPY';
+		}
+		else
+		{
+			return 'FILE';
+		}
+	}
+
+	readonly command = {
+		command: 'databricksFSItem.click', title: "Open File", arguments: [this]
+	};
+
+	get localFolderPath(): string {
+		return fspath.join(
+			ThisExtension.ActiveConnection.localSyncFolder, 
+			DatabricksConnectionManager.DatabricksFSSubFolder, 
+			fspath.dirname(this.path));
+	}
+
+	get localFilePath(): string {
+		return fspath.join(
+			ThisExtension.ActiveConnection.localSyncFolder, 
+			DatabricksConnectionManager.DatabricksFSSubFolder, 
+			this.path);
+	}
+
+	get localFileName(): string {
+		return 
+	}
+
+	get localPathExists(): boolean {
+		return fs.existsSync(this.localFilePath);
+	}
+
+	get localFileUri(): vscode.Uri {
+		// three '/' in the beginning indicate a local path
+		// however, there are issues if this.localFilePath also starts with a '/' so we do a replace in this special case
+		return vscode.Uri.parse(("file:///" + this.localFilePath).replace('////', '///'));
+	}
+
+	get onlinePathExists(): boolean {
+		return this._onlinePathExists;
+	}
+
+	get localFileExtension(): string {
+		return fspath.extname(this.path);
+	}
+
+	public static fromInterface(item: iDatabricksFSItem): DatabricksFSFile {
+		return new DatabricksFSFile(item.path, item.file_size, "Online");
+	}
+
+	async open(showWarning: boolean = true): Promise<void> {
+		if (!this.localPathExists) {
+			await this.download();
+		}
+		else {
+			if (showWarning)
+				vscode.window.showWarningMessage("Opening local cached file. To open most recent file from Databricks, please manually download it first!");
+		}
+
+		vscode.workspace
+			.openTextDocument(this.localFileUri)
+			.then(vscode.window.showTextDocument);
+	}
+
+	async click(): Promise<void> {
+		//if (this._languageFileExtension.isNotebook) { Helper.resetOpenAsNotebook(); }
+		Helper.singleVsDoubleClick(this, this.singleClick, this.doubleClick);
+	}
+
+	async doubleClick(): Promise<void> {
+		//vscode.window.showInformationMessage("DoubleClick");
+		await this.open();
+	}
+
+	async singleClick(): Promise<void> {
+		// TODO: This is not working properly as the "this" cannot be passed when used insided setTimeout?!?
+
+		//vscode.window.showInformationMessage("SingleClick");
+	}
+
+	async download(asTempFile: boolean = false): Promise<string> {
+		try {
+			//vscode.window.showInformationMessage(`Download of item ${this._path}) started ...`);
+			let localPath = this.localFilePath;
+			if (asTempFile) {
+				localPath = await Helper.openTempFile('', this.label + '-ONLINE', false);
+				localPath += this.localFileExtension;
+			}
+			
+			let response = await DatabricksApiService.downloadDBFSFile(this.path, localPath, true);
+
+			vscode.window.showInformationMessage(`Download of item ${this.path}) finished!`);
+
+			if (ThisExtension.RefreshAfterUpDownload && !asTempFile) {
+				Helper.wait(500);
+				vscode.commands.executeCommand("databricksFS.refresh", false);
+			}
+
+			return localPath;
+		}
+		catch (error) {
+			vscode.window.showErrorMessage(`ERROR: ${error}`);
+		}
+	}
+
+	async upload(): Promise<void> {
+		try {
+			let localFilePath = fspath.join(
+				ThisExtension.ActiveConnection.localSyncFolder,
+				DatabricksConnectionManager.DatabricksFSSubFolder,
+				this.path
+			);
+			let response = DatabricksApiService.uploadDBFSFile(localFilePath, this.path, true);
+			vscode.window.showInformationMessage(`Upload of item ${this.path}) finished!`);
+			if (ThisExtension.RefreshAfterUpDownload) {
+				Helper.wait(500);
+				vscode.commands.executeCommand("databricksFS.refresh", false);
+			}
+		}
+		catch (error) {
+			vscode.window.showErrorMessage(`ERROR: ${error}`);
+		}
+	}
+
+	async add(): Promise<void> {
+		throw new Error("A new file can only be added to a directory!");
+	}
+
+	async delete(): Promise<void> {
+		DatabricksApiService.deleteDBFSItem(this.path, false);
+
+		Helper.wait(500);
+		vscode.commands.executeCommand("databricksFS.refresh", false);
+	}
+
+	async compare(): Promise<void> {
+		let onlineFileTempPath: string = await this.download(true);
+
+		// if(this._languageFileExtension.isNotebook) { await Helper.disableOpenAsNotebook(); }
+		Helper.showDiff(onlineFileTempPath, this.localFilePath);
+	}
+}

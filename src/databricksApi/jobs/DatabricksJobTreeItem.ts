@@ -157,7 +157,7 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 
 	get link(): string {
 		let actConn = ThisExtension.ActiveConnection;
-		let link: string = `${actConn.apiRootUrl}/?o=${actConn.organizationId}#job/${this.job_id}`;
+		let link: string = `${actConn.apiRootUrl}/?#job/${this.job_id}`;
 		if (this.type == "JOB") {
 			return link;
 		}

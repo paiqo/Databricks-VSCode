@@ -16,7 +16,7 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 		if(showInfoMessage){
 			vscode.window.showInformationMessage('Refreshing Clusters ...');
 		}
-		this._onDidChangeTreeData.fire();
+		this._onDidChangeTreeData.fire(null);
 	}
 
 	getTreeItem(element: DatabricksClusterTreeItem): vscode.TreeItem {

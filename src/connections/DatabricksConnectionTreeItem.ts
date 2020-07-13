@@ -13,10 +13,6 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 	_personalAccessToken: string;
 	_apiRootUrl: string;
 	_localSyncFolder: string;
-	_databricksConnectJars: string;
-	_pythonInterpreter: string;
-	_port: number;
-	_organizationId: string;
 	_isActive: boolean;
 	_exportFormats: ExportFormatsConfiguration;
 	_useCodeCells: boolean;
@@ -27,10 +23,6 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		personalAccessToken: string,
 		apiRootUrl: string,
 		localSyncFolder: string,
-		databricksConnectJars: string = undefined,
-		pythonInterpreter: string = undefined,
-		port: number = 15001,
-		organizationId: string = undefined,
 		exportFormats: ExportFormatsConfiguration = undefined,
 		useCodeCells: boolean = false
 	) {
@@ -41,10 +33,6 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		this._apiRootUrl = Helper.trimChar(apiRootUrl, '/', false, true);
 		//this._localSyncFolder = Helper.trimChar(localSyncFolder, '/');
 		this._localSyncFolder = localSyncFolder;
-		this._databricksConnectJars = databricksConnectJars;
-		this._pythonInterpreter = pythonInterpreter;
-		this._port = port;
-		this._organizationId = organizationId;
 		this._exportFormats = exportFormats;
 		this._useCodeCells = useCodeCells;
 
@@ -103,22 +91,6 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		return this._localSyncFolder;
 	}
 
-	get databricksConnectJars(): string {
-		return this._databricksConnectJars;
-	}
-
-	get pythonInterpreter(): string {
-		return this._pythonInterpreter;
-	}
-
-	get port(): number {
-		return this._port;
-	}
-
-	get organizationId(): string {
-		return this._organizationId;
-	}
-
 	get exportFormats(): ExportFormatsConfiguration {
 		return this._exportFormats;
 	}
@@ -144,10 +116,6 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 			Connection.personalAccessToken,
 			Connection.apiRootUrl,
 			Connection.localSyncFolder,
-			Connection.databricksConnectJars,
-			Connection.pythonInterpreter,
-			Connection.port,
-			Connection.organizationId,
 			Connection.exportFormats,
 			Connection.useCodeCells);
 	}

@@ -37,9 +37,8 @@ export class DatabricksWorkspaceLibrary extends DatabricksWorkspaceTreeItem {
 		return DatabricksWorkspaceLibrary.fromInterface(item);
 	}
 
-	/*
-	async getChildren(): Promise<DatabricksWorkspaceItem[]> {
-		return [];
+	async compare(): Promise<void> {
+		vscode.window.showErrorMessage("[Compare] is currently only supported on a single notebook!");
+		return;
 	}
-	*/
 }

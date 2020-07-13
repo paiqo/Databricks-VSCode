@@ -319,25 +319,19 @@ export abstract class DatabricksApiService {
 	-- D B F S   A P I
 	----------------------------------------------------------------
 	*/
-	static async listDBFSItems(path: string): Promise<DatabricksFSTreeItem[]> {
+	static async listDBFSItems(path: string): Promise<iDatabricksFSItem[]> {
 		let endpoint = '2.0/dbfs/list';
 		let body = { path: path };
 
 		let response = await this.get(endpoint, { params: body });
 
-		let result = response.data;
-
-		// array of file is in result.files
-		let items = result.files as iDatabricksFSItem[];
-
-		let dbfsItems: DatabricksFSTreeItem[] = [];
-		if (items == undefined) {
-			return dbfsItems;
+		if (response == undefined) {
+			return [];
 		}
+		
+		let result = response.data.files;
 
-		items.map(item => dbfsItems.push(new DatabricksFSTreeItem(item.path, item.is_dir, item.file_size)));
-		Helper.sortArrayByProperty(dbfsItems, "label");
-		return dbfsItems;
+		return result;
 	}
 
 	static async getDBFSItem(path: string): Promise<iDatabricksFSItem> {
@@ -466,33 +460,36 @@ export abstract class DatabricksApiService {
 		}
 
 		// remove file if it exists
-		fs.unlink(localPath, (err) => {
-			if (err) throw err;
-		});
+		//fs.unlink(localPath, (err) => {
+			//if (err) throw err;
+		//});
 
 		let totalSize = dbfsItem.file_size;
 		let offset = 0;
 		let content: { data: { bytes_read: number, data: string } };
 
+		Helper.ensureLocalFolder(localPath, true);
 		let writeStream = fs.createWriteStream(localPath, { highWaterMark: batchSize, encoding: 'base64' });
 
-		do {
-			if (offset + batchSize > totalSize) {
-				batchSize = totalSize - offset;
-			}
-
-			content = await this.readDBFSFileContent(dbfsPath, offset, batchSize);
-
-			writeStream.write(content.data.data, 'base64', function (err) {
-				if (err) {
-					vscode.window.showErrorMessage(`ERROR writing file: ${err}`);
+		if(totalSize > 0) // we may also download empty files where the code would not work otherwise
+		{
+			do {
+				if (offset + batchSize > totalSize) {
+					batchSize = totalSize - offset;
 				}
-			}
-			);
 
-			offset = offset + batchSize;
-		} while (offset < totalSize);
+				content = await this.readDBFSFileContent(dbfsPath, offset, batchSize);
 
+				writeStream.write(content.data.data, 'base64', function (err) {
+					if (err) {
+						vscode.window.showErrorMessage(`ERROR writing file: ${err}`);
+					}
+				}
+				);
+
+				offset = offset + batchSize;
+			} while (offset < totalSize);
+		}
 		writeStream.close();
 	}
 

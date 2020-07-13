@@ -32,7 +32,7 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	}
 
 	get tooltip(): string {
-		let tooltip: string = "[Online only]";
+		let tooltip: string = "Path: " + this.path + "\n";
 		return tooltip;
 	}
 
