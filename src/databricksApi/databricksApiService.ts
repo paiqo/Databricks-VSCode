@@ -5,7 +5,6 @@ import { WorkspaceItemExportFormat, WorkspaceItemLanguage } from './workspaces/_
 
 import { iDatabricksRuntimeVersion } from './clusters/iDatabricksRuntimeVersion';
 
-import { DatabricksFSTreeItem } from './dbfs/DatabricksFSTreeItem';
 import { iDatabricksFSItem } from './dbfs/iDatabricksFSItem';
 
 import { DatabricksSecretTreeItem } from './secrets/DatabricksSecretTreeItem';
@@ -253,7 +252,7 @@ export abstract class DatabricksApiService {
 	}
 
 	static async listJobRuns(
-		job_id: number,
+		job_id: number = null,
 		active_only: boolean = true,
 		completed_only: boolean = false,
 		offset: number = null,

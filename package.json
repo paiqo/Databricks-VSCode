@@ -560,14 +560,6 @@
 				}
 			},
 			{
-				"command": "databricksJobs.add",
-				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/add.png",
-					"dark": "resources/dark/add.png"
-				}
-			},
-			{
 				"command": "databricksJobItem.showDefinition",
 				"title": "JSON Definition",
 				"icon": {
@@ -593,14 +585,6 @@
 				"icon": {
 					"light": "resources/light/stop.png",
 					"dark": "resources/dark/stop.png"
-				}
-			},
-			{
-				"command": "databricksJobItem.delete",
-				"title": "Delete",
-				"icon": {
-					"light": "resources/light/delete.png",
-					"dark": "resources/dark/delete.png"
 				}
 			},
 			{
@@ -747,11 +731,6 @@
 					"group": "navigation"
 				},
 				{
-					"command": "databricksJobs.add",
-					"when": "view == databricksJobs",
-					"group": "navigation"
-				},
-				{
 					"command": "databricksFS.refresh",
 					"when": "view == databricksFS",
 					"group": "navigation"
@@ -820,7 +799,7 @@
 				},
 				{
 					"command": "databricksJobItem.showDefinition",
-					"when": "view == databricksJobs",
+					"when": "view == databricksJobs && viewItem == JOB || viewItem == JOB_RUN || viewItem == RUNNING_JOB",
 					"group": "inline"
 				},
 				{
@@ -835,12 +814,7 @@
 				},
 				{
 					"command": "databricksJobItem.openBrowser",
-					"when": "view == databricksJobs",
-					"group": "inline"
-				},
-				{
-					"command": "databricksJobItem.delete",
-					"when": "view == databricksJobs && viewItem == JOB",
+					"when": "view == databricksJobs && viewItem == JOB || viewItem == JOB_RUN || viewItem == RUNNING_JOB",
 					"group": "inline"
 				},
 				{

@@ -4,6 +4,12 @@ export type JobTreeItemType =
 	| "JOB_RUN" 
 	;
 
+export type JobRunType =
+	"JOB_RUN" 			// Normal job run. A run created with Run now.
+	| "WORKFLOW_RUN"	// Workflow run. A run created with dbutils.notebook.run.
+	| "SUBMIT_RUN" 		// Submit run. A run created with Run now.
+	;
+
 export type JobRunLifeCycleState = 
 	"PENDING" 			// 	The run has been triggered.If there is not already an active run of the same job, the cluster and execution context are being prepared.If there is already an active run of the same job, the run will immediately transition into a SKIPPED state without preparing any resources.
 	| "RUNNING" 		//	The task of this run is being executed.
@@ -56,13 +62,34 @@ export interface iDatabricksJob {
 export interface iDatabricksJobRun {
 	job_id: number;
 	run_id: number;
+	run_name: string;
+	run_type: JobRunType;
+	run_page_url: string;
 	number_in_job: number;
 	state: {
 		life_cycle_state: JobRunLifeCycleState,
 		state_message: string,
 		result_state: JobRunResultState
 	};
-	task: object;
+	task: {
+		notebook_task: {
+			notebook_path: string,
+			revision_timestamp: number,
+			base_parameters: object
+		},
+		spark_jar_task: {
+			jar_uri: string,
+			main_class_name: string,
+			parameters: string[] 
+		},
+		spark_python_task: {
+			python_file: string,
+			parameters: string[]
+		},
+		spark_submit_task: {
+		parameters: string[]
+		}
+	};
 	cluster_spec: object;
 	cluster_instance: object;
 	overriding_parameters: object;

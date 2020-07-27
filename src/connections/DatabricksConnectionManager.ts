@@ -15,12 +15,7 @@ export class DatabricksConnectionManager {
 
 	constructor() {
 		this._initialized = false;
-		this._workspaceConfig = vscode.workspace.getConfiguration().get('databricks.workspaceConfiguration');
-
-		if (this._workspaceConfig.workspaceGuid == undefined) {
-			this._workspaceConfig.workspaceGuid = Helper.newGuid();
-		}
-
+		
 		this.loadConnections();
 
 		if (this.Connections.length == 0) {
@@ -32,7 +27,14 @@ export class DatabricksConnectionManager {
 			if (this._workspaceConfig.lastActiveConnection == undefined) {
 				this._workspaceConfig.lastActiveConnection = this._connections[0].displayName;
 			}
-			this.activateConnection(this._workspaceConfig.lastActiveConnection);
+			try {
+				this.activateConnection(this._workspaceConfig.lastActiveConnection);
+			} catch (error) {
+				ThisExtension.log("Could not activate Connection '" + this._workspaceConfig.lastActiveConnection + "' ...");
+				ThisExtension.log("Activating first available connection instead ...");
+				this.activateConnection(this.Connections[0].displayName);
+			}
+			
 		}
 	}
 
@@ -45,6 +47,14 @@ export class DatabricksConnectionManager {
 
 		1) and 2) are used to add new or update existing connections hence they have priority over 3)
 		*/
+
+		ThisExtension.log("Getting current Workspace Configuration (databricks.workspaceConfiguration) ...");
+		this._workspaceConfig = vscode.workspace.getConfiguration().get('databricks.workspaceConfiguration');
+
+		if (this._workspaceConfig.workspaceGuid == undefined) {
+			ThisExtension.log("Creating Workspace Configuration ...");
+			this._workspaceConfig.workspaceGuid = Helper.newGuid();
+		}
 
 		ThisExtension.log("Loading connections array from Workspace (databricks.connections)...");
 		this._connections = this.getConnectionsFromWorkspace();
@@ -100,7 +110,9 @@ export class DatabricksConnectionManager {
 			return this._activeConnection;
 		}
 		else {
-			throw new Error("Connection with name  '" + displayName + "' could not be found!");
+			let msg = "Connection with name  '" + displayName + "' could not be found!";
+			ThisExtension.log(msg)
+			throw new Error(msg);
 		}
 	}
 

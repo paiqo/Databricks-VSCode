@@ -19,6 +19,8 @@ import { DatabricksWorkspaceDirectory } from './databricksApi/workspaces/Databri
 import { Helper } from './helpers/Helper';
 import { DatabricksFSFile } from './databricksApi/dbfs/DatabricksFSFile';
 import { DatabricksFSDirectory } from './databricksApi/dbfs/DatabricksFSDirectory';
+import { DatabricksJob } from './databricksApi/jobs/DatabricksJob';
+import { DatabricksJobRun } from './databricksApi/jobs/DatabricksJobRun';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -78,14 +80,12 @@ export function activate(context: vscode.ExtensionContext) {
 	let databricksJobsTreeProvider = new DatabricksJobTreeProvider();
 	vscode.window.registerTreeDataProvider('databricksJobs', databricksJobsTreeProvider);
 	vscode.commands.registerCommand('databricksJobs.refresh', (showInfoMessage: boolean = true) => databricksJobsTreeProvider.refresh(showInfoMessage));
-	vscode.commands.registerCommand('databricksJobs.add', () => databricksJobsTreeProvider.add());
 
 	vscode.commands.registerCommand('databricksJobItem.click', (job: DatabricksJobTreeItem) => job.click());
 	vscode.commands.registerCommand('databricksJobItem.showDefinition', (job: DatabricksJobTreeItem) => job.showDefinition());
-	vscode.commands.registerCommand('databricksJobItem.start', (job: DatabricksJobTreeItem) => job.start());
-	vscode.commands.registerCommand('databricksJobItem.stop', (job_run: DatabricksJobTreeItem) => job_run.stop());
+	vscode.commands.registerCommand('databricksJobItem.start', (job: DatabricksJob) => job.start());
+	vscode.commands.registerCommand('databricksJobItem.stop', (job_run: DatabricksJobRun) => job_run.stop());
 	vscode.commands.registerCommand('databricksJobItem.openBrowser', (job: DatabricksJobTreeItem) => job.openBrowser());
-	vscode.commands.registerCommand('databricksJobItem.delete', (job: DatabricksJobTreeItem) => job.delete());
 
 	// register DatabricksFSTreeProvider
 	let databricksFSTreeProvider = new DatabricksFSTreeProvider();
