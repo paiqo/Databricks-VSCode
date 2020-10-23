@@ -5,6 +5,7 @@ import { Helper } from './helpers/Helper';
 import { DatabricksConnection } from './connections/DatabricksConnection';
 import { iDatabricksConnection } from './connections/iDatabricksConnection';
 import { DatabricksApiService } from './databricksApi/databricksApiService';
+import { DatabricksConnectionManagerVSCode } from './connections/DatabricksConnectionManagerVSCode';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -54,7 +55,8 @@ export abstract class ThisExtension {
 			this._extension = vscode.extensions.getExtension(this.extension_id);
 
 			this.log("Initializing ConnectionManager ...");
-			this._connectionManager = new DatabricksConnectionManager();
+			// could use 
+			this._connectionManager = new DatabricksConnectionManagerVSCode();
 
 			this.log("Initializing Databricks API Service ...");
 
@@ -87,6 +89,7 @@ export abstract class ThisExtension {
 				extensions.push(element);
 			});
 		}
+		extensions.push(".py.ipynb"); // for legacy support of old file extensions - will be removed in the future
 
 		return extensions;
 	}
@@ -131,12 +134,69 @@ export abstract class ThisExtension {
 	}
 
 	static async getSecureSetting(setting: string): Promise<string> {
-		let value: string = await this._keytar.getPassword(this.extension_id, setting);
+		let value: string = this._keytar.getPassword(this.extension_id, setting);
 		return value;
 	}
 
 	static async setSecureSetting(setting: string, value: string): Promise<void> {
 		await this._keytar.setPassword(this.extension_id, setting, value);
+	}
+
+	static getConfigurationSetting<T=string>(setting: string, source?: ConfigSettingSource): ConfigSetting<T> {
+		let value = vscode.workspace.getConfiguration().get(setting) as T;
+		let inspect = vscode.workspace.getConfiguration().inspect(setting);
+
+		if(source == "Global")
+		{
+			value = (inspect.globalValue ?? inspect.globalLanguageValue) as T;
+		}
+		else if(source == "Workspace")
+		{
+			value = (inspect.workspaceValue ?? inspect.workspaceFolderValue ?? inspect.workspaceLanguageValue ?? inspect.workspaceFolderLanguageValue) as T;
+		}
+		else if(source == "Default")
+		{
+			value = (inspect.defaultValue ?? inspect.defaultLanguageValue) as T;
+		}
+		else if(!source)
+		{
+			if(inspect.workspaceValue || inspect.workspaceFolderValue || inspect.workspaceLanguageValue || inspect.workspaceFolderLanguageValue)
+			{
+				source = "Workspace";
+			}
+			else if(inspect.globalValue || inspect.globalLanguageValue)
+			{
+				source = "Global";
+			}
+			else {
+				source = "Default";
+			}
+		}
+		
+		return {
+			value: value,
+			inspect: inspect,
+			source: source
+		};
+	}
+
+	static get useProxy(): boolean {
+		let httpProxySupport: ConfigSetting<string> = ThisExtension.getConfigurationSetting<string>("http.proxySupport");
+
+		// only check if proxySupport is explicitly set to "off"
+		if(httpProxySupport.value == "off")
+		{
+			this.log('Proxy support is disabled due to setting "http.proxySupport": "off"!');
+			return false;
+		}
+
+		if(httpProxySupport.value == "on")
+		{
+			this.log('Proxy support is enabled due to setting "http.proxySupport": "on"!');
+			return true;
+		}
+
+		return undefined;
 	}
 }
 
@@ -160,3 +220,14 @@ export interface iUserWorkspaceConfiguration {
 	connections: iDatabricksConnection[];
 }
 
+export type ConfigSettingSource =
+	"Workspace"
+|	"Global"
+|	"Default"
+;
+
+export interface ConfigSetting<T> {
+	value: T;
+	inspect;
+	source: ConfigSettingSource;
+}

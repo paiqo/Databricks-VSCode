@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fspath from 'path';
 import { ThisExtension, ExportFormatsConfiguration } from '../ThisExtension';
-import { CloudProvider } from './_types';
+import { CloudProvider, AccessTokenSecure } from './_types';
 import { iDatabricksConnection } from './iDatabricksConnection';
 import { Helper } from '../helpers/Helper';
 
@@ -16,6 +16,10 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 	_isActive: boolean;
 	_exportFormats: ExportFormatsConfiguration;
 	_useCodeCells: boolean;
+	_personalAccessTokenSecure: {
+		keyTarSettingName: string,
+		databricksCLIProfileName: string
+	};
 
 	constructor(
 		displayName: string,
@@ -54,7 +58,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 
 	// description is show next to the label
 	get description(): string {
-		return `${this.localSyncFolder}`;
+		return `${fspath.join(Helper.trimChar(Helper.trimChar(this.localSyncFolder, '/', false, true), '\\', false, true), " ")}`;
 	}
 
 	// used in package.json to filter commands via viewItem == ACTIVE
@@ -99,6 +103,10 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		return this._useCodeCells;
 	}
 
+	get personalAccessTokenSecure(): AccessTokenSecure {
+		return this._personalAccessTokenSecure;
+	}
+
 
 	get isActive(): boolean {
 		return this._isActive;
@@ -120,7 +128,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 			Connection.useCodeCells);
 	}
 
-	activate(): void {
+	async activate(): Promise<void> {
 		vscode.window.showInformationMessage(`Activating Databricks Connection '${this.displayName}' ...`);
 
 		ThisExtension.ConnectionManager.activateConnection(this.displayName);

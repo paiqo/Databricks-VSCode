@@ -27,9 +27,11 @@ export abstract class DatabricksApiService {
 		try {
 			ThisExtension.log("Initializing Databricks API Service ...");
 			const axios = require('axios');
+
 			// Set config defaults when creating the instance
 			this._apiService = axios.create({
-				baseURL: Helper.trimChar(Connection.apiRootUrl, '/') + this.API_SUB_URL
+				baseURL: Helper.trimChar(Connection.apiRootUrl, '/') + this.API_SUB_URL,
+				proxy: ThisExtension.useProxy
 			});
 
 			// Alter defaults after instance has been created

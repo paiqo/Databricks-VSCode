@@ -21,6 +21,7 @@ import { DatabricksFSFile } from './databricksApi/dbfs/DatabricksFSFile';
 import { DatabricksFSDirectory } from './databricksApi/dbfs/DatabricksFSDirectory';
 import { DatabricksJob } from './databricksApi/jobs/DatabricksJob';
 import { DatabricksJobRun } from './databricksApi/jobs/DatabricksJobRun';
+import { iDatabricksConnection } from './connections/iDatabricksConnection';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -36,6 +37,11 @@ export function activate(context: vscode.ExtensionContext) {
 			(y) => ThisExtension.log(y)
 		)
 	);
+	
+
+	let x = ThisExtension.getSecureSetting2("myTest");
+	ThisExtension.log(x);
+	vscode.window.showInformationMessage(x);
 	*/
 
 	// register DatabricksConnectionTreeProvider

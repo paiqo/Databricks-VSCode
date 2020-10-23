@@ -5,7 +5,6 @@ import { DatabricksApiService } from '../databricksApiService';
 import { ThisExtension } from '../../ThisExtension';
 import { iDatabricksFSItem } from './iDatabricksFSItem';
 import { Helper } from '../../helpers/Helper';
-import { DatabricksConnectionManager } from '../../connections/DatabricksConnectionManager';
 import { DatabricksFSTreeItem } from './DatabricksFSTreeItem';
 import { DatabricksFSFile } from './DatabricksFSFile';
 
@@ -58,7 +57,7 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 	get localPath(): string {
 		return fspath.join(
 			ThisExtension.ActiveConnection.localSyncFolder, 
-			DatabricksConnectionManager.DatabricksFSSubFolder, 
+			ThisExtension.ConnectionManager.DatabricksFSSubFolder, 
 			this.path);
 	}
 

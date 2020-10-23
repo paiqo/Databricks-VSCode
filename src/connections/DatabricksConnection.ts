@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { CloudProvider } from './_types';
+import { CloudProvider, AccessTokenSecure } from './_types';
 import { iDatabricksConnection } from './iDatabricksConnection';
 import { ExportFormatsConfiguration, ThisExtension } from '../ThisExtension';
 
@@ -12,6 +12,7 @@ export class DatabricksConnection implements iDatabricksConnection {
 	localSyncFolder: string;
 	exportFormats: ExportFormatsConfiguration;
 	useCodeCells: boolean;
+	personalAccessTokenSecure: AccessTokenSecure;
 
 	constructor(
 		config: iDatabricksConnection

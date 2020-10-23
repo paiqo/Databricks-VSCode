@@ -5,7 +5,6 @@ import { DatabricksApiService } from '../databricksApiService';
 import { ThisExtension } from '../../ThisExtension';
 import { iDatabricksFSItem } from './iDatabricksFSItem';
 import { Helper } from '../../helpers/Helper';
-import { DatabricksConnectionManager } from '../../connections/DatabricksConnectionManager';
 import { DatabricksFSTreeItem } from './DatabricksFSTreeItem';
 
 
@@ -73,14 +72,14 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 	get localFolderPath(): string {
 		return fspath.join(
 			ThisExtension.ActiveConnection.localSyncFolder, 
-			DatabricksConnectionManager.DatabricksFSSubFolder, 
+			ThisExtension.ConnectionManager.DatabricksFSSubFolder, 
 			fspath.dirname(this.path));
 	}
 
 	get localFilePath(): string {
 		return fspath.join(
 			ThisExtension.ActiveConnection.localSyncFolder, 
-			DatabricksConnectionManager.DatabricksFSSubFolder, 
+			ThisExtension.ConnectionManager.DatabricksFSSubFolder, 
 			this.path);
 	}
 
@@ -169,7 +168,7 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 		try {
 			let localFilePath = fspath.join(
 				ThisExtension.ActiveConnection.localSyncFolder,
-				DatabricksConnectionManager.DatabricksFSSubFolder,
+				ThisExtension.ConnectionManager.DatabricksFSSubFolder,
 				this.path
 			);
 			let response = DatabricksApiService.uploadDBFSFile(localFilePath, this.path, true);

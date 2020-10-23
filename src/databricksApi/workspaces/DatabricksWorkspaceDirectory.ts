@@ -10,7 +10,6 @@ import { LanguageFileExtensionMapper } from './LanguageFileExtensionMapper';
 import { DatabricksWorkspaceTreeItem } from './DatabricksWorkspaceTreeItem';
 import { DatabricksWorkspaceLibrary } from './DatabricksWorkspaceLibrary';
 import { DatabricksWorkspaceNotebook } from './DatabricksWorkspaceNotebook';
-import { DatabricksConnectionManager } from '../../connections/DatabricksConnectionManager';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -76,7 +75,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 	}
 
 	get localPath(): string {
-		return fspath.join(ThisExtension.ActiveConnection.localSyncFolder, DatabricksConnectionManager.WorkspaceSubFolder, this.path);
+		return fspath.join(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.WorkspaceSubFolder, this.path);
 	}
 
 	get localPathExists(): boolean {

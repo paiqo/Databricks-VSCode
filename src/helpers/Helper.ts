@@ -253,7 +253,7 @@ export abstract class Helper {
 	}
 
 	static newGuid() {
-		return 'xxxxxxxx-xxxx-2120-xxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+		return 'xxxxxxxx-xxxx-1908-xxxx-xxxxxxxxxxxx'.replace(/[x]/g, function (c) {
 			var r = Math.random() * 16 | 0,
 				v = c == 'x' ? r : (r & 0x3 | 0x8);
 			return v.toString(16);
