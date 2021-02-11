@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Databricks Extension for VSCode",
-	"version": "0.6.1",
+	"version": "0.7.0",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -75,143 +75,6 @@
 						"description": "Defines the default how the VSCode extension for Databricks stores sensitive values like the Databricks Personal Access Token (PAT).",
 						"scope": "window"
 					},
-					"databricks.workspaceConfiguration": {
-						"type": "object",
-						"description": "An object containting information about settings configured for the current VSCode workspace.",
-						"scope": "window",
-						"properties": {
-							"workspaceGuid": {
-								"type": "string",
-								"description": "A GUID uniquely identifying the VSCode workspace for Databricks specific configurations."
-							},
-							"lastActiveConnection": {
-								"type": "string",
-								"description": "The display name of the Connection that was active the last time the extension was used."
-							},
-							"whereAreMySettings": {
-								"type": "string",
-								"description": "Please use the VSCode user settings and search for the 'workspaceGuid' to configure the connections for this workspace.",
-								"default": "Please use the VSCode user settings and search for the 'workspaceGuid' to configure the connections for this workspace."
-							}
-						}
-					},
-					"databricks.userWorkspaceConfigurations": {
-						"type": "array",
-						"description": "An object containting information about settings configured for the current VSCode workspace.",
-						"scope": "machine",
-						"items": {
-							"type": "object",
-							"properties": {
-								"workspaceGuid": {
-									"type": "string",
-									"description": "A GUID uniquely identifying the VSCode workspace for Databricks specific configurations. This is used to link workspace settings to global/user settings."
-								},
-								"connections": {
-									"type": "array",
-									"description": "An array of objects where each object represents a Databricks Connection containing the same settings as defined for databricks.connection.default.* ",
-									"items": {
-										"type": "object",
-										"properties": {
-											"exportFormats": {
-												"type": "object",
-												"default": {
-													"Scala": ".scala",
-													"Python": ".ipynb",
-													"SQL": ".sql",
-													"R": ".r"
-												},
-												"description": "(Optional) The different file extension used when downloading notebooks from Databricks.",
-												"scope": "window",
-												"properties": {
-													"Scala": {
-														"type": "string",
-														"enum": [
-															".scala"
-														],
-														"description": "The file extension used when downloading Scala notebooks from Databricks."
-													},
-													"Python": {
-														"type": "string",
-														"enum": [
-															".py",
-															".ipynb"
-														],
-														"description": "The file extension used when downloading Python notebooks from Databricks."
-													},
-													"SQL": {
-														"type": "string",
-														"enum": [
-															".sql"
-														],
-														"description": "The file extension used when downloading SQL notebooks from Databricks."
-													},
-													"R": {
-														"type": "string",
-														"enum": [
-															".r",
-															".Rmd"
-														],
-														"description": "The file extension used when downloading R notebooks from Databricks."
-													}
-												}
-											},
-											"displayName": {
-												"type": "string",
-												"description": "Name shown in the Connection list of the Databricks VSCode extension."
-											},
-											"apiRootUrl": {
-												"type": "string",
-												"default": "https://westeurope.azuredatabricks.net",
-												"description": "Root URL of the Databricks API. Azure: https://westeurope.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com"
-											},
-											"cloudProvider": {
-												"type": "string",
-												"enum": [
-													"Azure",
-													"AWS"
-												],
-												"enumDescriptions": [
-													"Databricks runs in Microsoft Azure Cloud.",
-													"Databricks runs in Amazon Web Service Cloud."
-												],
-												"description": "Cloud provider of your Databricks workspace."
-											},
-											"personalAccessToken": {
-												"type": "string",
-												"description": "The Personal Access Token (PAT) used to access the Databricks API."
-											},
-											"personalAccessTokenSecure": {
-												"type": "object",
-												"description": "(Optional) Reference to a secure store for the Personal Access Token.",
-												"scope": "window",
-												"properties": {
-													"keyChainSettingName": {
-														"type": "string",
-														"description": "A unique identifier which is used by KeyTar to store this connection's access token securely.",
-														"scope": "window"
-													},
-													"databricksCLIProfileName": {
-														"type": "string",
-														"description": "The name of a profile in the Databricks CLI config under ~/.databrickscfg",
-														"scope": "window"
-													}
-												}
-											},
-											"localSyncFolder": {
-												"type": "string",
-												"description": "A local path where files (notebooks) that are downloaded from Databricks should be stored. This folder can then be integrated in your GIT repository"
-											},
-											"useCodeCells": {
-												"type": "boolean",
-												"default": false,
-												"description": "If true, Code Cell tags (# %%) will be added when downloading raw source files."
-											}
-										}
-									}
-								}
-							}
-						}
-					},
 					"databricks.connection.default.exportFormats": {
 						"type": "object",
 						"default": {
@@ -257,7 +120,7 @@
 					},
 					"databricks.connection.default.displayName": {
 						"type": "string",
-						"description": "(Mandatory) Name shown in the Connection list of the Databricks VSCode extension.",
+						"description": "(Mandatory) Name shown in the Connection list of the Databricks VSCode extension. Must be unique across all VSCode workspaces to avoid conflicts!",
 						"scope": "window",
 						"examples": [
 							"my Connection",
@@ -382,7 +245,7 @@
 								"displayName": {
 									"type": "string",
 									"default": "my Databricks workspace",
-									"description": "Name shown in the Connection list of the Databricks VSCode extension.",
+									"description": "Name shown in the Connection list of the Databricks VSCode extension. . Must be unique across all VSCode workspaces to avoid conflicts!",
 									"scope": "window"
 								},
 								"apiRootUrl": {
@@ -952,30 +815,33 @@
 	},
 	"devDependencies": {
 		"@types/mkdirp": "^0.5.2",
-		"@types/node": "^10.17.29",
+		"@types/node": "^10.17.51",
 		"@types/rimraf": "^2.0.4",
 		"@types/vscode": "^1.43.0",
+		"ts-loader": "^8.0.17",
 		"tslint": "^5.20.1",
-		"typescript": "^3.9.7"
+		"typescript": "^3.9.9",
+		"webpack": "^5.21.2",
+		"webpack-cli": "^4.5.0"
 	},
 	"dependencies": {
 		"@angular/common": "^8.2.14",
 		"@angular/core": "^8.2.14",
-		"angular": "^1.8.0",
+		"angular": "^1.8.2",
 		"axios": "^0.21.1",
-		"file-saver": "^2.0.2",
+		"file-saver": "^2.0.5",
+		"follow-redirects": "^1.13.1",
 		"ftp": "^0.3.10",
 		"jsonc-parser": "^0.4.2",
 		"keytar": "^5.6.0",
 		"minimist": "^1.2.5",
 		"mkdirp": "^0.5.1",
 		"promise.prototype.finally": "^3.1.2",
-		"replace-in-file": "^6.1.0",
+		"replace-in-file": "^6.2.0",
 		"request": "^2.88.2",
 		"rimraf": "^2.6.2",
-		"rxjs": "^6.6.2",
+		"rxjs": "^6.6.3",
 		"sync-request": "^6.1.0",
-		"typed-rest-client": "^1.7.3",
 		"uniquefilename": "^1.1.2"
 	}
 }

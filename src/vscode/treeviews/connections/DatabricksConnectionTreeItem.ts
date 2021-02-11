@@ -201,12 +201,16 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 					ThisExtension.log("Getting Personal Access Token from External Config File");
 					throw "Not yet implemented!";
 
+					break;
+
 				case "VSCodeSettings":
 					throw "Not yet implemented!";
+
 					break;
 
 				default:
 					throw "Invalid Sensitive Value Store !";
+					
 					break;
 			}
 		}

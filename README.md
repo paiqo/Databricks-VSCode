@@ -83,7 +83,7 @@ Alternatively it can also be downloaded from the VS Code marketplace: [Databrick
 # Setup and Configuration
 The configuration happens directly via VS Code by simply [opening the settings](https://code.visualstudio.com/docs/getstarted/settings#_creating-user-and-workspace-settings)
 Then either search for "Databricks" or expand Extensions -> Databricks.
-The settings themselves are very well described and it should be easy for you to populate them. Also, not all of them are mandatory! Some of the optional settings will allow better integration with Databricks-Connect but this is still work in progress.
+The settings themselves are very well described and it should be easy for you to populate them. Also, not all of them are mandatory! Some of the optional settings are experimental or still work in progress.
 To configure multiple Databricks Connections/workspaces, you need to use the JSON editor.
 ``` json
 		...
@@ -105,9 +105,9 @@ To configure multiple Databricks Connections/workspaces, you need to use the JSO
 		],
 		...
 ```
-Even though the values are configured in the Workspace settings, they are not persisted there! Instead, they are converted and stored in the User settings to avoid any sensitive information like the ```personalAccessToken``` to be check-in to GIT accidentially. The workspace only contains a link to the User settings then.
-Existing connections can be updated by using the settings UI and specifying the ```databricks.connection.defaultdisplayName``` you want to update. All other settings you configure will then overwrite the existing values. Also, new connections can be added this way at any time. To delete a connection, you need to manually remove it from the User settings at the moment (will be improved in future versions!). This works for single connections via ```databricks.connection.default.*``` but also via ```databricks.connections.[]``` if you want to add/modify multiple connections at once.
-Alternatively, you can also modify the User settings directly - but this is for advanced users only! Check the configuration ```databricks.userWorkspaceConfigurations```. It list all workspace connections that were ever configured together with their unique workspace GUID which is used to link them to the corresponding VS Code workspace.
+The sensitive values entere like `personalAccessToken` will be safely stored in the system key chain/credential manager once the configuration is read the first time. This happens if you open the extension.
+Existing connections can be updated directly in VSCode settigns or via the JSON editor. To update a `personalAccessToken`, simply re-enter it and the extension will update it in the system key chain/credential manager.
+The only important thing to keep in mind is that the `displayName` should be unique on the whole machine (across all VSCode workspaces) as the `displayName` is used to identify the `personalAccessToken` to load from the system key chain/credential manager.
 
 Another important setting which requires modifying the JSON directly are the export formats which can be used to define the format in which notebooks are up-/downloaded. Again, there is a default/current setting ```databricks.connection.default.exportFormats``` and it can also configured per Connection:
 ``` json
