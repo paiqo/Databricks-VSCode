@@ -1,5 +1,5 @@
-import { iDatabricksJob, iDatabricksJobRun } from "./jobs/_types";
-
+import { iDatabricksJob } from "../vscode/treeviews/jobs/iDatabricksJob";
+import { iDatabricksJobRun } from "../vscode/treeviews/jobs/iDatabricksJobRun";
 
 export interface iDatabricksJobResponse {
 	jobs: 			iDatabricksJob[];

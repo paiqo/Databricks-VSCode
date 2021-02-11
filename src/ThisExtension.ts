@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
-import { WorkspaceItemLanguage } from './databricksApi/workspaces/_types';
-import { DatabricksConnectionManager } from './connections/DatabricksConnectionManager';
+import { WorkspaceItemLanguage } from './vscode/treeviews/workspaces/_types';
+import { DatabricksConnectionManager } from './vscode/treeviews/connections/DatabricksConnectionManager';
 import { Helper } from './helpers/Helper';
-import { DatabricksConnection } from './connections/DatabricksConnection';
-import { iDatabricksConnection } from './connections/iDatabricksConnection';
-import { DatabricksApiService } from './databricksApi/databricksApiService';
-import { DatabricksConnectionManagerVSCode } from './connections/DatabricksConnectionManagerVSCode';
+import { iDatabricksConnection } from './vscode/treeviews/connections/iDatabricksConnection';
+import { DatabricksConnectionManagerVSCode } from './vscode/treeviews/connections/DatabricksConnectionManagerVSCode';
+import { SensitiveValueStore } from './vscode/treeviews/connections/_types';
+import { DatabricksConnectionTreeItem } from './vscode/treeviews/connections/DatabricksConnectionTreeItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -17,6 +17,9 @@ export abstract class ThisExtension {
 	private static _logger: vscode.OutputChannel;
 	private static _keytar;
 	private static _connectionManager: DatabricksConnectionManager;
+	private static _settingScope: ConfigSettingSource;
+	private static _sensitiveValueStore: SensitiveValueStore;
+	private static _activeConnection: DatabricksConnectionTreeItem;
 
 	static get rootPath(): string {
 		return this._context.extensionPath;
@@ -26,17 +29,15 @@ export abstract class ThisExtension {
 		return this._context;
 	}
 
-	static set ActiveConnectionName(displayName: string) {
-		this.ConnectionManager.activateConnection(displayName);
-	}
-
 	static get ActiveConnectionName(): string {
-		return this.ConnectionManager.ActiveConnectionName;
+		if(!this.ActiveConnection)
+		{
+			return this.ConnectionManager.LastActiveconnectionName;
+		}
+		return this.ActiveConnection.displayName;
 	}
 
-	static get ActiveConnection(): DatabricksConnection {
-		return this.ConnectionManager.ActiveConnection;
-	}
+	static ActiveConnection: DatabricksConnectionTreeItem;
 
 	static get RefreshAfterUpDownload(): boolean {
 		return true;
@@ -46,33 +47,61 @@ export abstract class ThisExtension {
 		return this._isValidated;
 	}
 
-	static initialize(context: vscode.ExtensionContext): boolean {
+	static async initialize(context: vscode.ExtensionContext): Promise<boolean> {
 		try {
 			this._logger = vscode.window.createOutputChannel(ThisExtension.extension_id);
 			this.log("Logger initialized!");
 
+			this._keytar = require('keytar');
+
 			this._context = context;
 			this._extension = vscode.extensions.getExtension(this.extension_id);
 
+			ThisExtension.updateGlobalSettings();
+
 			this.log("Initializing ConnectionManager ...");
-			// could use 
 			this._connectionManager = new DatabricksConnectionManagerVSCode();
-
-			this.log("Initializing Databricks API Service ...");
-
-
-			this._keytar = require('keytar');
-
-			DatabricksApiService.initialize();
-
-			return true;
 		} catch (error) {
 			return false;
 		}
+
+		return true;
 	}
 
 	static cleanUp(): void {
 		Helper.removeTempFiles();
+	}
+
+	private static updateGlobalSettings(): void
+	{
+		let settingScope: ConfigSettingSource = "Workspace";
+
+		ThisExtension.log("Trying to get config from Workspace settings ...");
+		let workspaceConnections = ThisExtension.getConfigurationSetting<iDatabricksConnection[]>('databricks.connections', settingScope);
+		let workspaceDefaultConnection = ThisExtension.getConfigurationSetting<string>('databricks.connection.default.displayName', settingScope);
+
+		if(workspaceConnections.value || workspaceDefaultConnection.value)
+		{
+			ThisExtension.log("Workspace settings found and using them! (User-Settings are ignored)");
+			this._settingScope = "Workspace";
+		}
+		else
+		{
+			ThisExtension.log("No Workspace settings found! Trying to get User-Settings instead ...");
+			this._settingScope = "Global";
+		}
+
+		let svs = ThisExtension.getConfigurationSetting<SensitiveValueStore>('databricks.sensitiveValueStore', this._settingScope, true);
+
+		this._sensitiveValueStore = svs.value;
+	}
+
+	static get SettingScope(): ConfigSettingSource {
+		return this._settingScope;
+	}
+
+	static get SensitiveValueStore(): SensitiveValueStore {
+		return this._sensitiveValueStore;
 	}
 
 	static get ConnectionManager(): DatabricksConnectionManager {
@@ -142,24 +171,15 @@ export abstract class ThisExtension {
 		await this._keytar.setPassword(this.extension_id, setting, value);
 	}
 
-	static getConfigurationSetting<T=string>(setting: string, source?: ConfigSettingSource): ConfigSetting<T> {
+	static getConfigurationSetting<T=string>(setting: string, source?: ConfigSettingSource, allowDefaultValue: boolean = false): ConfigSetting<T> {
+		// usage: ThisExtension.getConfigurationSetting('databricks.connection.default.displayName')
+
 		let value = vscode.workspace.getConfiguration().get(setting) as T;
 		let inspect = vscode.workspace.getConfiguration().inspect(setting);
 
-		if(source == "Global")
+		if(!source)
 		{
-			value = (inspect.globalValue ?? inspect.globalLanguageValue) as T;
-		}
-		else if(source == "Workspace")
-		{
-			value = (inspect.workspaceValue ?? inspect.workspaceFolderValue ?? inspect.workspaceLanguageValue ?? inspect.workspaceFolderLanguageValue) as T;
-		}
-		else if(source == "Default")
-		{
-			value = (inspect.defaultValue ?? inspect.defaultLanguageValue) as T;
-		}
-		else if(!source)
-		{
+			// if no source was specified we use the most specific value that exists.
 			if(inspect.workspaceValue || inspect.workspaceFolderValue || inspect.workspaceLanguageValue || inspect.workspaceFolderLanguageValue)
 			{
 				source = "Workspace";
@@ -172,12 +192,50 @@ export abstract class ThisExtension {
 				source = "Default";
 			}
 		}
+
+		if(source == "Global")
+		{
+			value = (inspect.globalValue ?? inspect.globalLanguageValue) as T;
+		}
+		else if(source == "Workspace")
+		{
+			value = (inspect.workspaceValue ?? inspect.workspaceFolderValue ?? inspect.workspaceLanguageValue ?? inspect.workspaceFolderLanguageValue) as T;
+		}
+
+		if(source == "Default" || (allowDefaultValue && !value))
+		{
+			value = (inspect.defaultValue ?? inspect.defaultLanguageValue) as T;
+		}
 		
 		return {
+			setting: inspect.key,
 			value: value,
 			inspect: inspect,
 			source: source
 		};
+	}
+
+	static async updateConfigurationSetting(setting: string, value: any, target: ConfigSettingSource = this._settingScope): Promise<void> {
+		let finalTarget: vscode.ConfigurationTarget = undefined;
+
+		switch (target) {
+			case "Workspace":
+				finalTarget = vscode.ConfigurationTarget.Workspace;
+				break;
+			
+			case "Global":
+				finalTarget = vscode.ConfigurationTarget.Global;
+				break;
+		
+			default:
+				finalTarget = vscode.ConfigurationTarget.Workspace;
+				break;
+		}
+		vscode.workspace.getConfiguration().update(setting, value, finalTarget);
+	}
+
+	static async updateConfigurationSettingByConfigSetting(configSetting: ConfigSetting<any>, target: vscode.ConfigurationTarget): Promise<void> {
+		vscode.workspace.getConfiguration().update(configSetting.setting, configSetting.value, target);
 	}
 
 	static get useProxy(): boolean {
@@ -227,7 +285,10 @@ export type ConfigSettingSource =
 ;
 
 export interface ConfigSetting<T> {
+	setting: string;
 	value: T;
 	inspect;
 	source: ConfigSettingSource;
 }
+
+

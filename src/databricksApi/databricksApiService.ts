@@ -1,29 +1,30 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import { iDatabricksWorkspaceItem } from './workspaces/iDatabricksworkspaceItem';
-import { WorkspaceItemExportFormat, WorkspaceItemLanguage } from './workspaces/_types';
+import { iDatabricksWorkspaceItem } from '../vscode/treeviews/workspaces/iDatabricksworkspaceItem';
+import { WorkspaceItemExportFormat, WorkspaceItemLanguage } from '../vscode/treeviews/workspaces/_types';
 
-import { iDatabricksRuntimeVersion } from './clusters/iDatabricksRuntimeVersion';
+import { iDatabricksRuntimeVersion } from '../vscode/treeviews/clusters/iDatabricksRuntimeVersion';
 
-import { iDatabricksFSItem } from './dbfs/iDatabricksFSItem';
+import { iDatabricksFSItem } from '../vscode/treeviews/dbfs/iDatabricksFSItem';
 
-import { DatabricksSecretTreeItem } from './secrets/DatabricksSecretTreeItem';
-import { iDatabricksSecretScope } from './secrets/iDatabricksSecretScope';
-import { iDatabricksSecret } from './secrets/iDatabricksSecret';
+import { DatabricksSecretTreeItem } from '../vscode/treeviews/secrets/DatabricksSecretTreeItem';
+import { iDatabricksSecretScope } from '../vscode/treeviews/secrets/iDatabricksSecretScope';
+import { iDatabricksSecret } from '../vscode/treeviews/secrets/iDatabricksSecret';
 
 import { Helper } from '../helpers/Helper';
 import { iDatabricksJobResponse, iDatabricksJobRunResponse } from './_types';
-import { iDatabricksCluster } from './clusters/iDatabricksCluster';
+import { iDatabricksCluster } from '../vscode/treeviews/clusters/iDatabricksCluster';
 import { ThisExtension } from '../ThisExtension';
-import { DatabricksConnection } from '../connections/DatabricksConnection';
-
-
+import { DatabricksConnectionTreeItem } from '../vscode/treeviews/connections/DatabricksConnectionTreeItem';
 
 export abstract class DatabricksApiService {
 	private static API_SUB_URL: string = "/api/";
 	private static _apiService: any;
+	private static _isInitialized: boolean = false;
+	private static _connectionTestRunning: boolean = false;
 
-	static initialize(Connection: DatabricksConnection = ThisExtension.ActiveConnection): boolean {
+
+	static async initialize(Connection: DatabricksConnectionTreeItem): Promise<boolean> {
 		try {
 			ThisExtension.log("Initializing Databricks API Service ...");
 			const axios = require('axios');
@@ -35,16 +36,36 @@ export abstract class DatabricksApiService {
 			});
 
 			// Alter defaults after instance has been created
-			this._apiService.defaults.headers.common['Authorization'] = "Bearer " + Connection.personalAccessToken;
+			let accessToken = await Connection.getAccessToken();
+			this._apiService.defaults.headers.common['Authorization'] = "Bearer " + accessToken;
 			this._apiService.defaults.headers.common['Content-Type'] = 'application/json';
 			this._apiService.defaults.headers.common['Accept'] = 'application/json';
 
-			return true;
-
-			ThisExtension.log("Databricks API Service initialized!");
+			ThisExtension.log("Testing new Databricks API settings ...");
+			this._connectionTestRunning = true;
+			let dbfsList = await this.listDBFSItems("/");
+			this._connectionTestRunning = false;
+			if(dbfsList.length > 0)
+			{
+				ThisExtension.log("Databricks API Service initialized!");
+				this._isInitialized = true;
+				return true;
+			}
+			else
+			{
+				ThisExtension.log(JSON.stringify(dbfsList));
+				throw new Error(`Invalid Configuration for Databricks REST API: Cannot access '${Connection.apiRootUrl}' with token '${accessToken}'!`);
+			}
 		} catch (error) {
+			this._connectionTestRunning = false;
+			ThisExtension.log("ERROR: " + error);
+			vscode.window.showErrorMessage(error);
 			return false;
 		}
+	}
+
+	public static get isInitialized(): boolean {
+		return DatabricksApiService._isInitialized;
 	}
 
 	private static writeBase64toFile(base64String: string, filePath: string): void {
@@ -69,31 +90,38 @@ export abstract class DatabricksApiService {
 	}
 
 	private static async get(endpoint: string, params: object = null): Promise<any> {
-		ThisExtension.log("GET " + endpoint);
-		ThisExtension.log("Params:" + JSON.stringify(params));
+		if(!this._isInitialized && !this._connectionTestRunning)
+		{
+			ThisExtension.log("API has not yet been initialized! Please connect first!");
+		}
+		else
+		{
+			ThisExtension.log("GET " + endpoint);
+			ThisExtension.log("Params:" + JSON.stringify(params));
 
-		let response: any = "Request not yet executed!";
-		try {
-			response = await this._apiService.get(endpoint, params);
-			this.logResponse(response);
-		} catch (error) {
-			let errResponse = error.response;
+			let response: any = "Request not yet executed!";
+			try {
+				response = await this._apiService.get(endpoint, params);
+				this.logResponse(response);
+			} catch (error) {
+				let errResponse = error.response;
 
-			let errorMessage = errResponse.data.message;
-			if (!errorMessage) {
-				errorMessage = errResponse.headers["x-databricks-reason-phrase"];
+				let errorMessage = errResponse.data.message;
+				if (!errorMessage) {
+					errorMessage = errResponse.headers["x-databricks-reason-phrase"];
+				}
+
+				ThisExtension.log("ERROR: " + error.message);
+				ThisExtension.log("ERROR: " + errorMessage);
+				ThisExtension.log("ERROR: " + JSON.stringify(errResponse.data));
+
+				vscode.window.showErrorMessage(errorMessage);
+
+				return undefined;
 			}
 
-			ThisExtension.log("ERROR: " + error.message);
-			ThisExtension.log("ERROR: " + errorMessage);
-			ThisExtension.log("ERROR: " + JSON.stringify(errResponse.data));
-
-			vscode.window.showErrorMessage(errorMessage);
-
-			return undefined;
+			return response;
 		}
-
-		return response;
 	}
 
 	private static async post(endpoint: string, body: object): Promise<any> {

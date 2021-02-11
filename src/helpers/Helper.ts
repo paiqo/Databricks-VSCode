@@ -130,7 +130,7 @@ export abstract class Helper {
 
 	private static initOpenAsNotebookOriginalSetting(): void {
 		if (this._openAsNotebookOriginalSetting == undefined) {
-			this._openAsNotebookOriginalSetting = vscode.workspace.getConfiguration().get(this.openAsNotebookSettingName);
+			this._openAsNotebookOriginalSetting = ThisExtension.getConfigurationSetting<boolean>(this.openAsNotebookSettingName).value;
 		}
 	}
 
@@ -153,7 +153,7 @@ export abstract class Helper {
 
 		if (this._openAsNotebookOriginalSetting) {
 			ThisExtension.log("Temporary setting " + this.openAsNotebookSettingName + " to false for proper DIFF ...");
-			vscode.workspace.getConfiguration().update(this.openAsNotebookSettingName, false, vscode.ConfigurationTarget.Workspace);
+			ThisExtension.updateConfigurationSetting(this.openAsNotebookSettingName, false, ThisExtension.SettingScope);
 		}
 	}
 
@@ -161,7 +161,7 @@ export abstract class Helper {
 		this.initOpenAsNotebookOriginalSetting();
 
 		ThisExtension.log("Setting " + this.openAsNotebookSettingName + " back to " + this._openAsNotebookOriginalSetting);
-		vscode.workspace.getConfiguration().update("python.dataScience.useNotebookEditor", this._openAsNotebookOriginalSetting, vscode.ConfigurationTarget.Workspace);
+		ThisExtension.updateConfigurationSetting("python.dataScience.useNotebookEditor", this._openAsNotebookOriginalSetting, ThisExtension.SettingScope);
 	}
 
 	static async showDiff(filePath1: string, filePath2: string): Promise<void> {

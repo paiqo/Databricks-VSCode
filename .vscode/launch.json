@@ -20,7 +20,9 @@
                 "<node_internals>/**/*.js",
                 "${workspaceFolder}/node_modules/**/*.js",
                 "main.js",
-                "extension.bundle.js"
+                "extension.bundle.js",
+                "extensionHostProcess.js",
+                "${workspaceFolder}/node_modules/**/*.js"
             ]
         },
         {
@@ -37,7 +39,9 @@
                 "<node_internals>/**/*.js",
                 "${workspaceFolder}/node_modules/**/*.js",
                 "main.js",
-                "extension.bundle.js"
+                "extension.bundle.js",
+                "extensionHostProcess.js",
+                "${workspaceFolder}/node_modules/**/*.js"
             ]
         }
     ]

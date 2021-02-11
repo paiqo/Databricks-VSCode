@@ -29,6 +29,13 @@ This is a Visual Studio Code extension that allows you to work with Azure Databr
 - Easy configuration via standard VS Code settings
 
 # Relase Notes
+**v0.7.0**:
+- Major rework of environment/connection configurations
+	- **Please read the [Migration FAQ](#FAQ_Migration)**
+	- Sensitive values (PAT) are now stored in the system key chain
+	- Connections are stored in VSCode again - either per workspace or globally per user
+- restructured repository
+- added auto-update every 10 seconds for jobs and clusters
 **v0.6.0**:
 - Reworked DBFS browser - Thanks to [JacekPliszka9](https://github.com/JacekPliszka)
 	- now also downloads to local sync folder (similar to Workspace browser)
@@ -170,3 +177,17 @@ Clicking a file will download it to yout TEMP folder and open it in VS Code. If 
 
 Another tool to help you working with Databricks locally is the Secrets Browser. It allows you to browse, create, update and delete your secret scopes and secrets.
 This can come in handy if you want to quickly add a new secret as this is otherwise only supported using the plain REST API (or a CLI)!
+
+
+## FAQ
+**Q:** What can I do if none of the tabs/browsers is showing anything?
+
+**A:** This is very likely an issue with the connection. Please make sure that especially `apiRootUrl` and `personalAccessToken` are set correctly. If you are sure th values are correct, please check the logs in the output window and filter for this extension.
+
+**Q:** I just upgraded (or was upgraded automatically) to v0.7.0 and all my connections are lost. What shall I do?
+
+**A:** No worries, this is _by design_. To restore your existing connections please open the [User Settings](https://code.visualstudio.com/docs/getstarted/settings) and edit them in JSON. There is a button at the top right that opens the JSON editor. You will find the property `databricks.userWorkspaceConfigurations` which contains a list of all VSCode workspaces that were used in combination with this extension. Search the one you want to restore and copy the `connections` property. Restore it in your existing workspace settings as `databricks.connections`. The next time you open the workspace again, it will read the settings from `databricks.connections`, extract the sensitive values and store them safely in the system key chain/credential manager. Once this is working, you can remove the original `databricks.userWorkspaceConfigurations`.
+
+**Q:** My Personal Access Token (PAT) changed, how can I update my connection?
+
+**A:** Whenever the property `personalAccessToken` is provided, it will be used and updated in the system key chain/credential manager. Once it is savely stored there, it will be removed again from the VSCode configuration.

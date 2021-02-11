@@ -59,6 +59,22 @@
 				"type": "object",
 				"title": "Databricks",
 				"properties": {
+					"databricks.sensitiveValueStore": {
+						"type": "string",
+						"enum": [
+							"VSCodeSettings",
+							"SystemKeyChain",
+							"ExternalConfigFile"
+						],
+						"default": "SystemKeyChain",
+						"enumDescriptions": [
+							"Databricks Personal Access Token is stored in the VSCode Settings as plain text! There is a potential risk that the PAT gets checked in to source control systems like git!",
+							"(Experimental!) Databricks Personal Access Token is securely stored in the System Key Chain. Easy Copying/Sharing connections with other users is not possible this way. VSCode only stores a reference to the the KeyChain entry.",
+							"(Experimental!) Databricks Personal Access Token is stored in an external Config file. This is useful to manage all your PATs in one place and also easily share it"
+						],
+						"description": "Defines the default how the VSCode extension for Databricks stores sensitive values like the Databricks Personal Access Token (PAT).",
+						"scope": "window"
+					},
 					"databricks.workspaceConfiguration": {
 						"type": "object",
 						"description": "An object containting information about settings configured for the current VSCode workspace.",
@@ -154,11 +170,32 @@
 													"Azure",
 													"AWS"
 												],
+												"enumDescriptions": [
+													"Databricks runs in Microsoft Azure Cloud.",
+													"Databricks runs in Amazon Web Service Cloud."
+												],
 												"description": "Cloud provider of your Databricks workspace."
 											},
 											"personalAccessToken": {
 												"type": "string",
 												"description": "The Personal Access Token (PAT) used to access the Databricks API."
+											},
+											"personalAccessTokenSecure": {
+												"type": "object",
+												"description": "(Optional) Reference to a secure store for the Personal Access Token.",
+												"scope": "window",
+												"properties": {
+													"keyChainSettingName": {
+														"type": "string",
+														"description": "A unique identifier which is used by KeyTar to store this connection's access token securely.",
+														"scope": "window"
+													},
+													"databricksCLIProfileName": {
+														"type": "string",
+														"description": "The name of a profile in the Databricks CLI config under ~/.databrickscfg",
+														"scope": "window"
+													}
+												}
 											},
 											"localSyncFolder": {
 												"type": "string",
@@ -244,6 +281,10 @@
 							"Azure",
 							"AWS"
 						],
+						"enumDescriptions": [
+							"Databricks runs in Microsoft Azure Cloud.",
+							"Databricks runs in Amazon Web Service Cloud."
+						],
 						"description": "(Optional) Cloud provider of your Databricks workspace.",
 						"scope": "window"
 					},
@@ -255,6 +296,24 @@
 							"dapi0123456789abcdef0123456789abcdef"
 						]
 					},
+					"databricks.connection.default.personalAccessTokenSecure": {
+						"type": "object",
+						"description": "(Optional) Reference to a secure store for the Personal Access Token.",
+						"scope": "window",
+						"maxProperties": 1,
+						"properties": {
+							"keyChainSettingName": {
+								"type": "string",
+								"description": "A unique identifier which is used by KeyTar to store this connection's access token securely.",
+								"scope": "window"
+							},
+							"databricksCLIProfileName": {
+								"type": "string",
+								"description": "The name of a profile in the Databricks CLI config under ~/.databrickscfg",
+								"scope": "window"
+							}
+						}
+					},
 					"databricks.connection.default.localSyncFolder": {
 						"type": "string",
 						"description": "(Mandatory) A local path where files (notebooks) that are downloaded from Databricks should be stored. This folder can then be integrated in your GIT repository. \nExamples: \nWindows - C:\\mySyncFolder \nLinux/Unix - /home/myUser/mySyncFolder \nmacOS - myUser/mySyncFolder  (Please do not use leading / on macOS!)",
@@ -263,13 +322,13 @@
 							"Windows: C:\\mySyncFolder",
 							"Linux/Unix: /home/myUser/mySyncFolder",
 							"macOS: myUser/mySyncFolder  (Please do not use leading / on macOS!)"
-						],
-						"format": "uri"
+						]
 					},
 					"databricks.connection.default.useCodeCells": {
 						"type": "boolean",
 						"description": "If true, Code Cell tags (# %%) will be added when downloading raw source files.",
-						"scope": "window"
+						"scope": "window",
+						"default": true
 					},
 					"databricks.connections": {
 						"type": "array",
@@ -338,6 +397,10 @@
 										"Azure",
 										"AWS"
 									],
+									"enumDescriptions": [
+										"Databricks runs in Microsoft Azure Cloud.",
+										"Databricks runs in Amazon Web Service Cloud."
+									],
 									"description": "Cloud provider of your Databricks workspace.",
 									"scope": "window"
 								},
@@ -347,12 +410,12 @@
 									"description": "The Personal Access Token (PAT) used to access the Databricks API.",
 									"scope": "window"
 								},
-								"databricks.connection.default.personalAccessTokenSecure": {
+								"personalAccessTokenSecure": {
 									"type": "object",
 									"description": "(Optional) Reference to a secure store for the Personal Access Token.",
 									"scope": "window",
 									"properties": {
-										"keyTarSettingName": {
+										"keyChainSettingName": {
 											"type": "string",
 											"description": "A unique identifier which is used by KeyTar to store this connection's access token securely.",
 											"scope": "window"
@@ -378,6 +441,11 @@
 								}
 							}
 						},
+						"scope": "window"
+					},
+					"databricks.lastActiveConnection": {
+						"type": "string",
+						"description": "(Optional) The displayName of the Connection that was used in the last session.",
 						"scope": "window"
 					}
 				}
