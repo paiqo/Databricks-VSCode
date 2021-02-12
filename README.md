@@ -31,7 +31,7 @@ This is a Visual Studio Code extension that allows you to work with Azure Databr
 # Relase Notes
 **v0.7.0**:
 - Major rework of environment/connection configurations
-	- **Please read the [Migration FAQ](#FAQ_Migration)**
+	- **Please read the [Migration FAQ](#FAQ)**
 	- Sensitive values (PAT) are now stored in the system key chain
 	- Connections are stored in VSCode again - either per workspace or globally per user
 - restructured repository
