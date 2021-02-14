@@ -10,7 +10,6 @@ import { DatabricksApiService } from '../../../databricksApi/databricksApiServic
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDatabricksConnection {
 	_displayName: string;
-	_cloudProvider: CloudProvider;
 	_personalAccessToken: string;
 	_apiRootUrl: string;
 	_localSyncFolder: string;
@@ -27,12 +26,10 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 	_secureTokenStore: SensitiveValueStore;
 
 	constructor(
-		definition: iDatabricksConnection,
-		source: ConnectionSource = "databricks.connections"
+		definition: iDatabricksConnection
 	) {
 		super(definition.displayName);
 		this._displayName = definition.displayName;
-		this._cloudProvider = definition.cloudProvider;
 		this._personalAccessToken = definition.personalAccessToken;
 		this._personalAccessTokenSecure = definition.personalAccessTokenSecure;
 		this._apiRootUrl = Helper.trimChar(definition.apiRootUrl, '/', false, true);
@@ -40,6 +37,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		this._localSyncFolder = definition.localSyncFolder;
 		this._exportFormats = definition.exportFormats;
 		this._useCodeCells = definition.useCodeCells;
+		this._source = definition._source;
 
 		this._isActive = this.displayName === ThisExtension.ActiveConnectionName;
 
@@ -55,7 +53,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 
 		this._isActive = false;
 
-		this._source = source;
+		
 
 		this.manageSecureToken();
 	}
@@ -93,7 +91,12 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 	}
 
 	get cloudProvider(): CloudProvider {
-		return this._cloudProvider;
+		if (this.apiRootUrl.includes('azuredatabricks')) {
+			return "Azure";
+		}
+		else {
+			return "AWS";
+		}
 	}
 
 	get apiRootUrl(): string {
@@ -109,7 +112,12 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 	}
 
 	get exportFormats(): ExportFormatsConfiguration {
-		return this._exportFormats;
+		return this._exportFormats; 
+
+	}
+
+	set exportFormats(value: ExportFormatsConfiguration) {
+		this._exportFormats = value;
 	}
 
 	get useCodeCells(): boolean {
@@ -124,6 +132,14 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		return this._personalAccessTokenSecure;
 	}
 
+	get source(): ConnectionSource {
+		return this._source;
+	}
+
+	set source(value: ConnectionSource) {
+		this._source = value;
+	}
+
 
 	get isActive(): boolean {
 		return this._isActive;
@@ -131,7 +147,8 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 
 	static fromJson(jsonString: string, source: ConnectionSource): DatabricksConnectionTreeItem {
 		let item: iDatabricksConnection = JSON.parse(jsonString);
-		return new DatabricksConnectionTreeItem(item, source);
+		item._source = source;
+		return new DatabricksConnectionTreeItem(item);
 	}
 
 	get Source(): ConnectionSource {
@@ -276,22 +293,11 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 
 		// check defaultvalues, etc.
 		if (!this.propertyIsValid(con.exportFormats)) {
-			// get the default from the config of this extension
 			let defaultFromExtension = ThisExtension.configuration.packageJSON.contributes.configuration[0].properties["databricks.connection.default.exportFormats"].default;
-			con.exportFormats = defaultFromExtension;
-			msg = 'Configuration ' + con.displayName + ': Property "exportFormats" was not provided - using the default value "' + defaultFromExtension + '"!';
+			con.exportFormats = defaultFromExtension;	
+			msg = 'Configuration ' + con.displayName + ': Property "exportFormats" was not provided - using the default value!';
 			ThisExtension.log(msg);
 			//vscode.window.showWarningMessage(msg);
-		}
-		if (!this.propertyIsValid(con.cloudProvider)) {
-			if (con.apiRootUrl.includes('azuredatabricks')) {
-				con.cloudProvider = "Azure";
-			}
-			else {
-				con.cloudProvider = "AWS";
-			}
-			msg = 'Configuration ' + con.displayName + ': Setting Configuration property "cloudProvider" to "' + con.cloudProvider + '" based on the property "apiRootUrl"';
-			ThisExtension.log(msg);
 		}
 		if (con.useCodeCells == undefined) { // this.propertyIsValid does not work for booleans !!!
 			// get the default from the config of this extension

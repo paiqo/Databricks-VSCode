@@ -266,18 +266,6 @@ export type ExportFormatsConfiguration = {
 	SQL: string;
 };
 
-// represents the structure how the reference to the VSCode User settings are stored in the VSCode workspace settings
-export interface iWorkspaceConfiguration {
-	workspaceGuid: string;
-	lastActiveConnection: string;
-}
-
-// represents the structure how workspace configurations are stored in VSCode User Settings
-export interface iUserWorkspaceConfiguration {
-	workspaceConfig: iWorkspaceConfiguration;
-	connections: iDatabricksConnection[];
-}
-
 export type ConfigSettingSource =
 	"Workspace"
 |	"Global"

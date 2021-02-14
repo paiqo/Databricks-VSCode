@@ -29,6 +29,8 @@ This is a Visual Studio Code extension that allows you to work with Azure Databr
 - Easy configuration via standard VS Code settings
 
 # Relase Notes
+**v0.7.1**:
+- fix issue with new environment/Connection configuration and `exportFormats` property
 **v0.7.0**:
 - Major rework of environment/connection configurations
 	- **Please read the [Migration FAQ](#FAQ)**
@@ -90,14 +92,12 @@ To configure multiple Databricks Connections/workspaces, you need to use the JSO
 		"databricks.connections": [
 			{
 				"apiRootUrl": "https://westeurope.azuredatabricks.net",
-				"cloudProvider": "Azure",
 				"displayName": "My Dev workspace",
 				"localSyncFolder": "c:\\Databricks\\dev",
 				"personalAccessToken": "dapi219e30212312311c6721a66ce879e"
 			},
 			{
 				"apiRootUrl": "https://westeurope.azuredatabricks.net",
-				"cloudProvider": "Azure",
 				"displayName": "My Test workspace",
 				"localSyncFolder": "c:\\Databricks\\test",
 				"personalAccessToken": "dapi219e30212312311c672aaaaaaaaaa"

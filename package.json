@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Databricks Extension for VSCode",
-	"version": "0.7.0",
+	"version": "0.7.1",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -138,19 +138,6 @@
 						],
 						"format": "hostname"
 					},
-					"databricks.connection.default.cloudProvider": {
-						"type": "string",
-						"enum": [
-							"Azure",
-							"AWS"
-						],
-						"enumDescriptions": [
-							"Databricks runs in Microsoft Azure Cloud.",
-							"Databricks runs in Amazon Web Service Cloud."
-						],
-						"description": "(Optional) Cloud provider of your Databricks workspace.",
-						"scope": "window"
-					},
 					"databricks.connection.default.personalAccessToken": {
 						"type": "string",
 						"description": "(Mandatory) The Personal Access Token (PAT) used to access the Databricks API.",
@@ -252,19 +239,6 @@
 									"type": "string",
 									"default": "https://westeurope.azuredatabricks.net",
 									"description": "Root URL of the Databricks API. Azure: https://westeurope.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com",
-									"scope": "window"
-								},
-								"cloudProvider": {
-									"type": "string",
-									"enum": [
-										"Azure",
-										"AWS"
-									],
-									"enumDescriptions": [
-										"Databricks runs in Microsoft Azure Cloud.",
-										"Databricks runs in Amazon Web Service Cloud."
-									],
-									"description": "Cloud provider of your Databricks workspace.",
 									"scope": "window"
 								},
 								"personalAccessToken": {
