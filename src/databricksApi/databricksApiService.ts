@@ -12,7 +12,7 @@ import { iDatabricksSecretScope } from '../vscode/treeviews/secrets/iDatabricksS
 import { iDatabricksSecret } from '../vscode/treeviews/secrets/iDatabricksSecret';
 
 import { Helper } from '../helpers/Helper';
-import { iDatabricksJobResponse, iDatabricksJobRunResponse } from './_types';
+import { ExecutionCommand, ExecutionContext, iDatabricksJobResponse, iDatabricksJobRunResponse } from './_types';
 import { iDatabricksCluster } from '../vscode/treeviews/clusters/iDatabricksCluster';
 import { ThisExtension } from '../ThisExtension';
 import { DatabricksConnectionTreeItem } from '../vscode/treeviews/connections/DatabricksConnectionTreeItem';
@@ -45,14 +45,12 @@ export abstract class DatabricksApiService {
 			this._connectionTestRunning = true;
 			let dbfsList = await this.listDBFSItems("/");
 			this._connectionTestRunning = false;
-			if(dbfsList.length > 0)
-			{
+			if (dbfsList.length > 0) {
 				ThisExtension.log("Databricks API Service initialized!");
 				this._isInitialized = true;
 				return true;
 			}
-			else
-			{
+			else {
 				ThisExtension.log(JSON.stringify(dbfsList));
 				throw new Error(`Invalid Configuration for Databricks REST API: Cannot access '${Connection.apiRootUrl}' with token '${accessToken}'!`);
 			}
@@ -66,6 +64,10 @@ export abstract class DatabricksApiService {
 
 	public static get isInitialized(): boolean {
 		return DatabricksApiService._isInitialized;
+	}
+
+	public static get sqlClusterId(): string {
+		return "0419-145009-rifts122";
 	}
 
 	private static writeBase64toFile(base64String: string, filePath: string): void {
@@ -90,12 +92,10 @@ export abstract class DatabricksApiService {
 	}
 
 	private static async get(endpoint: string, params: object = null): Promise<any> {
-		if(!this._isInitialized && !this._connectionTestRunning)
-		{
+		if (!this._isInitialized && !this._connectionTestRunning) {
 			ThisExtension.log("API has not yet been initialized! Please connect first!");
 		}
-		else
-		{
+		else {
 			ThisExtension.log("GET " + endpoint);
 			ThisExtension.log("Params:" + JSON.stringify(params));
 
@@ -154,6 +154,99 @@ export abstract class DatabricksApiService {
 
 	/*
 	----------------------------------------------------------------
+	-- C O N T E X T   A N D   C O M M A N D   A P I s (v1.2)
+	----------------------------------------------------------------
+	*/
+	static async getExecutionContext(cluster_id: string, language: string = "sql"): Promise<ExecutionContext> {
+		let endpoint = '1.2/contexts/create';
+		let body = { clusterId: cluster_id, language: language };
+
+		let response = await this.post(endpoint, body);
+
+		let ret = {
+			"cluster_id": cluster_id,
+			"language": language,
+			"context_id": response.data.id
+		};
+
+		return ret;
+	}
+
+	static async runCommand(context: ExecutionContext, command: string): Promise<ExecutionCommand> {
+		let endpoint = '1.2/commands/execute';
+		let body = {
+			clusterId: context.cluster_id,
+			language: context.language,
+			contextId: context.context_id,
+			command: command
+		};
+
+		let response = await this.post(endpoint, body);
+
+		let ret = {
+			"command_id": response.data.id,
+			"cluster_id": context.cluster_id,
+			"language": context.language,
+			"context_id": context.context_id
+		};
+
+		return ret;
+	}
+
+	static async getCommandStatus(command: ExecutionCommand) {
+		let endpoint = '1.2/commands/status';
+		let body = {
+			clusterId: command.cluster_id,
+			contextId: command.context_id,
+			commandId: command.command_id
+		};
+
+		let response = await this.get(endpoint, { params: body });
+
+		return response;
+	}
+
+	static async getCommandResult(command: ExecutionCommand, awaitCompletion: boolean = true) {
+		let apiResults = null;
+		do {
+			if (apiResults != null) { await Helper.wait(1000); }
+
+			apiResults = await this.getCommandStatus(command);
+		} while (awaitCompletion && !["Finished", "Cancelled", "Error"].includes(apiResults.data.status));
+
+		if (apiResults.data.status == "Finished") {
+			if (apiResults.data.results.resultType == "table") {
+				let data = [];
+				let schema = apiResults.data.results.schema;
+		
+				for(let row of apiResults.data.results.data)
+				{
+					let newRow = {};
+
+					for (let i = 0; i < schema.length; i++) {
+						newRow[schema[i].name] = row[i];					
+					}
+			
+					data.push(newRow);
+				}
+		
+				return data;
+			}
+			else if (apiResults.data.results.resultType == "text") {
+				return apiResults.results.data;
+			}
+			else if (apiResults.data.results.resultType == "error") {
+				ThisExtension.log(apiResults);
+			}
+		}
+		else if (apiResults.data.status == "Error") {
+			ThisExtension.log(apiResults);
+		}
+		return apiResults;
+	}
+
+	/*
+	----------------------------------------------------------------
 	-- W O R K S P A C E   A P I
 	----------------------------------------------------------------
 	*/
@@ -180,6 +273,8 @@ export abstract class DatabricksApiService {
 			format: format
 		};
 
+		ThisExtension.log(`Downloading '${path}' to local path '${localPath}' ...`);
+
 		let response = await this.get(endpoint, { params: body });
 
 		let result = response.data;
@@ -196,6 +291,8 @@ export abstract class DatabricksApiService {
 			overwrite: overwrite,
 			format: format
 		};
+
+		ThisExtension.log(`Uploading local path '${localPath}' to '${path}' ...`);
 
 		let response = await this.post(endpoint, body);
 
@@ -357,7 +454,7 @@ export abstract class DatabricksApiService {
 		if (response == undefined) {
 			return [];
 		}
-		
+
 		let result = response.data.files;
 
 		return result;
@@ -490,7 +587,7 @@ export abstract class DatabricksApiService {
 
 		// remove file if it exists
 		//fs.unlink(localPath, (err) => {
-			//if (err) throw err;
+		//if (err) throw err;
 		//});
 
 		let totalSize = dbfsItem.file_size;
@@ -500,7 +597,7 @@ export abstract class DatabricksApiService {
 		Helper.ensureLocalFolder(localPath, true);
 		let writeStream = fs.createWriteStream(localPath, { highWaterMark: batchSize, encoding: 'base64' });
 
-		if(totalSize > 0) // we may also download empty files where the code would not work otherwise
+		if (totalSize > 0) // we may also download empty files where the code would not work otherwise
 		{
 			do {
 				if (offset + batchSize > totalSize) {

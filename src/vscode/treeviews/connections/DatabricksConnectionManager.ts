@@ -22,20 +22,4 @@ export abstract class DatabricksConnectionManager {
 	get LastActiveconnectionName(): string {
 		return this._lastActiveConnectionName;
 	}
-
-	get WorkspaceSubFolder(): string {
-		return "Workspace";
-	}
-
-	get ClustersSubFolder(): string {
-		return "Clusters";
-	}
-
-	get DatabricksFSSubFolder(): string {
-		return "DBFS";
-	}
-
-	get JobsSubFolder(): string {
-		return "Jobs";
-	}
 }

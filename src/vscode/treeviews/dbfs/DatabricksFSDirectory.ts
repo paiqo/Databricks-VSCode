@@ -60,7 +60,7 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 	get localPath(): string {
 		return fspath.join(
 			ThisExtension.ActiveConnection.localSyncFolder, 
-			ThisExtension.ConnectionManager.DatabricksFSSubFolder, 
+			ThisExtension.ActiveConnection.DatabricksFSSubFolder, 
 			this.path);
 	}
 

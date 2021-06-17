@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Databricks Extension for VSCode",
-	"version": "0.7.1",
+	"version": "0.8.0",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -49,7 +49,8 @@
 		"onView:databricksClusters",
 		"onView:databricksJobs",
 		"onView:databricksFS",
-		"onView:databricksSecrets"
+		"onView:databricksSecrets",
+		"onView:databricksSql"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -174,6 +175,35 @@
 							"macOS: myUser/mySyncFolder  (Please do not use leading / on macOS!)"
 						]
 					},
+					"databricks.connection.default.localSyncSubfolders": {
+						"type": "object",
+						"default": {
+							"Workspace": "Workspace",
+							"Clusters": "Clusters",
+							"DBFS": "DBFS",
+							"Jobs": "Jobs"
+						},
+						"description": "(Optional) Can be used to specify different sub-paths for the items that can be downloaded from Databricks.",
+						"scope": "window",
+						"properties": {
+							"Workspace": {
+								"type": "string",
+								"description": "The subfolder where to store downloaded notebooks."
+							},
+							"Clusters": {
+								"type": "string",
+								"description": "The subfolder where to store downloaded cluster definitions."
+							},
+							"DBFS": {
+								"type": "string",
+								"description": "The subfolder where to store downloaded DBFS items."
+							},
+							"Jobs": {
+								"type": "string",
+								"description": "The subfolder where to store downloaded job and job-run defintions."
+							}
+						}
+					},
 					"databricks.connection.default.useCodeCells": {
 						"type": "boolean",
 						"description": "If true, Code Cell tags (# %%) will be added when downloading raw source files.",
@@ -270,6 +300,35 @@
 									"description": "A local path where files (notebooks) that are downloaded from Databricks should be stored. This folder can then be integrated in your GIT repository",
 									"scope": "window"
 								},
+								"localSyncSubfolders": {
+									"type": "object",
+									"default": {
+										"Workspace": "Workspace",
+										"Clusters": "Clusters",
+										"DBFS": "DBFS",
+										"Jobs": "Jobs"
+									},
+									"description": "(Optional) Can be used to specify different sub-paths for the items that can be downloaded from Databricks.",
+									"scope": "window",
+									"properties": {
+										"Workspace": {
+											"type": "string",
+											"description": "The subfolder where to store downloaded notebooks."
+										},
+										"Clusters": {
+											"type": "string",
+											"description": "The subfolder where to store downloaded cluster definitions."
+										},
+										"DBFS": {
+											"type": "string",
+											"description": "The subfolder where to store downloaded DBFS items."
+										},
+										"Jobs": {
+											"type": "string",
+											"description": "The subfolder where to store downloaded job and job-run defintions."
+										}
+									}
+								},
 								"useCodeCells": {
 									"type": "boolean",
 									"default": false,
@@ -278,7 +337,8 @@
 								}
 							}
 						},
-						"scope": "window"
+						"scope": "window",
+						"default": []
 					},
 					"databricks.lastActiveConnection": {
 						"type": "string",
@@ -322,12 +382,16 @@
 				{
 					"id": "databricksSecrets",
 					"name": "Secrets"
+				},
+				{
+					"id": "databricksSQL",
+					"name": "SQL"
 				}
 			]
 		},
 		"commands": [
 			{
-				"command": "DatabricksConnections.refresh",
+				"command": "databricksConnections.refresh",
 				"title": "Refresh",
 				"icon": {
 					"light": "resources/light/refresh.png",
@@ -479,6 +543,14 @@
 				}
 			},
 			{
+				"command": "databricksClusterItem.useForSQL",
+				"title": "Use for SQL",
+				"icon": {
+					"light": "resources/light/stop.png",
+					"dark": "resources/dark/stop.png"
+				}
+			},
+			{
 				"command": "databricksJobs.refresh",
 				"title": "Refresh",
 				"icon": {
@@ -613,12 +685,20 @@
 					"light": "resources/light/delete.png",
 					"dark": "resources/dark/delete.png"
 				}
+			},
+			{
+				"command": "databricksSQL.refresh",
+				"title": "Refresh",
+				"icon": {
+					"light": "resources/light/refresh.png",
+					"dark": "resources/dark/refresh.png"
+				}
 			}
 		],
 		"menus": {
 			"view/title": [
 				{
-					"command": "DatabricksConnections.refresh",
+					"command": "databricksConnections.refresh",
 					"when": "view == DatabricksConnections",
 					"group": "navigation"
 				},
@@ -676,6 +756,11 @@
 					"command": "databricksSecrets.addSecretScope",
 					"when": "view == databricksSecrets",
 					"group": "navigation"
+				},
+				{
+					"command": "databricksSQL.refresh",
+					"when": "view == databricksSQL",
+					"group": "navigation"
 				}
 			],
 			"view/item/context": [
@@ -723,6 +808,10 @@
 					"command": "databricksClusterItem.delete",
 					"when": "view == databricksClusters",
 					"group": "inline"
+				},
+				{
+					"command": "databricksClusterItem.useForSQL",
+					"when": "view == databricksClusters"
 				},
 				{
 					"command": "databricksJobItem.showDefinition",

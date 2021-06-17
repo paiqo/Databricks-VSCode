@@ -15,7 +15,7 @@ export class DatabricksJob extends DatabricksJobTreeItem {
 	) {
 		super("JOB", definition.job_id, definition.settings.name, definition, vscode.TreeItemCollapsibleState.Collapsed);
 
-		super.label = "Job " + this.name;
+		super.label = this.name;
 		super.tooltip = this._tooltip;
 		super.description = this._description;
 		super.contextValue = this._contextValue;

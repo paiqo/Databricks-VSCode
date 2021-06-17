@@ -77,7 +77,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 	}
 
 	get localPath(): string {
-		return fspath.join(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.WorkspaceSubFolder, this.path);
+		return fspath.join(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ActiveConnection.WorkspaceSubFolder, this.path);
 	}
 
 	get localPathExists(): boolean {

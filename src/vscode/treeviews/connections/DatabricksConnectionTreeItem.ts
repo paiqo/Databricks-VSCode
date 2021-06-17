@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as fspath from 'path';
-import { ThisExtension, ExportFormatsConfiguration } from '../../../ThisExtension';
+import { ThisExtension, ExportFormatsConfiguration, LocalSyncSubfolderConfiguration } from '../../../ThisExtension';
 import { CloudProvider, AccessTokenSecure, ConnectionSource, SensitiveValueStore } from './_types';
 import { iDatabricksConnection } from './iDatabricksConnection';
 import { Helper } from '../../../helpers/Helper';
@@ -13,6 +13,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 	_personalAccessToken: string;
 	_apiRootUrl: string;
 	_localSyncFolder: string;
+	_localSyncSubfolders: LocalSyncSubfolderConfiguration;
 	_isActive: boolean;
 	_exportFormats: ExportFormatsConfiguration;
 	_useCodeCells: boolean;
@@ -35,6 +36,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		this._apiRootUrl = Helper.trimChar(definition.apiRootUrl, '/', false, true);
 		//this._localSyncFolder = Helper.trimChar(localSyncFolder, '/');
 		this._localSyncFolder = definition.localSyncFolder;
+		this._localSyncSubfolders = definition.localSyncSubfolders;
 		this._exportFormats = definition.exportFormats;
 		this._useCodeCells = definition.useCodeCells;
 		this._source = definition._source;
@@ -53,7 +55,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 
 		this._isActive = false;
 
-		
+
 
 		this.manageSecureToken();
 	}
@@ -111,8 +113,12 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		return this._localSyncFolder;
 	}
 
+	get localSyncSubfolders(): LocalSyncSubfolderConfiguration {
+		return this._localSyncSubfolders;
+	}
+
 	get exportFormats(): ExportFormatsConfiguration {
-		return this._exportFormats; 
+		return this._exportFormats;
 
 	}
 
@@ -204,8 +210,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 					ThisExtension.log("Getting Personal Access Token from System KeyChain '" + this._secureTokenName + "'");
 					this._personalAccessToken = await ThisExtension.getSecureSetting(this._secureTokenName);
 
-					if(!this._personalAccessToken)
-					{
+					if (!this._personalAccessToken) {
 						let msg = "Databricks Personal Access Token not found in System Key Chain!";
 						ThisExtension.log(msg);
 						ThisExtension.log("Please add the Personal access token again using the configuration property 'personalAccessToken' and refersh the connections.");
@@ -227,7 +232,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 
 				default:
 					throw "Invalid Sensitive Value Store !";
-					
+
 					break;
 			}
 		}
@@ -294,7 +299,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		// check defaultvalues, etc.
 		if (!this.propertyIsValid(con.exportFormats)) {
 			let defaultFromExtension = ThisExtension.configuration.packageJSON.contributes.configuration[0].properties["databricks.connection.default.exportFormats"].default;
-			con.exportFormats = defaultFromExtension;	
+			con.exportFormats = defaultFromExtension;
 			msg = 'Configuration ' + con.displayName + ': Property "exportFormats" was not provided - using the default value!';
 			ThisExtension.log(msg);
 			//vscode.window.showWarningMessage(msg);
@@ -315,10 +320,9 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		ThisExtension.log(`Activating Databricks Connection '${this.displayName}' ...`);
 
 		ThisExtension.ActiveConnection = this;
+		await ThisExtension.updateConfigurationSetting("databricks.lastActiveConnection", this.displayName);
 
 		if (await DatabricksApiService.initialize(this)) {
-			await ThisExtension.updateConfigurationSetting("databricks.lastActiveConnection", this.displayName);
-
 			if (this.useCodeCells) {
 				await ThisExtension.updateConfigurationSetting("python.dataScience.codeRegularExpression", "^(# COMMAND ----------|#\\s*%%|#\\s*\\<codecell\\>|#\\s*In\\[\\d*?\\]|#\\s*In\\[ \\])");
 			}
@@ -335,8 +339,41 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 			vscode.commands.executeCommand("databricksJobs.refresh", false);
 			vscode.commands.executeCommand("databricksFS.refresh", false);
 			vscode.commands.executeCommand("databricksSecrets.refresh", false);
+			vscode.commands.executeCommand("databricksSQL.refresh", false);
 
-			vscode.commands.executeCommand("DatabricksConnections.refresh", false);
+			vscode.commands.executeCommand("databricksConnections.refresh", false);
+		}
+	}
+
+	get WorkspaceSubFolder(): string {
+		try {
+			return this._localSyncSubfolders.Workspace;
+		} catch (error) {
+			return "Workspace";
+		}
+	}
+
+	get ClustersSubFolder(): string {
+		try {
+			return this._localSyncSubfolders.Clusters;
+		} catch (error) {
+			return "Clusters";
+		}
+	}
+
+	get DatabricksFSSubFolder(): string {
+		try {
+			return this._localSyncSubfolders.DBFS;
+		} catch (error) {
+			return "DBFS";
+		}
+	}
+
+	get JobsSubFolder(): string {
+		try {
+			return this._localSyncSubfolders.Jobs;
+		} catch (error) {
+			return "Jobs";
 		}
 	}
 }

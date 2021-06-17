@@ -75,14 +75,14 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 	get localFolderPath(): string {
 		return fspath.join(
 			ThisExtension.ActiveConnection.localSyncFolder, 
-			ThisExtension.ConnectionManager.DatabricksFSSubFolder, 
+			ThisExtension.ActiveConnection.DatabricksFSSubFolder, 
 			fspath.dirname(this.path));
 	}
 
 	get localFilePath(): string {
 		return fspath.join(
 			ThisExtension.ActiveConnection.localSyncFolder, 
-			ThisExtension.ConnectionManager.DatabricksFSSubFolder, 
+			ThisExtension.ActiveConnection.DatabricksFSSubFolder, 
 			this.path);
 	}
 
@@ -171,7 +171,7 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 		try {
 			let localFilePath = fspath.join(
 				ThisExtension.ActiveConnection.localSyncFolder,
-				ThisExtension.ConnectionManager.DatabricksFSSubFolder,
+				ThisExtension.ActiveConnection.DatabricksFSSubFolder,
 				this.path
 			);
 			let response = DatabricksApiService.uploadDBFSFile(localFilePath, this.path, true);

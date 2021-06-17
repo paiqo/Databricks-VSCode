@@ -114,6 +114,7 @@ export abstract class Helper {
 		this.addTempFile(uniqueFilePath);
 
 		if (open) {
+			await Helper.wait(500);
 			vscode.workspace
 				.openTextDocument(uniqueFilePath)
 				.then(vscode.window.showTextDocument);
@@ -305,5 +306,21 @@ export abstract class Helper {
 		catch (error) {
 			ThisExtension.log('Error occurred:', error);
 		}
+	}
+
+	static secondsToHms(seconds: number) {
+		var h = Math.floor(seconds / 3600);
+		var m = Math.floor(seconds % 3600 / 60);
+		var s = Math.floor(seconds % 3600 % 60);
+
+		var hDisplay = h > 0 ? h + ":" : "";
+		var mDisplay = m > 0 ? m + ":" : "";
+		var sDisplay = s > 0 ? s + ":" : "";
+
+		var hDisplay = h > 0 ? `${h.toString().length > 1 ? `${h}` : `0${h}`}` : '00';
+		var mDisplay = m > 0 ? `${m.toString().length > 1 ? `${m}` : `0${m}`}` : '00';
+		var sDisplay = s > 0 ? `${s.toString().length > 1 ? `${s}` : `0${s}`}` : '00';
+
+		return `${hDisplay}:${mDisplay}:${sDisplay}`; 
 	}
 }

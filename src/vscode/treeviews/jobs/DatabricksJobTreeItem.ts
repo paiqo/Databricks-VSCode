@@ -61,7 +61,8 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 	}
 
 	async showDefinition(): Promise<void> {
-		await Helper.openTempFile(JSON.stringify(this.definition, null, "\t"), this.label + '-' + this.databricks_id + '.json');
+		let file_name = (this.name + '-' + this.databricks_id + '.json').replace(":", "");
+		await Helper.openTempFile(JSON.stringify(this.definition, null, "\t"), file_name);
 	}
 
 	async openBrowser(): Promise<void> {

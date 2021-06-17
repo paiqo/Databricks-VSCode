@@ -110,7 +110,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 	};
 
 	get localFolderPath(): string {
-		return fspath.join(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.WorkspaceSubFolder, fspath.dirname(this.path));
+		return fspath.join(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ActiveConnection.WorkspaceSubFolder, fspath.dirname(this.path));
 	}
 
 	get localFilePath(): string {

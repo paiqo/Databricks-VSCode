@@ -29,8 +29,20 @@ This is a Visual Studio Code extension that allows you to work with Azure Databr
 - Easy configuration via standard VS Code settings
 
 # Relase Notes
+**v0.8.0**:
+- add SQL Data browser as in the Databricks UI
+- fixed an issue with Secrets - you can now add/delete secrets again
+
+**v0.7.3**:
+- fixed an issue where and error is thrown if only the default connection was specified
+- fixed an issue with the LastActiveConnection
+
+**v0.7.2**:
+- add support for custom sub-folders in the local sync folder for the different items. Check out configuratio property `localSyncSubfolders`
+
 **v0.7.1**:
 - fix issue with new environment/Connection configuration and `exportFormats` property
+
 **v0.7.0**:
 - Major rework of environment/connection configurations
 	- **Please read the [Migration FAQ](#FAQ)**
@@ -38,6 +50,7 @@ This is a Visual Studio Code extension that allows you to work with Azure Databr
 	- Connections are stored in VSCode again - either per workspace or globally per user
 - restructured repository
 - added auto-update every 10 seconds for jobs and clusters
+
 **v0.6.0**:
 - Reworked DBFS browser - Thanks to [JacekPliszka9](https://github.com/JacekPliszka)
 	- now also downloads to local sync folder (similar to Workspace browser)

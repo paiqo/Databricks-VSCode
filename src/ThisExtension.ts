@@ -6,6 +6,7 @@ import { iDatabricksConnection } from './vscode/treeviews/connections/iDatabrick
 import { DatabricksConnectionManagerVSCode } from './vscode/treeviews/connections/DatabricksConnectionManagerVSCode';
 import { SensitiveValueStore } from './vscode/treeviews/connections/_types';
 import { DatabricksConnectionTreeItem } from './vscode/treeviews/connections/DatabricksConnectionTreeItem';
+import { DatabricksSQLTreeProvider } from './vscode/treeviews/sql/DatabricksSQLTreeProvider';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -20,6 +21,7 @@ export abstract class ThisExtension {
 	private static _settingScope: ConfigSettingSource;
 	private static _sensitiveValueStore: SensitiveValueStore;
 	private static _activeConnection: DatabricksConnectionTreeItem;
+	private static _sqlClusterId: string;
 
 	static get rootPath(): string {
 		return this._context.extensionPath;
@@ -106,6 +108,16 @@ export abstract class ThisExtension {
 
 	static get ConnectionManager(): DatabricksConnectionManager {
 		return this._connectionManager;
+	}
+
+	static get SQLClusterID(): string {
+		return this._sqlClusterId;
+	}
+
+	static set SQLClusterID(value: string) {
+		ThisExtension.log(`Using cluster with id '${value}' for SQL Browser!`);
+		vscode.commands.executeCommand("databricksSQL.refresh", true);
+		this._sqlClusterId = value;
 	}
 
 	static get allFileExtensions(): string[] {
@@ -264,6 +276,13 @@ export type ExportFormatsConfiguration = {
 	Python: string;
 	R: string;
 	SQL: string;
+};
+
+export type LocalSyncSubfolderConfiguration = {
+	Workspace: string;
+	Clusters: string;
+	DBFS: string;
+	Jobs: string;
 };
 
 export type ConfigSettingSource =

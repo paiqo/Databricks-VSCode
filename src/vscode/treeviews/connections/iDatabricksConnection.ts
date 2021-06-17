@@ -1,5 +1,5 @@
 import { CloudProvider, AccessTokenSecure, ConnectionSource } from './_types';
-import { ExportFormatsConfiguration } from '../../../ThisExtension';
+import { ExportFormatsConfiguration, LocalSyncSubfolderConfiguration } from '../../../ThisExtension';
 
 
 export interface iDatabricksConnection {
@@ -8,6 +8,7 @@ export interface iDatabricksConnection {
 	personalAccessTokenSecure: AccessTokenSecure;
 	apiRootUrl: string;
 	localSyncFolder: string;
+	localSyncSubfolders: LocalSyncSubfolderConfiguration;
 	exportFormats: ExportFormatsConfiguration;
 	useCodeCells: boolean;
 

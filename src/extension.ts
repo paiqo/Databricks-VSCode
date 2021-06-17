@@ -11,16 +11,15 @@ import { DatabricksClusterTreeItem } from './vscode/treeviews/clusters/Databrick
 import { DatabricksJobTreeProvider } from './vscode/treeviews/jobs/DatabricksJobTreeProvider';
 import { DatabricksJobTreeItem } from './vscode/treeviews/jobs/DatabricksJobTreeItem';
 import { DatabricksFSTreeProvider } from './vscode/treeviews/dbfs/DatabricksFSTreeProvider';
-import { DatabricksFSTreeItem } from './vscode/treeviews/dbfs/DatabricksFSTreeItem';
 import { DatabricksSecretTreeProvider } from './vscode/treeviews/secrets/DatabricksSecretTreeProvider';
 import { DatabricksSecretTreeItem } from './vscode/treeviews/secrets/DatabricksSecretTreeItem';
 import { DatabricksWorkspaceNotebook } from './vscode/treeviews/workspaces/DatabricksWorkspaceNotebook';
 import { DatabricksWorkspaceDirectory } from './vscode/treeviews/workspaces/DatabricksWorkspaceDirectory';
-import { Helper } from './helpers/Helper';
 import { DatabricksFSFile } from './vscode/treeviews/dbfs/DatabricksFSFile';
 import { DatabricksFSDirectory } from './vscode/treeviews/dbfs/DatabricksFSDirectory';
 import { DatabricksJob } from './vscode/treeviews/jobs/DatabricksJob';
 import { DatabricksJobRun } from './vscode/treeviews/jobs/DatabricksJobRun';
+import { DatabricksSQLTreeProvider } from './vscode/treeviews/sql/DatabricksSQLTreeProvider';
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -33,7 +32,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	// register DatabricksConnectionTreeProvider
 	let databricksConnectionTreeProvider = new DatabricksConnectionTreeProvider();
 	vscode.window.registerTreeDataProvider('DatabricksConnections', databricksConnectionTreeProvider);
-	vscode.commands.registerCommand('DatabricksConnections.refresh', (showInfoMessage: boolean = true) => databricksConnectionTreeProvider.refresh(showInfoMessage));
+	vscode.commands.registerCommand('databricksConnections.refresh', (showInfoMessage: boolean = true) => databricksConnectionTreeProvider.refresh(showInfoMessage));
 	vscode.commands.registerCommand('DatabricksConnections.add', () => databricksConnectionTreeProvider.add());
 
 	vscode.commands.registerCommand('DatabricksConnectionItem.activate', (connection: DatabricksConnectionTreeItem) => connection.activate());
@@ -66,7 +65,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksClusterItem.stop', (cluster: DatabricksClusterTreeItem) => cluster.stop());
 	vscode.commands.registerCommand('databricksClusterItem.showDefinition', (cluster: DatabricksClusterTreeItem) => cluster.showDefinition());
 	vscode.commands.registerCommand('databricksClusterItem.delete', (cluster: DatabricksClusterTreeItem) => cluster.delete());
+	vscode.commands.registerCommand('databricksClusterItem.useForSQL', (cluster: DatabricksClusterTreeItem) => cluster.useForSQL());
 
+	
 	databricksClusterTreeProvider.autoRefresh();
 
 	// register DatabricksJobsTreeProvider
@@ -104,6 +105,11 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksSecretItem.deleteSecretScope', (secretItem: DatabricksSecretTreeItem) => secretItem.deleteSecretScope());
 	vscode.commands.registerCommand('databricksSecretItem.addSecret', (secretItem: DatabricksSecretTreeItem) => secretItem.addSecret());
 	vscode.commands.registerCommand('databricksSecretItem.deleteSecret', (secretItem: DatabricksSecretTreeItem) => secretItem.deleteSecret());
+
+	// register DatabricksSQLTreeProvider
+	let databricksSQLTreeProvider = new DatabricksSQLTreeProvider();
+	vscode.window.registerTreeDataProvider('databricksSQL', databricksSQLTreeProvider);
+	vscode.commands.registerCommand('databricksSQL.refresh', (showInfoMessage: boolean = true) => databricksSQLTreeProvider.refresh(showInfoMessage));
 }
 
 

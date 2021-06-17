@@ -14,7 +14,7 @@ export class DatabricksJobRun extends DatabricksJobTreeItem {
 	) {
 		super("JOB_RUN", definition.run_id, definition.run_name, definition, vscode.TreeItemCollapsibleState.None);
 
-		super.label = "Run " + this.name;
+		super.label = `${new Date(this.start_time).toISOString().substr(0, 19).replace('T', ' ')}`;
 		super.tooltip = this._tooltip;
 		super.description = this._description;
 		super.contextValue = this._contextValue;
@@ -25,33 +25,34 @@ export class DatabricksJobRun extends DatabricksJobTreeItem {
 	}
 
 	get _tooltip(): string {
-		let tooltip: string = this.task_details;
+		let tooltip: string = "";
 
-		let startDate = new Date(this.definition.start_time);
+		let startDate = new Date(this.start_time);
 		
-		tooltip = tooltip + "Started: " + Helper.trimChar(startDate.toISOString().split('T')[1], "T") + " UTC\n";
+		// tooltip = tooltip + "Started: " + Helper.trimChar(startDate.toISOString().split('T')[1], "T") + " UTC\n";
 
+		tooltip = tooltip + `Duration: ${this.duration}`; 
 		if(this.state == "succeeded")
 		{
-			let endDate = new Date(this.definition.start_time + this.definition.setup_duration + this.definition.execution_duration + this.definition.cleanup_duration);
-			tooltip = tooltip + "Finished: " + Helper.trimChar(endDate.toISOString().split('T')[1], "T") + " UTC\n";
-			tooltip = tooltip + `Duration: ${(endDate.getTime() - startDate.getTime()) / 1000} seconds\n`; 
+			tooltip = tooltip + ""; 
 		}
 		else
 		{
-			tooltip = tooltip + `Duration: ${(Date.now() - startDate.getTime()) / 1000} seconds (running)\n`; 
+			tooltip = tooltip + " (running)"; 
 		}
-		
+		tooltip = tooltip + `\nrun_id: ${this.job_run_id}`; 
+		tooltip = tooltip + `\n${this.task_details}`;
+
 		return tooltip;
 	}
 
 	// description is show next to the label
 	get _description(): string {
 		let state = this.definition.state;
-		return `(${state.result_state ||state.life_cycle_state}) ${this.definition.run_type} - ${this.task_description}`;
+		return `(${state.result_state || state.life_cycle_state}) ${this.duration} - ${this.task_description}`;
 	}
 
-	// used in package.json to filter commands via viewItem == CANSTART
+	// used in package.json to filter commands via viewItem == RUNNING_JOB
 	get _contextValue(): string {
 		if (this.state == "running") {
 			return "RUNNING_JOB";
@@ -99,6 +100,20 @@ export class DatabricksJobRun extends DatabricksJobTreeItem {
 
 	get start_time(): number {
 		return this.definition.start_time;
+	}
+
+	get duration(): string {
+		let startDate = new Date(this.definition.start_time);
+		let endDate = new Date(Date.now());
+
+		if(this.state == "succeeded")
+		{
+			endDate = new Date(this.definition.start_time + this.definition.setup_duration + this.definition.execution_duration + this.definition.cleanup_duration);	
+		}
+
+		let duration = (endDate.getTime() - startDate.getTime()) / 1000;
+
+		return Helper.secondsToHms(duration);
 	}
 
 	get link(): string {

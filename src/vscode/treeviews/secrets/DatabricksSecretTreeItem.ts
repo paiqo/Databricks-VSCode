@@ -26,6 +26,7 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 		this._secret = secret;
 
 		super.label = this.path.split('/').pop();
+		super.contextValue = this._contextValue;
 		super.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
@@ -37,6 +38,11 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 		{
 			super.collapsibleState = undefined;
 		}
+	}
+
+	// used in package.json to filter commands via viewItem == CANSTART
+	get _contextValue(): string {
+		return this.itemType;
 	}
 
 	private getIconPath(theme: string): string {

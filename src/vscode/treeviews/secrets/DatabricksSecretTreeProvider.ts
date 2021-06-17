@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { Helper } from '../../../helpers/Helper';
 
 import { DatabricksSecretTreeItem } from './DatabricksSecretTreeItem';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';

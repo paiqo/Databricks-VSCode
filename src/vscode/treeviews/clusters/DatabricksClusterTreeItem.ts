@@ -125,6 +125,12 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 				if (["API", "UI"].includes(cluster.cluster_source))
 				{
 					items.push(new DatabricksClusterTreeItem("CLUSTER", cluster));
+
+					if (cluster.state == "RUNNING" && ThisExtension.SQLClusterID == undefined)
+					{
+						ThisExtension.log(`Running cluster "${cluster.cluster_name}"(${cluster.cluster_id}) found! It will be used for SQL Browser!`);
+						ThisExtension.SQLClusterID = cluster.cluster_id;
+					}
 				}
 				if (["JOB"].includes(cluster.cluster_source)) {
 					job_clusters_found = true;
@@ -192,6 +198,12 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 
 	async showDefinition(): Promise<void> {
 		await Helper.openTempFile(JSON.stringify(this.definition, null, "\t"), this.cluster_name + '.json');
+	}
+
+	async useForSQL(): Promise<void> {
+		ThisExtension.SQLClusterID = this.cluster_id;
+		await Helper.wait(1000);
+		vscode.commands.executeCommand("databricksSQL.refresh", false);
 	}
 
 	async click(): Promise<void> {

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ExportFormatsConfiguration, ThisExtension, ConfigSettingSource } from '../../../ThisExtension';
+import { ExportFormatsConfiguration, ThisExtension, ConfigSettingSource, LocalSyncSubfolderConfiguration } from '../../../ThisExtension';
 import { iDatabricksConnection } from './iDatabricksConnection';
 import { AccessTokenSecure } from './_types';
 import { DatabricksConnectionManager } from './DatabricksConnectionManager';
@@ -46,10 +46,6 @@ export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManag
 		}
 	}
 
-	migrateOldConfigurations(): void {
-
-	}
-
 	loadConnections(): void {
 		/*
 		there are 2 different areas from where Connections can be loaded from:
@@ -66,7 +62,7 @@ export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManag
 		this._connections = [];
 
 		ThisExtension.log("Loading Connections from 'databricks.connections' ...");
-		let connections = ThisExtension.getConfigurationSetting<iDatabricksConnection[]>('databricks.connections', this._settingScope);
+		let connections = ThisExtension.getConfigurationSetting<iDatabricksConnection[]>('databricks.connections', this._settingScope, true);
 		connections.value.forEach( x => x._source = "databricks.connections");
 
 		this._connections = this._connections.concat(connections.value);
@@ -76,6 +72,7 @@ export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManag
 				"displayName": ThisExtension.getConfigurationSetting<string>('databricks.connection.default.displayName', this._settingScope).value,
 				"apiRootUrl": ThisExtension.getConfigurationSetting<string>('databricks.connection.default.apiRootUrl', this._settingScope).value,
 				"localSyncFolder": ThisExtension.getConfigurationSetting<string>('databricks.connection.default.localSyncFolder', this._settingScope).value,
+				"localSyncSubfolders": ThisExtension.getConfigurationSetting<LocalSyncSubfolderConfiguration>('databricks.connection.default.localSyncSubfolders', this._settingScope).value,
 				"personalAccessToken": ThisExtension.getConfigurationSetting<string>('databricks.connection.default.personalAccessToken', this._settingScope).value,
 				"personalAccessTokenSecure": ThisExtension.getConfigurationSetting<AccessTokenSecure>('databricks.connection.default.personalAccessTokenSecure', this._settingScope).value,
 				"exportFormats": ThisExtension.getConfigurationSetting<ExportFormatsConfiguration>('databricks.connection.default.exportFormats', this._settingScope).value,
