@@ -338,6 +338,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 			}
 
 			this._isActive = true;
+			ThisExtension.SQLClusterID = undefined;
 
 			Helper.delay(100);
 

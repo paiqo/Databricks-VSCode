@@ -65,6 +65,7 @@ export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManag
 		ThisExtension.log("Loading Connections from 'databricks.connections' ...");
 		let connections = ThisExtension.getConfigurationSetting<iDatabricksConnection[]>('databricks.connections', this._settingScope, true);
 		connections.value.forEach( x => x._source = "databricks.connections");
+		connections.value.forEach(x => DatabricksConnectionTreeItem.validate(x, false))
 
 		this._connections = this._connections.concat(connections.value);
 

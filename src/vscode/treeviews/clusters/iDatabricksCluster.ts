@@ -6,10 +6,10 @@ export interface iDatabricksCluster {
 	state:				ClusterState;
 	cluster_source: 	ClusterSource;
 	
-	num_workers:	number;
-	autoscale: {
+	num_workers?:	number;
+	autoscale?: {
 				min_workers:	number;
-				max_wokrers:	number;
+				max_workers:	number;
 				};
 	spark_version:	string;
 	creator_user_name:	string;
@@ -23,6 +23,9 @@ export interface iDatabricksCluster {
 	last_activity_time: number;
 	cluster_memory_mb: number;
 	cluster_cores:	number;
+	custom_tags?: {
+		ResourceClass?: string
+	}
 
 	/*
 	driver:	SparkNode

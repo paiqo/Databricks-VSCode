@@ -9,13 +9,13 @@ import { Helper } from '../../../helpers/Helper';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksClusterTreeItem extends vscode.TreeItem {
-	private _item_type:	ClusterTreeItemType;
+	private _item_type: ClusterTreeItemType;
 	private _id: string;
 	private _name: string;
 	private _state: ClusterState;
 	private _definition: iDatabricksCluster;
-	private _source:	ClusterSource;
-	
+	private _source: ClusterSource;
+
 	constructor(
 		type: ClusterTreeItemType,
 		definition: iDatabricksCluster
@@ -34,8 +34,8 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 			super.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
 		}
 
-		super.tooltip = this._tooltip;
 		super.description = this._description;
+		super.tooltip = this._tooltip;
 		super.contextValue = this._contextValue;
 		super.iconPath = {
 			light: this.getIconPath("light"),
@@ -47,7 +47,21 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 		if (["ROOT", "JOB_CLUSTER_DIR"].includes(this.item_type)) {
 			return null;
 		}
-		return `${this.cluster_id} (${this.state})`;
+		let tooltip =  `NodeType: ${this.definition.node_type_id}\n` + 
+				`DriverNodeType: ${this.definition.driver_node_type_id}\n` + 
+				`SparkVersion: ${this.definition.spark_version}\n` + 
+				`AutoTermination: ${this.definition.autotermination_minutes} minutes\n`;
+
+		if(this.definition.num_workers != undefined)
+		{
+			tooltip += `Num Workers: ${this.definition.num_workers}\n`;
+		}
+		else if(this.definition.autoscale != undefined)
+		{
+			tooltip += `AutoScale: ${this.definition.autoscale.min_workers} - ${this.definition.autoscale.max_workers} workers\n`;
+		}
+
+		return tooltip.trim();
 	}
 
 	// description is show next to the label
@@ -55,22 +69,35 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 		if (["ROOT", "JOB_CLUSTER_DIR"].includes(this.item_type)) {
 			return null;
 		}
-		return `${this.cluster_id} (${this.state})`;
+		let desc: string = this.cluster_id;
+
+		if (this.definition.custom_tags != undefined && this.definition.custom_tags.ResourceClass != undefined) {
+			if (this.definition.custom_tags.ResourceClass == "Serverless") {
+				desc += " (High-Concurrency, "
+			}
+			else if (this.definition.custom_tags.ResourceClass == "SingleNode") {
+				desc += " (SingleNode, "
+			}
+			else {
+				desc += " (Standard, "
+			}
+		}
+		else {
+			desc += " (Standard, "
+		}
+		return desc + this.state + ")"
 	}
 
 	// used in package.json to filter commands via viewItem == ACTIVE
 	get _contextValue(): string {
-		if (["ROOT", "JOB_CLUSTER_DIR"].includes(this.item_type)) 
-		{ 
+		if (["ROOT", "JOB_CLUSTER_DIR"].includes(this.item_type)) {
 			return null;
 		}
 
-		if(['RUNNING', 'ERROR', 'UNKNOWN', 'PENDING'].includes(this.state))
-		{
+		if (['RUNNING', 'ERROR', 'UNKNOWN', 'PENDING'].includes(this.state)) {
 			return 'CAN_STOP';
 		}
-		if(['UNKNOWN', 'RESTARTING', 'RESIZING', 'TERMINATING','TERMINATED'].includes(this.state))
-		{
+		if (['UNKNOWN', 'RESTARTING', 'RESIZING', 'TERMINATING', 'TERMINATED'].includes(this.state)) {
 			return 'CAN_START';
 		}
 	}
@@ -87,21 +114,20 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 	};
 
 
-	get definition (): iDatabricksCluster {
+	get definition(): iDatabricksCluster {
 		return this._definition;
 	}
 
-	get cluster_name (): string {
+	get cluster_name(): string {
 		return this._name;
 	}
 
-	get cluster_id (): string {
+	get cluster_id(): string {
 		return this._id;
 	}
 
-	get state (): ClusterState {
-		if(this._state == undefined)
-		{
+	get state(): ClusterState {
+		if (this._state == undefined) {
 			return "UNKNOWN";
 		}
 		return this._state;
@@ -120,15 +146,13 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 		let items: DatabricksClusterTreeItem[] = [];
 
 		if (this.item_type === 'ROOT') {
-			
+
 			let job_clusters_found: boolean = false;
 			for (let cluster of clusters) {
-				if (["API", "UI"].includes(cluster.cluster_source))
-				{
+				if (["API", "UI"].includes(cluster.cluster_source)) {
 					items.push(new DatabricksClusterTreeItem("CLUSTER", cluster));
 
-					if (cluster.state == "RUNNING" && ThisExtension.SQLClusterID == undefined)
-					{
+					if (cluster.state == "RUNNING" && ThisExtension.SQLClusterID == undefined) {
 						ThisExtension.log(`Running cluster "${cluster.cluster_name}"(${cluster.cluster_id}) found! It will be used for SQL Browser!`);
 						ThisExtension.SQLClusterID = cluster.cluster_id;
 					}
@@ -138,8 +162,7 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 				}
 			}
 
-			if(job_clusters_found)
-			{
+			if (job_clusters_found) {
 				items.push(DatabricksClusterTreeItem.getDummyItem("JOB_CLUSTER_DIR"));
 			}
 		}
@@ -159,9 +182,9 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 	}
 
 	static getDummyItem(item_type: ClusterTreeItemType): DatabricksClusterTreeItem {
-		let def: any = { cluster_name: item_type}; // cluster_name is the only mandatory property!
+		let def: any = { cluster_name: item_type }; // cluster_name is the only mandatory property!
 
-		if(item_type == "JOB_CLUSTER_DIR") {
+		if (item_type == "JOB_CLUSTER_DIR") {
 			def.cluster_name = 'Job Clusters';
 		}
 		return new DatabricksClusterTreeItem(item_type, def);

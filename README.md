@@ -35,7 +35,7 @@ This is a Visual Studio Code extension that allows you to work with Databricks l
 - Easy configuration via standard VS Code settings
 
 # Relase Notes
-**v0.8.5**:
+**v0.8.6**:
 - added support for Databricks CLI profiles
 	- use Databricks CLI profiles to manage connections
 	- support `DATABRICKS_CONFIG_FILE` for custom config file locations
@@ -47,7 +47,6 @@ This is a Visual Studio Code extension that allows you to work with Databricks l
 - improved tooltip for Connections
 - fixed an issue with upload of whole workspace folders
 - fixed an issue with Azure KeyVault secret scopes
-- 
 
 **v0.8.0**:
 - add SQL Data browser as in the Databricks UI
