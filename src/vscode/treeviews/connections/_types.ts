@@ -6,6 +6,7 @@ export type CloudProvider =
 export type ConnectionSource = 
 	"databricks.connections" 
 | 	"databricks.default" 
+|	"CLI-profile"
 ;
 
 export interface AccessTokenSecure {

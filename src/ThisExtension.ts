@@ -7,6 +7,7 @@ import { DatabricksConnectionManagerVSCode } from './vscode/treeviews/connection
 import { SensitiveValueStore } from './vscode/treeviews/connections/_types';
 import { DatabricksConnectionTreeItem } from './vscode/treeviews/connections/DatabricksConnectionTreeItem';
 import { DatabricksSQLTreeProvider } from './vscode/treeviews/sql/DatabricksSQLTreeProvider';
+import { DatabricksConnectionManagerCLI } from './vscode/treeviews/connections/DatabricksConnectionManagerCLI';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -61,8 +62,19 @@ export abstract class ThisExtension {
 
 			ThisExtension.updateGlobalSettings();
 
-			this.log("Initializing ConnectionManager ...");
-			this._connectionManager = new DatabricksConnectionManagerVSCode();
+			let connectionManager = this.getConfigurationSetting("databricks.connectionManager");
+			switch(connectionManager.value)
+			{
+				case "VSCode Settings":
+					this._connectionManager = new DatabricksConnectionManagerVSCode();
+					break;
+				case "Databricks CLI Profiles": 
+					this._connectionManager = new DatabricksConnectionManagerCLI();
+					break;
+				default:
+					this.log("'" +connectionManager + "' is not a valid value for config setting 'databricks.connectionManager!");
+			}
+			
 		} catch (error) {
 			return false;
 		}

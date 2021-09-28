@@ -6,5 +6,5 @@ export type SecretTreeItemType =
 
 export type SecretBackendType = 
 	"DATABRICKS" 		// Databricks internal secret store
-| 	"AZURE_KEY_VAULT" 		// ??
+| 	"AZURE_KEYVAULT" 		// ??
 ;

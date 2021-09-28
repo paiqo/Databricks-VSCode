@@ -6,27 +6,28 @@ import { DatabricksSQLTreeItem } from './DatabricksSQLTreeItem';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { ThisExtension } from '../../../ThisExtension';
 import { ExecutionContext } from '../../../databricksApi/_types';
+import { iSQLTableColumn } from './iSQLTableDetails';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksSQLColumn extends DatabricksSQLTreeItem {
-	private _columnName: string;
-	private _datatype: string;
+	private _columnDefinition: iSQLTableColumn;
+	private _isPartitionedBy: boolean;
 	private _tableName: string;
 	private _databaseName: string;
 
 	constructor(
-		columnName: string,
-		datatype: string,
+		columnDefinition: iSQLTableColumn,
+		isPartitionedBy: boolean,
 		tableName: string,
 		databaseName: string,
 		sqlContext: ExecutionContext,
 		collapsibleState: vscode.TreeItemCollapsibleState = undefined
 	) {
-		super(columnName, "COLUMN", sqlContext, collapsibleState);
+		super(columnDefinition.name, "COLUMN", sqlContext, collapsibleState);
 
-		this._columnName = columnName;
-		this._datatype = datatype;
+		this._columnDefinition = columnDefinition;
+		this._isPartitionedBy = isPartitionedBy;
 		this._tableName = tableName;
 		this._databaseName = databaseName;
 
@@ -45,14 +46,27 @@ export class DatabricksSQLColumn extends DatabricksSQLTreeItem {
 	*/
 
 	get _tooltip(): string {
-		let tooltip: string = this.columnName + "(" + this.datatype.toUpperCase() + ")";
+		let tooltip: string[] = [];
 
-		return tooltip;
+		tooltip.push("USED FOR PARTITIINNG: " + this.isPartitionedBy);
+
+		if(this.comment != undefined)
+		{
+			tooltip.push("COMMENT: " + this.comment);
+		}
+
+		return tooltip.join("\n");
 	}
 
 	// description is show next to the label
 	get _description(): string {
-		return this.datatype;
+		let description: string = this.datatype;
+
+		if(this.isPartitionedBy)
+		{
+			description += " (PARTITIONED BY)";
+		}
+		return description;
 	}
 
 	// used in package.json to filter commands via viewItem == CANSTART
@@ -65,11 +79,19 @@ export class DatabricksSQLColumn extends DatabricksSQLTreeItem {
 	}
 
 	get columnName(): string {
-		return this._columnName;
+		return this._columnDefinition.name;
 	}
 
 	get datatype(): string {
-		return this._datatype;
+		return this._columnDefinition.dataType;
+	}
+
+	get comment(): string {
+		return this._columnDefinition.comment;
+	}
+
+	get isPartitionedBy(): boolean {
+		return this._isPartitionedBy;
 	}
 
 	get tableName(): string {

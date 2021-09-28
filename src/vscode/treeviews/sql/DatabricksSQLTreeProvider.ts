@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { ThisExtension } from '../../../ThisExtension';
 import { DatabricksSQLDatabase } from './DatabricksSQLDatabase';
+import { DatabricksSQLSelectCluster } from './DatabricksSQLSelectCluster';
 import { DatabricksSQLTreeItem } from './DatabricksSQLTreeItem';
 
 
@@ -30,8 +31,7 @@ export class DatabricksSQLTreeProvider implements vscode.TreeDataProvider<Databr
 		}
 
 		if (!ThisExtension.SQLClusterID) {
-			vscode.window.showErrorMessage("Please select a cluster to 'Use for SQL' first!");
-			return Promise.resolve([]);
+			return [new DatabricksSQLSelectCluster()];
 		}
 
 		if (element != null && element != undefined) {

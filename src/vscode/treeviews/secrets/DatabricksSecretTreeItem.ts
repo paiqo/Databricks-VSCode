@@ -10,12 +10,13 @@ import { SecretBackendType, SecretTreeItemType } from './_types';
 export class DatabricksSecretTreeItem extends vscode.TreeItem {
 	private _path: string; // path like /secret-scope/secret-name
 	private _scope: string;
-	private _backend_type: SecretBackendType | undefined;
+	private _scope_backend_type: SecretBackendType | undefined;
 	private _secret: string;
 	private _itemType: SecretTreeItemType;
 
 	constructor(
 		scope: string = undefined,
+		scope_backend_type: SecretBackendType = undefined,
 		secret: string = undefined,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
@@ -23,10 +24,12 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 		this._path = "/" + (scope == undefined ? "" : scope ) + (secret == undefined ? "" : "/" + secret );
 		this._itemType = (scope == undefined ? "ROOT" : (secret == undefined ? "SCOPE" : "SECRET" ));
 		this._scope = scope;
+		this._scope_backend_type = scope_backend_type;
 		this._secret = secret;
 
 		super.label = this.path.split('/').pop();
 		super.contextValue = this._contextValue;
+		super.description = this._description;
 		super.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
@@ -42,7 +45,15 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 
 	// used in package.json to filter commands via viewItem == CANSTART
 	get _contextValue(): string {
-		return this.itemType;
+		return this.itemType + "_" + this.scope_backend_type;
+	}
+
+	private get _description(): string {
+		if(this.scope_backend_type == "AZURE_KEYVAULT")
+		{
+			return "READ-ONLY";
+		}
+		return "";
 	}
 
 	private getIconPath(theme: string): string {
@@ -72,17 +83,15 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 		return this._scope;
 	}
 
+	get scope_backend_type (): SecretBackendType {
+		return this._scope_backend_type;
+	}
+
 	get secret (): string {
 		return this._secret;
 	}
 
-	get backend_type (): SecretBackendType {
-		if(!this._backend_type)
-		{
-			return 'DATABRICKS';
-		}
-		return this._backend_type;
-	}
+	
 
 	getChildren(): Thenable<DatabricksSecretTreeItem[]> {
 		if(this.itemType === 'ROOT')
@@ -91,7 +100,7 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 		}
 		else if(this.itemType === 'SCOPE')
 		{
-			return DatabricksApiService.listSecrets(this.scope);
+			return DatabricksApiService.listSecrets(this.scope, this.scope_backend_type);
 		}
 		return null;
 	}
@@ -122,9 +131,18 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 
 	async addSecret(): Promise<void> {
 		let secretName = await Helper.showInputBox("<name of secret>", "The name of the secret to create");
-		let value = await Helper.showInputBox("<value for the secret>", "The value for the secret");
+		let value = await Helper.showInputBox("<value for '" + secretName + "'>", "The value for the secret '" + secretName + "'");
 
 		await DatabricksApiService.setSecret(this.scope, secretName, value);
+
+		Helper.wait(1000);
+		vscode.commands.executeCommand("databricksSecrets.refresh", false);
+	}
+
+	async updateSecret(): Promise<void> {
+		let newValue = await Helper.showInputBox("<new value for the '" + this.secret + "'>", "The new value for the secret '" + this.secret + "'");
+
+		await DatabricksApiService.setSecret(this.scope, this.secret, newValue);
 
 		Helper.wait(1000);
 		vscode.commands.executeCommand("databricksSecrets.refresh", false);

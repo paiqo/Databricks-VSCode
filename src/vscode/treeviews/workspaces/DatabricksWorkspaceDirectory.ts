@@ -181,7 +181,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 	}
 
 	async upload(): Promise<void> {
-		DatabricksApiService.createWorkspaceFolder(this.localPath);
+		DatabricksApiService.createWorkspaceFolder(this.path);
 		let items: iDatabricksWorkspaceItem[] = await this.getChildren();
 
 		for (let item of items) {

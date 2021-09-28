@@ -34,7 +34,6 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		this._personalAccessToken = definition.personalAccessToken;
 		this._personalAccessTokenSecure = definition.personalAccessTokenSecure;
 		this._apiRootUrl = Helper.trimChar(definition.apiRootUrl, '/', false, true);
-		//this._localSyncFolder = Helper.trimChar(localSyncFolder, '/');
 		this._localSyncFolder = definition.localSyncFolder;
 		this._localSyncSubfolders = definition.localSyncSubfolders;
 		this._exportFormats = definition.exportFormats;
@@ -55,20 +54,24 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 
 		this._isActive = false;
 
-
-
 		this.manageSecureToken();
 	}
 
 	//tooltip = this._tooltip;
 	private get _tooltip(): string {
-		return `${this.displayName} (${this.cloudProvider})`;
+		return  `Host: ${this.apiRootUrl}\n` + 
+				`CloudProvider: ${this.cloudProvider}\n` + 
+				`LocalSyncFolder: ${this.localSyncFolder}\n` + 
+				`LocalSyncSubFolders: ${JSON.stringify(this.localSyncSubfolders)}\n` + 
+				`ExportFormats: ${JSON.stringify(this.exportFormats)}\n` + 
+				`UseCodeCells: ${this.useCodeCells}\n` + 
+				`Source: ${this.source}`;
 	}
 
 	// description is show next to the label
 	//description = this._description;
 	private get _description(): string {
-		return "";
+		//return "";
 		return `${fspath.join(Helper.trimChar(Helper.trimChar(this.localSyncFolder, '/', false, true), '\\', false, true), " ")}`;
 	}
 
@@ -117,6 +120,10 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		return this._localSyncSubfolders;
 	}
 
+	set localSyncSubfolders(value: LocalSyncSubfolderConfiguration) {
+		this._localSyncSubfolders = value;
+	}
+
 	get exportFormats(): ExportFormatsConfiguration {
 		return this._exportFormats;
 
@@ -155,14 +162,6 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		let item: iDatabricksConnection = JSON.parse(jsonString);
 		item._source = source;
 		return new DatabricksConnectionTreeItem(item);
-	}
-
-	get Source(): ConnectionSource {
-		return this._source;
-	}
-
-	public setSource(value: ConnectionSource): void {
-		this._source = value;
 	}
 
 	private async manageSecureToken(): Promise<void> {
@@ -296,6 +295,14 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 			return false;
 		}
 
+		// check defaultvalues, etc.
+		if (!this.propertyIsValid(con.localSyncSubfolders)) {
+			let defaultFromExtension = ThisExtension.configuration.packageJSON.contributes.configuration[0].properties["databricks.connection.default.localSyncSubfolders"].default;
+			con.localSyncSubfolders = defaultFromExtension;
+			msg = 'Configuration ' + con.displayName + ': Property "localSyncSubfolders" was not provided - using the default value!';
+			ThisExtension.log(msg);
+			//vscode.window.showWarningMessage(msg);
+		}
 		// check defaultvalues, etc.
 		if (!this.propertyIsValid(con.exportFormats)) {
 			let defaultFromExtension = ThisExtension.configuration.packageJSON.contributes.configuration[0].properties["databricks.connection.default.exportFormats"].default;

@@ -19,6 +19,7 @@ export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManag
 	}
 
 	initialize(): void {
+		ThisExtension.log("Initializing ConnectionManager VSCode ...");
 		this.loadConnections();
 
 		if (this._connections.length == 0) {

@@ -16,6 +16,7 @@ import { ExecutionCommand, ExecutionContext, iDatabricksJobResponse, iDatabricks
 import { iDatabricksCluster } from '../vscode/treeviews/clusters/iDatabricksCluster';
 import { ThisExtension } from '../ThisExtension';
 import { DatabricksConnectionTreeItem } from '../vscode/treeviews/connections/DatabricksConnectionTreeItem';
+import { SecretBackendType } from '../vscode/treeviews/secrets/_types';
 
 export abstract class DatabricksApiService {
 	private static API_SUB_URL: string = "/api/";
@@ -640,7 +641,7 @@ export abstract class DatabricksApiService {
 			return scopeItems;
 		}
 
-		items.map(item => scopeItems.push(new DatabricksSecretTreeItem(item.name)));
+		items.map(item => scopeItems.push(new DatabricksSecretTreeItem(item.name, item.backend_type)));
 		Helper.sortArrayByProperty(scopeItems, "label");
 		return scopeItems;
 	}
@@ -669,7 +670,7 @@ export abstract class DatabricksApiService {
 		return response;
 	}
 
-	static async listSecrets(scope: string): Promise<DatabricksSecretTreeItem[]> {
+	static async listSecrets(scope: string, scope_backend_type: SecretBackendType): Promise<DatabricksSecretTreeItem[]> {
 		let endpoint = '2.0/secrets/list';
 		let body = { scope: scope };
 
@@ -685,7 +686,7 @@ export abstract class DatabricksApiService {
 			return scopeItems;
 		}
 
-		items.map(item => scopeItems.push(new DatabricksSecretTreeItem(scope, item.key)));
+		items.map(item => scopeItems.push(new DatabricksSecretTreeItem(scope, scope_backend_type, item.key)));
 		Helper.sortArrayByProperty(scopeItems, "label");
 		return scopeItems;
 	}

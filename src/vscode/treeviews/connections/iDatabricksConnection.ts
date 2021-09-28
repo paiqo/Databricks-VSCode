@@ -5,12 +5,12 @@ import { ExportFormatsConfiguration, LocalSyncSubfolderConfiguration } from '../
 export interface iDatabricksConnection {
 	displayName: string;
 	personalAccessToken: string;
-	personalAccessTokenSecure: AccessTokenSecure;
+	personalAccessTokenSecure?: AccessTokenSecure;
 	apiRootUrl: string;
 	localSyncFolder: string;
-	localSyncSubfolders: LocalSyncSubfolderConfiguration;
-	exportFormats: ExportFormatsConfiguration;
-	useCodeCells: boolean;
+	localSyncSubfolders?: LocalSyncSubfolderConfiguration;
+	exportFormats?: ExportFormatsConfiguration;
+	useCodeCells?: boolean;
 
 	_source: ConnectionSource;
 }

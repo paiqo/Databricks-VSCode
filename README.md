@@ -1,7 +1,9 @@
 ![Databricks-VSCode](https://github.com/paiqo/Databricks-VSCode/blob/master/images/Databricks-VSCode.jpg?raw=true "Databricks-VSCode")
 
 # VS Code Extension for Databricks
-This is a Visual Studio Code extension that allows you to work with Azure Databricks and Databricks on AWS locally in an efficient way, having everything you need integrated into VS Code. It can be downloaded from the official Visual Studio Code extension gallery: [Databricks VSCode](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
+This is a Visual Studio Code extension that allows you to work with Databricks locally from VSCode in an efficient way, having everything you need integrated into VS Code - see [Features](#features). It allows you to sync notebooks but does **not** help you with executing those notebooks against a Databricks cluster. To do this, please refer to [Databricks-Connect](https://docs.databricks.com/dev-tools/databricks-connect.html) but from that point of view, these two tools are independent!
+
+ The extensions can be downloaded from the official Visual Studio Code extension gallery: [Databricks VSCode](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
 
 # Features
 - Workspace browser
@@ -12,6 +14,10 @@ This is a Visual Studio Code extension that allows you to work with Azure Databr
 - Cluster manager 
 	- Start/stop clusters
 	- Script cluster definition as JSON
+- SQL / Data browser
+	- view SQL tables and views from Databricks metastore
+	- list columns
+	- more to come!
 - Job browser
 	- Start/stop jobs
 	- View job-run history + status
@@ -29,6 +35,20 @@ This is a Visual Studio Code extension that allows you to work with Azure Databr
 - Easy configuration via standard VS Code settings
 
 # Relase Notes
+**v0.8.5**:
+- added support for Databricks CLI profiles
+	- use Databricks CLI profiles to manage connections
+	- support `DATABRICKS_CONFIG_FILE` for custom config file locations
+- further improvements to the SQL Data browser
+	- Show Definition
+	- Datatypes for columns including complex columns (array, struct, map)
+	- Table and column comments
+	- improved tooltips and desciption
+- improved tooltip for Connections
+- fixed an issue with upload of whole workspace folders
+- fixed an issue with Azure KeyVault secret scopes
+- 
+
 **v0.8.0**:
 - add SQL Data browser as in the Databricks UI
 - fixed an issue with Secrets - you can now add/delete secrets again
@@ -95,34 +115,35 @@ The extension can be downloaded directly from within VS Code. Simply go to the E
 
 Alternatively it can also be downloaded from the VS Code marketplace: [Databricks VSCode](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode).
 
-# Setup and Configuration
+# Setup and Configuration (VSCode Connection Manager)
 The configuration happens directly via VS Code by simply [opening the settings](https://code.visualstudio.com/docs/getstarted/settings#_creating-user-and-workspace-settings)
 Then either search for "Databricks" or expand Extensions -> Databricks.
 The settings themselves are very well described and it should be easy for you to populate them. Also, not all of them are mandatory! Some of the optional settings are experimental or still work in progress.
-To configure multiple Databricks Connections/workspaces, you need to use the JSON editor.
+To configure multiple Databricks Connections/workspaces, you need to use the JSON editor and add them to `databricks.connections`:
 ``` json
 		...
+		"databricks.connectionManager": "VSCode Settings",
 		"databricks.connections": [
 			{
 				"apiRootUrl": "https://westeurope.azuredatabricks.net",
-				"displayName": "My Dev workspace",
+				"displayName": "My DEV workspace",
 				"localSyncFolder": "c:\\Databricks\\dev",
 				"personalAccessToken": "dapi219e30212312311c6721a66ce879e"
 			},
 			{
 				"apiRootUrl": "https://westeurope.azuredatabricks.net",
-				"displayName": "My Test workspace",
+				"displayName": "My TEST workspace",
 				"localSyncFolder": "c:\\Databricks\\test",
 				"personalAccessToken": "dapi219e30212312311c672aaaaaaaaaa"
 			}
 		],
 		...
 ```
-The sensitive values entere like `personalAccessToken` will be safely stored in the system key chain/credential manager once the configuration is read the first time. This happens if you open the extension.
+The sensitive values entered like `personalAccessToken` will be safely stored in the system key chain/credential manager (see `databricks.sensitiveValueStore`) once the configuration is read the first time. This happens if you open the extension.
 Existing connections can be updated directly in VSCode settigns or via the JSON editor. To update a `personalAccessToken`, simply re-enter it and the extension will update it in the system key chain/credential manager.
 The only important thing to keep in mind is that the `displayName` should be unique on the whole machine (across all VSCode workspaces) as the `displayName` is used to identify the `personalAccessToken` to load from the system key chain/credential manager.
 
-Another important setting which requires modifying the JSON directly are the export formats which can be used to define the format in which notebooks are up-/downloaded. Again, there is a default/current setting ```databricks.connection.default.exportFormats``` and it can also configured per Connection:
+Another important setting which requires modifying the JSON directly are the export formats which can be used to define the format in which notebooks are up-/downloaded. Again, there is a default/current setting ```databricks.connection.default.exportFormats``` and it can also configured per Connection under `databricks.connections`:
 ``` json
 		...
 		"databricks.connection.default.exportFormats": 
@@ -140,6 +161,42 @@ If you are using raw/source files, you may also consider using [Code Cells](http
 
 All these settings can either be configured on a global/user or on a workspace level. The recommendation is to use workspace configurations and then to include the localSyncFolders into your workspace for easy access to your notebooks and sync to GIT. 
 Using a workspace configuration also allows you separate differnt Databricks Connections completely. 
+
+
+# Setup and Configuration (Databricks CLI Connection Manager)
+To use the Databricks CLI Connection Manager, you first need to install and configure the [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html). Once you have created a connection or profiles, you can proceed here.
+Basically all you need to do in VSCode for this extension to derive the connections from the Databricks CLI is to change the VSCode setting `databricks.connectionManager` to `Databricks CLI Profiles`. This can be done in the regular settings UI or by modifying the settings JSON directly.
+
+## Additional settings
+
+In order to work to its full potential, the VSCode extension needs some addional settings which are not maintained by the Databricks CLI. Foremost the `localSyncFolder` to store files locally (e.g. notebooks, cluster/job definitions, ...). For the Databricks CLI Connection Manager this path defaults to `<user home directory>/DatabricksSync/<profile name>`.
+If you want to change this you can do so by manually extending your Databricks CLI config file which can usually be found at `<user home directory>/.databrickscfg`:
+``` text
+[DEV]
+host = https://westeurope.azuredatabricks.net/
+token = dapi219e30212312311c6721a66ce879e
+localSyncFolder = D:\Desktop\sync\dev
+
+[TEST]
+host = https://westeurope.azuredatabricks.net/
+token = dapi219e30212312311c672aaaaaaaaaa
+localSyncFolder = D:\Desktop\sync\test
+localSyncSubfolders = {"Workspace": "Workspace","Clusters": "Clusters","DBFS": "DBFS","Jobs": "Jobs"}
+exportFormats = {"Scala": ".scala","Python": ".ipynb","SQL": ".sql","R": ".r"}
+useCodeCells = true
+
+```
+
+You can also change the following other settings this way:
+
+|CLI setting|VSCode setting|format|descrption|
+|-----------|--------------|------|----------|
+|host|apiRootUrl|text|mandatory by Databricks CLI|
+|token|personalAccessToken|text|mandatory by Databricks CLI|
+|localSyncFolder|localSyncFolder|text|optional, defaults to `<user home directory>/DatabricksSync/<profile name>`|
+|localSyncSubFolders|localSyncSubfolders|JSON|optional, defaults to VSCode default|
+|exportFormats|exportFormats|JSON|optional, defaults to VSCode default|
+|useCodeCells|useCodeCells|boolean|true/false|
 
 # Connections
 ![Connections](https://github.com/paiqo/Databricks-VSCode/blob/master/images/Connections.jpg?raw=true "Connections")
@@ -193,6 +250,10 @@ This can come in handy if you want to quickly add a new secret as this is otherw
 
 
 ## FAQ
+**Q:** I cannot execute the downloaded notebooks against the Databricks cluster - what shall I do?
+
+**A:** This extension allows you to manage your Databricks workspace via the provided REST API (up-/download notebooks, manage jobs, clusters, ..., etc. ). The interactive execution part of this extension. To execute a local code on an existing Databricks cluster please use [Databricks-Connect](https://docs.databricks.com/dev-tools/databricks-connect.html) - the official tool from DAtabricks to do this. These two tools are not directly related to/dependent on each other but work very well together and it makes sense to set them up together.
+
 **Q:** What can I do if none of the tabs/browsers is showing anything?
 
 **A:** This is very likely an issue with the connection. Please make sure that especially `apiRootUrl` and `personalAccessToken` are set correctly. If you are sure th values are correct, please check the logs in the output window and filter for this extension.

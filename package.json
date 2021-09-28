@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Databricks Extension for VSCode",
-	"version": "0.8.0",
+	"version": "0.8.6",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -60,6 +60,20 @@
 				"type": "object",
 				"title": "Databricks",
 				"properties": {
+					"databricks.connectionManager": {
+						"type": "string",
+						"enum": [
+							"VSCode Settings",
+							"Databricks CLI Profiles"
+						],
+						"default": "VSCode Settings",
+						"enumDescriptions": [
+							"All connection information is stored securely in the VSCode Settings (user or workspace).",
+							"Connection information is read from the Databricks CLI config file. Databricks CLI has to be configured upfront! Also supports the environment varialbe 'DATABRICKS_CONFIG_FILE'."
+						],
+						"description": "Defines how connection information is managed and stored",
+						"scope": "window"
+					},
 					"databricks.sensitiveValueStore": {
 						"type": "string",
 						"enum": [
@@ -73,7 +87,7 @@
 							"(Experimental!) Databricks Personal Access Token is securely stored in the System Key Chain. Easy Copying/Sharing connections with other users is not possible this way. VSCode only stores a reference to the the KeyChain entry.",
 							"(Experimental!) Databricks Personal Access Token is stored in an external Config file. This is useful to manage all your PATs in one place and also easily share it"
 						],
-						"description": "Defines the default how the VSCode extension for Databricks stores sensitive values like the Databricks Personal Access Token (PAT).",
+						"description": "Defines the default how the VSCode extension for Databricks stores sensitive values like the Databricks Personal Access Token (PAT). Only releveant if the VSCode Connection Manager is used!",
 						"scope": "window"
 					},
 					"databricks.connection.default.exportFormats": {
@@ -544,7 +558,7 @@
 			},
 			{
 				"command": "databricksClusterItem.useForSQL",
-				"title": "Use for SQL",
+				"title": "Use for VSCode and SQL",
 				"icon": {
 					"light": "resources/light/stop.png",
 					"dark": "resources/dark/stop.png"
@@ -679,6 +693,14 @@
 				}
 			},
 			{
+				"command": "databricksSecretItem.updateSecret",
+				"title": "Update",
+				"icon": {
+					"light": "resources/light/edit.png",
+					"dark": "resources/dark/edit.png"
+				}
+			},
+			{
 				"command": "databricksSecretItem.deleteSecret",
 				"title": "Delete",
 				"icon": {
@@ -692,6 +714,14 @@
 				"icon": {
 					"light": "resources/light/refresh.png",
 					"dark": "resources/dark/refresh.png"
+				}
+			},
+			{
+				"command": "databricksSQLTable.showDefinition",
+				"title": "Show Definition",
+				"icon": {
+					"light": "resources/light/json.png",
+					"dark": "resources/dark/json.png"
 				}
 			}
 		],
@@ -854,18 +884,28 @@
 					"group": "inline"
 				},
 				{
-					"command": "databricksSecretItem.addSecret",
-					"when": "view == databricksSecrets && viewItem == SCOPE",
+					"command": "databricksSecretItem.deleteSecretScope",
+					"when": "view == databricksSecrets && viewItem == SCOPE_DATABRICKS",
 					"group": "inline"
 				},
 				{
-					"command": "databricksSecretItem.deleteSecretScope",
-					"when": "view == databricksSecrets && viewItem == SCOPE",
+					"command": "databricksSecretItem.addSecret",
+					"when": "view == databricksSecrets && viewItem == SCOPE_DATABRICKS",
+					"group": "inline"
+				},
+				{
+					"command": "databricksSecretItem.updateSecret",
+					"when": "view == databricksSecrets && viewItem == SECRET_DATABRICKS",
 					"group": "inline"
 				},
 				{
 					"command": "databricksSecretItem.deleteSecret",
-					"when": "view == databricksSecrets && viewItem == SECRET",
+					"when": "view == databricksSecrets && viewItem == SECRET_DATABRICKS",
+					"group": "inline"
+				},
+				{
+					"command": "databricksSQLTable.showDefinition",
+					"when": "view == databricksSQL && viewItem == TABLE",
 					"group": "inline"
 				}
 			]

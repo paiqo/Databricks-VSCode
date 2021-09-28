@@ -179,6 +179,7 @@ export abstract class Helper {
 
 	private static resolvePath(filepath: string): string {
 		if (filepath[0] === '~') {
+			// could also use os.homedir()
 			const homeVar = process.platform === 'win32' ? 'USERPROFILE' : 'HOME';
 			return fspath.join(process.env[homeVar], filepath.slice(1));
 		}
@@ -208,15 +209,7 @@ export abstract class Helper {
 	}
 
 	static async wait(ms): Promise<void> {
-		/*
-		let start = new Date().getTime();
-		let end = start;
-		while (end < start + ms) {
-			end = new Date().getTime();
-		}
-		*/
 		await setTimeout(() => { }, ms);
-		//const wait = (ms) => new Promise(res => setTimeout(res, ms));
 	}
 
 	static bytesToSize(bytes: number): string {
@@ -322,5 +315,22 @@ export abstract class Helper {
 		var sDisplay = s > 0 ? `${s.toString().length > 1 ? `${s}` : `0${s}`}` : '00';
 
 		return `${hDisplay}:${mDisplay}:${sDisplay}`; 
+	}
+
+	static getFirstRegexGroup(regexp: RegExp, text: string): string {
+		const array = [...text.matchAll(regexp)];
+		if(array.length >= 1)
+		{
+			return array[0][1];
+		}
+		return null;
+	}
+
+	static getUserDir(): string {
+		return os.homedir();
+	}
+
+	static parseBoolean(value: string): boolean {
+		return value === 'false' || value === 'undefined' || value === 'null' || value === '0' ? false : !!value;
 	}
 }

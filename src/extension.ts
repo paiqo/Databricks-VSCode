@@ -20,6 +20,7 @@ import { DatabricksFSDirectory } from './vscode/treeviews/dbfs/DatabricksFSDirec
 import { DatabricksJob } from './vscode/treeviews/jobs/DatabricksJob';
 import { DatabricksJobRun } from './vscode/treeviews/jobs/DatabricksJobRun';
 import { DatabricksSQLTreeProvider } from './vscode/treeviews/sql/DatabricksSQLTreeProvider';
+import { DatabricksSQLTable } from './vscode/treeviews/sql/DatabricksSQLTable';
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -104,12 +105,14 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand('databricksSecretItem.deleteSecretScope', (secretItem: DatabricksSecretTreeItem) => secretItem.deleteSecretScope());
 	vscode.commands.registerCommand('databricksSecretItem.addSecret', (secretItem: DatabricksSecretTreeItem) => secretItem.addSecret());
+	vscode.commands.registerCommand('databricksSecretItem.updateSecret', (secretItem: DatabricksSecretTreeItem) => secretItem.updateSecret());
 	vscode.commands.registerCommand('databricksSecretItem.deleteSecret', (secretItem: DatabricksSecretTreeItem) => secretItem.deleteSecret());
 
 	// register DatabricksSQLTreeProvider
 	let databricksSQLTreeProvider = new DatabricksSQLTreeProvider();
 	vscode.window.registerTreeDataProvider('databricksSQL', databricksSQLTreeProvider);
 	vscode.commands.registerCommand('databricksSQL.refresh', (showInfoMessage: boolean = true) => databricksSQLTreeProvider.refresh(showInfoMessage));
+	vscode.commands.registerCommand('databricksSQLTable.showDefinition', (sqlTable: DatabricksSQLTable) => sqlTable.showDefinition());
 }
 
 
