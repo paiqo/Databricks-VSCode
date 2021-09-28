@@ -891,7 +891,7 @@
 		"@angular/common": "^8.2.14",
 		"@angular/core": "^8.2.14",
 		"angular": "^1.8.2",
-		"axios": "^0.21.1",
+		"axios": "^0.21.2",
 		"file-saver": "^2.0.5",
 		"follow-redirects": "^1.13.1",
 		"ftp": "^0.3.10",
