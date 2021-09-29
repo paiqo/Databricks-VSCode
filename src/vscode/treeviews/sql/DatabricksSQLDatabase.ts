@@ -1,13 +1,8 @@
 import * as vscode from 'vscode';
-import { SQLItemType } from './_types';
-import { Helper } from '../../../helpers/Helper';
 import { DatabricksSQLTreeItem } from './DatabricksSQLTreeItem';
-import { ThisExtension } from '../../../ThisExtension';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { ExecutionContext } from '../../../databricksApi/_types';
 import { DatabricksSQLTable } from './DatabricksSQLTable';
-import { iSQLTableColumn, iSQLTableDetails, iSQLTableProperty } from './iSQLTableDetails';
-import { TemplateRef } from '@angular/core';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html

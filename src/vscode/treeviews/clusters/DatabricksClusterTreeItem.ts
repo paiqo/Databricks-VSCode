@@ -4,7 +4,6 @@ import { DatabricksApiService } from '../../../databricksApi/databricksApiServic
 import { ThisExtension } from '../../../ThisExtension';
 import { ClusterState, ClusterSource, ClusterTreeItemType } from './_types';
 import { iDatabricksCluster } from './iDatabricksCluster';
-import { iDatabricksRuntimeVersion } from './iDatabricksRuntimeVersion';
 import { Helper } from '../../../helpers/Helper';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html

@@ -18,7 +18,6 @@ export class DatabricksSQLTable extends DatabricksSQLTreeItem {
 	private _isTemporary: boolean;
 	private _tableDetails: iSQLTableDetails;
 
-
 	constructor(
 		tableDetails: iSQLTableDetails,
 		isTemporary: boolean,
@@ -98,6 +97,7 @@ export class DatabricksSQLTable extends DatabricksSQLTreeItem {
 			let isPartitionedBy: boolean = this._tableDetails.partitioningColumns.includes(col);
 			columns.push(new DatabricksSQLColumn(col, isPartitionedBy, this.tableName, this.databaseName, this.sqlContext));
 		}
+		
 		return columns;
 	}
 

@@ -21,10 +21,9 @@ export class DatabricksSQLColumn extends DatabricksSQLTreeItem {
 		isPartitionedBy: boolean,
 		tableName: string,
 		databaseName: string,
-		sqlContext: ExecutionContext,
-		collapsibleState: vscode.TreeItemCollapsibleState = undefined
+		sqlContext: ExecutionContext
 	) {
-		super(columnDefinition.name, "COLUMN", sqlContext, collapsibleState);
+		super(columnDefinition.name, "COLUMN", sqlContext, vscode.TreeItemCollapsibleState.None);
 
 		this._columnDefinition = columnDefinition;
 		this._isPartitionedBy = isPartitionedBy;
@@ -34,8 +33,6 @@ export class DatabricksSQLColumn extends DatabricksSQLTreeItem {
 		super.tooltip = this._tooltip;
 		super.description = this._description;
 		super.contextValue = this._contextValue;
-
-		super.collapsibleState = undefined;
 	}
 
 	readonly command = null;

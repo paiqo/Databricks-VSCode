@@ -6,7 +6,6 @@ import { iDatabricksConnection } from './vscode/treeviews/connections/iDatabrick
 import { DatabricksConnectionManagerVSCode } from './vscode/treeviews/connections/DatabricksConnectionManagerVSCode';
 import { SensitiveValueStore } from './vscode/treeviews/connections/_types';
 import { DatabricksConnectionTreeItem } from './vscode/treeviews/connections/DatabricksConnectionTreeItem';
-import { DatabricksSQLTreeProvider } from './vscode/treeviews/sql/DatabricksSQLTreeProvider';
 import { DatabricksConnectionManagerCLI } from './vscode/treeviews/connections/DatabricksConnectionManagerCLI';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
