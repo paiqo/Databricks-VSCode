@@ -1,6 +1,7 @@
 export type CloudProvider = 
 	"Azure" 
 | 	"AWS" 
+|	"GCP"
 ;
 
 export type ConnectionSource = 

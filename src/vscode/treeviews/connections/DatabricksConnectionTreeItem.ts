@@ -96,8 +96,11 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 	}
 
 	get cloudProvider(): CloudProvider {
-		if (this.apiRootUrl.includes('azuredatabricks')) {
+		if (this.apiRootUrl.toLowerCase().includes('azuredatabricks')) {
 			return "Azure";
+		}
+		if (this.apiRootUrl.toLowerCase().includes('.gcp.')) {
+			return "GCP";
 		}
 		else {
 			return "AWS";

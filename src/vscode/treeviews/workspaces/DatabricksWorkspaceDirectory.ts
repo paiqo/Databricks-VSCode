@@ -11,6 +11,8 @@ import { DatabricksWorkspaceTreeItem } from './DatabricksWorkspaceTreeItem';
 import { DatabricksWorkspaceLibrary } from './DatabricksWorkspaceLibrary';
 import { DatabricksWorkspaceNotebook } from './DatabricksWorkspaceNotebook';
 
+import { WorkspaceItemType } from './_types';
+
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
@@ -22,10 +24,11 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 		path: string,
 		object_id: number,
 		source: "Online" | "Local",
+		object_type: WorkspaceItemType = "DIRECTORY"
 	) {
-		super(path, "DIRECTORY", object_id, undefined, vscode.TreeItemCollapsibleState.Collapsed);
+		super(path, object_type, object_id, undefined, vscode.TreeItemCollapsibleState.Collapsed);
 
-		this._object_type = "DIRECTORY";
+		this._object_type = object_type;
 
 		if (source == "Local") {
 			this._onlinePathExists = false;
@@ -112,6 +115,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 							onlineItems.push(DatabricksWorkspaceNotebook.fromInterface(item));
 							break;
 						case "DIRECTORY":
+						case "REPO":
 							onlineItems.push(DatabricksWorkspaceDirectory.fromInterface(item));
 							break;
 					}
@@ -174,6 +178,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 					DatabricksWorkspaceNotebook.fromInterface(item).download();
 					break;
 				case "DIRECTORY":
+				case "REPO":
 					DatabricksWorkspaceDirectory.fromInterface(item).download();
 					break;
 			}
@@ -190,6 +195,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 					DatabricksWorkspaceNotebook.fromInterface(item).upload();
 					break;
 				case "DIRECTORY":
+				case "REPO":
 					DatabricksWorkspaceDirectory.fromInterface(item).upload();
 					break;
 			}
