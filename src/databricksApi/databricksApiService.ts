@@ -42,17 +42,17 @@ export abstract class DatabricksApiService {
 			this._apiService.defaults.headers.common['Content-Type'] = 'application/json';
 			this._apiService.defaults.headers.common['Accept'] = 'application/json';
 
-			ThisExtension.log("Testing new Databricks API settings ...");
+			ThisExtension.log(`Testing new Databricks API (${Connection.apiRootUrl}) settings ()...`);
 			this._connectionTestRunning = true;
-			let dbfsList = await this.listDBFSItems("/");
+			let workspaceList = await this.listWorkspaceItems("/");
 			this._connectionTestRunning = false;
-			if (dbfsList.length > 0) {
+			if (workspaceList.length > 0) {
 				ThisExtension.log("Databricks API Service initialized!");
 				this._isInitialized = true;
 				return true;
 			}
 			else {
-				ThisExtension.log(JSON.stringify(dbfsList));
+				ThisExtension.log(JSON.stringify(workspaceList));
 				throw new Error(`Invalid Configuration for Databricks REST API: Cannot access '${Connection.apiRootUrl}' with token '${accessToken}'!`);
 			}
 		} catch (error) {

@@ -12,6 +12,7 @@ import { DatabricksWorkspaceLibrary } from './DatabricksWorkspaceLibrary';
 import { DatabricksWorkspaceNotebook } from './DatabricksWorkspaceNotebook';
 
 import { WorkspaceItemType } from './_types';
+import { DatabricksWorkspaceFile } from './DatabricksWorkspaceFile';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -113,6 +114,9 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 							break;
 						case "NOTEBOOK":
 							onlineItems.push(DatabricksWorkspaceNotebook.fromInterface(item));
+							break;
+						case "FILE":
+							onlineItems.push(DatabricksWorkspaceFile.fromInterface(item));
 							break;
 						case "DIRECTORY":
 						case "REPO":

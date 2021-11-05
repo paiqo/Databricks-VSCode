@@ -2,7 +2,8 @@ export type WorkspaceItemType =
 	"DIRECTORY" 
 | 	"NOTEBOOK"
 | 	"LIBRARY"
-|	"REPO";
+|	"REPO"
+|	"FILE";
 
 
 export type WorkspaceItemExportFormat = 

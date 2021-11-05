@@ -35,6 +35,10 @@ This is a Visual Studio Code extension that allows you to work with Databricks l
 - Easy configuration via standard VS Code settings
 
 # Relase Notes
+**v0.8.9**:
+- add support to list regular files from Git repositories. Up-/Download is not yet supported by the underlying API
+**v0.8.8**:
+- fix issues with Databricks running on GCP
 **v0.8.7**:
 - fix issue with repositories in workspace
 **v0.8.6**:
