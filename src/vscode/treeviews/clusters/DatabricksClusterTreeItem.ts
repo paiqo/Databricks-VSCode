@@ -72,19 +72,19 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 
 		if (this.definition.custom_tags != undefined && this.definition.custom_tags.ResourceClass != undefined) {
 			if (this.definition.custom_tags.ResourceClass == "Serverless") {
-				desc += " (High-Concurrency, "
+				desc += " (High-Concurrency, ";
 			}
 			else if (this.definition.custom_tags.ResourceClass == "SingleNode") {
-				desc += " (SingleNode, "
+				desc += " (SingleNode, ";
 			}
 			else {
-				desc += " (Standard, "
+				desc += " (Standard, ";
 			}
 		}
 		else {
-			desc += " (Standard, "
+			desc += " (Standard, ";
 		}
-		return desc + this.state + ")"
+		return desc + this.state + ")";
 	}
 
 	// used in package.json to filter commands via viewItem == ACTIVE
@@ -198,8 +198,7 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 			vscode.window.showErrorMessage(`ERROR: ${error}`);
 		});
 
-		await Helper.wait(5000);
-		vscode.commands.executeCommand("databricksClusters.refresh", false);
+		setTimeout(() => vscode.commands.executeCommand("databricksClusters.refresh", false), 5000);
 	}
 
 	async stop(): Promise<void> {
@@ -211,8 +210,7 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 			vscode.window.showErrorMessage(`ERROR: ${error}`);
 		});
 
-		await Helper.wait(5000);
-		vscode.commands.executeCommand("databricksClusters.refresh", false);
+		setTimeout(() => vscode.commands.executeCommand("databricksClusters.refresh", false), 5000);
 	}
 
 	async delete(): Promise<void> {
@@ -225,8 +223,7 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 
 	async useForSQL(): Promise<void> {
 		ThisExtension.SQLClusterID = this.cluster_id;
-		await Helper.wait(1000);
-		vscode.commands.executeCommand("databricksSQL.refresh", false);
+		setTimeout(() => vscode.commands.executeCommand("databricksSQL.refresh", false), 1000);
 	}
 
 	async click(): Promise<void> {

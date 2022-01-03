@@ -351,6 +351,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 			vscode.commands.executeCommand("databricksFS.refresh", false);
 			vscode.commands.executeCommand("databricksSecrets.refresh", false);
 			vscode.commands.executeCommand("databricksSQL.refresh", false);
+			vscode.commands.executeCommand("databricksRepos.refresh", false);
 
 			vscode.commands.executeCommand("databricksConnections.refresh", false);
 		}

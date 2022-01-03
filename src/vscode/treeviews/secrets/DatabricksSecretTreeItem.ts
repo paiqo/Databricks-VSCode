@@ -111,8 +111,7 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 
 		await DatabricksApiService.createSecretScopes(scopeName, managingPrincipal);
 
-		Helper.wait(1000);
-		vscode.commands.executeCommand("databricksSecrets.refresh", false);
+		setTimeout(() => vscode.commands.executeCommand("databricksSecrets.refresh", false), 1000);
 	}
 
 	async deleteSecretScope(): Promise<void> {
@@ -120,8 +119,7 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 		{
 			await DatabricksApiService.deleteSecretScope(this.scope);
 
-			Helper.wait(1000);
-			vscode.commands.executeCommand("databricksSecrets.refresh", false);
+			setTimeout(() => vscode.commands.executeCommand("databricksSecrets.refresh", false), 1000);
 		}
 		else
 		{
@@ -135,8 +133,7 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 
 		await DatabricksApiService.setSecret(this.scope, secretName, value);
 
-		Helper.wait(1000);
-		vscode.commands.executeCommand("databricksSecrets.refresh", false);
+		setTimeout(() => vscode.commands.executeCommand("databricksSecrets.refresh", false), 1000);
 	}
 
 	async updateSecret(): Promise<void> {
@@ -144,8 +141,7 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 
 		await DatabricksApiService.setSecret(this.scope, this.secret, newValue);
 
-		Helper.wait(1000);
-		vscode.commands.executeCommand("databricksSecrets.refresh", false);
+		setTimeout(() => vscode.commands.executeCommand("databricksSecrets.refresh", false), 1000);
 	}
 
 	async deleteSecret(): Promise<void> {
@@ -153,8 +149,7 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 		{
 			await DatabricksApiService.deleteSecret(this.scope, this.secret);
 
-			Helper.wait(1000);
-			vscode.commands.executeCommand("databricksSecrets.refresh", false);
+			setTimeout(() => vscode.commands.executeCommand("databricksSecrets.refresh", false), 1000);
 		}
 		else
 		{

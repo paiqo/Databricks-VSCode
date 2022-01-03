@@ -174,8 +174,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 			vscode.window.showInformationMessage(`Download of item ${this._path}) finished!`);
 
 			if (ThisExtension.RefreshAfterUpDownload && !asTempFile) {
-				Helper.wait(500);
-				vscode.commands.executeCommand("databricksWorkspace.refresh", false);
+				setTimeout(() => vscode.commands.executeCommand("databricksWorkspace.refresh", false), 500);
 			}
 
 			return localPath;
@@ -191,8 +190,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 			vscode.window.showInformationMessage(`Upload of item ${this.path}) finished!`);
 
 			if (ThisExtension.RefreshAfterUpDownload) {
-				Helper.wait(500);
-				vscode.commands.executeCommand("databricksWorkspace.refresh", false);
+				setTimeout(() => vscode.commands.executeCommand("databricksWorkspace.refresh", false), 500);
 			}
 		}
 		catch (error) {
@@ -208,10 +206,19 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 			if (showWarning)
 				vscode.window.showWarningMessage("Opening local cached file. To open most recent file from Databricks, please manually download it first!");
 		}
-
-		vscode.workspace
-			.openTextDocument(this.localFileUri)
-			.then(vscode.window.showTextDocument);
+		let viewType:string = "default";
+		if(this.localFileExtension == ".ipynb") {
+			if(vscode.extensions.getExtension("ms-python.python")!= undefined)
+			{
+				viewType = "jupyter-notebook";
+			}
+			else
+			{
+				vscode.window.showErrorMessage("Please install extension 'ms-python.python' to open .ipynb files!");
+			}
+		}
+		
+		await vscode.commands.executeCommand('vscode.openWith', this.localFileUri, viewType);
 	}
 
 	async click(): Promise<void> {

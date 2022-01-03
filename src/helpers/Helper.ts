@@ -114,10 +114,9 @@ export abstract class Helper {
 		this.addTempFile(uniqueFilePath);
 
 		if (open) {
-			await Helper.wait(500);
-			vscode.workspace
+			setTimeout(() => vscode.workspace
 				.openTextDocument(uniqueFilePath)
-				.then(vscode.window.showTextDocument);
+				.then(vscode.window.showTextDocument), 500);			
 		}
 
 		return uniqueFilePath;
@@ -208,7 +207,7 @@ export abstract class Helper {
 		vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(link));
 	}
 
-	static async wait(ms): Promise<void> {
+	static async wait(ms: number): Promise<void> {
 		await setTimeout(() => { }, ms);
 	}
 

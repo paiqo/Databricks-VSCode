@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Databricks Extension for VSCode",
-	"version": "0.8.9",
+	"version": "0.9.1",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -19,7 +19,7 @@
 		"email": "databricks-vscode@paiqo.com"
 	},
 	"qna": "https://github.com/paiqo/Databricks-VSCode",
-	"enableProposedApi": false,
+	"enableApiProposals": false,
 	"engines": {
 		"vscode": "^1.43.0"
 	},
@@ -41,7 +41,9 @@
 		"cluster",
 		"notebook",
 		"azure",
-		"AWS"
+		"AWS",
+		"GCP",
+		"data"
 	],
 	"activationEvents": [
 		"onView:DatabricksConnections",
@@ -50,7 +52,8 @@
 		"onView:databricksJobs",
 		"onView:databricksFS",
 		"onView:databricksSecrets",
-		"onView:databricksSql"
+		"onView:databricksSql",
+		"onView:databricksRepos"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -400,6 +403,10 @@
 				{
 					"id": "databricksSQL",
 					"name": "SQL"
+				},
+				{
+					"id": "databricksRepos",
+					"name": "Repos"
 				}
 			]
 		},
@@ -723,6 +730,30 @@
 					"light": "resources/light/json.png",
 					"dark": "resources/dark/json.png"
 				}
+			},
+			{
+				"command": "databricksRepos.refresh",
+				"title": "Refresh",
+				"icon": {
+					"light": "resources/light/refresh.png",
+					"dark": "resources/dark/refresh.png"
+				}
+			},
+			{
+				"command": "databricksRepo.checkOut",
+				"title": "Check-Out",
+				"icon": {
+					"light": "resources/light/download.png",
+					"dark": "resources/dark/download.png"
+				}
+			},
+			{
+				"command": "databricksRepo.delete",
+				"title": "Delete",
+				"icon": {
+					"light": "resources/light/delete.png",
+					"dark": "resources/dark/delete.png"
+				}
 			}
 		],
 		"menus": {
@@ -790,6 +821,11 @@
 				{
 					"command": "databricksSQL.refresh",
 					"when": "view == databricksSQL",
+					"group": "navigation"
+				},
+				{
+					"command": "databricksRepos.refresh",
+					"when": "view == databricksRepos",
 					"group": "navigation"
 				}
 			],
@@ -906,6 +942,16 @@
 				{
 					"command": "databricksSQLTable.showDefinition",
 					"when": "view == databricksSQL && viewItem == TABLE",
+					"group": "inline"
+				},
+				{
+					"command": "databricksRepo.checkOut",
+					"when": "view == databricksRepos",
+					"group": "inline"
+				},
+				{
+					"command": "databricksRepo.delete",
+					"when": "view == databricksRepos",
 					"group": "inline"
 				}
 			]

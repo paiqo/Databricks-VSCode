@@ -128,8 +128,7 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 
 				if(ThisExtension.RefreshAfterUpDownload)
 				{
-					Helper.wait(500);
-					vscode.commands.executeCommand("databricksFS.refresh", false);
+					setTimeout(() => vscode.commands.executeCommand("databricksFS.refresh", false), 500);
 				}
 			});
 		}

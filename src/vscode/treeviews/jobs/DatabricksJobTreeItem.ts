@@ -53,7 +53,7 @@ export class DatabricksJobTreeItem extends vscode.TreeItem {
 	}
 
 	get definition(): iDatabricksJob | iDatabricksJobRun {
-		return this.definition;
+		return this._definition;
 	}
 
 	get link(): string {

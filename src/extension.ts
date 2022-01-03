@@ -21,6 +21,9 @@ import { DatabricksJob } from './vscode/treeviews/jobs/DatabricksJob';
 import { DatabricksJobRun } from './vscode/treeviews/jobs/DatabricksJobRun';
 import { DatabricksSQLTreeProvider } from './vscode/treeviews/sql/DatabricksSQLTreeProvider';
 import { DatabricksSQLTable } from './vscode/treeviews/sql/DatabricksSQLTable';
+import { DatabricksRepoTreeProvider } from './vscode/treeviews/repos/DatabricksRepoTreeProvider';
+import { DatabricksRepoTreeItem } from './vscode/treeviews/repos/DatabricksRepoTreeItem';
+
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -113,6 +116,14 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.window.registerTreeDataProvider('databricksSQL', databricksSQLTreeProvider);
 	vscode.commands.registerCommand('databricksSQL.refresh', (showInfoMessage: boolean = true) => databricksSQLTreeProvider.refresh(showInfoMessage));
 	vscode.commands.registerCommand('databricksSQLTable.showDefinition', (sqlTable: DatabricksSQLTable) => sqlTable.showDefinition());
+
+	// register DatabricksRepoProvider
+	let databricksRepoTreeProvider = new DatabricksRepoTreeProvider();
+	vscode.window.registerTreeDataProvider('databricksRepos', databricksRepoTreeProvider);
+	vscode.commands.registerCommand('databricksRepos.refresh', (showInfoMessage: boolean = true) => databricksRepoTreeProvider.refresh(showInfoMessage));
+	vscode.commands.registerCommand('databricksRepo.checkOut', (repo: DatabricksRepoTreeItem) => repo.checkOut());
+	vscode.commands.registerCommand('databricksRepo.delete', (repo: DatabricksRepoTreeItem) => repo.delete());
+	
 }
 
 

@@ -156,8 +156,7 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 			vscode.window.showInformationMessage(`Download of item ${this.path}) finished!`);
 
 			if (ThisExtension.RefreshAfterUpDownload && !asTempFile) {
-				Helper.wait(500);
-				vscode.commands.executeCommand("databricksFS.refresh", false);
+				setTimeout(() => vscode.commands.executeCommand("databricksFS.refresh", false), 500);
 			}
 
 			return localPath;
@@ -177,8 +176,7 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 			let response = DatabricksApiService.uploadDBFSFile(localFilePath, this.path, true);
 			vscode.window.showInformationMessage(`Upload of item ${this.path}) finished!`);
 			if (ThisExtension.RefreshAfterUpDownload) {
-				Helper.wait(500);
-				vscode.commands.executeCommand("databricksFS.refresh", false);
+				setTimeout(() => vscode.commands.executeCommand("databricksFS.refresh", false), 500);
 			}
 		}
 		catch (error) {
@@ -193,8 +191,7 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 	async delete(): Promise<void> {
 		DatabricksApiService.deleteDBFSItem(this.path, false);
 
-		Helper.wait(500);
-		vscode.commands.executeCommand("databricksFS.refresh", false);
+		setTimeout(() => vscode.commands.executeCommand("databricksFS.refresh", false), 500);
 	}
 
 	async compare(): Promise<void> {

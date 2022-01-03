@@ -1,5 +1,6 @@
 import { iDatabricksJob } from "../vscode/treeviews/jobs/iDatabricksJob";
 import { iDatabricksJobRun } from "../vscode/treeviews/jobs/iDatabricksJobRun";
+import { iDatabricksRepo } from "../vscode/treeviews/repos/_types";
 
 export interface iDatabricksJobResponse {
 	jobs: 			iDatabricksJob[];
@@ -21,4 +22,9 @@ export class ExecutionCommand {
 	context_id: 	string;
 	cluster_id: 	string;
 	language:		string;
+}
+
+export interface iDatabricksRepoResponse {
+	repos: 				iDatabricksRepo[];
+	next_page_token?:	string;
 }

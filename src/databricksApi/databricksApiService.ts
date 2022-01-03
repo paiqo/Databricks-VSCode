@@ -12,11 +12,12 @@ import { iDatabricksSecretScope } from '../vscode/treeviews/secrets/iDatabricksS
 import { iDatabricksSecret } from '../vscode/treeviews/secrets/iDatabricksSecret';
 
 import { Helper } from '../helpers/Helper';
-import { ExecutionCommand, ExecutionContext, iDatabricksJobResponse, iDatabricksJobRunResponse } from './_types';
+import { ExecutionCommand, ExecutionContext, iDatabricksJobResponse, iDatabricksJobRunResponse, iDatabricksRepoResponse } from './_types';
 import { iDatabricksCluster } from '../vscode/treeviews/clusters/iDatabricksCluster';
 import { ThisExtension } from '../ThisExtension';
 import { DatabricksConnectionTreeItem } from '../vscode/treeviews/connections/DatabricksConnectionTreeItem';
 import { SecretBackendType } from '../vscode/treeviews/secrets/_types';
+import { iDatabricksRepo } from '../vscode/treeviews/repos/_types';
 
 export abstract class DatabricksApiService {
 	private static API_SUB_URL: string = "/api/";
@@ -25,6 +26,7 @@ export abstract class DatabricksApiService {
 	private static _connectionTestRunning: boolean = false;
 
 
+	//#region Initialization
 	static async initialize(Connection: DatabricksConnectionTreeItem): Promise<boolean> {
 		try {
 			ThisExtension.log("Initializing Databricks API Service ...");
@@ -66,11 +68,9 @@ export abstract class DatabricksApiService {
 	public static get isInitialized(): boolean {
 		return DatabricksApiService._isInitialized;
 	}
+	//#endregion
 
-	public static get sqlClusterId(): string {
-		return "0419-145009-rifts122";
-	}
-
+	//#region Helpers
 	private static writeBase64toFile(base64String: string, filePath: string): void {
 		Helper.ensureLocalFolder(filePath, true);
 		fs.writeFile(filePath, base64String, { encoding: 'base64' }, function (err) {
@@ -153,11 +153,64 @@ export abstract class DatabricksApiService {
 		return response;
 	}
 
-	/*
-	----------------------------------------------------------------
-	-- C O N T E X T   A N D   C O M M A N D   A P I s (v1.2)
-	----------------------------------------------------------------
-	*/
+	private static async patch(endpoint: string, body: object): Promise<any> {
+		ThisExtension.log("PATCH " + endpoint);
+		ThisExtension.log("Body:" + JSON.stringify(body));
+
+		let response: any = "Request not yet executed!";
+		try {
+			response = await this._apiService.patch(endpoint, body);
+			this.logResponse(response);
+		} catch (error) {
+			let errResponse = error.response;
+
+			let errorMessage = errResponse.data.message;
+			if (!errorMessage) {
+				errorMessage = errResponse.headers["x-databricks-reason-phrase"];
+			}
+
+			ThisExtension.log("ERROR: " + error.message);
+			ThisExtension.log("ERROR: " + errorMessage);
+			ThisExtension.log("ERROR: " + JSON.stringify(errResponse.data));
+
+			vscode.window.showErrorMessage(errorMessage);
+
+			return undefined;
+		}
+
+		return response;
+	}
+
+	private static async delete(endpoint: string, body: object): Promise<any> {
+		ThisExtension.log("DELETE " + endpoint);
+		ThisExtension.log("Body:" + JSON.stringify(body));
+
+		let response: any = "Request not yet executed!";
+		try {
+			response = await this._apiService.delete(endpoint, body);
+			this.logResponse(response);
+		} catch (error) {
+			let errResponse = error.response;
+
+			let errorMessage = errResponse.data.message;
+			if (!errorMessage) {
+				errorMessage = errResponse.headers["x-databricks-reason-phrase"];
+			}
+
+			ThisExtension.log("ERROR: " + error.message);
+			ThisExtension.log("ERROR: " + errorMessage);
+			ThisExtension.log("ERROR: " + JSON.stringify(errResponse.data));
+
+			vscode.window.showErrorMessage(errorMessage);
+
+			return undefined;
+		}
+
+		return response;
+	}
+	//#endregion
+
+	//#region Context and Command APIs (v1.2)
 	static async getExecutionContext(cluster_id: string, language: string = "sql"): Promise<ExecutionContext> {
 		let endpoint = '1.2/contexts/create';
 		let body = { clusterId: cluster_id, language: language };
@@ -245,12 +298,9 @@ export abstract class DatabricksApiService {
 		}
 		return apiResults;
 	}
-
-	/*
-	----------------------------------------------------------------
-	-- W O R K S P A C E   A P I
-	----------------------------------------------------------------
-	*/
+	//#endregion
+	
+	//#region Workspace API
 	static async listWorkspaceItems(path: string): Promise<iDatabricksWorkspaceItem[]> {
 		let endpoint = '2.0/workspace/list';
 		let body = { path: path };
@@ -310,12 +360,9 @@ export abstract class DatabricksApiService {
 
 		let result = response.data;
 	}
-
-	/*
-	----------------------------------------------------------------
-	-- C L U S T E R S   A P I
-	----------------------------------------------------------------
-	*/
+	//#endregion
+	
+	//#region Clusters API
 	static async listClusters(): Promise<iDatabricksCluster[]> {
 		let endpoint = '2.0/clusters/list';
 
@@ -358,13 +405,9 @@ export abstract class DatabricksApiService {
 
 		return result.versions;
 	}
+	//#endregion
 
-
-	/*
-	----------------------------------------------------------------
-	-- J O B S   A P I
-	----------------------------------------------------------------
-	*/
+	//#region Jobs API (v2.0)
 	static async listJobs(): Promise<iDatabricksJobResponse> {
 		let endpoint = '2.0/jobs/list';
 
@@ -441,11 +484,9 @@ export abstract class DatabricksApiService {
 		this.writeBase64toFile(result.content, localPath);
 	}
 
-	/*
-	----------------------------------------------------------------
-	-- D B F S   A P I
-	----------------------------------------------------------------
-	*/
+	//#endregion
+
+	//#region DBFS API (v2.0)
 	static async listDBFSItems(path: string): Promise<iDatabricksFSItem[]> {
 		let endpoint = '2.0/dbfs/list';
 		let body = { path: path };
@@ -619,13 +660,9 @@ export abstract class DatabricksApiService {
 		}
 		writeStream.close();
 	}
+	//#endregion
 
-
-	/*
-	----------------------------------------------------------------
-	-- S E C R E T S   A P I
-	----------------------------------------------------------------
-	*/
+	//#region Secrets API (v2.0)
 	static async listSecretScopes(): Promise<DatabricksSecretTreeItem[]> {
 		let endpoint = '2.0/secrets/scopes/list';
 
@@ -717,4 +754,48 @@ export abstract class DatabricksApiService {
 
 		return response;
 	}
+	//#endregion
+
+	//#region Repos API (v2.0)
+	static async listRepos(): Promise<iDatabricksRepoResponse> {
+		let endpoint = '2.0/repos';
+
+		let response = await this.get(endpoint);
+
+		let result = response.data as iDatabricksRepoResponse;
+
+		if (result == undefined) {
+			return { repos: [] };
+		}
+
+		return result;
+	}
+
+	static async updateRepo(repo_id: number, branch: string = undefined, tag: string = undefined): Promise<iDatabricksRepo> {
+		let endpoint = `2.0/repos/${repo_id}`;
+
+		let body: any = {};
+		if(branch != undefined)
+		{
+			body.branch = branch;
+		}
+		else if(tag != undefined)
+		{
+			body.tag = tag;
+		}
+		
+
+		let response = await this.patch(endpoint, body);
+
+		return response.data as iDatabricksRepo;
+	}
+
+	static async deleteRepo(repo_id: number): Promise<void> {
+		let endpoint = `2.0/repos/${repo_id}`;
+
+		let body: any = {};	
+
+		let response = await this.delete(endpoint, body);
+	}
+	//#endregion
 }
