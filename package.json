@@ -979,7 +979,7 @@
 		"angular": "^1.8.2",
 		"axios": "^0.21.4",
 		"file-saver": "^2.0.5",
-		"follow-redirects": "^1.14.5",
+		"follow-redirects": "^1.14.7",
 		"ftp": "^0.3.10",
 		"jsonc-parser": "^0.4.2",
 		"keytar": "^5.6.0",
