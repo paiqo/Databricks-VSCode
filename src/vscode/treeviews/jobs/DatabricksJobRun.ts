@@ -5,6 +5,7 @@ import { ThisExtension } from '../../../ThisExtension';
 import { Helper } from '../../../helpers/Helper';
 import { DatabricksJobTreeItem } from './DatabricksJobTreeItem';
 import { iDatabricksJobRun } from './iDatabricksJobRun';
+import { Timestamp } from 'rxjs';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksJobRun extends DatabricksJobTreeItem {
@@ -14,7 +15,7 @@ export class DatabricksJobRun extends DatabricksJobTreeItem {
 	) {
 		super("JOB_RUN", definition.run_id, definition.run_name, definition, vscode.TreeItemCollapsibleState.None);
 
-		super.label = `${new Date(this.start_time).toISOString().substr(0, 19).replace('T', ' ')}`;
+		super.label = this._label;
 		super.tooltip = this._tooltip;
 		super.description = this._description;
 		super.contextValue = this._contextValue;
@@ -24,24 +25,26 @@ export class DatabricksJobRun extends DatabricksJobTreeItem {
 		};
 	}
 
+	get _label(): string {
+		let dateToShow: number = this.start_time;
+		if (this.state != "running") {
+			dateToShow = this.definition.end_time;
+		}
+		return `${new Date(dateToShow).toISOString().substr(0, 19).replace('T', ' ')}`;
+	}
+
 	get _tooltip(): string {
 		let tooltip: string = "";
 
-		let startDate = new Date(this.start_time);
-		
-		// tooltip = tooltip + "Started: " + Helper.trimChar(startDate.toISOString().split('T')[1], "T") + " UTC\n";
-
-		tooltip = tooltip + `Duration: ${this.duration}`; 
-		if(this.state == "succeeded")
-		{
-			tooltip = tooltip + ""; 
+		tooltip = tooltip + `Duration: ${this.duration}`;
+		if (this.state != "running") {
+			tooltip = tooltip + "";
 		}
-		else
-		{
-			tooltip = tooltip + " (running)"; 
+		else {
+			tooltip = tooltip + " (running)";
 		}
-		tooltip = tooltip + `\nrun_id: ${this.job_run_id}`; 
-		tooltip = tooltip + `\n${this.task_details}`;
+		tooltip = tooltip + `\nrun_id: ${this.job_run_id}`;
+		//tooltip = tooltip + `\n${this.task_details}`;
 
 		return tooltip;
 	}
@@ -49,7 +52,7 @@ export class DatabricksJobRun extends DatabricksJobTreeItem {
 	// description is show next to the label
 	get _description(): string {
 		let state = this.definition.state;
-		return `(${state.result_state || state.life_cycle_state}) ${this.duration} - ${this.task_description}`;
+		return `(${state.result_state || state.life_cycle_state}) ${this.duration}`;
 	}
 
 	// used in package.json to filter commands via viewItem == RUNNING_JOB
@@ -106,9 +109,8 @@ export class DatabricksJobRun extends DatabricksJobTreeItem {
 		let startDate = new Date(this.definition.start_time);
 		let endDate = new Date(Date.now());
 
-		if(this.state == "succeeded")
-		{
-			endDate = new Date(this.definition.start_time + this.definition.setup_duration + this.definition.execution_duration + this.definition.cleanup_duration);	
+		if (this.state != "running") {
+			endDate = new Date(this.definition.end_time);
 		}
 
 		let duration = (endDate.getTime() - startDate.getTime()) / 1000;
@@ -121,43 +123,55 @@ export class DatabricksJobRun extends DatabricksJobTreeItem {
 	}
 
 	get task_type(): string {
-		if (this.definition.task.notebook_task) { return "Notebook"; }
-		if (this.definition.task.spark_jar_task) { return "JAR"; }
-		if (this.definition.task.spark_python_task) { return "Python"; }
-		if (this.definition.task.spark_submit_task) { return "Submit"; }
+		if (this.definition.tasks && this.definition.tasks.length == 1) {
+			let single_task = this.definition.tasks[0];
+			if (single_task.notebook_task) { return "Notebook"; }
+			if (single_task.spark_jar_task) { return "JAR"; }
+			if (single_task.spark_python_task) { return "Python"; }
+			if (single_task.spark_submit_task) { return "Submit"; }
+		}
+		return "MULTI_TASK";
 	}
 
 	get task_description(): string {
-		if (this.definition.task.notebook_task) { 
-			return "Notebook: " + this.definition.task.notebook_task.notebook_path;
+		if (this.task_type == "MULTI_TASK") {
+			return this.task_type;
 		}
-		if (this.definition.task.spark_jar_task) { 
-			return "JAR: " + this.definition.task.spark_jar_task.jar_uri + " - " + this.definition.task.spark_jar_task.main_class_name;
+		let single_task = this.definition.tasks[0];
+		if (single_task.notebook_task) {
+			return "Notebook: " + single_task.notebook_task.notebook_path;
 		}
-		if (this.definition.task.spark_python_task) { 
-			return "Python: " + this.definition.task.spark_python_task.python_file;
+		if (single_task.spark_jar_task) {
+			return "JAR: " + single_task.spark_jar_task.jar_uri + " - " + single_task.spark_jar_task.main_class_name;
 		}
-		if (this.definition.task.spark_submit_task) { 
-			return "Spark-Submit: " + this.definition.task.spark_submit_task.parameters.join(' '); 
+		if (single_task.spark_python_task) {
+			return "Python: " + single_task.spark_python_task.python_file;
+		}
+		if (single_task.spark_submit_task) {
+			return "Spark-Submit: " + single_task.spark_submit_task.parameters.join(' ');
 		}
 	}
 
 	get task_details(): string {
-		if (this.definition.task.notebook_task) { 
-			return `Notebook: ${this.definition.task.notebook_task.notebook_path}\nRevision Timestamp: ${this.definition.task.notebook_task.revision_timestamp}\nParameters: ${JSON.stringify(this.definition.task.notebook_task.base_parameters)}`;
+		if (this.task_type == "MULTI_TASK") {
+			return this.task_type;
 		}
-		if (this.definition.task.spark_jar_task) { 
-			return `JAR: ${this.definition.task.spark_jar_task.jar_uri}\nMain Class: ${this.definition.task.spark_jar_task.main_class_name}\nParameters: ${this.definition.task.spark_jar_task.parameters.join(' ')}`;
+		let single_task = this.definition.tasks[0];
+		if (single_task.notebook_task) {
+			return `Notebook: ${single_task.notebook_task.notebook_path}\nRevision Timestamp: ${single_task.notebook_task.revision_timestamp}\nParameters: ${JSON.stringify(single_task.notebook_task.base_parameters)}`;
 		}
-		if (this.definition.task.spark_python_task) { 
-			return `Python: ${this.definition.task.spark_python_task.python_file}\nParameters: ${this.definition.task.spark_python_task.parameters.join(' ')}`;
+		if (single_task.spark_jar_task) {
+			return `JAR: ${single_task.spark_jar_task.jar_uri}\nMain Class: ${single_task.spark_jar_task.main_class_name}\nParameters: ${single_task.spark_jar_task.parameters.join(' ')}`;
 		}
-		if (this.definition.task.spark_submit_task) { 
-			return "Spark-Submit: " + this.definition.task.spark_submit_task.parameters.join(' '); 
+		if (single_task.spark_python_task) {
+			return `Python: ${single_task.spark_python_task.python_file}\nParameters: ${single_task.spark_python_task.parameters.join(' ')}`;
+		}
+		if (single_task.spark_submit_task) {
+			return "Spark-Submit: " + single_task.spark_submit_task.parameters.join(' ');
 		}
 	}
 
-	
+
 	public static fromInterface(item: iDatabricksJobRun): DatabricksJobRun {
 		return new DatabricksJobRun(item);
 	}
@@ -169,7 +183,7 @@ export class DatabricksJobRun extends DatabricksJobTreeItem {
 	}
 
 	async stop(): Promise<void> {
-		let response = DatabricksApiService.cancelJunJob(this.job_run_id);
+		let response = DatabricksApiService.cancelJobRun(this.job_run_id);
 
 		response.then((response) => {
 			vscode.window.showInformationMessage(`Stopping job run ${this.label} (${this.job_run_id}) ...`);

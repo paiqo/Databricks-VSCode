@@ -26,15 +26,17 @@ export class DatabricksJob extends DatabricksJobTreeItem {
 	}
 
 	get _tooltip(): string {
-		return JSON.stringify(this.definition.settings);
+		return JSON.stringify(this.definition.settings, null, 4);
 	}
 
 	// description is show next to the label
 	get _description(): string {
+		let description: string = `(MANUALLY)`;
 		if (this.definition.settings.schedule) {
-			return `(${this.definition.settings.schedule.pause_status}, ${this.definition.settings.schedule.quartz_cron_expression}, ${this.task_type})`;
+			description = `(${this.definition.settings.schedule.pause_status}, ${this.definition.settings.schedule.quartz_cron_expression}`;
 		}
-		return `(MANUALLY)`;
+		description = `${description}, ${this.task_type})`;
+		return description;
 	}
 
 	// used in package.json to filter commands via viewItem == CANSTART
@@ -73,10 +75,14 @@ export class DatabricksJob extends DatabricksJobTreeItem {
 	}
 
 	get task_type(): string {
-		if (this.definition.settings.notebook_task) { return "Notebook"; }
-		if (this.definition.settings.spark_jar_task) { return "JAR"; }
-		if (this.definition.settings.spark_python_task) { return "Python"; }
-		if (this.definition.settings.spark_submit_task) { return "Submit"; }
+		if (this.definition.settings.tasks.length == 1)
+		{
+			if (this.definition.settings.tasks[0].notebook_task) { return "Notebook"; }
+			if (this.definition.settings.tasks[0].spark_jar_task) { return "JAR"; }
+			if (this.definition.settings.tasks[0].spark_python_task) { return "Python"; }
+			if (this.definition.settings.tasks[0].spark_submit_task) { return "Submit"; }
+		}
+		return this.definition.settings.format;
 	}
 
 	public static fromInterface(item: iDatabricksJob): DatabricksJob {

@@ -1,3 +1,21 @@
+export interface iDatabricksJobTask {
+	task_key: string;
+	depends_on: object[];
+	spark_jar_task: object;
+	notebook_task: {
+		notebook_path: string,
+		base_parameters: object,
+		revision_timestamp: number
+	};
+	spark_python_task: object;
+	spark_submit_task: object;
+	job_cluster_key: string;
+	timeout_seconds: number;
+	email_notifications: object;
+}
+
+
+
 export interface iDatabricksJob {
 	job_id: number;
 	settings: {
@@ -20,14 +38,8 @@ export interface iDatabricksJob {
 
 		max_concurrent_runs: number;
 
-		spark_jar_task: object;
-		notebook_task: {
-			notebook_path: string,
-			base_parameters: object,
-			revision_timestamp: number
-		},
-		spark_python_task: object;
-		spark_submit_task: object;
+		tasks: iDatabricksJobTask[];
+		format: string;
 	};
 	created_time: number;
 }

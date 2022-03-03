@@ -21,9 +21,11 @@ import { iDatabricksRepo } from '../vscode/treeviews/repos/_types';
 
 export abstract class DatabricksApiService {
 	private static API_SUB_URL: string = "/api/";
+	private static JOB_API_VERSION = "2.1";
 	private static _apiService: any;
 	private static _isInitialized: boolean = false;
 	private static _connectionTestRunning: boolean = false;
+	
 
 
 	//#region Initialization
@@ -409,9 +411,12 @@ export abstract class DatabricksApiService {
 
 	//#region Jobs API (v2.0)
 	static async listJobs(): Promise<iDatabricksJobResponse> {
-		let endpoint = '2.0/jobs/list';
+		let endpoint = this.JOB_API_VERSION + '/jobs/list';
+		let body = {
+			expand_tasks: true
+		};
 
-		let response = await this.get(endpoint);
+		let response = await this.get(endpoint, { params: body });
 
 		let result = response.data as iDatabricksJobResponse;
 
@@ -424,18 +429,19 @@ export abstract class DatabricksApiService {
 
 	static async listJobRuns(
 		job_id: number = null,
-		active_only: boolean = true,
+		active_only: boolean = false,
 		completed_only: boolean = false,
 		offset: number = null,
 		limit: number = null
 	): Promise<iDatabricksJobRunResponse> {
-		let endpoint = '2.0/jobs/runs/list';
+		let endpoint = this.JOB_API_VERSION + '/jobs/runs/list';
 		let body = {
 			job_id: job_id,
 			active_only: active_only,
 			completed_only: completed_only,
 			offset: offset,
-			limit: limit
+			limit: limit,
+			expand_tasks: true
 		};
 
 		let response = await this.get(endpoint, { params: body });
@@ -450,7 +456,7 @@ export abstract class DatabricksApiService {
 	}
 
 	static async runJob(job_id: number): Promise<void> {
-		let endpoint = '2.0/jobs/run-now';
+		let endpoint = this.JOB_API_VERSION + '/jobs/run-now';
 		let body = {
 			job_id: job_id
 		};
@@ -460,8 +466,8 @@ export abstract class DatabricksApiService {
 		return response;
 	}
 
-	static async cancelJunJob(run_id: number): Promise<void> {
-		let endpoint = '2.0/jobs/runs/cancel';
+	static async cancelJobRun(run_id: number): Promise<void> {
+		let endpoint = this.JOB_API_VERSION + '/jobs/runs/cancel';
 		let body = {
 			run_id: run_id
 		};
@@ -472,7 +478,7 @@ export abstract class DatabricksApiService {
 	}
 
 	static async exportJobRun(run_id: number, localPath: string): Promise<void> {
-		let endpoint = '2.0/jobs/runs/export';
+		let endpoint = this.JOB_API_VERSION + '/jobs/runs/export';
 		let body = {
 			run_id: run_id
 		};
