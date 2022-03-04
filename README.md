@@ -35,6 +35,9 @@ This is a Visual Studio Code extension that allows you to work with Databricks l
 - Easy configuration via standard VS Code settings
 
 # Relase Notes
+**v0.9.2**:
+- Make use of Databricks [Jobs API v2.1](https://docs.databricks.com/dev-tools/api/latest/jobs.html)
+
 **v0.9.1**:
 - fix issue when opening `.ipynb` files/notebooks
 
