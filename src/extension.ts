@@ -23,6 +23,9 @@ import { DatabricksSQLTreeProvider } from './vscode/treeviews/sql/DatabricksSQLT
 import { DatabricksSQLTable } from './vscode/treeviews/sql/DatabricksSQLTable';
 import { DatabricksRepoTreeProvider } from './vscode/treeviews/repos/DatabricksRepoTreeProvider';
 import { DatabricksRepoTreeItem } from './vscode/treeviews/repos/DatabricksRepoTreeItem';
+import { DatabricksFSTreeItem } from './vscode/treeviews/dbfs/DatabricksFSTreeItem';
+import { DatabricksWorkspaceTreeItem } from './vscode/treeviews/workspaces/DatabricksWorkspaceTreeItem';
+import { DatabricksRepoRepository } from './vscode/treeviews/repos/DatabricksRepoRepository';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -52,10 +55,12 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksWorkspaceItem.download', (workspaceItem: DatabricksWorkspaceNotebook | DatabricksWorkspaceDirectory) => workspaceItem.download());
 	vscode.commands.registerCommand('databricksWorkspaceItem.upload', (workspaceItem: DatabricksWorkspaceNotebook | DatabricksWorkspaceDirectory) => workspaceItem.upload());
 	vscode.commands.registerCommand('databricksWorkspaceItem.compare', (workspaceItem: DatabricksWorkspaceNotebook) => workspaceItem.compare());
+	vscode.commands.registerCommand('databricksWorkspaceItem.copyPath', (workspaceItem: DatabricksWorkspaceTreeItem) => workspaceItem.CopyPathToClipboard());
 
 	vscode.commands.registerCommand('databricksWorkspaceItem.edit', (workspaceItem: DatabricksWorkspaceNotebook) => vscode.window.showErrorMessage(`Not yet implemented!`));
 	vscode.commands.registerCommand('databricksWorkspaceItem.delete', (workspaceItem: DatabricksWorkspaceNotebook | DatabricksWorkspaceDirectory) => vscode.window.showErrorMessage(`Not yet implemented!`));
 	vscode.commands.registerCommand('databricksWorkspaceItem.sync', (workspaceItem: DatabricksWorkspaceNotebook | DatabricksWorkspaceDirectory) => vscode.window.showErrorMessage(`Not yet implemented!`));
+	
 
 
 	// register DatabricksClusterTreeProvider
@@ -98,6 +103,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksFSItem.download', (fsItem: DatabricksFSFile | DatabricksFSDirectory) => fsItem.download());
 	vscode.commands.registerCommand('databricksFSItem.upload', (fsItem: DatabricksFSFile | DatabricksFSDirectory) => fsItem.upload());
 	vscode.commands.registerCommand('databricksFSItem.delete', (fsItem: DatabricksFSFile | DatabricksFSDirectory) => fsItem.delete());
+	vscode.commands.registerCommand('databricksFSItem.copyPath', (fsItem: DatabricksFSTreeItem) => fsItem.CopyPathToClipboard());
 
 
 	// register DatabricksSecretTreeProvider
@@ -121,8 +127,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	let databricksRepoTreeProvider = new DatabricksRepoTreeProvider();
 	vscode.window.registerTreeDataProvider('databricksRepos', databricksRepoTreeProvider);
 	vscode.commands.registerCommand('databricksRepos.refresh', (showInfoMessage: boolean = true) => databricksRepoTreeProvider.refresh(showInfoMessage));
-	vscode.commands.registerCommand('databricksRepo.checkOut', (repo: DatabricksRepoTreeItem) => repo.checkOut());
-	vscode.commands.registerCommand('databricksRepo.delete', (repo: DatabricksRepoTreeItem) => repo.delete());
+	vscode.commands.registerCommand('databricksRepo.checkOut', (repo: DatabricksRepoRepository) => repo.checkOut());
+	vscode.commands.registerCommand('databricksRepo.delete', (repo: DatabricksRepoRepository) => repo.delete());
 	
 }
 

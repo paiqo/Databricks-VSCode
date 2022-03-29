@@ -74,4 +74,8 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		let item: iDatabricksFSItem = JSON.parse(jsonString);
 		return new DatabricksFSTreeItem(item.path, item.is_dir, item.file_size);
 	}
+
+	public CopyPathToClipboard(): void {
+		vscode.env.clipboard.writeText(this.path)
+	}
 }

@@ -763,10 +763,20 @@ export abstract class DatabricksApiService {
 	//#endregion
 
 	//#region Repos API (v2.0)
-	static async listRepos(): Promise<iDatabricksRepoResponse> {
+	static async listRepos(path_prefix: string = undefined): Promise<iDatabricksRepoResponse> {
 		let endpoint = '2.0/repos';
 
-		let response = await this.get(endpoint);
+		let body: any = {};
+		if(path_prefix != undefined)
+		{
+			if(!path_prefix.startsWith("/Repos/"))
+			{
+				path_prefix = "/Repos/" + path_prefix;
+			}
+			body.path_prefix = path_prefix;
+		}
+
+		let response = await this.get(endpoint, { params: body });
 
 		let result = response.data as iDatabricksRepoResponse;
 

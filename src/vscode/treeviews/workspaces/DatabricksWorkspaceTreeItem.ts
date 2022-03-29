@@ -76,4 +76,8 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		let item: iDatabricksWorkspaceItem = JSON.parse(itemDefinition);
 		return DatabricksWorkspaceTreeItem.fromInterface(item);
 	}
+
+	public CopyPathToClipboard(): void {
+		vscode.env.clipboard.writeText(this.path);
+	}
 }

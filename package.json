@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Databricks Extension for VSCode",
-	"version": "0.9.2",
+	"version": "0.9.3",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -512,6 +512,10 @@
 				}
 			},
 			{
+				"command": "databricksWorkspaceItem.copyPath",
+				"title": "Copy Path"
+			},
+			{
 				"command": "databricksClusters.refresh",
 				"title": "Refresh",
 				"icon": {
@@ -666,6 +670,10 @@
 					"light": "resources/light/delete.png",
 					"dark": "resources/dark/delete.png"
 				}
+			},
+			{
+				"command": "databricksFSItem.copyPath",
+				"title": "Copy Path"
 			},
 			{
 				"command": "databricksSecrets.refresh",
@@ -854,6 +862,11 @@
 					"command": "databricksWorkspaceItem.delete",
 					"when": "view == databricksWorkspace",
 					"group": "inline@2"
+					
+				},
+				{
+					"command": "databricksWorkspaceItem.copyPath",
+					"when": "view == databricksWorkspace"
 				},
 				{
 					"command": "databricksClusterItem.start",
@@ -920,6 +933,10 @@
 					"group": "inline"
 				},
 				{
+					"command": "databricksFSItem.copyPath",
+					"when": "view == databricksFS"
+				},
+				{
 					"command": "databricksSecretItem.deleteSecretScope",
 					"when": "view == databricksSecrets && viewItem == SCOPE_DATABRICKS",
 					"group": "inline"
@@ -946,12 +963,12 @@
 				},
 				{
 					"command": "databricksRepo.checkOut",
-					"when": "view == databricksRepos",
+					"when": "view == databricksRepos && viewItem == REPOSITORY",
 					"group": "inline"
 				},
 				{
 					"command": "databricksRepo.delete",
-					"when": "view == databricksRepos",
+					"when": "view == databricksRepos && viewItem == REPOSITORY",
 					"group": "inline"
 				}
 			]

@@ -35,6 +35,10 @@ This is a Visual Studio Code extension that allows you to work with Databricks l
 - Easy configuration via standard VS Code settings
 
 # Relase Notes
+**v0.9.3**:
+- added `Copy Path` feature for Workspace and DBFS browser
+- added Folders for Repositories as in the Databricks Web UI
+
 **v0.9.2**:
 - Make use of Databricks [Jobs API v2.1](https://docs.databricks.com/dev-tools/api/latest/jobs.html)
 

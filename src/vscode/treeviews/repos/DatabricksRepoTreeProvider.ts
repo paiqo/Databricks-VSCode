@@ -4,6 +4,7 @@ import { Helper } from '../../../helpers/Helper';
 import { DatabricksRepoTreeItem } from './DatabricksRepoTreeItem';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { iDatabricksRepo } from './_types';
+import { DatabricksRepoDirectory } from './DatabricksRepoDirectory';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class DatabricksRepoTreeProvider implements vscode.TreeDataProvider<DatabricksRepoTreeItem> {
@@ -45,10 +46,13 @@ export class DatabricksRepoTreeProvider implements vscode.TreeDataProvider<Datab
 		{
 			let responseData = await DatabricksApiService.listRepos();
 
+			let directories: string[] = [];
 			let repoItems: DatabricksRepoTreeItem[] = [];
 
 			if (responseData != undefined) {
-				responseData.repos.map(item => repoItems.push(new DatabricksRepoTreeItem(item.id, item)));
+				responseData.repos.map(item => directories.push(item.path.split("/")[2]));
+				directories = Array.from(new Set(directories));
+				directories.map(item => repoItems.push(new DatabricksRepoDirectory(item)));
 				Helper.sortArrayByProperty(repoItems, "label", "ASC");
 			}
 			
