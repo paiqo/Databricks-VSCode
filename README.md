@@ -35,6 +35,12 @@ This is a Visual Studio Code extension that allows you to work with Databricks l
 - Easy configuration via standard VS Code settings
 
 # Relase Notes
+**v0.9.4**:
+- added support for VS Code setting `http.proxyStrictSSL` to optionally allow invalid certificates from the proxy. Can only be used in combination with `http.proxySupport = "on"`.
+- use VS Code native secret management instead of `KeyTar`
+- update Dev Dependencies to VS Code 1.66
+- fix minor issue with SQL Browser refresh
+
 **v0.9.3**:
 - added `Copy Path` feature for Workspace and DBFS browser
 - added Folders for Repositories as in the Databricks Web UI

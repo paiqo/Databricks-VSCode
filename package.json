@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Databricks Extension for VSCode",
-	"version": "0.9.3",
+	"version": "0.9.4",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -862,7 +862,6 @@
 					"command": "databricksWorkspaceItem.delete",
 					"when": "view == databricksWorkspace",
 					"group": "inline@2"
-					
 				},
 				{
 					"command": "databricksWorkspaceItem.copyPath",
@@ -983,7 +982,7 @@
 		"@types/mkdirp": "^0.5.2",
 		"@types/node": "^10.17.60",
 		"@types/rimraf": "^2.0.5",
-		"@types/vscode": "^1.43.0",
+		"@types/vscode": "^1.66.0",
 		"ts-loader": "^8.3.0",
 		"tslint": "^5.20.1",
 		"typescript": "^3.9.10",
@@ -998,6 +997,7 @@
 		"file-saver": "^2.0.5",
 		"follow-redirects": "^1.14.8",
 		"ftp": "^0.3.10",
+		"https-agent": "^1.0.0",
 		"jsonc-parser": "^0.4.2",
 		"keytar": "^5.6.0",
 		"minimist": "^1.2.6",

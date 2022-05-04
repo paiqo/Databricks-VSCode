@@ -33,9 +33,13 @@ export abstract class DatabricksApiService {
 		try {
 			ThisExtension.log("Initializing Databricks API Service ...");
 			const axios = require('axios');
+			const httpsAgent = require('https-agent');
 
 			// Set config defaults when creating the instance
 			this._apiService = axios.create({
+				httpsAgent: new httpsAgent({  
+					rejectUnauthorized: ThisExtension.rejectUnauthorizedSSL
+				}),
 				baseURL: Helper.trimChar(Connection.apiRootUrl, '/') + this.API_SUB_URL,
 				proxy: ThisExtension.useProxy
 			});

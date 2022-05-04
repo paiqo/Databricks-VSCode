@@ -87,7 +87,7 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 	}
 
 	get localFileName(): string {
-		return this.label;
+		return this.label.toString();
 	}
 
 	get localPathExists(): boolean {

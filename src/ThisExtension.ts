@@ -10,17 +10,14 @@ import { DatabricksConnectionManagerCLI } from './vscode/treeviews/connections/D
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
-	static extension_id = 'paiqo.databricks-vscode';
 
 	private static _context: vscode.ExtensionContext;
 	private static _extension: vscode.Extension<any>;
 	private static _isValidated: boolean = false;
 	private static _logger: vscode.OutputChannel;
-	private static _keytar;
 	private static _connectionManager: DatabricksConnectionManager;
 	private static _settingScope: ConfigSettingSource;
 	private static _sensitiveValueStore: SensitiveValueStore;
-	private static _activeConnection: DatabricksConnectionTreeItem;
 	private static _sqlClusterId: string;
 
 	static get rootPath(): string {
@@ -31,9 +28,12 @@ export abstract class ThisExtension {
 		return this._context;
 	}
 
+	static get secrets(): vscode.SecretStorage {
+		return this._context.secrets;
+	}
+
 	static get ActiveConnectionName(): string {
-		if(!this.ActiveConnection)
-		{
+		if (!this.ActiveConnection) {
 			return this.ConnectionManager.LastActiveconnectionName;
 		}
 		return this.ActiveConnection.displayName;
@@ -51,29 +51,28 @@ export abstract class ThisExtension {
 
 	static async initialize(context: vscode.ExtensionContext): Promise<boolean> {
 		try {
-			this._logger = vscode.window.createOutputChannel(ThisExtension.extension_id);
+			this._logger = vscode.window.createOutputChannel(context.extension.id);
 			this.log("Logger initialized!");
 
-			this._keytar = require('keytar');
+			this._extension = context.extension;
+			this.log(`Loading VS Code extension '${context.extension.packageJSON.displayName}' (${context.extension.packageJSON.id}) version ${context.extension.packageJSON.version} ...`);
+			this.log(`If you experience issues please open a ticket at ${context.extension.packageJSON.qna}`);
 
-			this._context = context;
-			this._extension = vscode.extensions.getExtension(this.extension_id);
+			this._context = context;			
 
 			ThisExtension.updateGlobalSettings();
 
 			let connectionManager = this.getConfigurationSetting("databricks.connectionManager");
-			switch(connectionManager.value)
-			{
+			switch (connectionManager.value) {
 				case "VSCode Settings":
 					this._connectionManager = new DatabricksConnectionManagerVSCode();
 					break;
-				case "Databricks CLI Profiles": 
+				case "Databricks CLI Profiles":
 					this._connectionManager = new DatabricksConnectionManagerCLI();
 					break;
 				default:
-					this.log("'" +connectionManager + "' is not a valid value for config setting 'databricks.connectionManager!");
+					this.log("'" + connectionManager + "' is not a valid value for config setting 'databricks.connectionManager!");
 			}
-			
 		} catch (error) {
 			return false;
 		}
@@ -85,21 +84,18 @@ export abstract class ThisExtension {
 		Helper.removeTempFiles();
 	}
 
-	private static updateGlobalSettings(): void
-	{
+	private static updateGlobalSettings(): void {
 		let settingScope: ConfigSettingSource = "Workspace";
 
 		ThisExtension.log("Trying to get config from Workspace settings ...");
 		let workspaceConnections = ThisExtension.getConfigurationSetting<iDatabricksConnection[]>('databricks.connections', settingScope);
 		let workspaceDefaultConnection = ThisExtension.getConfigurationSetting<string>('databricks.connection.default.displayName', settingScope);
 
-		if(workspaceConnections.value || workspaceDefaultConnection.value)
-		{
+		if (workspaceConnections.value || workspaceDefaultConnection.value) {
 			ThisExtension.log("Workspace settings found and using them! (User-Settings are ignored)");
 			this._settingScope = "Workspace";
 		}
-		else
-		{
+		else {
 			ThisExtension.log("No Workspace settings found! Trying to get User-Settings instead ...");
 			this._settingScope = "Global";
 		}
@@ -126,9 +122,12 @@ export abstract class ThisExtension {
 	}
 
 	static set SQLClusterID(value: string) {
-		ThisExtension.log(`Using cluster with id '${value}' for SQL Browser!`);
-		vscode.commands.executeCommand("databricksSQL.refresh", true);
-		this._sqlClusterId = value;
+		if(value != undefined)
+		{
+			ThisExtension.log(`Using cluster with id '${value}' for SQL Browser!`);
+			this._sqlClusterId = value;
+			vscode.commands.executeCommand("databricksSQL.refresh", true);
+		}
 	}
 
 	static get allFileExtensions(): string[] {
@@ -186,29 +185,37 @@ export abstract class ThisExtension {
 	}
 
 	static async getSecureSetting(setting: string): Promise<string> {
-		let value: string = this._keytar.getPassword(this.extension_id, setting);
+		let value = this.secrets.get(setting); // new way to store secrets
+
+		// check if the new secret is not yet set/used
+		if(await value == undefined)
+		{
+			let _keytar = require('keytar');
+			// get old value and store it the new way
+			value = _keytar.getPassword(this.configuration.id, setting);
+			await this.setSecureSetting(setting, await value);
+		}
+		
 		return value;
 	}
 
 	static async setSecureSetting(setting: string, value: string): Promise<void> {
-		await this._keytar.setPassword(this.extension_id, setting, value);
+		// changing the way we store secrets and make sure we are backward compatible
+		await this.secrets.store(setting, value);
 	}
 
-	static getConfigurationSetting<T=string>(setting: string, source?: ConfigSettingSource, allowDefaultValue: boolean = false): ConfigSetting<T> {
+	static getConfigurationSetting<T = string>(setting: string, source?: ConfigSettingSource, allowDefaultValue: boolean = false): ConfigSetting<T> {
 		// usage: ThisExtension.getConfigurationSetting('databricks.connection.default.displayName')
 
 		let value = vscode.workspace.getConfiguration().get(setting) as T;
 		let inspect = vscode.workspace.getConfiguration().inspect(setting);
 
-		if(!source)
-		{
+		if (!source) {
 			// if no source was specified we use the most specific value that exists.
-			if(inspect.workspaceValue || inspect.workspaceFolderValue || inspect.workspaceLanguageValue || inspect.workspaceFolderLanguageValue)
-			{
+			if (inspect.workspaceValue != undefined || inspect.workspaceFolderValue != undefined || inspect.workspaceLanguageValue != undefined || inspect.workspaceFolderLanguageValue != undefined) {
 				source = "Workspace";
 			}
-			else if(inspect.globalValue || inspect.globalLanguageValue)
-			{
+			else if (inspect.globalValue != undefined || inspect.globalLanguageValue != undefined) {
 				source = "Global";
 			}
 			else {
@@ -216,20 +223,17 @@ export abstract class ThisExtension {
 			}
 		}
 
-		if(source == "Global")
-		{
+		if (source == "Global") {
 			value = (inspect.globalValue ?? inspect.globalLanguageValue) as T;
 		}
-		else if(source == "Workspace")
-		{
+		else if (source == "Workspace") {
 			value = (inspect.workspaceValue ?? inspect.workspaceFolderValue ?? inspect.workspaceLanguageValue ?? inspect.workspaceFolderLanguageValue) as T;
 		}
 
-		if(source == "Default" || (allowDefaultValue && !value))
-		{
+		if (source == "Default" || (allowDefaultValue && !value)) {
 			value = (inspect.defaultValue ?? inspect.defaultLanguageValue) as T;
 		}
-		
+
 		return {
 			setting: inspect.key,
 			value: value,
@@ -245,11 +249,11 @@ export abstract class ThisExtension {
 			case "Workspace":
 				finalTarget = vscode.ConfigurationTarget.Workspace;
 				break;
-			
+
 			case "Global":
 				finalTarget = vscode.ConfigurationTarget.Global;
 				break;
-		
+
 			default:
 				finalTarget = vscode.ConfigurationTarget.Workspace;
 				break;
@@ -265,19 +269,34 @@ export abstract class ThisExtension {
 		let httpProxySupport: ConfigSetting<string> = ThisExtension.getConfigurationSetting<string>("http.proxySupport");
 
 		// only check if proxySupport is explicitly set to "off"
-		if(httpProxySupport.value == "off")
-		{
+		if (httpProxySupport.value == "off") {
 			this.log('Proxy support is disabled due to setting "http.proxySupport": "off"!');
 			return false;
 		}
 
-		if(httpProxySupport.value == "on")
-		{
+		if (httpProxySupport.value == "on") {
 			this.log('Proxy support is enabled due to setting "http.proxySupport": "on"!');
 			return true;
 		}
 
 		return undefined;
+	}
+
+	static get rejectUnauthorizedSSL(): boolean {
+		let httpProxyStrictSSL: ConfigSetting<boolean> = ThisExtension.getConfigurationSetting<boolean>("http.proxyStrictSSL");
+
+		// check if Strict Proxy SSL is NOT enabled
+		if (httpProxyStrictSSL.value) {
+			if (httpProxyStrictSSL.source != "Default") {
+				this.log('Strict Proxy SSL verification enabled due to setting "http.proxyStrictSSL": true !');
+			}
+		}
+		else
+		{
+			this.log('Strict Proxy SSL verification disabled due to setting "http.proxyStrictSSL": false !');
+		}
+
+		return httpProxyStrictSSL.value;
 	}
 }
 
@@ -298,9 +317,9 @@ export type LocalSyncSubfolderConfiguration = {
 
 export type ConfigSettingSource =
 	"Workspace"
-|	"Global"
-|	"Default"
-;
+	| "Global"
+	| "Default"
+	;
 
 export interface ConfigSetting<T> {
 	setting: string;

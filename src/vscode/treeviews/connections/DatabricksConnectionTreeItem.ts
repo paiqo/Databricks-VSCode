@@ -91,7 +91,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 
 
 	get displayName(): string {
-		if (!this._displayName) { return this.label; }
+		if (!this._displayName) { return this.label.toString(); }
 		return this._displayName;
 	}
 
