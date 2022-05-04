@@ -34,7 +34,7 @@ This is a Visual Studio Code extension that allows you to work with Databricks l
 - Support for multiple Databricks workspace connections
 - Easy configuration via standard VS Code settings
 
-# Relase Notes
+# Release Notes
 **v0.9.4**:
 - added support for VS Code setting `http.proxyStrictSSL` to optionally allow invalid certificates from the proxy. Can only be used in combination with `http.proxySupport = "on"`.
 - use VS Code native secret management instead of `KeyTar`
