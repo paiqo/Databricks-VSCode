@@ -40,6 +40,7 @@ This is a Visual Studio Code extension that allows you to work with Databricks l
 - use VS Code native secret management instead of `KeyTar`
 - update Dev Dependencies to VS Code 1.66
 - fix minor issue with SQL Browser refresh
+- support for environment variables in `localSyncFolder`
 
 **v0.9.3**:
 - added `Copy Path` feature for Workspace and DBFS browser
@@ -169,6 +170,7 @@ To configure multiple Databricks Connections/workspaces, you need to use the JSO
 		],
 		...
 ```
+The `localSyncFolder` is the location of a local folder which is used to download/sync files from Databricks and work with them locally (notebooks, DBFS, ...). It also supports environment variables - e.g. `%USERPROFILE%\\Databricks` or `~\\Databricks`.
 The sensitive values entered like `personalAccessToken` will be safely stored in the system key chain/credential manager (see `databricks.sensitiveValueStore`) once the configuration is read the first time. This happens if you open the extension.
 Existing connections can be updated directly in VSCode settigns or via the JSON editor. To update a `personalAccessToken`, simply re-enter it and the extension will update it in the system key chain/credential manager.
 The only important thing to keep in mind is that the `displayName` should be unique on the whole machine (across all VSCode workspaces) as the `displayName` is used to identify the `personalAccessToken` to load from the system key chain/credential manager.

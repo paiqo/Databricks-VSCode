@@ -153,7 +153,7 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 			
 			let response = await DatabricksApiService.downloadDBFSFile(this.path, localPath, true);
 
-			vscode.window.showInformationMessage(`Download of item ${this.path}) finished!`);
+			vscode.window.showInformationMessage(`Download of item ${this.path} finished!`);
 
 			if (ThisExtension.RefreshAfterUpDownload && !asTempFile) {
 				setTimeout(() => vscode.commands.executeCommand("databricksFS.refresh", false), 500);

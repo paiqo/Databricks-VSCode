@@ -21,7 +21,7 @@
 	"qna": "https://github.com/paiqo/Databricks-VSCode",
 	"enableApiProposals": false,
 	"engines": {
-		"vscode": "^1.43.0"
+		"vscode": "^1.66.0"
 	},
 	"galleryBanner": {
 		"color": "#0ea5ff",

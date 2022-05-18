@@ -34,7 +34,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		this._personalAccessToken = definition.personalAccessToken;
 		this._personalAccessTokenSecure = definition.personalAccessTokenSecure;
 		this._apiRootUrl = Helper.trimChar(definition.apiRootUrl, '/', false, true);
-		this._localSyncFolder = definition.localSyncFolder;
+		this._localSyncFolder = Helper.resolvePath(definition.localSyncFolder);
 		this._localSyncSubfolders = definition.localSyncSubfolders;
 		this._exportFormats = definition.exportFormats;
 		this._useCodeCells = definition.useCodeCells;

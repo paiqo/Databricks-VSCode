@@ -176,7 +176,14 @@ export abstract class Helper {
 		vscode.commands.executeCommand("vscode.diff", localFileUri, onlnieFileUri, "Online <-> Local", options);
 	}
 
-	private static resolvePath(filepath: string): string {
+	static resolvePath(filepath: string): string {
+		// replace environment variables in path
+		const envVarRegex = /\$([A-Z_]+[A-Z0-9_]*)|\${([A-Z0-9_]*)}|%([^%]+)%/ig;
+
+		do {
+			filepath = filepath.replace(envVarRegex, (_, a, b, c) => process.env[a || b || c]);
+		} while(filepath.match(envVarRegex));
+
 		if (filepath[0] === '~') {
 			// could also use os.homedir()
 			const homeVar = process.platform === 'win32' ? 'USERPROFILE' : 'HOME';

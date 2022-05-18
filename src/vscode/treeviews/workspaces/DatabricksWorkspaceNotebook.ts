@@ -171,7 +171,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 
 			let response = await DatabricksApiService.downloadWorkspaceItem(this.path, localPath, this.exportFormat);
 
-			vscode.window.showInformationMessage(`Download of item ${this._path}) finished!`);
+			vscode.window.showInformationMessage(`Download of item ${fspath.basename(this.path) + this.localFileExtension} finished!`);
 
 			if (ThisExtension.RefreshAfterUpDownload && !asTempFile) {
 				setTimeout(() => vscode.commands.executeCommand("databricksWorkspace.refresh", false), 500);
