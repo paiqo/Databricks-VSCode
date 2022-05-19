@@ -194,6 +194,7 @@ If you are using raw/source files, you may also consider using [Code Cells](http
 All these settings can either be configured on a global/user or on a workspace level. The recommendation is to use workspace configurations and then to include the localSyncFolders into your workspace for easy access to your notebooks and sync to GIT. 
 Using a workspace configuration also allows you separate differnt Databricks Connections completely. 
 
+**NOTE: Changing any of the connection settings only take effect once the connection is activated! If you make changes to your current connection, you need to activate another connection temporary and then the original one again! Alternatively, a restart of VSCode also works.**
 
 # Setup and Configuration (Databricks CLI Connection Manager)
 To use the Databricks CLI Connection Manager, you first need to install and configure the [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html). Once you have created a connection or profiles, you can proceed here.
