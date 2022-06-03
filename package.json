@@ -991,7 +991,7 @@
 	},
 	"dependencies": {
 		"@angular/common": "^8.2.14",
-		"@angular/core": "^8.2.14",
+		"@angular/core": "^11.0.5",
 		"angular": "^1.8.2",
 		"axios": "^0.21.4",
 		"file-saver": "^2.0.5",
