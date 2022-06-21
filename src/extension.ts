@@ -22,7 +22,6 @@ import { DatabricksJobRun } from './vscode/treeviews/jobs/DatabricksJobRun';
 import { DatabricksSQLTreeProvider } from './vscode/treeviews/sql/DatabricksSQLTreeProvider';
 import { DatabricksSQLTable } from './vscode/treeviews/sql/DatabricksSQLTable';
 import { DatabricksRepoTreeProvider } from './vscode/treeviews/repos/DatabricksRepoTreeProvider';
-import { DatabricksRepoTreeItem } from './vscode/treeviews/repos/DatabricksRepoTreeItem';
 import { DatabricksFSTreeItem } from './vscode/treeviews/dbfs/DatabricksFSTreeItem';
 import { DatabricksWorkspaceTreeItem } from './vscode/treeviews/workspaces/DatabricksWorkspaceTreeItem';
 import { DatabricksRepoRepository } from './vscode/treeviews/repos/DatabricksRepoRepository';
@@ -130,6 +129,15 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksRepo.checkOut', (repo: DatabricksRepoRepository) => repo.checkOut());
 	vscode.commands.registerCommand('databricksRepo.delete', (repo: DatabricksRepoRepository) => repo.delete());
 	
+
+	// register DatabricksNotebook Commands
+	vscode.commands.registerCommand('databricksNotebook.new', async function () {
+		const newNotebook = await vscode.workspace.openNotebookDocument('jupyter-notebook', new vscode.NotebookData(
+			[new vscode.NotebookCellData(vscode.NotebookCellKind.Code, '/Hello{1,7} Notebooks/', 'plaintext')]
+		));
+
+		await vscode.commands.executeCommand('vscode.open', newNotebook.uri);
+	});
 }
 
 

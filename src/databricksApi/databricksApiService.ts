@@ -12,7 +12,7 @@ import { iDatabricksSecretScope } from '../vscode/treeviews/secrets/iDatabricksS
 import { iDatabricksSecret } from '../vscode/treeviews/secrets/iDatabricksSecret';
 
 import { Helper } from '../helpers/Helper';
-import { ExecutionCommand, ExecutionContext, iDatabricksJobResponse, iDatabricksJobRunResponse, iDatabricksRepoResponse } from './_types';
+import { ContextLanguage, ExecutionCommand, ExecutionContext, iDatabricksJobResponse, iDatabricksJobRunResponse, iDatabricksRepoResponse } from './_types';
 import { iDatabricksCluster } from '../vscode/treeviews/clusters/iDatabricksCluster';
 import { ThisExtension } from '../ThisExtension';
 import { DatabricksConnectionTreeItem } from '../vscode/treeviews/connections/DatabricksConnectionTreeItem';
@@ -232,11 +232,11 @@ export abstract class DatabricksApiService {
 		return ret;
 	}
 
-	static async runCommand(context: ExecutionContext, command: string): Promise<ExecutionCommand> {
+	static async runCommand(context: ExecutionContext, command: string, language: ContextLanguage = undefined): Promise<ExecutionCommand> {
 		let endpoint = '1.2/commands/execute';
 		let body = {
 			clusterId: context.cluster_id,
-			language: context.language,
+			language: language || context.language,
 			contextId: context.context_id,
 			command: command
 		};
@@ -246,7 +246,7 @@ export abstract class DatabricksApiService {
 		let ret = {
 			"command_id": response.data.id,
 			"cluster_id": context.cluster_id,
-			"language": context.language,
+			"language":  language || context.language,
 			"context_id": context.context_id
 		};
 
@@ -266,7 +266,7 @@ export abstract class DatabricksApiService {
 		return response;
 	}
 
-	static async getCommandResult(command: ExecutionCommand, awaitCompletion: boolean = true) {
+	static async getCommandResult(command: ExecutionCommand, awaitCompletion: boolean = true, rawOutput: boolean = false) {
 		let apiResults = null;
 		do {
 			if (apiResults != null) { await Helper.wait(1000); }
@@ -275,6 +275,10 @@ export abstract class DatabricksApiService {
 		} while (awaitCompletion && !["Finished", "Cancelled", "Error"].includes(apiResults.data.status));
 
 		if (apiResults.data.status == "Finished") {
+			if(rawOutput)
+			{
+				return apiResults.data;
+			}
 			if (apiResults.data.results.resultType == "table") {
 				let data = [];
 				let schema = apiResults.data.results.schema;
@@ -303,6 +307,26 @@ export abstract class DatabricksApiService {
 			ThisExtension.log(apiResults);
 		}
 		return apiResults;
+	}
+
+	static async cancelCommand(command: ExecutionCommand): Promise<ExecutionCommand> {
+		let endpoint = '1.2/commands/cancel';
+		let body = {
+			clusterId: command.cluster_id,
+			contextId: command.context_id,
+			commandId: command.command_id
+		};
+
+		let response = await this.post(endpoint, body);
+
+		let ret = {
+			"command_id": response.data.id,
+			"cluster_id": command.cluster_id,
+			"language": command.language,
+			"context_id": command.context_id
+		};
+
+		return ret;
 	}
 	//#endregion
 	

@@ -53,7 +53,8 @@
 		"onView:databricksFS",
 		"onView:databricksSecrets",
 		"onView:databricksSql",
-		"onView:databricksRepos"
+		"onView:databricksRepos",
+		"onNotebook:jupyter-notebook"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -575,6 +576,7 @@
 					"dark": "resources/dark/stop.png"
 				}
 			},
+
 			{
 				"command": "databricksJobs.refresh",
 				"title": "Refresh",
@@ -762,6 +764,13 @@
 					"light": "resources/light/delete.png",
 					"dark": "resources/dark/delete.png"
 				}
+			},
+
+
+			{
+				"title": "New Databricks Notebook",
+				"shortTitle": "Databricks Notebook",
+				"command": "databricksNotebook.new"
 			}
 		],
 		"menus": {

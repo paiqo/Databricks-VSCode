@@ -5,6 +5,7 @@ import { ThisExtension } from '../../../ThisExtension';
 import { ClusterState, ClusterSource, ClusterTreeItemType } from './_types';
 import { iDatabricksCluster } from './iDatabricksCluster';
 import { Helper } from '../../../helpers/Helper';
+import { DatabricksNotebookKernel } from '../../notebook/DatabricksNotebookKernel';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksClusterTreeItem extends vscode.TreeItem {
@@ -223,6 +224,7 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 
 	async useForSQL(): Promise<void> {
 		ThisExtension.SQLClusterID = this.cluster_id;
+		ThisExtension.AddNotebookKernel(new DatabricksNotebookKernel(this.cluster_id, this.cluster_name));
 		setTimeout(() => vscode.commands.executeCommand("databricksSQL.refresh", false), 1000);
 	}
 

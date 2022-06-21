@@ -2,6 +2,13 @@ import { iDatabricksJob } from "../vscode/treeviews/jobs/iDatabricksJob";
 import { iDatabricksJobRun } from "../vscode/treeviews/jobs/iDatabricksJobRun";
 import { iDatabricksRepo } from "../vscode/treeviews/repos/_types";
 
+export type ContextLanguage = 
+	"scala" 
+| 	"python" 
+| 	"sql" 
+| 	"r" 
+;
+
 export interface iDatabricksJobResponse {
 	jobs: 			iDatabricksJob[];
 }

@@ -7,6 +7,7 @@ import { DatabricksConnectionManagerVSCode } from './vscode/treeviews/connection
 import { SensitiveValueStore } from './vscode/treeviews/connections/_types';
 import { DatabricksConnectionTreeItem } from './vscode/treeviews/connections/DatabricksConnectionTreeItem';
 import { DatabricksConnectionManagerCLI } from './vscode/treeviews/connections/DatabricksConnectionManagerCLI';
+import { DatabricksNotebookKernel } from './vscode/notebook/DatabricksNotebookKernel';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -297,6 +298,12 @@ export abstract class ThisExtension {
 		}
 
 		return httpProxyStrictSSL.value;
+	}
+
+	static AddNotebookKernel(kernel: DatabricksNotebookKernel)
+	{
+		this.log("Adding new Notebook Kernel ...");
+		this.extensionContext.subscriptions.push(kernel);
 	}
 }
 
