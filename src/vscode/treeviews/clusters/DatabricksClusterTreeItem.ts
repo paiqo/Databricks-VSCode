@@ -15,6 +15,7 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 	private _state: ClusterState;
 	private _definition: iDatabricksCluster;
 	private _source: ClusterSource;
+	private _notebookKernel: DatabricksNotebookKernel = undefined;
 
 	constructor(
 		type: ClusterTreeItemType,
@@ -224,7 +225,15 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 
 	async useForSQL(): Promise<void> {
 		ThisExtension.SQLClusterID = this.cluster_id;
-		ThisExtension.AddNotebookKernel(new DatabricksNotebookKernel(this.cluster_id, this.cluster_name));
+
+		if(!ThisExtension.DisposableExists(DatabricksNotebookKernel.getId(this.cluster_id))) {
+			new DatabricksNotebookKernel(this.cluster_id, this.cluster_name);
+		}
+		else
+		{
+			ThisExtension.log("Notebook Kernel for Cluster '" + this.cluster_id + "' has already been created!");
+		}
+		
 		setTimeout(() => vscode.commands.executeCommand("databricksSQL.refresh", false), 1000);
 	}
 

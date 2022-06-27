@@ -12,7 +12,8 @@ import { ThisExtension } from '../ThisExtension';
 
 export abstract class Helper {
 	private static CodeCellTag: string = "# %% Code Cell";
-	private static DatabricksCommandTag: string = "# COMMAND ----------";
+	static DatabricksCommandTagRegEx: string = '#\\s*COMMAND\\s*[-]*';
+	static JupyterCodeCellsSettingName: string = "jupyter.codeRegularExpression";
 	private static openAsNotebookSettingName: string = 'python.dataScience.useNotebookEditor';
 
 	private static _tempFiles: string[];
@@ -263,11 +264,11 @@ export abstract class Helper {
 	static async addCodeCells(filePath: string): Promise<void> {
 		try {
 			const replace = require('replace-in-file');
-			let regex = new RegExp(this.DatabricksCommandTag, 'g');
+			let regex = new RegExp(this.DatabricksCommandTagRegEx, 'g');
 			let options = {
 				files: filePath,
 				from: regex,
-				to: this.DatabricksCommandTag + '\n' + this.CodeCellTag
+				to: this.DatabricksCommandTagRegEx + '\n' + this.CodeCellTag
 			};
 
 
@@ -292,11 +293,11 @@ export abstract class Helper {
 	static async removeCodeCells(filePath: string): Promise<void> {
 		try {
 			const replace = require('replace-in-file');
-			const regex = new RegExp(this.DatabricksCommandTag + '[\\r\\n]*' + this.CodeCellTag, 'g');
+			const regex = new RegExp(this.DatabricksCommandTagRegEx + '[\\r\\n]*' + this.CodeCellTag, 'g');
 			const options = {
 				files: filePath,
 				from: regex,
-				to: this.DatabricksCommandTag,
+				to: this.DatabricksCommandTagRegEx,
 			};
 
 			const results = await replace(options);

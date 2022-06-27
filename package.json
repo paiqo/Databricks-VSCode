@@ -53,8 +53,7 @@
 		"onView:databricksFS",
 		"onView:databricksSecrets",
 		"onView:databricksSql",
-		"onView:databricksRepos",
-		"onNotebook:jupyter-notebook"
+		"onView:databricksRepos"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -898,7 +897,7 @@
 				},
 				{
 					"command": "databricksClusterItem.useForSQL",
-					"when": "view == databricksClusters"
+					"when": "view == databricksClusters && viewItem == CAN_STOP"
 				},
 				{
 					"command": "databricksJobItem.showDefinition",

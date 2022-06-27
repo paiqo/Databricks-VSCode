@@ -16,12 +16,12 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 		while (true) {
 			await new Promise(resolve => setTimeout(resolve, timeoutSeconds * 1000));
 			
-			this.refresh(false);
+			this.refresh(false, true);
 		}
 	}
 
-	refresh(showInfoMessage: boolean = false): void {
-		if(showInfoMessage){
+	refresh(showInfoMessage: boolean = false, isAutoRefresh = false): void {
+		if(showInfoMessage && !isAutoRefresh){
 			vscode.window.showInformationMessage('Refreshing Clusters ...');
 		}
 		this._onDidChangeTreeData.fire(null);

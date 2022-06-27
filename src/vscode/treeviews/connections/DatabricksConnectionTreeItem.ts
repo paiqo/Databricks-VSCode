@@ -333,11 +333,16 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		await ThisExtension.updateConfigurationSetting("databricks.lastActiveConnection", this.displayName);
 
 		if (await DatabricksApiService.initialize(this)) {
+			
 			if (this.useCodeCells) {
-				await ThisExtension.updateConfigurationSetting("python.dataScience.codeRegularExpression", "^(# COMMAND ----------|#\\s*%%|#\\s*\\<codecell\\>|#\\s*In\\[\\d*?\\]|#\\s*In\\[ \\])");
+				let codeCellsCurrentValue = ThisExtension.getConfigurationSetting(Helper.JupyterCodeCellsSettingName).value;
+				if(!codeCellsCurrentValue.includes(Helper.DatabricksCommandTagRegEx)) // Databricks tag was not yet added
+				{
+					await ThisExtension.updateConfigurationSetting(Helper.JupyterCodeCellsSettingName, "^(" + Helper.DatabricksCommandTagRegEx + "|" + codeCellsCurrentValue.slice(2));
+				}
 			}
 			else {
-				await ThisExtension.updateConfigurationSetting("python.dataScience.codeRegularExpression", undefined);
+				await ThisExtension.updateConfigurationSetting(Helper.JupyterCodeCellsSettingName, undefined);
 			}
 
 			this._isActive = true;

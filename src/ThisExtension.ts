@@ -300,10 +300,17 @@ export abstract class ThisExtension {
 		return httpProxyStrictSSL.value;
 	}
 
-	static AddNotebookKernel(kernel: DatabricksNotebookKernel)
+	static PushDisposable(item: any)
 	{
-		this.log("Adding new Notebook Kernel ...");
-		this.extensionContext.subscriptions.push(kernel);
+		this.extensionContext.subscriptions.push(item);
+	}
+
+	static DisposableExists(id: string): boolean {
+		if(this.extensionContext.subscriptions.find((x: any) => x.id = id))
+		{
+			return true;
+		}
+		return false;
 	}
 }
 

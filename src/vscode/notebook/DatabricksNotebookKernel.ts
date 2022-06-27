@@ -15,9 +15,11 @@ export type NotebookMagic =
 
 // https://code.visualstudio.com/blogs/2021/11/08/custom-notebooks
 export class DatabricksNotebookKernel implements vscode.NotebookController {
-	readonly id: string = 'databricks-notebook-kernel-';
+	private static baseId: string = 'databricks-notebook-kernel-';
+	private static baseLabel: string = 'Databricks ';
+	public id: string;
+	public label: string;
 	readonly notebookType: string = 'jupyter-notebook';
-	readonly label: string = 'Databricks ';
 	readonly description: string = 'A notebook controller that allows execution of code against a Databricks cluster';
 	readonly detail: string = 'Some more detils ...';
 	readonly supportedLanguages = [];
@@ -32,12 +34,14 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 	constructor(clusterId: string, clusterName: string, language: ContextLanguage = "python") {
 		this._clusterId = clusterId;
 		this._language = language;
+		this.id = DatabricksNotebookKernel.getId(clusterId);
+		this.label = DatabricksNotebookKernel.getLabel(clusterName);
 
 		this._executionOrder = 0;
 
-		this._controller = vscode.notebooks.createNotebookController(this.id + clusterId,
+		this._controller = vscode.notebooks.createNotebookController(this.id,
 			this.notebookType,
-			this.label + clusterName);
+			this.label);
 
 		this._controller.supportedLanguages = this.supportedLanguages;
 		this._controller.description = this.description;
@@ -46,6 +50,18 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 		this._controller.description = 'A notebook for making REST calls.';
 		this._controller.executeHandler = this.executeHandler.bind(this);
 		this._controller.dispose = this.dispose.bind(this);
+
+		ThisExtension.PushDisposable(this);
+	}
+
+	static getId(clusterId: string)
+	{
+		return this.baseId + clusterId;
+	}
+
+	static getLabel(clusterName: string)
+	{
+		return this.baseLabel + clusterName;
 	}
 
 	get Controller(): vscode.NotebookController {
@@ -121,21 +137,29 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 
 		execution.clearOutput();
 
-		if(magic == "md")
+		switch(magic)
 		{
-			execution.appendOutput(new vscode.NotebookCellOutput([
-				vscode.NotebookCellOutputItem.text(commandText, 'text/markdown')
-			]));
+			case  "md":
+				execution.appendOutput(new vscode.NotebookCellOutput([
+					vscode.NotebookCellOutputItem.text(commandText, 'text/markdown')
+				]));
 
-			execution.end(true, Date.now());
-			return;
+				execution.end(true, Date.now());
+				return;
+			case "fs":
+			case "sh":
+				execution.appendOutput(new vscode.NotebookCellOutput([
+					vscode.NotebookCellOutputItem.text("Magic %" + magic + " is not supported in remote executions!", 'text/plain')
+				]));
+
+				execution.end(false, Date.now());
 		}
 		let command = await DatabricksApiService.runCommand(this.ExecutionContext, commandText, language);
 		execution.token.onCancellationRequested(executingCommand => {
 			DatabricksApiService.cancelCommand(executingCommand);
 
 			execution.appendOutput(new vscode.NotebookCellOutput([
-				vscode.NotebookCellOutputItem.error(new Error("Cancelled")),
+				vscode.NotebookCellOutputItem.text("Execution cancelled!", 'text/plain'),
 			]));
 
 			execution.end(false, Date.now());
@@ -193,19 +217,12 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 			execution.end(false, Date.now());
 		}
 
+		
+		/*
 		// just for debugging
 		execution.appendOutput(new vscode.NotebookCellOutput([
 			vscode.NotebookCellOutputItem.json(result, 'text/x-json')
 		]));
-		/*
-		
-		
-
-		execution.replaceOutput([new vscode.NotebookCellOutput([
-			//scode.NotebookCellOutputItem.json(response.renderer(), MIME_TYPE),
-			//vscode.NotebookCellOutputItem.json(response.json(), 'text/x-json'),
-			vscode.NotebookCellOutputItem.json(result, 'text/x-json')
-		])]);
 		*/
 
 		execution.end(result.status == "Finished", Date.now());
