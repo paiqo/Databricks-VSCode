@@ -15,7 +15,6 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 	private _state: ClusterState;
 	private _definition: iDatabricksCluster;
 	private _source: ClusterSource;
-	private _notebookKernel: DatabricksNotebookKernel = undefined;
 
 	constructor(
 		type: ClusterTreeItemType,
@@ -105,8 +104,12 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 
 	private getIconPath(theme: string): string {
 		let state = (this.contextValue == "CAN_START" ? 'stop' : 'start');
-		if (["ROOT", "JOB_CLUSTER_DIR"].includes(this.item_type)) { state = fspath.join("workspace", "directory"); }
-		if (this.state == "PENDING") { state = fspath.join("pending"); }
+		if (["ROOT", "JOB_CLUSTER_DIR"].includes(this.item_type)) { 
+			state = fspath.join("workspace", "directory"); 
+		}
+		else if (this.state == "PENDING") { 
+			state = "pending"; 
+		}
 		return fspath.join(ThisExtension.rootPath, 'resources', theme, state + '.png');
 	}
 
@@ -226,14 +229,15 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 	async useForSQL(): Promise<void> {
 		ThisExtension.SQLClusterID = this.cluster_id;
 
-		if(!ThisExtension.DisposableExists(DatabricksNotebookKernel.getId(this.cluster_id))) {
-			new DatabricksNotebookKernel(this.cluster_id, this.cluster_name);
+		if(ThisExtension.DisposableExists(DatabricksNotebookKernel.getId(this.cluster_id))) {
+			ThisExtension.log("Notebook Kernel for Cluster '" + this.cluster_id + "' has already already exists - recreating it!");
+			ThisExtension.RemoveDisposable(DatabricksNotebookKernel.getId(this.cluster_id));
+
+			await Helper.delay(500);
 		}
-		else
-		{
-			ThisExtension.log("Notebook Kernel for Cluster '" + this.cluster_id + "' has already been created!");
-		}
-		
+
+		new DatabricksNotebookKernel(this.cluster_id, this.cluster_name);
+
 		setTimeout(() => vscode.commands.executeCommand("databricksSQL.refresh", false), 1000);
 	}
 

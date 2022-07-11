@@ -11,17 +11,20 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 	private _path: string;
 	private _is_dir: boolean;
 	private _fileSize: number;
+	private _parent: DatabricksFSDirectory;
 	
 	constructor(
 		path: string,
 		is_dir: boolean,
 		size: number,
+		parent?: DatabricksFSDirectory,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
 		super(path, collapsibleState);
 		this._path = path;
 		this._is_dir = is_dir;
 		this._fileSize = size;
+		this._parent = parent;
 
 		super.label = path.split('/').pop();
 		super.iconPath = {
@@ -66,7 +69,15 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		return this._fileSize;
 	}
 
-	public static fromInterface(item: iDatabricksFSItem): DatabricksFSTreeItem {
+	get parent(): DatabricksFSDirectory {
+		return this._parent;
+	}
+
+	set parent(value: DatabricksFSDirectory) {
+		this._parent = value;
+	}
+
+	public static fromInterface(item: iDatabricksFSItem, parent: DatabricksFSDirectory): DatabricksFSTreeItem {
 		return new DatabricksFSTreeItem(item.path, item.is_dir, item.file_size);
 	}
 

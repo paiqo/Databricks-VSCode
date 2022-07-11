@@ -6,6 +6,7 @@ import { ThisExtension } from '../../../ThisExtension';
 import { iDatabricksFSItem } from './iDatabricksFSItem';
 import { Helper } from '../../../helpers/Helper';
 import { DatabricksFSTreeItem } from './DatabricksFSTreeItem';
+import { DatabricksFSDirectory } from './DatabricksFSDirectory';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -17,9 +18,10 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 	constructor(
 		path: string,
 		size: number,
+		parent: DatabricksFSDirectory,
 		source: "Online" | "Local"
 	) {
-		super(path, false, size, vscode.TreeItemCollapsibleState.None);
+		super(path, false, size, parent, vscode.TreeItemCollapsibleState.None);
 		
 		if (source == "Local") {
 			this._onlinePathExists = false;
@@ -108,8 +110,8 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 		return fspath.extname(this.path);
 	}
 
-	public static fromInterface(item: iDatabricksFSItem): DatabricksFSFile {
-		return new DatabricksFSFile(item.path, item.file_size, "Online");
+	public static fromInterface(item: iDatabricksFSItem, parent: DatabricksFSDirectory): DatabricksFSFile {
+		return new DatabricksFSFile(item.path, item.file_size, parent, "Online");
 	}
 
 	async open(showWarning: boolean = true): Promise<void> {
@@ -156,7 +158,7 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 			vscode.window.showInformationMessage(`Download of item ${this.path} finished!`);
 
 			if (ThisExtension.RefreshAfterUpDownload && !asTempFile) {
-				setTimeout(() => vscode.commands.executeCommand("databricksFS.refresh", false), 500);
+				setTimeout(() => vscode.commands.executeCommand("databricksFS.refresh", false, this.parent), 500);
 			}
 
 			return localPath;
@@ -176,7 +178,7 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 			let response = DatabricksApiService.uploadDBFSFile(localFilePath, this.path, true);
 			vscode.window.showInformationMessage(`Upload of item ${this.path}) finished!`);
 			if (ThisExtension.RefreshAfterUpDownload) {
-				setTimeout(() => vscode.commands.executeCommand("databricksFS.refresh", false), 500);
+				setTimeout(() => vscode.commands.executeCommand("databricksFS.refresh", false, this.parent), 500);
 			}
 		}
 		catch (error) {
@@ -189,9 +191,21 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 	}
 
 	async delete(): Promise<void> {
-		DatabricksApiService.deleteDBFSItem(this.path, false);
+		let confirm = await Helper.showQuickPick(["no", "yes"], `Confirm deletion of file '${this.path}'(DBFS and local)?`)
 
-		setTimeout(() => vscode.commands.executeCommand("databricksFS.refresh", false), 500);
+		if(confirm == "yes") {
+			if(this.localPathExists)
+			{
+				ThisExtension.log(`Deleting local file '${this.localFilePath}'!`);
+				fs.unlink(this.localFilePath, (err) => { if (err) { vscode.window.showErrorMessage(err.message); } });
+			}
+			if(this.onlinePathExists)
+			{
+				DatabricksApiService.deleteDBFSItem(this.path, false);
+
+				setTimeout(() => vscode.commands.executeCommand("databricksFS.refresh", false, this.parent), 500);
+			}
+		}
 	}
 
 	async compare(): Promise<void> {

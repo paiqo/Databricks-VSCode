@@ -328,6 +328,16 @@ export abstract class DatabricksApiService {
 
 		return ret;
 	}
+
+	static async removeExecutionContext(context: ExecutionContext): Promise<void> {
+		let endpoint = '1.2/contexts/destroy ';
+		let body = { clusterId: context.cluster_id, contextId: context.context_id };
+
+		let response = await this.post(endpoint, body);
+
+		return response.data.id;
+	}
+
 	//#endregion
 	
 	//#region Workspace API

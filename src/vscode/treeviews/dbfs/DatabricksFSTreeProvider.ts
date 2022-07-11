@@ -10,18 +10,22 @@ export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<Databri
 
 	constructor() {	}
 
-	refresh(showInfoMessage: boolean = false): void {
+	refresh(showInfoMessage: boolean = false, item: DatabricksFSTreeItem = null): void {
 		if(showInfoMessage){
 			vscode.window.showInformationMessage('Refreshing DBFS ...');
 		}
-		this._onDidChangeTreeData.fire(null);
+		this._onDidChangeTreeData.fire(item);
 	}
 
 	getTreeItem(element: DatabricksFSTreeItem): vscode.TreeItem {
 		return element;
 	}
 
-	getChildren(element?: DatabricksFSTreeItem): Thenable<DatabricksFSTreeItem[]> {	
+	getParent(element: DatabricksFSTreeItem): vscode.ProviderResult<DatabricksFSTreeItem> {
+		return element.parent;
+	}
+
+	async getChildren(element?: DatabricksFSTreeItem): Promise<DatabricksFSTreeItem[]> {	
 		if(!DatabricksApiService.isInitialized) { 
 			return Promise.resolve([]);
 		}
@@ -32,7 +36,11 @@ export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<Databri
 		} 
 		else 
 		{
-			return new DatabricksFSDirectory("/", "Online").getChildren();
+			let items: DatabricksFSTreeItem[] = await new DatabricksFSDirectory("/", null, "Online").getChildren();
+
+			items.forEach(x => x.parent = null); 
+			// remove the artificial parent again
+			return items;
 		}
 	}
 }

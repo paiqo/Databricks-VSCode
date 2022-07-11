@@ -39,6 +39,7 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 
 		this._executionOrder = 0;
 
+		ThisExtension.log("Creating new Notebook Kernel for Databricks Cluster " + this.ClusterID);
 		this._controller = vscode.notebooks.createNotebookController(this.id,
 			this.notebookType,
 			this.label);
@@ -47,11 +48,11 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 		this._controller.description = this.description;
 		this._controller.detail = this.detail;
 		this._controller.supportsExecutionOrder = this.supportsExecutionOrder;
-		this._controller.description = 'A notebook for making REST calls.';
+		this._controller.description = this.description + "(" + this.ClusterID + ")";
 		this._controller.executeHandler = this.executeHandler.bind(this);
-		this._controller.dispose = this.dispose.bind(this);
+		this._controller.dispose = this.disposeController.bind(this);
 
-		ThisExtension.PushDisposable(this);
+		//ThisExtension.PushDisposable(this);
 	}
 
 	static getId(clusterId: string)
@@ -85,16 +86,24 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 	}
 
 	createNotebookCellExecution(cell: vscode.NotebookCell): vscode.NotebookCellExecution {
-		throw new Error('Method not implemented.');
+		//throw new Error('Method not implemented.');
+		return null;
 	}
 	interruptHandler?: (notebook: vscode.NotebookDocument) => void | Thenable<void>;
 	onDidChangeSelectedNotebooks: vscode.Event<{ readonly notebook: vscode.NotebookDocument; readonly selected: boolean; }>;
 	updateNotebookAffinity(notebook: vscode.NotebookDocument, affinity: vscode.NotebookControllerAffinity): void {
-		throw new Error('Method not implemented.');
+		//throw new Error('Method not implemented.');
 	}
 
-	dispose(): void {
+	async disposeController(): Promise<void> {
+		if(this.ExecutionContext)
+		{
+			await DatabricksApiService.removeExecutionContext(this.ExecutionContext);
+		}
+	}
 
+	async dispose(): Promise<void> {
+		this.Controller.dispose();
 	}
 
 	async executeHandler(cells: vscode.NotebookCell[], _notebook: vscode.NotebookDocument, _controller: vscode.NotebookController): Promise<void> {
@@ -226,7 +235,5 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 		*/
 
 		execution.end(result.status == "Finished", Date.now());
-
-
 	}
 }

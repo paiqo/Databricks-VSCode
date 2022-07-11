@@ -4,8 +4,6 @@ import { DatabricksClusterTreeItem } from './DatabricksClusterTreeItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<DatabricksClusterTreeItem> {
-	private _databricksApiService: DatabricksApiService;
-	private _workspaceLocalFolder: string;
 
 	private _onDidChangeTreeData: vscode.EventEmitter<DatabricksClusterTreeItem | undefined> = new vscode.EventEmitter<DatabricksClusterTreeItem | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<DatabricksClusterTreeItem | undefined> = this._onDidChangeTreeData.event;
@@ -20,11 +18,11 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 		}
 	}
 
-	refresh(showInfoMessage: boolean = false, isAutoRefresh = false): void {
+	refresh(showInfoMessage: boolean = false, isAutoRefresh = false, item: DatabricksClusterTreeItem = null): void {
 		if(showInfoMessage && !isAutoRefresh){
 			vscode.window.showInformationMessage('Refreshing Clusters ...');
 		}
-		this._onDidChangeTreeData.fire(null);
+		this._onDidChangeTreeData.fire(item);
 	}
 
 	getTreeItem(element: DatabricksClusterTreeItem): vscode.TreeItem {

@@ -305,8 +305,23 @@ export abstract class ThisExtension {
 		this.extensionContext.subscriptions.push(item);
 	}
 
+	static GetDisposable(id: string): vscode.Disposable
+	{
+		return this.extensionContext.subscriptions.find((x: any) => x.id == id)
+	}
+
+	static RemoveDisposable(id: string)
+	{
+		let item: vscode.Disposable = this.GetDisposable(id);
+
+		if(item)
+		{
+			item.dispose();
+		}
+	}
+
 	static DisposableExists(id: string): boolean {
-		if(this.extensionContext.subscriptions.find((x: any) => x.id = id))
+		if(this.GetDisposable(id))
 		{
 			return true;
 		}

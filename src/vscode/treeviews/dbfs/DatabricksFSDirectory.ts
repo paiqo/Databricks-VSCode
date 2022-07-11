@@ -17,9 +17,10 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 	
 	constructor(
 		path: string,
+		parent: DatabricksFSDirectory,
 		source: "Online" | "Local"
 	) {
-		super(path, true, 0, vscode.TreeItemCollapsibleState.Collapsed);
+		super(path, true, 0, parent, vscode.TreeItemCollapsibleState.Collapsed);
 		
 		if (source == "Local") {
 			this._onlinePathExists = false;
@@ -78,8 +79,8 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 		return this._onlinePathExists;
 	}
 
-	public static fromInterface(item: iDatabricksFSItem): DatabricksFSDirectory {
-		return new DatabricksFSDirectory(item.path, "Online");
+	public static fromInterface(item: iDatabricksFSItem, parent: DatabricksFSDirectory): DatabricksFSDirectory {
+		return new DatabricksFSDirectory(item.path, parent, "Online");
 	}
 
 
@@ -91,19 +92,19 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 			if (webServiceItems != undefined) {
 				for (let item of webServiceItems) {
 					if (item.is_dir) {
-						onlineItems.push(DatabricksFSDirectory.fromInterface(item));
+						onlineItems.push(DatabricksFSDirectory.fromInterface(item, this));
 					}
 					else
 					{
-						onlineItems.push(DatabricksFSFile.fromInterface(item));
+						onlineItems.push(DatabricksFSFile.fromInterface(item, this));
 					}
 				}
 			}
 		}
-		let onlinePaths: string[] = onlineItems.map((x) => (x as iDatabricksFSItem).path);
 
 		let localItems: DatabricksFSTreeItem[] = [];
 		if (this.localPathExists) {
+			// TODO browse local directory for files
 		}
 
 		let allItems = onlineItems.concat(localItems);
@@ -128,7 +129,7 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 
 				if(ThisExtension.RefreshAfterUpDownload)
 				{
-					setTimeout(() => vscode.commands.executeCommand("databricksFS.refresh", false), 500);
+					setTimeout(() => vscode.commands.executeCommand("databricksFS.refresh", false, this.parent), 500);
 				}
 			});
 		}
