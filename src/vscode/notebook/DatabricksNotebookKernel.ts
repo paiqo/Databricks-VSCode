@@ -52,7 +52,7 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 		this._controller.executeHandler = this.executeHandler.bind(this);
 		this._controller.dispose = this.disposeController.bind(this);
 
-		//ThisExtension.PushDisposable(this);
+		ThisExtension.PushDisposable(this);
 	}
 
 	static getId(clusterId: string)
@@ -81,8 +81,33 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 		return this._executionContext;
 	}
 
+	set ExecutionContext(value: ExecutionContext) {
+		this._executionContext = value;
+	}
+
 	private async initializeExecutionContext(): Promise<void> {
 		this._executionContext = await DatabricksApiService.getExecutionContext(this.ClusterID, this.Language);
+	}
+
+	async disposeController(): Promise<void> {
+		if(this.ExecutionContext)
+		{
+			await DatabricksApiService.removeExecutionContext(this.ExecutionContext);
+			this.ExecutionContext = null;
+		}
+	}
+
+	async dispose(): Promise<void> {
+		this.Controller.dispose();
+	}
+
+	async restart(): Promise<void> {
+		await this.disposeController();
+
+	}
+
+	async interrupt(): Promise<void> {
+
 	}
 
 	createNotebookCellExecution(cell: vscode.NotebookCell): vscode.NotebookCellExecution {
@@ -95,16 +120,7 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 		//throw new Error('Method not implemented.');
 	}
 
-	async disposeController(): Promise<void> {
-		if(this.ExecutionContext)
-		{
-			await DatabricksApiService.removeExecutionContext(this.ExecutionContext);
-		}
-	}
-
-	async dispose(): Promise<void> {
-		this.Controller.dispose();
-	}
+	
 
 	async executeHandler(cells: vscode.NotebookCell[], _notebook: vscode.NotebookDocument, _controller: vscode.NotebookController): Promise<void> {
 		if (this.ExecutionContext == undefined || this.ExecutionContext == null) {

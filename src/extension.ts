@@ -25,6 +25,7 @@ import { DatabricksRepoTreeProvider } from './vscode/treeviews/repos/DatabricksR
 import { DatabricksFSTreeItem } from './vscode/treeviews/dbfs/DatabricksFSTreeItem';
 import { DatabricksWorkspaceTreeItem } from './vscode/treeviews/workspaces/DatabricksWorkspaceTreeItem';
 import { DatabricksRepoRepository } from './vscode/treeviews/repos/DatabricksRepoRepository';
+import { DatabricksCluster } from './vscode/treeviews/clusters/DatabricksCluster';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -66,15 +67,15 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksClusters.refresh', (showInfoMessage: boolean = true, isAutoRefresh: boolean = false, item: DatabricksClusterTreeItem = null) => databricksClusterTreeProvider.refresh(showInfoMessage, isAutoRefresh, item));
 	vscode.commands.registerCommand('databricksClusters.add', () => databricksClusterTreeProvider.add());
 
-	vscode.commands.registerCommand('databricksClusterItem.click', (cluster: DatabricksClusterTreeItem) => cluster.click());
-	vscode.commands.registerCommand('databricksClusterItem.start', (cluster: DatabricksClusterTreeItem) => cluster.start());
-	vscode.commands.registerCommand('databricksClusterItem.stop', (cluster: DatabricksClusterTreeItem) => cluster.stop());
-	vscode.commands.registerCommand('databricksClusterItem.showDefinition', (cluster: DatabricksClusterTreeItem) => cluster.showDefinition());
-	vscode.commands.registerCommand('databricksClusterItem.delete', (cluster: DatabricksClusterTreeItem) => cluster.delete());
-	vscode.commands.registerCommand('databricksClusterItem.useForSQL', (cluster: DatabricksClusterTreeItem) => cluster.useForSQL());
-
+	vscode.commands.registerCommand('databricksClusterItem.start', (cluster: DatabricksCluster) => cluster.start());
+	vscode.commands.registerCommand('databricksClusterItem.stop', (cluster: DatabricksCluster) => cluster.stop());
+	vscode.commands.registerCommand('databricksClusterItem.showDefinition', (cluster: DatabricksCluster) => cluster.showDefinition());
+	vscode.commands.registerCommand('databricksClusterItem.delete', (cluster: DatabricksCluster) => cluster.delete());
+	vscode.commands.registerCommand('databricksClusterItem.useForSQL', (cluster: DatabricksCluster) => cluster.useForSQL());
+	vscode.commands.registerCommand('databricksClusterItem.restartKernel', (cluster: DatabricksCluster) => cluster.restartKernel());
+	vscode.commands.registerCommand('databricksClusterItem.interruptKernel', (cluster: DatabricksCluster) => cluster.interruptKernel());
 	
-	//databricksClusterTreeProvider.autoRefresh();
+	databricksClusterTreeProvider.autoRefresh();
 
 	// register DatabricksJobsTreeProvider
 	let databricksJobsTreeProvider = new DatabricksJobTreeProvider();

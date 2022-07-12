@@ -1,6 +1,10 @@
 import * as vscode from 'vscode';
-import { DatabricksApiService} from '../../../databricksApi/databricksApiService';
+import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
+import { ThisExtension } from '../../../ThisExtension';
+import { DatabricksCluster } from './DatabricksCluster';
+import { DatabricksClusterJobClusters } from './DatabricksClusterJobClusters';
 import { DatabricksClusterTreeItem } from './DatabricksClusterTreeItem';
+import { iDatabricksCluster } from './iDatabricksCluster';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<DatabricksClusterTreeItem> {
@@ -8,18 +12,18 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 	private _onDidChangeTreeData: vscode.EventEmitter<DatabricksClusterTreeItem | undefined> = new vscode.EventEmitter<DatabricksClusterTreeItem | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<DatabricksClusterTreeItem | undefined> = this._onDidChangeTreeData.event;
 
-	constructor() {	}
+	constructor() { }
 
 	async autoRefresh(timeoutSeconds: number = 10) {
 		while (true) {
 			await new Promise(resolve => setTimeout(resolve, timeoutSeconds * 1000));
-			
+
 			this.refresh(false, true);
 		}
 	}
 
 	refresh(showInfoMessage: boolean = false, isAutoRefresh = false, item: DatabricksClusterTreeItem = null): void {
-		if(showInfoMessage && !isAutoRefresh){
+		if (showInfoMessage && !isAutoRefresh) {
 			vscode.window.showInformationMessage('Refreshing Clusters ...');
 		}
 		this._onDidChangeTreeData.fire(item);
@@ -29,8 +33,8 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 		return element;
 	}
 
-	getChildren(element?: DatabricksClusterTreeItem): Thenable<DatabricksClusterTreeItem[]> {	
-		if(!DatabricksApiService.isInitialized) { 
+	async getChildren(element?: DatabricksClusterTreeItem): Promise<DatabricksClusterTreeItem[]> {
+		if (!DatabricksApiService.isInitialized) {
 			return Promise.resolve([]);
 		}
 
@@ -38,7 +42,29 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 			return element.getChildren();
 		}
 		else {
-			return DatabricksClusterTreeItem.getDummyItem("ROOT").getChildren();
+			let clusters: iDatabricksCluster[] = await DatabricksApiService.listClusters();
+			let items: DatabricksClusterTreeItem[] = [];
+
+			let job_clusters_found: boolean = false;
+			for (let cluster of clusters) {
+				if (["API", "UI"].includes(cluster.cluster_source)) {
+					items.push(new DatabricksCluster(cluster));
+
+					if (cluster.state == "RUNNING" && ThisExtension.SQLClusterID == undefined) {
+						ThisExtension.log(`Running cluster "${cluster.cluster_name}"(${cluster.cluster_id}) found! It will be used for SQL Browser!`);
+						ThisExtension.SQLClusterID = cluster.cluster_id;
+					}
+				}
+				if (["JOB"].includes(cluster.cluster_source)) {
+					job_clusters_found = true;
+				}
+			}
+
+			if (job_clusters_found) {
+				items.push(new DatabricksClusterJobClusters());
+			}
+
+			return items;
 		}
 	}
 

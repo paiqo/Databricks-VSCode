@@ -21,7 +21,7 @@
 	"qna": "https://github.com/paiqo/Databricks-VSCode",
 	"enableApiProposals": false,
 	"engines": {
-		"vscode": "^1.69.0"
+		"vscode": "^1.68.0"
 	},
 	"galleryBanner": {
 		"color": "#0ea5ff",
@@ -766,11 +766,21 @@
 				}
 			},
 
-
 			{
 				"title": "New Databricks Notebook",
 				"shortTitle": "Databricks Notebook",
 				"command": "databricksNotebook.new"
+			},
+			{
+				"command": "databricksClusterItem.restartKernel",
+				"title": "Restart Databricks Cluster Kernel",
+				"shortTitle": "Restart Kernel"
+				
+			},
+			{
+				"command": "databricksClusterItem.interruptKernel",
+				"title": "Interrupt Databricks Cluster Kernel",
+				"shortTitle": "Interrupt Kernel"			
 			}
 		],
 		"menus": {
@@ -901,6 +911,14 @@
 					"when": "view == databricksClusters && viewItem == CAN_STOP"
 				},
 				{
+					"command": "databricksClusterItem.restartKernel",
+					"when": "view == databricksClusters && viewItem == CAN_STOP"
+				},
+				{
+					"command": "databricksClusterItem.interruptKernel",
+					"when": "view == databricksClusters && viewItem == CAN_STOP"
+				},
+				{
 					"command": "databricksJobItem.showDefinition",
 					"when": "view == databricksJobs && viewItem == JOB || viewItem == JOB_RUN || viewItem == RUNNING_JOB",
 					"group": "inline"
@@ -980,7 +998,7 @@
 					"group": "inline"
 				}
 			]
-		}
+		}				
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
@@ -988,27 +1006,24 @@
 		"watch": "tsc -watch -p ./"
 	},
 	"devDependencies": {
-		"@types/mkdirp": "^0.5.2",
-		"@types/node": "^10.17.60",
+		"@types/node": "^16.11.7",
 		"@types/rimraf": "^2.0.5",
-		"@types/vscode": "^1.69.0",
-		"ts-loader": "^8.3.0",
-		"tslint": "^5.20.1",
-		"typescript": "^3.9.10",
-		"webpack": "^5.62.1",
-		"webpack-cli": "^4.9.1"
+		"@types/vscode": "^1.68.0",
+		"ts-loader": "^9.3.1",
+		"eslint": "^8.19.0",
+		"typescript": "^4.7.4",
+		"webpack": "^5.73.0",
+		"webpack-cli": "^4.10.0"
 	},
 	"dependencies": {
 		"@angular/common": "^14.0.1",
 		"@angular/core": "^14.0.1",
-		"axios": "^0.21.4",
+		"axios": "^0.27.2",
 		"file-saver": "^2.0.5",
 		"follow-redirects": "^1.14.8",
 		"ftp": "^0.3.10",
 		"https-agent": "^1.0.0",
 		"jsonc-parser": "^0.4.2",
-		"keytar": "^5.6.0",
-		"minimist": "^1.2.6",
 		"mkdirp": "^0.5.1",
 		"promise.prototype.finally": "^3.1.3",
 		"replace-in-file": "^6.3.2",
