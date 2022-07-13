@@ -8,6 +8,7 @@ import { SensitiveValueStore } from './vscode/treeviews/connections/_types';
 import { DatabricksConnectionTreeItem } from './vscode/treeviews/connections/DatabricksConnectionTreeItem';
 import { DatabricksConnectionManagerCLI } from './vscode/treeviews/connections/DatabricksConnectionManagerCLI';
 import { DatabricksNotebookKernel } from './vscode/notebook/DatabricksNotebookKernel';
+import { Dictionary } from 'form-data';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -20,6 +21,7 @@ export abstract class ThisExtension {
 	private static _settingScope: ConfigSettingSource;
 	private static _sensitiveValueStore: SensitiveValueStore;
 	private static _sqlClusterId: string;
+	private static _notebookKernels: Map<string, DatabricksNotebookKernel> = new Map<string, DatabricksNotebookKernel>();
 
 	static get rootPath(): string {
 		return this._context.extensionPath;
@@ -326,6 +328,17 @@ export abstract class ThisExtension {
 			return true;
 		}
 		return false;
+	}
+
+	static setNotebookKernel(clusterId: string, kernel: DatabricksNotebookKernel): void {
+		if(!(clusterId in ThisExtension._notebookKernels.keys))
+		{
+			ThisExtension._notebookKernels[clusterId] = kernel;
+		}
+	}
+
+	static getNotebookKernel(clusterId: string): DatabricksNotebookKernel {
+		return ThisExtension._notebookKernels[clusterId]
 	}
 }
 

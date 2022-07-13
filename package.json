@@ -570,11 +570,23 @@
 			},
 			{
 				"command": "databricksClusterItem.useForSQL",
-				"title": "Use for VSCode and SQL",
+				"title": "Use for SQL Browser",
 				"icon": {
 					"light": "resources/light/stop.png",
 					"dark": "resources/dark/stop.png"
 				}
+			},
+			{
+				"command": "databricksClusterItem.createKernel",
+				"title": "Create Databricks Cluster Kernel",
+				"shortTitle": "Create Notebook Kernel"
+				
+			},
+			{
+				"command": "databricksClusterItem.restartKernel",
+				"title": "Restart Databricks Cluster Kernel",
+				"shortTitle": "Restart Notebook Kernel"
+				
 			},
 
 			{
@@ -770,17 +782,6 @@
 				"title": "New Databricks Notebook",
 				"shortTitle": "Databricks Notebook",
 				"command": "databricksNotebook.new"
-			},
-			{
-				"command": "databricksClusterItem.restartKernel",
-				"title": "Restart Databricks Cluster Kernel",
-				"shortTitle": "Restart Kernel"
-				
-			},
-			{
-				"command": "databricksClusterItem.interruptKernel",
-				"title": "Interrupt Databricks Cluster Kernel",
-				"shortTitle": "Interrupt Kernel"			
 			}
 		],
 		"menus": {
@@ -888,12 +889,12 @@
 				},
 				{
 					"command": "databricksClusterItem.start",
-					"when": "view == databricksClusters && viewItem == CAN_START",
+					"when": "view == databricksClusters && viewItem =~ /.*,STOPPED,.*/",
 					"group": "inline"
 				},
 				{
 					"command": "databricksClusterItem.stop",
-					"when": "view == databricksClusters && viewItem == CAN_STOP",
+					"when": "view == databricksClusters && viewItem =~ /.*,STARTED,.*/",
 					"group": "inline"
 				},
 				{
@@ -908,15 +909,15 @@
 				},
 				{
 					"command": "databricksClusterItem.useForSQL",
-					"when": "view == databricksClusters && viewItem == CAN_STOP"
+					"when": "view == databricksClusters && viewItem =~ /.*,STARTED,.*/"
+				},
+				{
+					"command": "databricksClusterItem.createKernel",
+					"when": "view == databricksClusters && viewItem =~ /.*,STARTED,.*/ && viewItem =~ /.*,NOKERNEL,.*/"
 				},
 				{
 					"command": "databricksClusterItem.restartKernel",
-					"when": "view == databricksClusters && viewItem == CAN_STOP"
-				},
-				{
-					"command": "databricksClusterItem.interruptKernel",
-					"when": "view == databricksClusters && viewItem == CAN_STOP"
+					"when": "view == databricksClusters && viewItem =~ /.*,STARTED,.*/ && viewItem =~ /.*,KERNEL,.*/"
 				},
 				{
 					"command": "databricksJobItem.showDefinition",

@@ -39,7 +39,7 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 
 		this._executionOrder = 0;
 
-		ThisExtension.log("Creating new Notebook Kernel for Databricks Cluster " + this.ClusterID);
+		ThisExtension.log("Creating new notebook kernel " + this.id);
 		this._controller = vscode.notebooks.createNotebookController(this.id,
 			this.notebookType,
 			this.label);
@@ -102,12 +102,10 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 	}
 
 	async restart(): Promise<void> {
+		ThisExtension.log(`Restarting notebook kernel ${this.Controller.id} ...`)
+		// we simply remove the current execution context and close it on the Cluster
+		// the next execution will then create a new context
 		await this.disposeController();
-
-	}
-
-	async interrupt(): Promise<void> {
-
 	}
 
 	createNotebookCellExecution(cell: vscode.NotebookCell): vscode.NotebookCellExecution {

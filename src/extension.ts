@@ -72,8 +72,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksClusterItem.showDefinition', (cluster: DatabricksCluster) => cluster.showDefinition());
 	vscode.commands.registerCommand('databricksClusterItem.delete', (cluster: DatabricksCluster) => cluster.delete());
 	vscode.commands.registerCommand('databricksClusterItem.useForSQL', (cluster: DatabricksCluster) => cluster.useForSQL());
+	vscode.commands.registerCommand('databricksClusterItem.createKernel', (cluster: DatabricksCluster) => cluster.createKernel());
 	vscode.commands.registerCommand('databricksClusterItem.restartKernel', (cluster: DatabricksCluster) => cluster.restartKernel());
-	vscode.commands.registerCommand('databricksClusterItem.interruptKernel', (cluster: DatabricksCluster) => cluster.interruptKernel());
 	
 	databricksClusterTreeProvider.autoRefresh();
 

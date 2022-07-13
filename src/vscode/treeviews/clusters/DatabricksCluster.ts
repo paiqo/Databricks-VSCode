@@ -25,6 +25,7 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 		this._id = definition.cluster_id;
 		this._state = definition.state;
 		this._source = definition.cluster_source;
+		this._notebook_kernel = ThisExtension.getNotebookKernel(this.cluster_id);
 
 		super.description = this._description;
 		super.tooltip = this._tooltip;
@@ -76,16 +77,30 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 
 	// used in package.json to filter commands via viewItem == ACTIVE
 	get _contextValue(): string {
+		let states: string[] = [];
+
 		if (['RUNNING', 'ERROR', 'UNKNOWN', 'PENDING'].includes(this.state)) {
-			return 'CAN_STOP';
+			states.push("STARTED");
 		}
 		if (['UNKNOWN', 'RESTARTING', 'RESIZING', 'TERMINATING', 'TERMINATED'].includes(this.state)) {
-			return 'CAN_START';
+			states.push("STOPPED");
 		}
+
+		if(this.NotebookKernelExists)
+		{
+			states.push("KERNEL");
+		}
+		else
+		{
+			states.push("NOKERNEL");
+		}
+
+		// use , as separator to allow to check for ,<value>, in package.json when condition
+		return "," + states.join(",") + ",";
 	}
 
 	private getIconPath(theme: string): string {
-		let state = (this.contextValue == "CAN_START" ? 'stop' : 'start');
+		let state = (this.contextValue.includes("STOPPED") ? 'stop' : 'start');
 		if (this.state == "PENDING") { 
 			state = "pending"; 
 		}
@@ -121,11 +136,15 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 	}
 
 	private get NotebookKernel(): DatabricksNotebookKernel {
-		return this._notebook_kernel;
+		return ThisExtension.getNotebookKernel(this.cluster_id);
 	}
 
-	private set NotebookKernel(value: DatabricksNotebookKernel) {
-		this._notebook_kernel = value;
+	public get NotebookKernelExists(): boolean {
+		if(this.NotebookKernel)
+		{
+			return true;
+		}
+		return false;
 	}
 
 	async getChildren(): Promise<DatabricksClusterTreeItem[]> {
@@ -179,29 +198,25 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 	async useForSQL(): Promise<void> {
 		ThisExtension.SQLClusterID = this.cluster_id;
 
-		if(ThisExtension.DisposableExists(DatabricksNotebookKernel.getId(this.cluster_id))) {
-			ThisExtension.log("Notebook Kernel for Cluster '" + this.cluster_id + "' has already already exists - recreating it!");
-			ThisExtension.RemoveDisposable(DatabricksNotebookKernel.getId(this.cluster_id));
-
-			await Helper.delay(500);
-		}
-
-		this.NotebookKernel = new DatabricksNotebookKernel(this.cluster_id, this.cluster_name);
-
 		setTimeout(() => vscode.commands.executeCommand("databricksSQL.refresh", false), 1000);
 	}
 
-	async restartKernel(): Promise<void> {
-		if(this.NotebookKernel)
+	async createKernel(): Promise<void> {
+		if(!this.NotebookKernel)
 		{
-			this.NotebookKernel.restart();
+			this._notebook_kernel = new DatabricksNotebookKernel(this.cluster_id, this.cluster_name);
+			ThisExtension.setNotebookKernel(this.cluster_id, this._notebook_kernel);
+		}
+		else
+		{
+			ThisExtension.log(`Notebook Kernel for Databricks cluster ${this.cluster_id} already exists!`)
 		}
 	}
 
-	async interruptKernel(): Promise<void> {
-		if(this.NotebookKernel)
+	async restartKernel(): Promise<void> {
+		if(this.NotebookKernelExists)
 		{
-			this.NotebookKernel.interrupt();
+			this.NotebookKernel.restart();
 		}
 	}
 }
