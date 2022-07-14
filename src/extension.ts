@@ -26,6 +26,8 @@ import { DatabricksFSTreeItem } from './vscode/treeviews/dbfs/DatabricksFSTreeIt
 import { DatabricksWorkspaceTreeItem } from './vscode/treeviews/workspaces/DatabricksWorkspaceTreeItem';
 import { DatabricksRepoRepository } from './vscode/treeviews/repos/DatabricksRepoRepository';
 import { DatabricksCluster } from './vscode/treeviews/clusters/DatabricksCluster';
+import { DatabricksSecretScope } from './vscode/treeviews/secrets/DatabricksSecretScope';
+import { DatabricksSecret } from './vscode/treeviews/secrets/DatabricksSecret';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -58,7 +60,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksWorkspaceItem.copyPath', (workspaceItem: DatabricksWorkspaceTreeItem) => workspaceItem.CopyPathToClipboard());
 
 	vscode.commands.registerCommand('databricksWorkspaceItem.edit', (workspaceItem: DatabricksWorkspaceNotebook) => vscode.window.showErrorMessage(`Not yet implemented!`));
-	vscode.commands.registerCommand('databricksWorkspaceItem.delete', (workspaceItem: DatabricksWorkspaceNotebook | DatabricksWorkspaceDirectory) => vscode.window.showErrorMessage(`Not yet implemented!`));
+	vscode.commands.registerCommand('databricksWorkspaceItem.delete', (workspaceItem: DatabricksWorkspaceNotebook | DatabricksWorkspaceDirectory) => workspaceItem.delete());
 	vscode.commands.registerCommand('databricksWorkspaceItem.sync', (workspaceItem: DatabricksWorkspaceNotebook | DatabricksWorkspaceDirectory) => vscode.window.showErrorMessage(`Not yet implemented!`));
 	
 	// register DatabricksClusterTreeProvider
@@ -97,7 +99,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksFS.add', () => new DatabricksFSDirectory("/", null, "Online").add());
 
 	vscode.commands.registerCommand('databricksFSItem.click', (fsItem: DatabricksFSFile) => fsItem.click());
-	vscode.commands.registerCommand('databricksFSItem.add', (fsItem: DatabricksFSFile | DatabricksFSDirectory) => fsItem.add());
+	vscode.commands.registerCommand('databricksFSItem.add', (fsItem: DatabricksFSDirectory) => fsItem.add());
 	vscode.commands.registerCommand('databricksFSItem.download', (fsItem: DatabricksFSFile | DatabricksFSDirectory) => fsItem.download());
 	vscode.commands.registerCommand('databricksFSItem.upload', (fsItem: DatabricksFSFile | DatabricksFSDirectory) => fsItem.upload());
 	vscode.commands.registerCommand('databricksFSItem.delete', (fsItem: DatabricksFSFile | DatabricksFSDirectory) => fsItem.delete());
@@ -109,11 +111,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.window.registerTreeDataProvider('databricksSecrets', databricksSecretTreeProvider);
 	vscode.commands.registerCommand('databricksSecrets.refresh', (showInfoMessage: boolean = true) => databricksSecretTreeProvider.refresh(showInfoMessage));
 	vscode.commands.registerCommand('databricksSecrets.addSecretScope', () => databricksSecretTreeProvider.addSecretScope());
-
-	vscode.commands.registerCommand('databricksSecretItem.deleteSecretScope', (secretItem: DatabricksSecretTreeItem) => secretItem.deleteSecretScope());
-	vscode.commands.registerCommand('databricksSecretItem.addSecret', (secretItem: DatabricksSecretTreeItem) => secretItem.addSecret());
-	vscode.commands.registerCommand('databricksSecretItem.updateSecret', (secretItem: DatabricksSecretTreeItem) => secretItem.updateSecret());
-	vscode.commands.registerCommand('databricksSecretItem.deleteSecret', (secretItem: DatabricksSecretTreeItem) => secretItem.deleteSecret());
+	vscode.commands.registerCommand('databricksSecretScope.delete', (scope: DatabricksSecretScope) => scope.delete());
+	vscode.commands.registerCommand('databricksSecretScope.addSecret', (scope: DatabricksSecretScope) => scope.addSecret());
+	vscode.commands.registerCommand('databricksSecret.update', (secret: DatabricksSecret) => secret.update());
+	vscode.commands.registerCommand('databricksSecret.delete', (secret: DatabricksSecret) => secret.delete());
 
 	// register DatabricksSQLTreeProvider
 	let databricksSQLTreeProvider = new DatabricksSQLTreeProvider();

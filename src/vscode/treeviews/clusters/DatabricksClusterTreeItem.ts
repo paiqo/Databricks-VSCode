@@ -4,9 +4,9 @@ import { ClusterTreeItemType } from './_types';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksClusterTreeItem extends vscode.TreeItem {
-	private _item_type: ClusterTreeItemType;
-	private _name: string;
-	private _parent: DatabricksClusterTreeItem;
+	protected _itemType: ClusterTreeItemType;
+	protected _name: string;
+	protected _parent: DatabricksClusterTreeItem;
 
 	constructor(
 		type: ClusterTreeItemType,
@@ -16,12 +16,12 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 	) {
 		super(name, collapsibleState);
 		this._name = name;
-		this._item_type = type;
+		this._itemType = type;
 		this._parent = parent;
 	}
 
 	get item_type(): ClusterTreeItemType {
-		return this._item_type;
+		return this._itemType;
 	}
 
 	get name(): string {
@@ -33,6 +33,7 @@ export class DatabricksClusterTreeItem extends vscode.TreeItem {
 	}
 
 	async getChildren(): Promise<DatabricksClusterTreeItem[]> {
-		return []
+		// needs to be overwritten in derived class
+		throw new Error("Not implemented!");
 	}
 }

@@ -25,11 +25,9 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 		path: string,
 		object_id: number,
 		source: "Online" | "Local",
-		object_type: WorkspaceItemType = "DIRECTORY"
+		parent: DatabricksWorkspaceTreeItem = null
 	) {
-		super(path, object_type, object_id, undefined, vscode.TreeItemCollapsibleState.Collapsed);
-
-		this._object_type = object_type;
+		super(path, "DIRECTORY", object_id, parent, vscode.TreeItemCollapsibleState.Collapsed);
 
 		if (source == "Local") {
 			this._onlinePathExists = false;
@@ -92,13 +90,13 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 		return this._onlinePathExists;
 	}
 
-	public static fromInterface(item: iDatabricksWorkspaceItem): DatabricksWorkspaceDirectory {
-		return new DatabricksWorkspaceDirectory(item.path, item.object_id, "Online");
+	public static fromInterface(item: iDatabricksWorkspaceItem, parent: DatabricksWorkspaceTreeItem = null): DatabricksWorkspaceDirectory {
+		return new DatabricksWorkspaceDirectory(item.path, item.object_id, "Online", parent);
 	}
 
-	public static fromJSON(jsonString: string): DatabricksWorkspaceDirectory {
+	public static fromJSON(jsonString: string, parent: DatabricksWorkspaceTreeItem = null): DatabricksWorkspaceDirectory {
 		let item: iDatabricksWorkspaceItem = JSON.parse(jsonString);
-		return DatabricksWorkspaceDirectory.fromInterface(item);
+		return DatabricksWorkspaceDirectory.fromInterface(item, parent);
 	}
 
 	async getChildren(): Promise<DatabricksWorkspaceTreeItem[]> {
@@ -110,17 +108,17 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 				for (let item of webServiceItems) {
 					switch (item.object_type) {
 						case "LIBRARY":
-							onlineItems.push(DatabricksWorkspaceLibrary.fromInterface(item));
+							onlineItems.push(DatabricksWorkspaceLibrary.fromInterface(item, this));
 							break;
 						case "NOTEBOOK":
-							onlineItems.push(DatabricksWorkspaceNotebook.fromInterface(item));
+							onlineItems.push(DatabricksWorkspaceNotebook.fromInterface(item, this));
 							break;
 						case "FILE":
-							onlineItems.push(DatabricksWorkspaceFile.fromInterface(item));
+							onlineItems.push(DatabricksWorkspaceFile.fromInterface(item, this));
 							break;
 						case "DIRECTORY":
 						case "REPO":
-							onlineItems.push(DatabricksWorkspaceDirectory.fromInterface(item));
+							onlineItems.push(DatabricksWorkspaceDirectory.fromInterface(item, this));
 							break;
 					}
 				}
@@ -157,10 +155,10 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 							vscode.window.showWarningMessage("File " + localFullPath + " has no valid extension and will be ignored! Supported extensions can be confiugred using setting 'exportFormats'.");
 							continue;
 						}
-						localItems.push(new DatabricksWorkspaceNotebook(localRelativePath, -1, "Local", languageFileExtension));
+						localItems.push(new DatabricksWorkspaceNotebook(localRelativePath, -1, "Local", languageFileExtension, this));
 					}
 					else {
-						localItems.push(new DatabricksWorkspaceDirectory(localRelativePath, -1, "Local"));
+						localItems.push(new DatabricksWorkspaceDirectory(localRelativePath, -1, "Local", this));
 					}
 				}
 			}
@@ -187,6 +185,8 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 					break;
 			}
 		}
+
+		setTimeout(() => this.refreshParent(), 500);
 	}
 
 	async upload(): Promise<void> {
@@ -204,10 +204,43 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 					break;
 			}
 		}
+
+		setTimeout(() => this.refreshParent(), 500);
 	}
 
-	async compare(): Promise<void> {
-		vscode.window.showErrorMessage("[Compare] is currently only supported on a single notebook!");
-		return;
+	async delete(): Promise<void> {
+		let options: string[] = ["Cancel"];
+
+		if(this.onlinePathExists)
+		{
+			options.push("Delete in Workspace only")
+		}
+		if (this.localPathExists) {
+			options.push("Delete local file only")
+
+			if(this.onlinePathExists)
+			{
+				options.push("Delete in Workspace and locally")
+			}
+		}
+
+		let confirm = await Helper.showQuickPick(options, `Which files do you want to delete?`)
+
+		if(!confirm || confirm == "Cancel")
+		{
+			ThisExtension.log("Deletion of Workspace directory '" + this.path + "' aborted!")
+			return;
+		}
+
+		if (confirm.includes("local")) {
+			ThisExtension.log(`Deleting local file '${this.localPath}'!`);
+			fs.unlink(this.localPath, (err) => { if (err) { vscode.window.showErrorMessage(err.message); } });
+		}
+		if (confirm.includes("Workspace")) {
+			DatabricksApiService.deleteWorkspaceItem(this.path, true);	
+		}
+
+		// we always call refresh
+		setTimeout(() => this.refreshParent(), 500);
 	}
 }

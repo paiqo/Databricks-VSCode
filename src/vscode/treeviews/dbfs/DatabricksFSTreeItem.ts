@@ -89,4 +89,8 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 	public CopyPathToClipboard(): void {
 		vscode.env.clipboard.writeText(this.path)
 	}
+
+	async refreshParent(): Promise<void> {
+		vscode.commands.executeCommand("databricksFS.refresh", false, this.parent);
+	}
 }

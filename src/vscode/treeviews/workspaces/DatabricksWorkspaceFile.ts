@@ -11,9 +11,10 @@ export class DatabricksWorkspaceFile extends DatabricksWorkspaceTreeItem {
 
 	constructor(
 		path: string,
-		object_id: number
+		object_id: number,
+		parent: DatabricksWorkspaceTreeItem
 	) {
-		super(path, "FILE", object_id, null, vscode.TreeItemCollapsibleState.None);
+		super(path, "FILE", object_id, parent, vscode.TreeItemCollapsibleState.None);
 
 		super.tooltip = this._tooltip;
 	}
@@ -29,17 +30,12 @@ export class DatabricksWorkspaceFile extends DatabricksWorkspaceTreeItem {
 
 	readonly command = null;
 
-	public static fromInterface(item: iDatabricksWorkspaceItem): DatabricksWorkspaceFile {
-		return new DatabricksWorkspaceFile(item.path, item.object_id);
+	public static fromInterface(item: iDatabricksWorkspaceItem, parent: DatabricksWorkspaceTreeItem = null): DatabricksWorkspaceFile {
+		return new DatabricksWorkspaceFile(item.path, item.object_id, parent);
 	}
 
-	public static fromJSON(jsonString: string): DatabricksWorkspaceFile {
+	public static fromJSON(jsonString: string, parent: DatabricksWorkspaceTreeItem = null): DatabricksWorkspaceFile {
 		let item: iDatabricksWorkspaceItem = JSON.parse(jsonString);
-		return DatabricksWorkspaceFile.fromInterface(item);
-	}
-
-	async compare(): Promise<void> {
-		vscode.window.showErrorMessage("[Compare] is currently only supported on a single notebook!");
-		return;
+		return DatabricksWorkspaceFile.fromInterface(item, parent);
 	}
 }

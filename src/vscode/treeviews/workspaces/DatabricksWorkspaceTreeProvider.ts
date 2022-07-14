@@ -26,6 +26,10 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 		return element;
 	}
 
+	getParent(element: DatabricksWorkspaceTreeItem): vscode.ProviderResult<DatabricksWorkspaceTreeItem> {
+		return element.parent;
+	}
+
 	getChildren(element?: DatabricksWorkspaceTreeItem): Thenable<DatabricksWorkspaceTreeItem[]> {
 		if(!DatabricksApiService.isInitialized) { 			
 			return Promise.resolve([]);

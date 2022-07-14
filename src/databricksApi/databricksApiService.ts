@@ -400,6 +400,18 @@ export abstract class DatabricksApiService {
 
 		let result = response.data;
 	}
+
+	static async deleteWorkspaceItem(path: string, recursive: boolean = false): Promise<void> {
+		let endpoint = '2.0/workspace/delete';
+		let body = {
+			path: path,
+			recursive: recursive
+		};
+
+		let response = await this.post(endpoint, body);
+
+		let result = response.data;
+	}
 	//#endregion
 	
 	//#region Clusters API
@@ -707,24 +719,19 @@ export abstract class DatabricksApiService {
 	//#endregion
 
 	//#region Secrets API (v2.0)
-	static async listSecretScopes(): Promise<DatabricksSecretTreeItem[]> {
+	static async listSecretScopes(): Promise<iDatabricksSecretScope[]> {
 		let endpoint = '2.0/secrets/scopes/list';
 
 		let response = await this.get(endpoint);
 
 		let result = response.data;
-
-		// array of scopes is in result.scopes
 		let items = result.scopes as iDatabricksSecretScope[];
 
-		let scopeItems: DatabricksSecretTreeItem[] = [];
 		if (items == undefined) {
-			return scopeItems;
+			return [];
 		}
-
-		items.map(item => scopeItems.push(new DatabricksSecretTreeItem(item.name, item.backend_type)));
-		Helper.sortArrayByProperty(scopeItems, "label");
-		return scopeItems;
+		Helper.sortArrayByProperty(items, "name");
+		return items;
 	}
 
 	static async createSecretScopes(scope: string, initial_manage_principal: string = "users"): Promise<object> {
@@ -751,25 +758,20 @@ export abstract class DatabricksApiService {
 		return response;
 	}
 
-	static async listSecrets(scope: string, scope_backend_type: SecretBackendType): Promise<DatabricksSecretTreeItem[]> {
+	static async listSecrets(scope: string, scope_backend_type: SecretBackendType): Promise<iDatabricksSecret[]> {
 		let endpoint = '2.0/secrets/list';
 		let body = { scope: scope };
 
 		let response = await this.get(endpoint, { params: body });
 
 		let result = response.data;
+		let items: iDatabricksSecret[] = result.secrets as iDatabricksSecret[];
 
-		// array of secrets is in result.secrets
-		let items = result.secrets as iDatabricksSecret[];
-
-		let scopeItems: DatabricksSecretTreeItem[] = [];
 		if (items == undefined) {
-			return scopeItems;
+			return [];
 		}
-
-		items.map(item => scopeItems.push(new DatabricksSecretTreeItem(scope, scope_backend_type, item.key)));
-		Helper.sortArrayByProperty(scopeItems, "label");
-		return scopeItems;
+		Helper.sortArrayByProperty(items, "key");
+		return items;
 	}
 
 	static async setSecret(scope: string, secret: string, value: string): Promise<object> {

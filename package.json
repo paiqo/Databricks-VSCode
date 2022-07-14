@@ -706,7 +706,7 @@
 				}
 			},
 			{
-				"command": "databricksSecretItem.deleteSecretScope",
+				"command": "databricksSecretScope.delete",
 				"title": "Delete",
 				"icon": {
 					"light": "resources/light/delete.png",
@@ -714,7 +714,7 @@
 				}
 			},
 			{
-				"command": "databricksSecretItem.addSecret",
+				"command": "databricksSecretScope.addSecret",
 				"title": "Add",
 				"icon": {
 					"light": "resources/light/add.png",
@@ -722,7 +722,7 @@
 				}
 			},
 			{
-				"command": "databricksSecretItem.updateSecret",
+				"command": "databricksSecret.update",
 				"title": "Update",
 				"icon": {
 					"light": "resources/light/edit.png",
@@ -730,7 +730,7 @@
 				}
 			},
 			{
-				"command": "databricksSecretItem.deleteSecret",
+				"command": "databricksSecret.delete",
 				"title": "Delete",
 				"icon": {
 					"light": "resources/light/delete.png",
@@ -964,22 +964,22 @@
 					"when": "view == databricksFS"
 				},
 				{
-					"command": "databricksSecretItem.deleteSecretScope",
+					"command": "databricksSecretScope.delete",
 					"when": "view == databricksSecrets && viewItem == SCOPE_DATABRICKS",
 					"group": "inline"
 				},
 				{
-					"command": "databricksSecretItem.addSecret",
+					"command": "databricksSecretScope.addSecret",
 					"when": "view == databricksSecrets && viewItem == SCOPE_DATABRICKS",
 					"group": "inline"
 				},
 				{
-					"command": "databricksSecretItem.updateSecret",
+					"command": "databricksSecret.update",
 					"when": "view == databricksSecrets && viewItem == SECRET_DATABRICKS",
 					"group": "inline"
 				},
 				{
-					"command": "databricksSecretItem.deleteSecret",
+					"command": "databricksSecret.delete",
 					"when": "view == databricksSecrets && viewItem == SECRET_DATABRICKS",
 					"group": "inline"
 				},

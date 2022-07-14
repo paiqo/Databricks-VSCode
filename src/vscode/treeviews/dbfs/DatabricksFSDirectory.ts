@@ -129,7 +129,7 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 
 				if(ThisExtension.RefreshAfterUpDownload)
 				{
-					setTimeout(() => vscode.commands.executeCommand("databricksFS.refresh", false, this.parent), 500);
+					setTimeout(() => this.refreshParent(), 500);
 				}
 			});
 		}
@@ -147,11 +147,6 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 
 	async delete(): Promise<void> {
 		vscode.window.showErrorMessage("For safety reasons, only a single file can be deleted!");
-		return;
-	}
-
-	async compare(): Promise<void> {
-		vscode.window.showErrorMessage("[Compare] is currently not supported on directories.");
 		return;
 	}
 }

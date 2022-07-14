@@ -111,6 +111,10 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 		return new DatabricksFSFile(item.path, item.file_size, parent, "Online");
 	}
 
+	async click(): Promise<void> {
+		this.open();
+	}
+
 	async open(showWarning: boolean = true): Promise<void> {
 		if (!this.localPathExists) {
 			await this.download();
@@ -123,22 +127,6 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 		vscode.workspace
 			.openTextDocument(this.localFileUri)
 			.then(vscode.window.showTextDocument);
-	}
-
-	async click(): Promise<void> {
-		//if (this._languageFileExtension.isNotebook) { Helper.resetOpenAsNotebook(); }
-		Helper.singleVsDoubleClick(this, this.singleClick, this.doubleClick);
-	}
-
-	async doubleClick(): Promise<void> {
-		//vscode.window.showInformationMessage("DoubleClick");
-		await this.open();
-	}
-
-	async singleClick(): Promise<void> {
-		// TODO: This is not working properly as the "this" cannot be passed when used insided setTimeout?!?
-
-		//vscode.window.showInformationMessage("SingleClick");
 	}
 
 	async download(asTempFile: boolean = false): Promise<string> {
@@ -155,7 +143,7 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 			vscode.window.showInformationMessage(`Download of item ${this.path} finished!`);
 
 			if (ThisExtension.RefreshAfterUpDownload && !asTempFile) {
-				setTimeout(() => vscode.commands.executeCommand("databricksFS.refresh", false, this.parent), 500);
+				setTimeout(() => this.refreshParent(), 500);
 			}
 
 			return localPath;
@@ -175,7 +163,7 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 			let response = DatabricksApiService.uploadDBFSFile(localFilePath, this.path, true);
 			vscode.window.showInformationMessage(`Upload of item ${this.path}) finished!`);
 			if (ThisExtension.RefreshAfterUpDownload) {
-				setTimeout(() => vscode.commands.executeCommand("databricksFS.refresh", false, this.parent), 500);
+				setTimeout(() => this.refreshParent(), 500);
 			}
 		}
 		catch (error) {
@@ -183,19 +171,21 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 		}
 	}
 
-	async add(): Promise<void> {
-		throw new Error("A new file can only be added to a directory!");
-	}
-
 	async delete(): Promise<void> {
-		let options: string[] = ["DBFS"];
+		let options: string[] = ["Cancel", "Delete DBFS file only"];
 
 		if (this.localPathExists) {
-			options.push("local")
-			options.push("DBFS + local")
+			options.push("Delete local file only")
+			options.push("Delete file on DBFS and locally")
 		}
 
 		let confirm = await Helper.showQuickPick(options, `Which files do you want to delete?`)
+
+		if(!confirm || confirm == "Cancel")
+		{
+			ThisExtension.log("Deletion of DBFS file '" + this.path + "' aborted!")
+			return;
+		}
 
 		if (confirm.includes("local")) {
 			ThisExtension.log(`Deleting local file '${this.localFilePath}'!`);
@@ -205,7 +195,8 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 			DatabricksApiService.deleteDBFSItem(this.path, false);	
 		}
 
-		setTimeout(() => vscode.commands.executeCommand("databricksFS.refresh", false, this.parent), 500);
+		// we always call refresh
+		setTimeout(() => this.refreshParent(), 500);
 	}
 
 	async compare(): Promise<void> {

@@ -9,22 +9,26 @@ import { DatabricksApiService } from '../../../databricksApi/databricksApiServic
 import { Helper } from '../../../helpers/Helper';
 import { LanguageFileExtensionMapper } from './LanguageFileExtensionMapper';
 import { DatabricksWorkspaceTreeItem } from './DatabricksWorkspaceTreeItem';
+import { DatabricksWorkspaceDirectory } from './DatabricksWorkspaceDirectory';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 
+
 	protected _isInitialized: boolean = false;
 	private _onlinePathExists: boolean = true;
+	private _language: WorkspaceItemLanguage;
 	private _languageFileExtension: LanguageFileExtensionMapper;
 
 	constructor(
 		path: string,
 		object_id: number,
 		source: "Online" | "Local",
-		language: WorkspaceItemLanguage | LanguageFileExtensionMapper = undefined
+		language: WorkspaceItemLanguage | LanguageFileExtensionMapper = undefined,
+		parent: DatabricksWorkspaceTreeItem
 	) {
-		super(path, "NOTEBOOK", object_id, language instanceof LanguageFileExtensionMapper ? language.language : language, vscode.TreeItemCollapsibleState.None);
+		super(path, "NOTEBOOK", object_id, parent, vscode.TreeItemCollapsibleState.None);
 
 		this._object_type = "NOTEBOOK";
 
@@ -150,14 +154,18 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 		return this._languageFileExtension.exportFormat;
 	}
 
-	public static fromInterface(item: iDatabricksWorkspaceItem): DatabricksWorkspaceNotebook {
-		let ret = new DatabricksWorkspaceNotebook(item.path, item.object_id, "Online", item.language);
+	get language(): WorkspaceItemLanguage {
+		return this._language;
+	}
+
+	public static fromInterface(item: iDatabricksWorkspaceItem, parent: DatabricksWorkspaceTreeItem = null): DatabricksWorkspaceNotebook {
+		let ret = new DatabricksWorkspaceNotebook(item.path, item.object_id, "Online", item.language, parent);
 		return ret;
 	}
 
-	public static fromJSON(jsonString: string): DatabricksWorkspaceNotebook {
+	public static fromJSON(jsonString: string, parent: DatabricksWorkspaceTreeItem = null): DatabricksWorkspaceNotebook {
 		let item: iDatabricksWorkspaceItem = JSON.parse(jsonString);
-		return DatabricksWorkspaceNotebook.fromInterface(item);
+		return DatabricksWorkspaceNotebook.fromInterface(item, parent);
 	}
 
 	async download(asTempFile: boolean = false): Promise<string> {
@@ -174,7 +182,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 			vscode.window.showInformationMessage(`Download of item ${fspath.basename(this.path) + this.localFileExtension} finished!`);
 
 			if (ThisExtension.RefreshAfterUpDownload && !asTempFile) {
-				setTimeout(() => vscode.commands.executeCommand("databricksWorkspace.refresh", false), 500);
+				setTimeout(() => this.refreshParent(), 500);
 			}
 
 			return localPath;
@@ -190,12 +198,21 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 			vscode.window.showInformationMessage(`Upload of item ${this.path}) finished!`);
 
 			if (ThisExtension.RefreshAfterUpDownload) {
-				setTimeout(() => vscode.commands.executeCommand("databricksWorkspace.refresh", false), 500);
+				setTimeout(() => this.refreshParent(), 500);
 			}
 		}
 		catch (error) {
 			vscode.window.showErrorMessage(`ERROR: ${error}`);
 		}
+	}
+
+	async click(): Promise<void> {
+		this.open()
+	}
+
+	async doubleClick(): Promise<void> {
+		//vscode.window.showInformationMessage("DoubleClick");
+		this.open();
 	}
 
 	async open(showWarning: boolean = true): Promise<void> {
@@ -206,35 +223,17 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 			if (showWarning)
 				vscode.window.showWarningMessage("Opening local cached file. To open most recent file from Databricks, please manually download it first!");
 		}
-		let viewType:string = "default";
-		if(this.localFileExtension == ".ipynb") {
-			if(vscode.extensions.getExtension("ms-python.python")!= undefined)
-			{
+		let viewType: string = "default";
+		if (this.localFileExtension == ".ipynb") {
+			if (vscode.extensions.getExtension("ms-python.python") != undefined) {
 				viewType = "jupyter-notebook";
 			}
-			else
-			{
+			else {
 				vscode.window.showErrorMessage("Please install extension 'ms-python.python' to open .ipynb files!");
 			}
 		}
-		
+
 		await vscode.commands.executeCommand('vscode.openWith', this.localFileUri, viewType);
-	}
-
-	async click(): Promise<void> {
-		//if (this._languageFileExtension.isNotebook) { Helper.resetOpenAsNotebook(); }
-		Helper.singleVsDoubleClick(this, this.singleClick, this.doubleClick);
-	}
-
-	async doubleClick(): Promise<void> {
-		//vscode.window.showInformationMessage("DoubleClick");
-		await this.open();
-	}
-
-	async singleClick(): Promise<void> {
-		// TODO: This is not working properly as the "this" cannot be passed when used insided setTimeout?!?
-
-		//vscode.window.showInformationMessage("SingleClick");
 	}
 
 	async compare(): Promise<void> {
@@ -246,5 +245,41 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 
 		// if(this._languageFileExtension.isNotebook) { await Helper.disableOpenAsNotebook(); }
 		Helper.showDiff(onlineFileTempPath, this.localFilePath);
+	}
+
+	async delete(): Promise<void> {
+		let options: string[] = ["Cancel"];
+
+		if(this.onlinePathExists)
+		{
+			options.push("Delete in Workspace only")
+		}
+		if (this.localPathExists) {
+			options.push("Delete local file only")
+
+			if(this.onlinePathExists)
+			{
+				options.push("Delete in Workspace and locally")
+			}
+		}
+
+		let confirm = await Helper.showQuickPick(options, `Which files do you want to delete?`)
+
+		if(!confirm || confirm == "Cancel")
+		{
+			ThisExtension.log("Deletion of Workspace notebook '" + this.path + "' aborted!")
+			return;
+		}
+
+		if (confirm.includes("local")) {
+			ThisExtension.log(`Deleting local file '${this.localFilePath}'!`);
+			fs.unlink(this.localFilePath, (err) => { if (err) { vscode.window.showErrorMessage(err.message); } });
+		}
+		if (confirm.includes("Workspace")) {
+			DatabricksApiService.deleteWorkspaceItem(this.path, false);	
+		}
+
+		// we always call refresh
+		setTimeout(() => this.refreshParent(), 500);
 	}
 }

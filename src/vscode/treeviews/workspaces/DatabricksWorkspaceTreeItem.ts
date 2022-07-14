@@ -8,13 +8,13 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	protected _path: string;
 	protected _object_type: WorkspaceItemType;
 	protected _object_id: number;
-	protected _language: WorkspaceItemLanguage | undefined;
+	protected _parent: DatabricksWorkspaceTreeItem;
 
 	constructor(
 		path: string,
 		object_type: WorkspaceItemType,
 		object_id: number,
-		language?: WorkspaceItemLanguage,
+		parent: DatabricksWorkspaceTreeItem,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
 		super(path, collapsibleState);
@@ -22,7 +22,7 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		this._path = path;
 		this._object_type = object_type;
 		this._object_id = object_id;
-		this._language = language;
+		this._parent = parent;
 
 		super.label = path.split('/').pop();
 
@@ -64,20 +64,24 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		return this._object_id;
 	}
 
-	public get language(): WorkspaceItemLanguage | undefined {
-		return this._language;
+	public get parent(): DatabricksWorkspaceTreeItem | undefined {
+		return this._parent;
 	}
 
-	public static fromInterface(item: iDatabricksWorkspaceItem): DatabricksWorkspaceTreeItem {
-		return new DatabricksWorkspaceTreeItem(item.path, item.object_type, item.object_id, item.language);
+	public static fromInterface(item: iDatabricksWorkspaceItem, parent: DatabricksWorkspaceTreeItem = null): DatabricksWorkspaceTreeItem {
+		return new DatabricksWorkspaceTreeItem(item.path, item.object_type, item.object_id, parent);
 	}
 
-	public static fromJSON(itemDefinition: string): DatabricksWorkspaceTreeItem {
+	public static fromJSON(itemDefinition: string, parent: DatabricksWorkspaceTreeItem = null): DatabricksWorkspaceTreeItem {
 		let item: iDatabricksWorkspaceItem = JSON.parse(itemDefinition);
-		return DatabricksWorkspaceTreeItem.fromInterface(item);
+		return DatabricksWorkspaceTreeItem.fromInterface(item, parent);
 	}
 
 	public CopyPathToClipboard(): void {
 		vscode.env.clipboard.writeText(this.path);
+	}
+
+	async refreshParent(): Promise<void> {
+		vscode.commands.executeCommand("databricksWorkspace.refresh", false, this.parent);
 	}
 }
