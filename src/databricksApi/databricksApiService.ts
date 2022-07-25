@@ -448,6 +448,15 @@ export abstract class DatabricksApiService {
 		return response;
 	}
 
+	static async deleteCluster(cluster_id: string): Promise<object> {
+		let endpoint = '2.0/clusters/permanent-delete';
+		let body = { cluster_id: cluster_id };
+
+		let response = this.post(endpoint, body);
+
+		return response;
+	}
+
 	static async listRuntimeVersions(path: string): Promise<iDatabricksRuntimeVersion[]> {
 		let endpoint = '2.0/clusters/spark-versions';
 

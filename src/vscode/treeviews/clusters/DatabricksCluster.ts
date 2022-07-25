@@ -177,16 +177,24 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 			vscode.window.showErrorMessage(`ERROR: ${error}`);
 		});
 
-		if(this.NotebookKernel)
+		let kernel = this.NotebookKernel;
+		if(kernel)
 		{
-			this.NotebookKernel.disposeController();
+			kernel.disposeController();
 		}
 
 		setTimeout(() => vscode.commands.executeCommand("databricksClusters.refresh", false), 1000);
 	}
 
 	async delete(): Promise<void> {
-		vscode.window.showErrorMessage(`Not yet implemented!`);
+		let confirm: string = await Helper.showInputBox("", "Confirm deletion by typeing the Cluster name '" + this.name + "' again.");
+
+		if (!confirm || confirm != this.name) {
+			ThisExtension.log("Deletion of Cluster '" + this.name + "' aborted!")
+			return;
+		}
+
+		await DatabricksApiService.deleteCluster(this.cluster_id);
 
 		setTimeout(() => vscode.commands.executeCommand("databricksClusters.refresh", false), 1000);
 	}
