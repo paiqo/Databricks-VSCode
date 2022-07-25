@@ -234,6 +234,13 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 				]));
 			}
 		}
+		else if (result.results.resultType == "images") {
+			execution.appendOutput([
+			  new vscode.NotebookCellOutput([
+				vscode.NotebookCellOutputItem.text(`<img src="${result.results.fileNames[0]}">`, "text/html")
+			  ])
+			]);
+		}
 		else if (result.results.resultType == "error") {
 			execution.appendOutput(new vscode.NotebookCellOutput([
 				vscode.NotebookCellOutputItem.text(result.results.summary, 'text/html')
