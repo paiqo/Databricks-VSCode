@@ -53,8 +53,7 @@
 		"onView:databricksFS",
 		"onView:databricksSecrets",
 		"onView:databricksSql",
-		"onView:databricksRepos",
-		"onNotebook:jupyter-notebook"
+		"onView:databricksRepos"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
