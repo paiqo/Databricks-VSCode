@@ -102,7 +102,16 @@ export class DatabricksRepoRepository extends DatabricksRepoTreeItem {
 	async checkOut(): Promise<iDatabricksRepo> {
 		let type: string = await Helper.showQuickPick(["branch", "tag"], "Check-out repository to ");
 
+		if(!type) // if the user does not click anything we abort
+		{
+			return;
+		}
+
 		let target: string = await Helper.showInputBox("", `The name of the ${type} you want to check out: `);
+		if(!target) // if the user does not click anything we abort
+		{
+			return;
+		}
 
 		let branch: string = undefined;
 		if (type == "branch") { branch = target; }
@@ -116,8 +125,15 @@ export class DatabricksRepoRepository extends DatabricksRepoTreeItem {
 	}
 
 	async delete(): Promise<void> {
+		let confirm: string = await Helper.showInputBox("", "Confirm deletion by typeing the repo name '" + this.label + "' again.");
+
+		if (!confirm || confirm != this.label) {
+			ThisExtension.log("Deletion of repo '" + this.label + "' aborted!");
+			return;
+		}
+
 		await DatabricksApiService.deleteRepo(this.databricks_id);
 
-		setTimeout(() => vscode.commands.executeCommand("databricksRepos.refresh", false), 2000);
+		setTimeout(() => vscode.commands.executeCommand("databricksRepos.refresh", false), 500);
 	}
 }
