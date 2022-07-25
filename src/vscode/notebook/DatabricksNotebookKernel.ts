@@ -4,14 +4,15 @@ import { ThisExtension } from '../../ThisExtension';
 import { ContextLanguage, ExecutionContext } from '../../databricksApi/_types';
 import { DatabricksApiService } from '../../databricksApi/databricksApiService';
 
-export type NotebookMagic = 
+export type NotebookMagic =
 	"sql"
-|	"python"
-|	"scala"
-|	"md"
-|	"sh"
-|	"fs"
-;
+	| "python"
+	| "scala"
+	| "md"
+	| "sh"
+	| "fs"
+	| "pip"
+	;
 
 // https://code.visualstudio.com/blogs/2021/11/08/custom-notebooks
 export class DatabricksNotebookKernel implements vscode.NotebookController {
@@ -55,13 +56,11 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 		ThisExtension.PushDisposable(this);
 	}
 
-	static getId(clusterId: string)
-	{
+	static getId(clusterId: string) {
 		return this.baseId + clusterId;
 	}
 
-	static getLabel(clusterName: string)
-	{
+	static getLabel(clusterName: string) {
 		return this.baseLabel + clusterName;
 	}
 
@@ -90,8 +89,7 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 	}
 
 	async disposeController(): Promise<void> {
-		if(this.ExecutionContext)
-		{
+		if (this.ExecutionContext) {
 			await DatabricksApiService.removeExecutionContext(this.ExecutionContext);
 			this.ExecutionContext = null;
 		}
@@ -118,7 +116,7 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 		//throw new Error('Method not implemented.');
 	}
 
-	
+
 
 	async executeHandler(cells: vscode.NotebookCell[], _notebook: vscode.NotebookDocument, _controller: vscode.NotebookController): Promise<void> {
 		if (this.ExecutionContext == undefined || this.ExecutionContext == null) {
@@ -132,12 +130,16 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 	private parseCommand(cmd: string): [ContextLanguage, string, NotebookMagic] {
 		if (cmd[0] == "%") {
 			let lines = cmd.split('\n');
-			let magicText = lines[0].slice(1).trim();
+			let magicText = lines[0].split(" ")[0].slice(1).trim();
 			let commandText = lines.slice(1).join('\n');
 			let language: ContextLanguage = this.Language;
-			if(["python", "sql", "scala", "r"].includes(magicText))
-			{
+			if (["python", "sql", "scala", "r"].includes(magicText)) {
 				language = magicText as ContextLanguage;
+			}
+			if (["pip"].includes(magicText)) {
+				// we can run %pip commands "as-is" using the Python language
+				language = "python";
+				commandText = cmd;
 			}
 
 			return [language, commandText, magicText as NotebookMagic];
@@ -150,6 +152,7 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 		execution.executionOrder = ++this._executionOrder;
 		execution.start(Date.now());
 
+
 		let commandText = cell.document.getText();
 		let language: ContextLanguage = null;
 		let magic: NotebookMagic = null;
@@ -160,9 +163,8 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 
 		execution.clearOutput();
 
-		switch(magic)
-		{
-			case  "md":
+		switch (magic) {
+			case "md":
 				execution.appendOutput(new vscode.NotebookCellOutput([
 					vscode.NotebookCellOutputItem.text(commandText, 'text/markdown')
 				]));
@@ -176,16 +178,18 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 				]));
 
 				execution.end(false, Date.now());
+				return;
 		}
 		let command = await DatabricksApiService.runCommand(this.ExecutionContext, commandText, language);
-		execution.token.onCancellationRequested(executingCommand => {
-			DatabricksApiService.cancelCommand(executingCommand);
+		execution.token.onCancellationRequested(() => {
+			DatabricksApiService.cancelCommand(command);
 
 			execution.appendOutput(new vscode.NotebookCellOutput([
 				vscode.NotebookCellOutputItem.text("Execution cancelled!", 'text/plain'),
 			]));
 
 			execution.end(false, Date.now());
+			return;
 		});
 
 		let result = await DatabricksApiService.getCommandResult(command, true, true);
@@ -194,7 +198,7 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 			let data = [];
 			let html: string;
 
-			html = '<table><thead><tr>';
+			html = '<div style="height:300px;overflow:auto;resize:both;"><table class="searchable sortable"><thead><tr>';
 
 			let schema = result.results.schema;
 
@@ -216,17 +220,19 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 				data.push(newRow);
 			}
 
-			html += '</tbody></table>';
+			html += '</tbody></table></div>';
 
 			execution.appendOutput(new vscode.NotebookCellOutput([
 				vscode.NotebookCellOutputItem.text(html, 'text/html'),
-				//vscode.NotebookCellOutputItem.json(data, 'text/x-json')
+				vscode.NotebookCellOutputItem.json(data, 'application/json')
 			]));
 		}
 		else if (result.results.resultType == "text") {
-			execution.appendOutput(new vscode.NotebookCellOutput([
-				vscode.NotebookCellOutputItem.text(result.results.data, 'text/plain'),
-			]));
+			if (result.results.data != '') {
+				execution.appendOutput(new vscode.NotebookCellOutput([
+					vscode.NotebookCellOutputItem.text(result.results.data, 'text/plain'),
+				]));
+			}
 		}
 		else if (result.results.resultType == "error") {
 			execution.appendOutput(new vscode.NotebookCellOutput([
@@ -240,7 +246,7 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 			execution.end(false, Date.now());
 		}
 
-		
+
 		/*
 		// just for debugging
 		execution.appendOutput(new vscode.NotebookCellOutput([

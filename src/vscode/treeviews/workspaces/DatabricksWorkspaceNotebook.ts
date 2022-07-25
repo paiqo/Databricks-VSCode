@@ -109,6 +109,21 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 		return fspath.join(ThisExtension.rootPath, 'resources', theme, 'workspace', 'notebook' + sync_state + '.png');
 	}
 
+	// this should be changed to use vscode.open command to properly support single and double click
+	// however, the local file URI would need to be passed in as a static value somehow
+	/*
+	item.command = {
+			command: 'vscode.open',
+			title: 'Open Call',
+			arguments: [
+				element.item.uri,
+				<vscode.TextDocumentShowOptions>{
+					selection: element.item.selectionRange.with({ end: element.item.selectionRange.start }),
+					preserveFocus: true
+				}
+			]
+		};
+	*/
 	readonly command = {
 		command: 'databricksWorkspaceItem.click', title: "Open File", arguments: [this]
 	};
