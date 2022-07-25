@@ -195,7 +195,7 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 		let result = await DatabricksApiService.getCommandResult(command, true, true);
 
 		if (result.results.resultType == "table") {
-			let data = [];
+			let data: Array<any> = [];
 			let html: string;
 
 			html = '<div style="height:300px;overflow:auto;resize:both;"><table class="searchable sortable"><thead><tr>';
@@ -222,10 +222,13 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 
 			html += '</tbody></table></div>';
 
-			execution.appendOutput(new vscode.NotebookCellOutput([
+			let output: vscode.NotebookCellOutput = new vscode.NotebookCellOutput([
 				vscode.NotebookCellOutputItem.text(html, 'text/html'),
-				vscode.NotebookCellOutputItem.json(data, 'application/json')
-			]));
+				vscode.NotebookCellOutputItem.json(data, 'application/json'), // to be used by proper JSON/table renderers
+				vscode.NotebookCellOutputItem.json(data, 'text/data') // for easy copying of results as JSON
+			])
+			output.metadata = { row_count: data.length, truncated: result.results.truncated };
+			execution.appendOutput(output);
 		}
 		else if (result.results.resultType == "text") {
 			if (result.results.data != '') {
@@ -235,24 +238,15 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 			}
 		}
 		else if (result.results.resultType == "images") {
-			/*
-			// add support for multiple images renderd as SVG natively
-			for(let fileName of result.results.fileNames)
-			{
-				let mimeType = fileName.split(";")[0].split(":")[1];
+			// add support for multiple images, each rendered as individual output
+			for (let fileName of result.results.fileNames) {
+				// we derive the mimeType from the actual file provided by Databricks and load the actual content from the base64 string
+				let mimeType: string = fileName.split(";")[0].split(":")[1];
+				let content: string = fileName.split(";", 2)[1];
 				execution.appendOutput(new vscode.NotebookCellOutput([
-					vscode.NotebookCellOutputItem.text(fileName.split(";")[1], mimeType),
-					vscode.NotebookCellOutputItem.text(fileName, mimeType),
-					vscode.NotebookCellOutputItem.text(`<img src="${fileName}">`, "text/html")
+					new vscode.NotebookCellOutputItem(Buffer.from(content.split(",")[1], (content.split(",")[0] as BufferEncoding)), mimeType),
 				]))
-
 			}
-			*/
-			execution.appendOutput(
-				result.results.fileNames.map(fileName => new vscode.NotebookCellOutput([
-					vscode.NotebookCellOutputItem.text(`<img src="${fileName}">`, "text/html")
-				])
-				));
 		}
 		else if (result.results.resultType == "error") {
 			execution.appendOutput(new vscode.NotebookCellOutput([
