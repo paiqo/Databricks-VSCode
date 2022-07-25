@@ -225,7 +225,7 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 			let output: vscode.NotebookCellOutput = new vscode.NotebookCellOutput([
 				vscode.NotebookCellOutputItem.text(html, 'text/html'),
 				vscode.NotebookCellOutputItem.json(data, 'application/json'), // to be used by proper JSON/table renderers
-				vscode.NotebookCellOutputItem.json(data, 'text/data') // for easy copying of results as JSON
+				vscode.NotebookCellOutputItem.json(data, 'text/plain') // for easy copying of results as JSON
 			])
 			output.metadata = { row_count: data.length, truncated: result.results.truncated };
 			execution.appendOutput(output);
@@ -233,8 +233,10 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 		else if (result.results.resultType == "text") {
 			if (result.results.data != '') {
 				execution.appendOutput(new vscode.NotebookCellOutput([
-					vscode.NotebookCellOutputItem.text(result.results.data, 'text/plain'),
+					vscode.NotebookCellOutputItem.text(result.results.data, 'text/plain')
 				]));
+
+
 			}
 		}
 		else if (result.results.resultType == "images") {
