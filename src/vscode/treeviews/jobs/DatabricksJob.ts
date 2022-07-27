@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
 import * as fspath from 'path';
-import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
+
 import { ThisExtension } from '../../../ThisExtension';
 import { Helper } from '../../../helpers/Helper';
+
+import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { DatabricksJobTreeItem } from './DatabricksJobTreeItem';
 import { DatabricksJobRun } from './DatabricksJobRun';
 import { iDatabricksJob } from './iDatabricksJob';
@@ -112,7 +114,7 @@ export class DatabricksJob extends DatabricksJobTreeItem {
 		let response = DatabricksApiService.runJob(this.job_id);
 
 		response.then((response) => {
-			vscode.window.showInformationMessage(`Starting job ${this.label} (${this.job_id}) ...`);
+			Helper.showTemporaryInformationMessage(`Starting job ${this.label} (${this.job_id}) ...`);
 		}, (error) => {
 			vscode.window.showErrorMessage(`ERROR: ${error}`);
 		});

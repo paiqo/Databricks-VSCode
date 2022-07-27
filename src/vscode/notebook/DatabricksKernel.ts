@@ -14,16 +14,20 @@ export type NotebookMagic =
 	| "pip"
 	;
 
+export type KernelType =
+	"jupyter-notebook"
+	| "interactive"
+
 // https://code.visualstudio.com/blogs/2021/11/08/custom-notebooks
-export class DatabricksNotebookKernel implements vscode.NotebookController {
+export class DatabricksKernel implements vscode.NotebookController {
 	private static baseId: string = 'databricks-notebook-kernel-';
 	private static baseLabel: string = 'Databricks ';
 	public id: string;
 	public label: string;
-	readonly notebookType: string = 'jupyter-notebook';
+	readonly notebookType: KernelType;
 	readonly description: string = 'A notebook controller that allows execution of code against a Databricks cluster';
 	readonly detail: string = 'Some more detils ...';
-	readonly supportedLanguages = [];
+	readonly supportedLanguages = ["python", "sql", "r", "markdown", "scala"];
 	readonly supportsExecutionOrder: boolean = true;
 
 	private _controller: vscode.NotebookController;
@@ -32,15 +36,16 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 	private _language: ContextLanguage;
 	private _executionContext: ExecutionContext;
 
-	constructor(clusterId: string, clusterName: string, language: ContextLanguage = "python") {
+	constructor(clusterId: string, clusterName: string, notebookType: KernelType = 'jupyter-notebook', language: ContextLanguage = "python") {
+		this.notebookType = notebookType;
 		this._clusterId = clusterId;
 		this._language = language;
-		this.id = DatabricksNotebookKernel.getId(clusterId);
-		this.label = DatabricksNotebookKernel.getLabel(clusterName);
+		this.id = DatabricksKernel.getId(clusterId, notebookType);
+		this.label = DatabricksKernel.getLabel(clusterName);
 
 		this._executionOrder = 0;
 
-		ThisExtension.log("Creating new notebook kernel " + this.id);
+		ThisExtension.log("Creating new " + this.notebookType + " kernel '" + this.id + "'");
 		this._controller = vscode.notebooks.createNotebookController(this.id,
 			this.notebookType,
 			this.label);
@@ -56,8 +61,8 @@ export class DatabricksNotebookKernel implements vscode.NotebookController {
 		ThisExtension.PushDisposable(this);
 	}
 
-	static getId(clusterId: string) {
-		return this.baseId + clusterId;
+	static getId(clusterId: string, kernelType: KernelType) {
+		return this.baseId + clusterId + "-" + kernelType;
 	}
 
 	static getLabel(clusterName: string) {

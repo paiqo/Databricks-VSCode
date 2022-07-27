@@ -5,7 +5,7 @@ import { ThisExtension } from '../../../ThisExtension';
 import { ClusterState, ClusterSource } from './_types';
 import { iDatabricksCluster } from './iDatabricksCluster';
 import { Helper } from '../../../helpers/Helper';
-import { DatabricksNotebookKernel } from '../../notebook/DatabricksNotebookKernel';
+import { DatabricksKernel } from '../../notebook/DatabricksKernel';
 import { DatabricksClusterTreeItem } from './DatabricksClusterTreeItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -14,7 +14,6 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 	private _state: ClusterState;
 	private _definition: iDatabricksCluster;
 	private _source: ClusterSource;
-	private _notebook_kernel: DatabricksNotebookKernel;
 
 	constructor(
 		definition: iDatabricksCluster,
@@ -25,7 +24,6 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 		this._id = definition.cluster_id;
 		this._state = definition.state;
 		this._source = definition.cluster_source;
-		this._notebook_kernel = ThisExtension.getNotebookKernel(this.cluster_id);
 
 		super.description = this._description;
 		super.tooltip = this._tooltip;
@@ -135,12 +133,32 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 		return this._source;
 	}
 
-	private get NotebookKernel(): DatabricksNotebookKernel {
-		return ThisExtension.getNotebookKernel(this.cluster_id);
+	private get NotebookKernelName(): string {
+		return this.cluster_id + "-jupyter-notebook";
+	}
+
+	private get NotebookKernel(): DatabricksKernel {
+		return ThisExtension.getNotebookKernel(this.NotebookKernelName);
 	}
 
 	public get NotebookKernelExists(): boolean {
 		if(this.NotebookKernel)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	private get InteractiveKernelName(): string {
+		return this.cluster_id + "-interactive";
+	}
+
+	private get InteractiveKernel(): DatabricksKernel {
+		return ThisExtension.getNotebookKernel(this.InteractiveKernelName);
+	}
+
+	public get InteractiveKernelExists(): boolean {
+		if(this.InteractiveKernel)
 		{
 			return true;
 		}
@@ -160,7 +178,7 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 		let response = DatabricksApiService.startCluster(this.cluster_id);
 
 		response.then((response) => {
-			vscode.window.showInformationMessage(`Starting cluster ${this.label} (${this.cluster_id}) ...`);
+			Helper.showTemporaryInformationMessage(`Starting cluster ${this.label} (${this.cluster_id}) ...`);
 		}, (error) => {
 			vscode.window.showErrorMessage(`ERROR: ${error}`);
 		});
@@ -172,7 +190,7 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 		let response = DatabricksApiService.stopCluster(this.cluster_id);
 
 		response.then((response) => {
-			vscode.window.showInformationMessage(`Stopping cluster ${this.label} (${this.cluster_id}) ...`);
+			Helper.showTemporaryInformationMessage(`Stopping cluster ${this.label} (${this.cluster_id}) ...`);
 		}, (error) => {
 			vscode.window.showErrorMessage(`ERROR: ${error}`);
 		});
@@ -212,12 +230,22 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 	async createKernel(): Promise<void> {
 		if(!this.NotebookKernel)
 		{
-			this._notebook_kernel = new DatabricksNotebookKernel(this.cluster_id, this.cluster_name);
-			ThisExtension.setNotebookKernel(this.cluster_id, this._notebook_kernel);
+			let notebookKernel: DatabricksKernel = new DatabricksKernel(this.cluster_id, this.cluster_name);
+			ThisExtension.setNotebookKernel(this.NotebookKernelName, notebookKernel);
 		}
 		else
 		{
 			ThisExtension.log(`Notebook Kernel for Databricks cluster ${this.cluster_id} already exists!`)
+		}
+
+		if(!this.InteractiveKernel)
+		{
+			let interactiveKernel: DatabricksKernel = new DatabricksKernel(this.cluster_id, this.cluster_name, "interactive");
+			ThisExtension.setNotebookKernel(this.InteractiveKernelName, interactiveKernel);
+		}
+		else
+		{
+			ThisExtension.log(`Interactive Kernel for Databricks cluster ${this.cluster_id} already exists!`)
 		}
 	}
 

@@ -116,16 +116,20 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 	async add(): Promise<void> {
 		let files: vscode.Uri[] = await vscode.window.showOpenDialog({ canSelectMany: true });
 
-		let file: vscode.Uri = files[0];
-		for(let fileNum in files)
+		if(!files)
 		{
-			let dbfsPath = fspath.join(this.path, fspath.basename(files[fileNum].fsPath)).split('\\').join('/');
-			let response = DatabricksApiService.uploadDBFSFile(files[fileNum].fsPath, dbfsPath, true );
+			return;
+		}
+
+		for(let file of files)
+		{
+			let dbfsPath = fspath.join(this.path, fspath.basename(file.fsPath)).split('\\').join('/');
+			let response = DatabricksApiService.uploadDBFSFile(file.fsPath, dbfsPath, true );
 
 			response.catch((error) => {
 				vscode.window.showErrorMessage(`ERROR: ${error}`);
 			}).then(() => {
-				vscode.window.showInformationMessage(`Upload of item ${dbfsPath} finished!`);
+				Helper.showTemporaryInformationMessage(`Upload of item ${dbfsPath} finished!`);
 
 				if(ThisExtension.RefreshAfterUpDownload)
 				{

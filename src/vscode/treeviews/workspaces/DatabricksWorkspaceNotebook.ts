@@ -57,6 +57,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
+		super.command = this._command;
 	}
 
 	get _tooltip(): string {
@@ -93,9 +94,20 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 
 	// used in package.json to filter commands via viewItem == CANSTART
 	get _contextValue(): string {
-		if (this.localPathExists && this.onlinePathExists) { return 'CAN_SYNC'; }
-		if (!this.localPathExists && this.onlinePathExists) { return 'CAN_DOWNLOAD'; }
-		if (this.localPathExists && !this.onlinePathExists) { return 'CAN_UPLOAD'; }
+		let states: string[] = [];
+
+		if (this.localPathExists) {
+			states.push("UPLOAD");
+		}
+		if (this.onlinePathExists) {
+			states.push("DOWNLOAD")
+		}
+		if (this.localPathExists && this.onlinePathExists) {
+			states.push("COMPARE")
+		}
+
+		// use , as separator to allow to check for ,<value>, in package.json when condition
+		return "," + states.join(",") + ",";
 	}
 
 	protected getIconPath(theme: string): string {
@@ -109,23 +121,24 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 		return fspath.join(ThisExtension.rootPath, 'resources', theme, 'workspace', 'notebook' + sync_state + '.png');
 	}
 
-	// this should be changed to use vscode.open command to properly support single and double click
-	// however, the local file URI would need to be passed in as a static value somehow
-	/*
-	item.command = {
-			command: 'vscode.open',
-			title: 'Open Call',
-			arguments: [
-				element.item.uri,
-				<vscode.TextDocumentShowOptions>{
-					selection: element.item.selectionRange.with({ end: element.item.selectionRange.start }),
-					preserveFocus: true
-				}
-			]
-		};
-	*/
-	readonly command = {
-		command: 'databricksWorkspaceItem.click', title: "Open File", arguments: [this]
+	get _command(): vscode.Command {
+		
+		// vscode.open only works if the local file exists and it is not a notebook (which would get opened as JSON)
+		if (this.localPathExists && !this._languageFileExtension.isNotebook) {
+			return {
+				command: 'vscode.open',
+				title: 'Open',
+				arguments: [
+					this.localFileUri,
+					<vscode.TextDocumentShowOptions>{
+						preserveFocus: true
+					}
+				]
+			}
+		}
+		return {
+			command: 'databricksWorkspaceItem.click', title: "Open File", arguments: [this]
+		}
 	};
 
 	get localFolderPath(): string {
@@ -194,7 +207,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 
 			let response = await DatabricksApiService.downloadWorkspaceItem(this.path, localPath, this.exportFormat);
 
-			vscode.window.showInformationMessage(`Download of item ${fspath.basename(this.path) + this.localFileExtension} finished!`);
+			Helper.showTemporaryInformationMessage(`Download of item ${fspath.basename(this.path) + this.localFileExtension} finished!`);
 
 			if (ThisExtension.RefreshAfterUpDownload && !asTempFile) {
 				setTimeout(() => this.refreshParent(), 500);
@@ -210,7 +223,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 	async upload(): Promise<void> {
 		try {
 			let response = DatabricksApiService.uploadWorkspaceItem(this.localFilePath, this.path, this.language, true, this.exportFormat);
-			vscode.window.showInformationMessage(`Upload of item ${this.path}) finished!`);
+			Helper.showTemporaryInformationMessage(`Upload of item ${this.path}) finished!`);
 
 			if (ThisExtension.RefreshAfterUpDownload) {
 				setTimeout(() => this.refreshParent(), 500);
@@ -252,10 +265,6 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 	}
 
 	async compare(): Promise<void> {
-		if (this._languageFileExtension.isNotebook) {
-			vscode.window.showErrorMessage("DIFF is currently not supported when using notebooks. You can change the export formats to work around this issue!");
-			return;
-		}
 		let onlineFileTempPath: string = await this.download(true);
 
 		// if(this._languageFileExtension.isNotebook) { await Helper.disableOpenAsNotebook(); }
@@ -265,23 +274,20 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 	async delete(): Promise<void> {
 		let options: string[] = ["Cancel"];
 
-		if(this.onlinePathExists)
-		{
+		if (this.onlinePathExists) {
 			options.push("Delete in Workspace only")
 		}
 		if (this.localPathExists) {
 			options.push("Delete local file only")
 
-			if(this.onlinePathExists)
-			{
+			if (this.onlinePathExists) {
 				options.push("Delete in Workspace and locally")
 			}
 		}
 
 		let confirm = await Helper.showQuickPick(options, `Which files do you want to delete?`)
 
-		if(!confirm || confirm == "Cancel")
-		{
+		if (!confirm || confirm == "Cancel") {
 			ThisExtension.log("Deletion of Workspace notebook '" + this.path + "' aborted!")
 			return;
 		}
@@ -291,7 +297,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 			fs.unlink(this.localFilePath, (err) => { if (err) { vscode.window.showErrorMessage(err.message); } });
 		}
 		if (confirm.includes("Workspace")) {
-			DatabricksApiService.deleteWorkspaceItem(this.path, false);	
+			DatabricksApiService.deleteWorkspaceItem(this.path, false);
 		}
 
 		// we always call refresh

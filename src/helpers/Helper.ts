@@ -56,6 +56,20 @@ export abstract class Helper {
 		return result;
 	}
 
+	static async showTemporaryInformationMessage(message: string, timeout: number = 2000): Promise<void> {
+		vscode.window.withProgress({
+			location: vscode.ProgressLocation.Notification,
+			title: message,
+			cancellable: false
+		}, (progress) => {
+			return new Promise<void>(resolve => {
+				setTimeout(() => {
+					resolve();
+				}, timeout);
+			});
+		});
+	}
+
 
 	static async delay(ms: number) {
 		return new Promise(resolve => setTimeout(resolve, ms));

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { DatabricksConnectionTreeItem } from './DatabricksConnectionTreeItem';
 import { ThisExtension } from '../../../ThisExtension';
 import { iDatabricksConnection } from './iDatabricksConnection';
+import { Helper } from '../../../helpers/Helper';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class DatabricksConnectionTreeProvider implements vscode.TreeDataProvider<DatabricksConnectionTreeItem> {
@@ -14,7 +15,7 @@ export class DatabricksConnectionTreeProvider implements vscode.TreeDataProvider
 
 	refresh(showInfoMessage: boolean = false): void {
 		if (showInfoMessage) {
-			vscode.window.showInformationMessage('Refreshing Connections ...');
+			Helper.showTemporaryInformationMessage('Refreshing Connections ...');
 		}
 		ThisExtension.ConnectionManager.initialize();
 		this._onDidChangeTreeData.fire(null);

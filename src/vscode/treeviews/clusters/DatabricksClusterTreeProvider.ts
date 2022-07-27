@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
+import { Helper } from '../../../helpers/Helper';
 import { ThisExtension } from '../../../ThisExtension';
 import { DatabricksCluster } from './DatabricksCluster';
 import { DatabricksClusterJobClusters } from './DatabricksClusterJobClusters';
@@ -24,7 +25,7 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 
 	refresh(showInfoMessage: boolean = false, isAutoRefresh = false, item: DatabricksClusterTreeItem = null): void {
 		if (showInfoMessage && !isAutoRefresh) {
-			vscode.window.showInformationMessage('Refreshing Clusters ...');
+			Helper.showTemporaryInformationMessage('Refreshing Clusters ...');
 		}
 		this._onDidChangeTreeData.fire(item);
 	}

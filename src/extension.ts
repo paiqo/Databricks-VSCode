@@ -59,9 +59,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksWorkspaceItem.compare', (workspaceItem: DatabricksWorkspaceNotebook) => workspaceItem.compare());
 	vscode.commands.registerCommand('databricksWorkspaceItem.copyPath', (workspaceItem: DatabricksWorkspaceTreeItem) => workspaceItem.CopyPathToClipboard());
 
-	vscode.commands.registerCommand('databricksWorkspaceItem.edit', (workspaceItem: DatabricksWorkspaceNotebook) => vscode.window.showErrorMessage(`Not yet implemented!`));
-	vscode.commands.registerCommand('databricksWorkspaceItem.delete', (workspaceItem: DatabricksWorkspaceNotebook | DatabricksWorkspaceDirectory) => workspaceItem.delete());
-	vscode.commands.registerCommand('databricksWorkspaceItem.sync', (workspaceItem: DatabricksWorkspaceNotebook | DatabricksWorkspaceDirectory) => vscode.window.showErrorMessage(`Not yet implemented!`));
+		vscode.commands.registerCommand('databricksWorkspaceItem.delete', (workspaceItem: DatabricksWorkspaceNotebook | DatabricksWorkspaceDirectory) => workspaceItem.delete());
 	
 	// register DatabricksClusterTreeProvider
 	let databricksClusterTreeProvider = new DatabricksClusterTreeProvider();

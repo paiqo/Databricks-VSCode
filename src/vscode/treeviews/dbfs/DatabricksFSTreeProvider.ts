@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { DatabricksFSTreeItem } from './DatabricksFSTreeItem';
 import { DatabricksFSDirectory } from './DatabricksFSDirectory';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
+import { Helper } from '../../../helpers/Helper';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<DatabricksFSTreeItem> {
@@ -12,7 +13,7 @@ export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<Databri
 
 	refresh(showInfoMessage: boolean = false, item: DatabricksFSTreeItem = null): void {
 		if(showInfoMessage){
-			vscode.window.showInformationMessage('Refreshing DBFS ...');
+			Helper.showTemporaryInformationMessage('Refreshing DBFS ...');
 		}
 		this._onDidChangeTreeData.fire(item);
 	}

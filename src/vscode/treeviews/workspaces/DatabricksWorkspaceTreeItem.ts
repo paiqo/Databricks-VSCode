@@ -36,7 +36,7 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		return fspath.join(ThisExtension.rootPath, 'resources', theme, 'workspace', this.object_type.toLowerCase() + '.png');
 	}	
 
-	readonly command = null;
+	command = null;
 	/*
 	readonly command = {
 		command: 'databricksWorkspaceItem.click', title: "Open File", arguments: [this]

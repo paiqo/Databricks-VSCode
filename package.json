@@ -43,7 +43,9 @@
 		"azure",
 		"AWS",
 		"GCP",
-		"data"
+		"data",
+		"notebookKernelInteractive",
+		"notebookKernelJupyterNotebook"
 	],
 	"activationEvents": [
 		"onView:DatabricksConnections",
@@ -414,18 +416,12 @@
 			{
 				"command": "databricksConnections.refresh",
 				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "DatabricksConnections.add",
 				"title": "Add",
-				"icon": {
-					"light": "resources/light/add.png",
-					"dark": "resources/dark/add.png"
-				}
+				"icon": "$(add)"
 			},
 			{
 				"command": "DatabricksConnectionItem.activate",
@@ -438,34 +434,17 @@
 			{
 				"command": "databricksWorkspace.refresh",
 				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksWorkspace.download",
 				"title": "Download",
-				"icon": {
-					"light": "resources/light/download.png",
-					"dark": "resources/dark/download.png"
-				}
-			},
-			{
-				"command": "databricksWorkspace.sync",
-				"title": "Sync",
-				"icon": {
-					"light": "resources/light/sync.png",
-					"dark": "resources/dark/sync.png"
-				}
+				"icon": "$(cloud-download)"
 			},
 			{
 				"command": "databricksWorkspace.upload",
 				"title": "Upload",
-				"icon": {
-					"light": "resources/light/upload.png",
-					"dark": "resources/dark/upload.png"
-				}
+				"icon": "$(cloud-upload)"
 			},
 			{
 				"command": "databricksWorkspaceItem.click",
@@ -474,42 +453,22 @@
 			{
 				"command": "databricksWorkspaceItem.download",
 				"title": "Download",
-				"icon": {
-					"light": "resources/light/download.png",
-					"dark": "resources/dark/download.png"
-				}
+				"icon": "$(cloud-download)"
 			},
 			{
 				"command": "databricksWorkspaceItem.upload",
 				"title": "Upload",
-				"icon": {
-					"light": "resources/light/upload.png",
-					"dark": "resources/dark/upload.png"
-				}
+				"icon": "$(cloud-upload)"
 			},
 			{
 				"command": "databricksWorkspaceItem.compare",
 				"title": "Compare",
-				"icon": {
-					"light": "resources/light/compare.png",
-					"dark": "resources/dark/compare.png"
-				}
-			},
-			{
-				"command": "databricksWorkspaceItem.sync",
-				"title": "Sync",
-				"icon": {
-					"light": "resources/light/sync.png",
-					"dark": "resources/dark/sync.png"
-				}
+				"icon": "$(compare-changes)"
 			},
 			{
 				"command": "databricksWorkspaceItem.delete",
 				"title": "Delete",
-				"icon": {
-					"light": "resources/light/delete.png",
-					"dark": "resources/dark/delete.png"
-				}
+				"icon": "$(remove-close)"
 			},
 			{
 				"command": "databricksWorkspaceItem.copyPath",
@@ -518,18 +477,12 @@
 			{
 				"command": "databricksClusters.refresh",
 				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksClusters.add",
 				"title": "Add",
-				"icon": {
-					"light": "resources/light/add.png",
-					"dark": "resources/dark/add.png"
-				}
+				"icon": "$(add)"
 			},
 			{
 				"command": "databricksClusterItem.click",
@@ -554,18 +507,12 @@
 			{
 				"command": "databricksClusterItem.showDefinition",
 				"title": "JSON Definition",
-				"icon": {
-					"light": "resources/light/json.png",
-					"dark": "resources/dark/json.png"
-				}
+				"icon": "$(json)"
 			},
 			{
 				"command": "databricksClusterItem.delete",
 				"title": "Delete",
-				"icon": {
-					"light": "resources/light/delete.png",
-					"dark": "resources/dark/delete.png"
-				}
+				"icon": "$(remove-close)"
 			},
 			{
 				"command": "databricksClusterItem.useForSQL",
@@ -579,30 +526,22 @@
 				"command": "databricksClusterItem.createKernel",
 				"title": "Create Databricks Cluster Kernel",
 				"shortTitle": "Create Notebook Kernel"
-				
 			},
 			{
 				"command": "databricksClusterItem.restartKernel",
 				"title": "Restart Databricks Cluster Kernel",
 				"shortTitle": "Restart Notebook Kernel"
-				
 			},
 
 			{
 				"command": "databricksJobs.refresh",
 				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksJobItem.showDefinition",
 				"title": "JSON Definition",
-				"icon": {
-					"light": "resources/light/json.png",
-					"dark": "resources/dark/json.png"
-				}
+				"icon": "$(json)"
 			},
 			{
 				"command": "databricksJobItem.click",
@@ -627,42 +566,27 @@
 			{
 				"command": "databricksJobItem.openBrowser",
 				"title": "Open Browser",
-				"icon": {
-					"light": "resources/light/openBrowser.png",
-					"dark": "resources/dark/openBrowser.png"
-				}
+				"icon": "$(globe)"
 			},
 			{
 				"command": "databricksFS.refresh",
 				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksFS.add",
 				"title": "Add",
-				"icon": {
-					"light": "resources/light/add.png",
-					"dark": "resources/dark/add.png"
-				}
+				"icon": "$(add)"
 			},
 			{
 				"command": "databricksFSItem.download",
 				"title": "Download",
-				"icon": {
-					"light": "resources/light/download.png",
-					"dark": "resources/dark/download.png"
-				}
+				"icon": "$(cloud-download)"
 			},
 			{
 				"command": "databricksFSItem.upload",
 				"title": "Upload",
-				"icon": {
-					"light": "resources/light/upload.png",
-					"dark": "resources/dark/upload.png"
-				}
+				"icon": "$(cloud-upload)"
 			},
 			{
 				"command": "databricksFSItem.click",
@@ -671,18 +595,12 @@
 			{
 				"command": "databricksFSItem.add",
 				"title": "Add",
-				"icon": {
-					"light": "resources/light/add.png",
-					"dark": "resources/dark/add.png"
-				}
+				"icon": "$(add)"
 			},
 			{
 				"command": "databricksFSItem.delete",
 				"title": "Delete",
-				"icon": {
-					"light": "resources/light/delete.png",
-					"dark": "resources/dark/delete.png"
-				}
+				"icon": "$(remove-close)"
 			},
 			{
 				"command": "databricksFSItem.copyPath",
@@ -691,90 +609,57 @@
 			{
 				"command": "databricksSecrets.refresh",
 				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksSecrets.addSecretScope",
-				"title": "Add",
-				"icon": {
-					"light": "resources/light/add.png",
-					"dark": "resources/dark/add.png"
-				}
+				"title": "Add Secret Scope",
+				"icon": "$(add)"
 			},
 			{
 				"command": "databricksSecretScope.delete",
 				"title": "Delete",
-				"icon": {
-					"light": "resources/light/delete.png",
-					"dark": "resources/dark/delete.png"
-				}
+				"icon": "$(remove-close)"
 			},
 			{
 				"command": "databricksSecretScope.addSecret",
-				"title": "Add",
-				"icon": {
-					"light": "resources/light/add.png",
-					"dark": "resources/dark/add.png"
-				}
+				"title": "Add Secret",
+				"icon": "$(add)"
 			},
 			{
 				"command": "databricksSecret.update",
 				"title": "Update",
-				"icon": {
-					"light": "resources/light/edit.png",
-					"dark": "resources/dark/edit.png"
-				}
+				"icon": "$(pencil)"
 			},
 			{
 				"command": "databricksSecret.delete",
 				"title": "Delete",
-				"icon": {
-					"light": "resources/light/delete.png",
-					"dark": "resources/dark/delete.png"
-				}
+				"icon": "$(remove-close)"
 			},
 			{
 				"command": "databricksSQL.refresh",
 				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksSQLTable.showDefinition",
 				"title": "Show Definition",
-				"icon": {
-					"light": "resources/light/json.png",
-					"dark": "resources/dark/json.png"
-				}
+				"icon": "$(json)"
 			},
 			{
 				"command": "databricksRepos.refresh",
 				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksRepo.checkOut",
 				"title": "Check-Out",
-				"icon": {
-					"light": "resources/light/download.png",
-					"dark": "resources/dark/download.png"
-				}
+				"icon": "$(repo-pull)"
 			},
 			{
 				"command": "databricksRepo.delete",
 				"title": "Delete",
-				"icon": {
-					"light": "resources/light/delete.png",
-					"dark": "resources/dark/delete.png"
-				}
+				"icon": "$(remove-close)"
 			},
 
 			{
@@ -864,17 +749,17 @@
 				},
 				{
 					"command": "databricksWorkspaceItem.download",
-					"when": "view == databricksWorkspace && viewItem == CAN_SYNC || viewItem == CAN_DOWNLOAD",
+					"when": "view == databricksWorkspace && viewItem =~ /.*,DOWNLOAD,.*/",
 					"group": "inline@1"
 				},
 				{
 					"command": "databricksWorkspaceItem.upload",
-					"when": "view == databricksWorkspace && viewItem == CAN_SYNC || viewItem == CAN_UPLOAD",
+					"when": "view == databricksWorkspace && viewItem =~ /.*,UPLOAD,.*/",
 					"group": "inline@1"
 				},
 				{
 					"command": "databricksWorkspaceItem.compare",
-					"when": "view == databricksWorkspace && viewItem == CAN_SYNC",
+					"when": "view == databricksWorkspace && viewItem =~ /.*,COMPARE,.*/",
 					"group": "inline@1"
 				},
 				{

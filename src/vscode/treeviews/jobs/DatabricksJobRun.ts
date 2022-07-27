@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
 import * as fspath from 'path';
-import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
+
 import { ThisExtension } from '../../../ThisExtension';
 import { Helper } from '../../../helpers/Helper';
+
+import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { DatabricksJobTreeItem } from './DatabricksJobTreeItem';
 import { iDatabricksJobRun } from './iDatabricksJobRun';
-import { Timestamp } from 'rxjs';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksJobRun extends DatabricksJobTreeItem {
@@ -186,7 +187,7 @@ export class DatabricksJobRun extends DatabricksJobTreeItem {
 		let response = DatabricksApiService.cancelJobRun(this.job_run_id);
 
 		response.then((response) => {
-			vscode.window.showInformationMessage(`Stopping job run ${this.label} (${this.job_run_id}) ...`);
+			Helper.showTemporaryInformationMessage(`Stopping job run ${this.label} (${this.job_run_id}) ...`);
 		}, (error) => {
 			vscode.window.showErrorMessage(`ERROR: ${error}`);
 		});

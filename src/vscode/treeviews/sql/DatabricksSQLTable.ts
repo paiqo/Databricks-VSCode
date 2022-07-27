@@ -164,8 +164,8 @@ export class DatabricksSQLTable extends DatabricksSQLTreeItem {
 			location = "<view>";
 		}
 
-		let columnsString: string = stmt.match(/\(([^)]*)\)/gm)[0]; // everything between the first brackets
-		let columnMatches = columnsString.matchAll(/^\s*`([^`]*)`\s*(.*?(?=COMMENT|,$))(\s*COMMENT\s*'([^']*)')?[,)]/gm);
+		let columnsString: string = stmt.match(/\(\s*([^)]*)\s*\)/gm)[0] + ","; // everything between the first brackets, adding ',' at the end to make next RegEx easier
+		let columnMatches = columnsString.matchAll(/\n\s*(\`(?:[^\`]+|\`\`)*\`|[^ ]+)\s+([^\s]*)(.*?(?=COMMENT|,$|\)))(\s*COMMENT\s*'([^']*)')?[,)]/gm);
 
 		let columns: iSQLTableColumn[] = [];
 		for (const col of columnMatches) {
@@ -205,6 +205,6 @@ export class DatabricksSQLTable extends DatabricksSQLTreeItem {
 	}
 
 	async showDefinition(): Promise<void> {
-		await Helper.openTempFile(this._tableDetails.createStatement);
+		await Helper.openTempFile(this._tableDetails.createStatement, `create_${this.databaseName}_${this.tableName}.sql`);
 	}
 }

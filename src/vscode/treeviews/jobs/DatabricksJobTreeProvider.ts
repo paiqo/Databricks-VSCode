@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+
 import { Helper } from '../../../helpers/Helper';
 
 import { DatabricksJobTreeItem } from './DatabricksJobTreeItem';
@@ -24,7 +25,7 @@ export class DatabricksJobTreeProvider implements vscode.TreeDataProvider<Databr
 
 	refresh(showInfoMessage: boolean = false): void {
 		if(showInfoMessage){
-			vscode.window.showInformationMessage('Refreshing Jobs ...');
+			Helper.showTemporaryInformationMessage('Refreshing Jobs ...');
 		}
 		this._onDidChangeTreeData.fire(null);
 	}

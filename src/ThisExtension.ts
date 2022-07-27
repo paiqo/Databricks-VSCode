@@ -7,7 +7,7 @@ import { DatabricksConnectionManagerVSCode } from './vscode/treeviews/connection
 import { SensitiveValueStore } from './vscode/treeviews/connections/_types';
 import { DatabricksConnectionTreeItem } from './vscode/treeviews/connections/DatabricksConnectionTreeItem';
 import { DatabricksConnectionManagerCLI } from './vscode/treeviews/connections/DatabricksConnectionManagerCLI';
-import { DatabricksNotebookKernel } from './vscode/notebook/DatabricksNotebookKernel';
+import { DatabricksKernel } from './vscode/notebook/DatabricksKernel';
 import { Dictionary } from 'form-data';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
@@ -21,7 +21,7 @@ export abstract class ThisExtension {
 	private static _settingScope: ConfigSettingSource;
 	private static _sensitiveValueStore: SensitiveValueStore;
 	private static _sqlClusterId: string;
-	private static _notebookKernels: Map<string, DatabricksNotebookKernel> = new Map<string, DatabricksNotebookKernel>();
+	private static _kernels: Map<string, DatabricksKernel> = new Map<string, DatabricksKernel>();
 
 	static get rootPath(): string {
 		return this._context.extensionPath;
@@ -129,7 +129,7 @@ export abstract class ThisExtension {
 		{
 			ThisExtension.log(`Using cluster with id '${value}' for SQL Browser!`);
 			this._sqlClusterId = value;
-			vscode.commands.executeCommand("databricksSQL.refresh", true);
+			vscode.commands.executeCommand("databricksSQL.refresh", false);
 		}
 	}
 
@@ -330,15 +330,15 @@ export abstract class ThisExtension {
 		return false;
 	}
 
-	static setNotebookKernel(clusterId: string, kernel: DatabricksNotebookKernel): void {
-		if(!(clusterId in ThisExtension._notebookKernels.keys))
+	static setNotebookKernel(clusterId: string, kernel: DatabricksKernel): void {
+		if(!(clusterId in ThisExtension._kernels.keys))
 		{
-			ThisExtension._notebookKernels[clusterId] = kernel;
+			ThisExtension._kernels[clusterId] = kernel;
 		}
 	}
 
-	static getNotebookKernel(clusterId: string): DatabricksNotebookKernel {
-		return ThisExtension._notebookKernels[clusterId]
+	static getNotebookKernel(clusterId: string): DatabricksKernel {
+		return ThisExtension._kernels[clusterId]
 	}
 }
 

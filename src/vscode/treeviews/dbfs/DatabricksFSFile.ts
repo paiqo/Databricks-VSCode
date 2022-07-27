@@ -140,7 +140,7 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 
 			let response = await DatabricksApiService.downloadDBFSFile(this.path, localPath, true);
 
-			vscode.window.showInformationMessage(`Download of item ${this.path} finished!`);
+			Helper.showTemporaryInformationMessage(`Download of item ${this.path} finished!`);
 
 			if (ThisExtension.RefreshAfterUpDownload && !asTempFile) {
 				setTimeout(() => this.refreshParent(), 500);
@@ -161,7 +161,7 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 				this.path
 			);
 			let response = DatabricksApiService.uploadDBFSFile(localFilePath, this.path, true);
-			vscode.window.showInformationMessage(`Upload of item ${this.path}) finished!`);
+			Helper.showTemporaryInformationMessage(`Upload of item ${this.path}) finished!`);
 			if (ThisExtension.RefreshAfterUpDownload) {
 				setTimeout(() => this.refreshParent(), 500);
 			}

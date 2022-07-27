@@ -64,7 +64,17 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 
 	// used in package.json to filter commands via viewItem == CANSTART
 	get _contextValue(): string {
-		return 'CAN_SYNC';
+		let states: string[] = [];
+
+		if (this.localPathExists) {
+			states.push("UPLOAD");
+		}
+		if (this.onlinePathExists) {
+			states.push("DOWNLOAD")
+		}
+
+		// use , as separator to allow to check for ,<value>, in package.json when condition
+		return "," + states.join(",") + ",";
 	}
 
 	protected getIconPath(theme: string): string {

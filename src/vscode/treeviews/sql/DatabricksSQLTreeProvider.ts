@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 
+import { Helper } from '../../../helpers/Helper';
+
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { ThisExtension } from '../../../ThisExtension';
 import { DatabricksSQLDatabase } from './DatabricksSQLDatabase';
@@ -16,7 +18,7 @@ export class DatabricksSQLTreeProvider implements vscode.TreeDataProvider<Databr
 
 	refresh(showInfoMessage: boolean = false): void {
 		if (showInfoMessage) {
-			vscode.window.showInformationMessage('Refreshing SQL ...');
+			Helper.showTemporaryInformationMessage('Refreshing SQL ...');
 		}
 		this._onDidChangeTreeData.fire(null);
 	}

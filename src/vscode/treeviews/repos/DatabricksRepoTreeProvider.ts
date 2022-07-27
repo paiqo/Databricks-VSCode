@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
+
 import { Helper } from '../../../helpers/Helper';
 
 import { DatabricksRepoTreeItem } from './DatabricksRepoTreeItem';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
-import { iDatabricksRepo } from './_types';
 import { DatabricksRepoDirectory } from './DatabricksRepoDirectory';
+
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class DatabricksRepoTreeProvider implements vscode.TreeDataProvider<DatabricksRepoTreeItem> {
@@ -24,7 +25,7 @@ export class DatabricksRepoTreeProvider implements vscode.TreeDataProvider<Datab
 
 	refresh(showInfoMessage: boolean = false): void {
 		if(showInfoMessage){
-			vscode.window.showInformationMessage('Refreshing Repos ...');
+			Helper.showTemporaryInformationMessage('Refreshing Repos ...');
 		}
 		this._onDidChangeTreeData.fire(null);
 	}

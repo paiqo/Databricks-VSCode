@@ -1,10 +1,12 @@
 import * as vscode from 'vscode';
 
+import { Helper } from '../../../helpers/Helper';
+
 import { DatabricksSecretTreeItem } from './DatabricksSecretTreeItem';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { iDatabricksSecretScope } from './iDatabricksSecretScope';
-import { Helper } from '../../../helpers/Helper';
 import { DatabricksSecretScope } from './DatabricksSecretScope';
+
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class DatabricksSecretTreeProvider implements vscode.TreeDataProvider<DatabricksSecretTreeItem> {
@@ -15,7 +17,7 @@ export class DatabricksSecretTreeProvider implements vscode.TreeDataProvider<Dat
 
 	refresh(showInfoMessage: boolean = false): void {
 		if (showInfoMessage) {
-			vscode.window.showInformationMessage('Refreshing Secrets ...');
+			Helper.showTemporaryInformationMessage('Refreshing Secrets ...');
 		}
 		this._onDidChangeTreeData.fire(null);
 	}
