@@ -1,8 +1,8 @@
 {
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
-	"description": "Databricks Extension for VSCode",
-	"version": "0.9.4",
+	"description": "Extension to manage your Databricks workspace and ease local development",
+	"version": "1.0.0",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -28,9 +28,9 @@
 		"theme": "dark"
 	},
 	"categories": [
-		"Debuggers",
 		"Azure",
-		"Extension Packs",
+		"Notebooks",
+		"Data Science",
 		"Other"
 	],
 	"keywords": [
@@ -525,12 +525,12 @@
 			{
 				"command": "databricksClusterItem.createKernel",
 				"title": "Create Databricks Cluster Kernel",
-				"shortTitle": "Create Notebook Kernel"
+				"shortTitle": "Create Databricks Kernel"
 			},
 			{
 				"command": "databricksClusterItem.restartKernel",
 				"title": "Restart Databricks Cluster Kernel",
-				"shortTitle": "Restart Notebook Kernel"
+				"shortTitle": "Restart Databricks Kernel"
 			},
 
 			{

@@ -32,20 +32,22 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
+
+		if (this.state == "RUNNING") {
+			this.createKernel(false);
+		}
 	}
 
 	get _tooltip(): string {
-		let tooltip =  `NodeType: ${this.definition.node_type_id}\n` + 
-				`DriverNodeType: ${this.definition.driver_node_type_id}\n` + 
-				`SparkVersion: ${this.definition.spark_version}\n` + 
-				`AutoTermination: ${this.definition.autotermination_minutes} minutes\n`;
+		let tooltip = `NodeType: ${this.definition.node_type_id}\n` +
+			`DriverNodeType: ${this.definition.driver_node_type_id}\n` +
+			`SparkVersion: ${this.definition.spark_version}\n` +
+			`AutoTermination: ${this.definition.autotermination_minutes} minutes\n`;
 
-		if(this.definition.num_workers != undefined)
-		{
+		if (this.definition.num_workers != undefined) {
 			tooltip += `Num Workers: ${this.definition.num_workers}\n`;
 		}
-		else if(this.definition.autoscale != undefined)
-		{
+		else if (this.definition.autoscale != undefined) {
 			tooltip += `AutoScale: ${this.definition.autoscale.min_workers} - ${this.definition.autoscale.max_workers} workers\n`;
 		}
 
@@ -84,12 +86,10 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 			states.push("STOPPED");
 		}
 
-		if(this.NotebookKernelExists)
-		{
+		if (this.NotebookKernelExists) {
 			states.push("KERNEL");
 		}
-		else
-		{
+		else {
 			states.push("NOKERNEL");
 		}
 
@@ -99,8 +99,8 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 
 	private getIconPath(theme: string): string {
 		let state = (this.contextValue.includes("STOPPED") ? 'stop' : 'start');
-		if (this.state == "PENDING") { 
-			state = "pending"; 
+		if (this.state == "PENDING") {
+			state = "pending";
 		}
 		return fspath.join(ThisExtension.rootPath, 'resources', theme, state + '.png');
 	}
@@ -142,8 +142,7 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 	}
 
 	public get NotebookKernelExists(): boolean {
-		if(this.NotebookKernel)
-		{
+		if (this.NotebookKernel) {
 			return true;
 		}
 		return false;
@@ -158,8 +157,7 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 	}
 
 	public get InteractiveKernelExists(): boolean {
-		if(this.InteractiveKernel)
-		{
+		if (this.InteractiveKernel) {
 			return true;
 		}
 		return false;
@@ -196,8 +194,7 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 		});
 
 		let kernel = this.NotebookKernel;
-		if(kernel)
-		{
+		if (kernel) {
 			kernel.disposeController();
 		}
 
@@ -227,31 +224,36 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 		setTimeout(() => vscode.commands.executeCommand("databricksSQL.refresh", false), 1000);
 	}
 
-	async createKernel(): Promise<void> {
-		if(!this.NotebookKernel)
-		{
+	async createKernel(logMessages: boolean = true): Promise<void> {
+		if (!this.NotebookKernel) {
 			let notebookKernel: DatabricksKernel = new DatabricksKernel(this.cluster_id, this.cluster_name);
 			ThisExtension.setNotebookKernel(this.NotebookKernelName, notebookKernel);
+			if (logMessages) {
+				ThisExtension.log(`Notebook Kernel for Databricks cluster '${this.cluster_id}' created!`)
+			}
 		}
-		else
-		{
-			ThisExtension.log(`Notebook Kernel for Databricks cluster ${this.cluster_id} already exists!`)
+		else {
+			if (logMessages) {
+				ThisExtension.log(`Notebook Kernel for Databricks cluster '${this.cluster_id}' already exists!`)
+			}
 		}
 
-		if(!this.InteractiveKernel)
-		{
+		if (!this.InteractiveKernel) {
 			let interactiveKernel: DatabricksKernel = new DatabricksKernel(this.cluster_id, this.cluster_name, "interactive");
 			ThisExtension.setNotebookKernel(this.InteractiveKernelName, interactiveKernel);
+			if (logMessages) {
+				ThisExtension.log(`Interactive Kernel for Databricks cluster '${this.cluster_id}' created!`)
+			}
 		}
-		else
-		{
-			ThisExtension.log(`Interactive Kernel for Databricks cluster ${this.cluster_id} already exists!`)
+		else {
+			if (logMessages) {
+				ThisExtension.log(`Interactive Kernel for Databricks cluster '${this.cluster_id}' already exists!`)
+			}
 		}
 	}
 
 	async restartKernel(): Promise<void> {
-		if(this.NotebookKernelExists)
-		{
+		if (this.NotebookKernelExists) {
 			this.NotebookKernel.restart();
 		}
 	}

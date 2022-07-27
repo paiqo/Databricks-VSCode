@@ -25,9 +25,9 @@ export class DatabricksKernel implements vscode.NotebookController {
 	public id: string;
 	public label: string;
 	readonly notebookType: KernelType;
-	readonly description: string = 'A notebook controller that allows execution of code against a Databricks cluster';
+	readonly description: string = 'Execute code on a remote Databricks cluster';
 	readonly detail: string = 'Some more detils ...';
-	readonly supportedLanguages = ["python", "sql", "r", "markdown", "scala"];
+	readonly supportedLanguages = []; // ["python", "sql", "r", "markdown", "scala"];
 	readonly supportsExecutionOrder: boolean = true;
 
 	private _controller: vscode.NotebookController;
@@ -51,10 +51,9 @@ export class DatabricksKernel implements vscode.NotebookController {
 			this.label);
 
 		this._controller.supportedLanguages = this.supportedLanguages;
-		this._controller.description = this.description;
-		this._controller.detail = this.detail;
+		this._controller.description = "Databricks Cluster " + this.ClusterID;
+		//this._controller.detail = this.detail;
 		this._controller.supportsExecutionOrder = this.supportsExecutionOrder;
-		this._controller.description = this.description + "(" + this.ClusterID + ")";
 		this._controller.executeHandler = this.executeHandler.bind(this);
 		this._controller.dispose = this.disposeController.bind(this);
 

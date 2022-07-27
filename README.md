@@ -1,52 +1,61 @@
+# VSCode Extension for Databricks
 [![Version](https://vsmarketplacebadge.apphb.com/version/paiqo.databricks-vscode.svg?color=orange&style=?style=for-the-badge&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
 [![Installs](https://vsmarketplacebadge.apphb.com/installs/paiqo.databricks-vscode.svg?color=orange)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
 [![Downloads](https://vsmarketplacebadge.apphb.com/downloads/paiqo.databricks-vscode.svg?color=orange)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
 
-![Databricks-VSCode](https://github.com/paiqo/Databricks-VSCode/blob/master/images/Databricks-VSCode.jpg?raw=true "Databricks-VSCode")
+![Databricks-VSCode](/images/Databricks-VSCode.jpg?raw=true "Databricks-VSCode")
 
-# VS Code Extension for Databricks
+This is a Visual Studio Code extension that allows you to work with Databricks locally from VSCode in an efficient way, having everything you need integrated into VS Code - see [Features](#features). It allows you to manage and execute your notebooks, start/stop clusters, execute jobs and much more!
 
-This is a Visual Studio Code extension that allows you to work with Databricks locally from VSCode in an efficient way, having everything you need integrated into VS Code - see [Features](#features). It allows you to sync notebooks but does **not** help you with executing those notebooks against a Databricks cluster. To do this, please refer to [Databricks-Connect](https://docs.databricks.com/dev-tools/databricks-connect.html) but from that point of view, these two tools are independent!
-
- The extensions can be downloaded from the official Visual Studio Code extension gallery: [Databricks VSCode](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
+The extensions can be downloaded from the official Visual Studio Code extension gallery: [Databricks VSCode](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
 
 # Features
 
-- Workspace browser
-  - Up-/download of notebooks
-  - Compare/Diff of local vs online notebook (currently only supported for raw files but not for notebooks)
-  - Execution of notebooks against a Databricks Cluster (via [Databricks-Connect](https://docs.databricks.com/dev-tools/databricks-connect.html))
+- [Workspace Manager](#workspace-Manager)
+  - Up-/download of notebooks and whole folders
+  - Compare/Diff of local vs online notebook
   - Support for [Code Cells](https://code.visualstudio.com/docs/python/jupyter-support-py#_jupyter-code-cells) if you do not want to use the .ipynb format
-- Cluster manager
+- [Cluster Manager](#cluster-manager)
   - Start/stop clusters
   - Script cluster definition as JSON
-- Notebook kernel
+- [Notebook Kernel](#notebook-kernel)
   - Execute local code against a running Databricks cluster
   - interactive cell-by-cell execution as in Databricks web UI
   - rich output and visualization of results
-- SQL / Data browser
-  - view SQL tables and views from Databricks metastore
-  - list columns
-  - more to come!
-- Job browser
+- [Connection Manager](#connection-manager)
+  - Easy configuration via standard VS Code settings
+  - Manage and switch between multiple Databricks workspaces (e.g. DEV/TEST/PROD)
+  - Supports Azure Databricks, Databricks on AWS and Dtabricks on GCP
+  - control how notebooks are downloaded (Jupyter notebook, source code, ...)
+  - various other settings
+- [SQL / Data Browser](#sql-browser)
+  - Browse availabl SQL objects from the Databricks metastore
+  - databases, tables and views, columns, ...
+- [Job Manager](#job-manager)
   - Start/stop jobs
   - View job-run history + status
   - Script job definition as JSON
   - View job-run output as JSON
-- DBFS browser
+- [DBFS Browser](#dbfs-browser)
   - Supports static mount points (e.g. using Service Principals)
-  - Upload files
-  - Download files
-- Secrets browser
+  - Up-/Download of files
+- [Secret Manager](#secret-manager)
   - Create/delete secret scopes
   - Create/delete secrets
-- Integration for CI/CD using [DatabricksPS](https://www.powershellgallery.com/packages/DatabricksPS)
-- Support for multiple Databricks workspace connections
-- Easy configuration via standard VS Code settings
+  - view Azure Key Vault backed secret scopes
+- [Repo Manager](#repo-manager)
+  - Create/delete linked repositories
+  - Update repository to repo or branch
+- Integration for CI/CD using [DatabricksPS](https://www.powershellgallery.com/packages/DatabricksPS) PowerShell module
 
 # Release Notes
 
 **v1.0.0:**
+- added support for [Notebook Kernel](#notebook-kernel) to allow execution of code on the Databricks cluster from within VSCode notebooks
+- major improvements for useability and user-interaction
+- performance improvements when refreshing tree-views
+- improved logging and output of messages
+- use native VSCode icons instead of custom ones
 
 **v0.9.4:**
 - added support for VS Code setting `http.proxyStrictSSL` to optionally allow invalid certificates from the proxy. Can only be used in combination with `http.proxySupport = "on"`.
@@ -97,71 +106,17 @@ This is a Visual Studio Code extension that allows you to work with Databricks l
 - add SQL Data browser as in the Databricks UI
 - fixed an issue with Secrets - you can now add/delete secrets again
 
-**v0.7.3:**
-- fixed an issue where and error is thrown if only the default connection was specified
-- fixed an issue with the LastActiveConnection
-
-**v0.7.2:**
-- add support for custom sub-folders in the local sync folder for the different items. Check out configuratio property `localSyncSubfolders`
-
-**v0.7.1:**
-- fix issue with new environment/Connection configuration and `exportFormats` property
-
-**v0.7.0:**
-- Major rework of environment/connection configurations
-  - **Please read the [Migration FAQ](#FAQ)**
-  - Sensitive values (PAT) are now stored in the system key chain
-  - Connections are stored in VSCode again - either per workspace or globally per user
-- restructured repository
-- added auto-update every 10 seconds for jobs and clusters
-
-**v0.6.0:**
-- Reworked DBFS browser - Thanks to [JacekPliszka9](https://github.com/JacekPliszka)
-  - now also downloads to local sync folder (similar to Workspace browser)
-  - supports up-/download from/to local file
-- potential fix for "enableProposedAPI"
-
-**v0.5.3:**
-- fix issue with dots ('.') in folder names (e.g. in user-folders) - Thanks to [JacekPliszka9](https://github.com/JacekPliszka)
-- another fix issue with deprecated '.py.ipynb' file extensions
-
-**v0.5.2:**
-- fix issues with deprecated file extension '.py.ipynb'. Also removed it from configuration settings (but it still works)
-- reworked UseCodeCells to now use the code cell tags provided by Databricks instead of adding new ones
-- refresh on Connections Tab now also re-activates the current connection to reload the configuration
-
-**v0.5.1:**
-- fix issues with unsupported file extensions (e.g. .scala.ipynb)
-
-**v0.5.0:**
-- added support for [Code Cells](https://code.visualstudio.com/docs/python/jupyter-support-py#_jupyter-code-cells) which can be enabled using the new configuration property "useCodeCells"
-- minor fixes for connection manager
-
-**v0.4.0:**
-- Moved configuration from VSCode Workspace-settings to VSCode User-settings
-  - avoids accidential check-in of sensitive information (Databricks API token) to GIT
-  - allows you to use the same configuratino across multiple workspaces on the same machine
-- added subfolders for different components (Workspace, clusters, jobs, ...) for better integration with [DatabricksPS](https://www.powershellgallery.com/packages/DatabricksPS)
-- internally reworked configuration management
-- Updated logo
-
-**v0.3.5:**
-- extended logging for all API calls 
-- fixes for iOS and Linux users
-
-**v0.3.0:**
-- added feature to compare notebooks (currently only works for regular files but not for notebooks)
-- added logging for all API calls to separate VS Code output channel ```paiqo.databricks-vscode```
-- added configuration option for export formats
+# Outlook upcoming/planned features
+- Support for Drag&Drop of local files directly into the workspace
+- Fix remaining issues with Notebook Kernel and code cells
+- whatever is requested by the users :)
 
 # Installation
+The extension can be downloaded directly from within VS Code. Simply go to the Extensions tab, search for "Databricks" and select and install the extension "Databricks VSCode" (ID: paiqo.databricks-vscode).
 
-The extension can be downloaded directly from within VS Code. Simply go to the Extensions tab and search for "Databricks" and select and install the extension "Databricks Integration" (ID: paiqo.databricks-vscode).
-
-Alternatively it can also be downloaded from the VS Code marketplace: [Databricks VSCode](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode).
+Alternatively it can also be downloaded the `.vsix` directly  from the VS Code marketplace: [Databricks VSCode](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode).
 
 # Setup and Configuration (VSCode Connection Manager)
-
 The configuration happens directly via VS Code by simply [opening the settings](https://code.visualstudio.com/docs/getstarted/settings#_creating-user-and-workspace-settings)
 Then either search for "Databricks" or expand Extensions -> Databricks.
 The settings themselves are very well described and it should be easy for you to populate them. Also, not all of them are mandatory! Some of the optional settings are experimental or still work in progress.
@@ -206,22 +161,20 @@ Another important setting which requires modifying the JSON directly are the exp
 		...
 ```
 
-Each filetype can either be exported as raw/source file (.scala, .py, .sql, .r) or as a notebook (.scala.ipynb, .py.ipynb, .sql.ipynb, .r.ipynb). This is also very important if you want to upload a local file as these also have to match these extension and will be ignored otherwise!
+Each filetype can either be exported as raw/source file (.scala, .py, .sql, .r) or, if supported, also as a notebook (.ipynb). This is also very important if you want to upload a local file as these also have to match these extension and will be ignored otherwise! For active development it is recommended to use `.ipynb` format as this also allows you to execute your local code against a running Databricks cluster - see [Notebook Kernel](#notebook-kernel).
 
-If you are using raw/source files, you may also consider using [Code Cells](https://code.visualstudio.com/docs/python/jupyter-support-py#_jupyter-code-cells) be setting ```"useCodeCells" = true``` for your corresponding connection.
+If you prefer raw/source files (e.g. for better Git integration), you may also consider using [Code Cells](https://code.visualstudio.com/docs/python/jupyter-support-py#_jupyter-code-cells) be setting ```"useCodeCells" = true``` for your corresponding connection. Please be aware that this does currently not work properly with the [Notebook Kernel](#notebook-kernel)!
 
-All these settings can either be configured on a global/user or on a workspace level. The recommendation is to use workspace configurations and then to include the localSyncFolders into your workspace for easy access to your notebooks and sync to GIT. 
-Using a workspace configuration also allows you separate differnt Databricks Connections completely. 
+All these settings can either be configured on a global/user or on a workspace level. The recommendation is to use workspace configurations and then to include the localSyncFolders into your workspace for easy access to your notebooks and sync to GIT.
+Using a workspace configuration also allows you separate differnt Databricks Connections completely.
 
 **NOTE: Changing any of the connection settings only take effect once the connection is activated! If you make changes to your current connection, you need to activate another connection temporary and then the original one again! Alternatively, a restart of VSCode also works.**
 
 # Setup and Configuration (Databricks CLI Connection Manager)
-
 To use the Databricks CLI Connection Manager, you first need to install and configure the [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html). Once you have created a connection or profiles, you can proceed here.
 Basically all you need to do in VSCode for this extension to derive the connections from the Databricks CLI is to change the VSCode setting `databricks.connectionManager` to `Databricks CLI Profiles`. This can be done in the regular settings UI or by modifying the settings JSON directly.
 
 ## Additional settings
-
 In order to work to its full potential, the VSCode extension needs some addional settings which are not maintained by the Databricks CLI. Foremost the `localSyncFolder` to store files locally (e.g. notebooks, cluster/job definitions, ...). For the Databricks CLI Connection Manager this path defaults to `<user home directory>/DatabricksSync/<profile name>`.
 If you want to change this you can do so by manually extending your Databricks CLI config file which can usually be found at `<user home directory>/.databrickscfg`:
 
@@ -240,7 +193,7 @@ exportFormats = {"Scala": ".scala","Python": ".ipynb","SQL": ".sql","R": ".r"}
 useCodeCells = true
 ```
 
-You can also change the following other settings this way:
+You can also change the following other settings:
 
 |CLI setting|VSCode setting|format|descrption|
 |-----------|--------------|------|----------|
@@ -251,24 +204,22 @@ You can also change the following other settings this way:
 |exportFormats|exportFormats|JSON|optional, defaults to VSCode default|
 |useCodeCells|useCodeCells|boolean|true/false|
 
-# Connections
-
-![Connections](https://github.com/paiqo/Databricks-VSCode/blob/master/images/Connections.jpg?raw=true "Connections")
+# Connection Manager
+![Connection Manager](/images/Connections.jpg?raw=true "Connection Manager")
 
 You can either work with a single Connection or configure multiple Connections. If you use multiple Connections, you will see your list in the Connections view and icons indicating which one is currently active. To change the Connection, simply click the "Activate" button next to an inactive Connection. All other views will update automatically.
 
 To change an existing connection - please see [Setup and Configuration](#setup-and-configuration)
 
-# Workspace Browser
-
-![Workspace Browser](https://github.com/paiqo/Databricks-VSCode/blob/master/images/WorkspaceBrowser.jpg?raw=true "Workspace Browser")
+# Workspace Manager
+![Workspace Manager](/images/WorkspaceBrowser.jpg?raw=true "Workspace Manager")
 
 The workspace browser connects directly to the Databricks workspace and loads the whole folder strucuture recursively. It displays folders, notebooks and libraries. Notebooks and folders can be up- and downloaded manually by simply clicking the corresponding item next them. If you do an up-/download on a whole folder or on the root, it will up-/download all items recursively.
 The files are stored in the ```databricks.connection.default.localSyncFolder``` (or your Connection) that you configured in your settings/for your Connection. If you doubleclick a file, it will be downloaded locally and opened. Depending on the ExportFormats that you have defined in ```databricks.connection.default.exportFormats``` (or your Connection), the item will be downloaded in the corresponding format - basically you can decide between Notebook format and raw/source format.
 The downloaded files can then be executed directly against the Databricks cluster if Databricks-Connect is setup correctly ([Setup Databricks-Connect on AWS](https://docs.databricks.com/dev-tools/databricks-connect.html), [Setup Databricks-Connect on Azure](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/databricks-connect))
 
 The up-/downloaded state of the single items are also reflected in their icons:
-![Workspace Browser Icons](https://github.com/paiqo/Databricks-VSCode/blob/master/images/WorkspaceBrowser_Icons.jpg?raw=true "Workspace Browser Icons")
+![Workspace Manager Icons](https://github.com/paiqo/Databricks-VSCode/blob/master/images/WorkspaceManager_Icons.jpg?raw=true "Workspace Manager Icons")
 
 If you have set ```useCodeCells = true``` in your connection, the Code Cells will be added once you download a raw/source file. They will not be removed again when you upload the raw/source file again!
 
@@ -279,34 +230,48 @@ If you have set ```useCodeCells = true``` in your connection, the Code Cells wil
 - If there is no blue or red dot in the icon then the file/folder exists locally and also in the Databricks workspace. However, this does not mean that the files have to be in sync. It is up to you to know which file is more recent and then sync them accordingly!
 
 # Cluster Manager
-
-![Cluster Manager](https://github.com/paiqo/Databricks-VSCode/blob/master/images/ClusterManager.jpg?raw=true "Cluster Manager")
+![Cluster Manager](/images/ClusterManager.jpg?raw=true "Cluster Manager")
 
 This VS Code extension also allows you to manage your Databricks clusters directly from within VS Code. So you do not need to open the web UI anymore to start or stop your clusters. It also distinguishes between regular clusters and job clusters which will be displayed in a separate folder.
 In addition, the Cluster manager also allows you to script the definition of your cluster and store it locally - e.g. if you want to integrate it as part of your CI/CD. This cluster definition file can for example be used with the [DatabricksPS PowerShell Module](https://www.powershellgallery.com/packages/DatabricksPS) to automate the cluster deployment.
 The cluster manager also distinguishes between regular user-created clusters and job-clusters.
 
-# Job Manager
+# Notebook Kernel
+![Notebook Kernel](/images/NotebookKernel.jpg?raw=true "Notebook Kernel")
 
-![Job Manager](https://github.com/paiqo/Databricks-VSCode/blob/master/images/JobManager.jpg?raw=true "Job Manager")
+Using Databricks Notebook Kernels you can execute local code againt a running Databricks cluster. Simply open a `.ipynb` notebook and select the Databricks kernel of your choice. A new kernel will be added automatically for each Databricks cluster that is currently running. In case you need to restart the kernel, you can do so by right-clicking the underlying cluster in the [Cluster Manager](#cluster-manager) and select `Restart Databricks Kernel`.
+The execution of the first cell may take a bit longer as the remote execution context has to be set up before any commands can be executed. The notebook kernel supports the magics `%sql`, `%python`, `%r`, `%scala`, `%md` and also `%pip`. Depending on the output of the cell, the results are rendered accordingly - e.g. as text, as table or as image. Due to the limitations of the underlying APIs, the output is limited to one output type so you should avoid mixing `print(...)`, `display(df)` and `df.plot` as only one of them will be show.
+If you need richer output especially for tables, you can install additional Notebook Renderer Extensions. We recommend [vscode-data-table](https://github.com/RandomFractals/vscode-data-table). Unfortunately the author decided to unpublish the extension from the offical VSCode market place but it can still be downloaded the `.vsix` from the [Github Releases](https://github.com/RandomFractals/vscode-data-table/releases)
+
+# SQL Browser
+![SQL Browser](/images/SQLBrowser.jpg?raw=true "SQL Browser")
+
+The SQL Browser is similar to the Data tab in the Databricks Web UI. It shows you all object that exist in the Hive metastore. To use the SQL Browser you first need to have a running cluster as the Hive metastore can only be browsed via a cluster. By default, the first running cluster is selected for you automatically. However, you can also change the cluster you want to use in the [Cluster Manager](#cluster-manager) by right-clicking the cluster of your choice and clicking `Use for SQL Browser`.
+For large databases with a lot of tables, it can take quite some time to load all details so please be patient!
+
+# Job Manager
+![Job Manager](/images/JobManager.jpg?raw=true "Job Manager")
 
 The Job Manager allows you to manage all your existing Databricks jobs from within VS Code. It gives you information about currently deployed jobs and their different job-runs/executions. You can also start and stop new job-runs which will then be executed on the cluster. Similar to the Cluster Manager, you can also script the jobs to integrate them in automated CI/CD deployment pipelines using the [DatabricksPS PowerShell Module](https://www.powershellgallery.com/packages/DatabricksPS).
 
 # DBFS Browser
-
-![DBFS Browser](https://github.com/paiqo/Databricks-VSCode/blob/master/images/DBFSBrowser.jpg?raw=true "DBFS Browser")
+![DBFS Browser](/images/DBFSBrowser.jpg?raw=true "DBFS Browser")
 
 The DBFS Browser allows you to browse the whole Databricks File System including mountpoints! You can also download files, view or modify them locally and upload them again. For viewing files I highly recommend installing the extension [Data Preview](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode) as it supports most formats communly used with Databricks.
 Clicking a file will download it to yout TEMP folder and open it in VS Code. If you download it explicitly using the icon next to the item, you will be asked where to save it locally.
 
 **NOTE: The DBFS Browser also supports browsing of mount points if they were configured with a static authentication (e.g. an Azure Service Principal)!**
 
-# Secrets Browser
-
-![Secret Browser](https://github.com/paiqo/Databricks-VSCode/blob/master/images/SecretBrowser.jpg?raw=true "Secret Browser")
+# Secret Manager
+![Secret Browser](/images/SecretBrowser.jpg?raw=true "Secret Browser")
 
 Another tool to help you working with Databricks locally is the Secrets Browser. It allows you to browse, create, update and delete your secret scopes and secrets.
 This can come in handy if you want to quickly add a new secret as this is otherwise only supported using the plain REST API (or a CLI)!
+
+# Repo Manager
+![Repo Manager](/images/RepoManager.jpg?raw=true "Repo Manager")
+
+Using the Repo Manager you can interact with the Repos API which allows you to add new repositories to the Databricks workspace and also update/check-out specific branches and tags. The latest branch/tag can then be found via the [Workspace Browser](#workspace-browser)
 
 ## FAQ
 
