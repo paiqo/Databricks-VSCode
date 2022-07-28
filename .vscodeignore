@@ -1,9 +1,10 @@
 .vscode/**
 .vscode-test/**
-node_modules/**
 out/test/**
 test/**
-src/**
 **/*.map
 .gitignore
 tsconfig.json
+*.code-workspace
+*lint.json
+src/

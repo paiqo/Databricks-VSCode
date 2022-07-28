@@ -8,7 +8,6 @@ import { SensitiveValueStore } from './vscode/treeviews/connections/_types';
 import { DatabricksConnectionTreeItem } from './vscode/treeviews/connections/DatabricksConnectionTreeItem';
 import { DatabricksConnectionManagerCLI } from './vscode/treeviews/connections/DatabricksConnectionManagerCLI';
 import { DatabricksKernel } from './vscode/notebook/DatabricksKernel';
-import { Dictionary } from 'form-data';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -188,17 +187,8 @@ export abstract class ThisExtension {
 	}
 
 	static async getSecureSetting(setting: string): Promise<string> {
-		let value = this.secrets.get(setting); // new way to store secrets
-
-		// check if the new secret is not yet set/used
-		if(await value == undefined)
-		{
-			let _keytar = require('keytar');
-			// get old value and store it the new way
-			value = _keytar.getPassword(this.configuration.id, setting);
-			await this.setSecureSetting(setting, await value);
-		}
-		
+		let value = this.secrets.get(setting); 
+	
 		return value;
 	}
 

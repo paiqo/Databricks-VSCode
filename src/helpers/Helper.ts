@@ -275,53 +275,6 @@ export abstract class Helper {
 		});
 	}
 
-	static async addCodeCells(filePath: string): Promise<void> {
-		try {
-			const replace = require('replace-in-file');
-			let regex = new RegExp(this.DatabricksCommandTagRegEx, 'g');
-			let options = {
-				files: filePath,
-				from: regex,
-				to: this.DatabricksCommandTagRegEx + '\n' + this.CodeCellTag
-			};
-
-
-			let results = await replace(options);
-			ThisExtension.log('Replacement results:', results[0].hasChanged);
-
-			// remove duplicat code cells that might have been added
-			regex = new RegExp(this.CodeCellTag + '[\\r\\n]' + this.CodeCellTag, 'g');
-			options = {
-				files: filePath,
-				from: regex,
-				to: this.CodeCellTag
-			};
-
-			results = await replace(options);
-			ThisExtension.log('Replacement results:', results[0].hasChanged);
-		}
-		catch (error) {
-			ThisExtension.log('Error occurred:', error);
-		}
-	}
-	static async removeCodeCells(filePath: string): Promise<void> {
-		try {
-			const replace = require('replace-in-file');
-			const regex = new RegExp(this.DatabricksCommandTagRegEx + '[\\r\\n]*' + this.CodeCellTag, 'g');
-			const options = {
-				files: filePath,
-				from: regex,
-				to: this.DatabricksCommandTagRegEx,
-			};
-
-			const results = await replace(options);
-			ThisExtension.log('Replacement results:', results[0].hasChanged);
-		}
-		catch (error) {
-			ThisExtension.log('Error occurred:', error);
-		}
-	}
-
 	static secondsToHms(seconds: number) {
 		var h = Math.floor(seconds / 3600);
 		var m = Math.floor(seconds % 3600 / 60);
