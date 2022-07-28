@@ -8,3 +8,5 @@ tsconfig.json
 *.code-workspace
 *lint.json
 src/
+node_modules/
+out/

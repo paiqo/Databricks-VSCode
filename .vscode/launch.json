@@ -14,7 +14,7 @@
             "outFiles": [
                 "${workspaceRoot}/out/src/**/*.js"
             ],
-            "preLaunchTask": "npm: watch",
+            "preLaunchTask": "npm: webpack-dev",
             "skipFiles": [
                 "<node_internals>/**/*.js",
                 "main.js",

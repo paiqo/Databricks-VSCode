@@ -57,7 +57,7 @@
 		"onView:databricksSql",
 		"onView:databricksRepos"
 	],
-	"main": "./out/extension.js",
+	"main": "./dist/extension.js",
 	"contributes": {
 		"configuration": [
 			{
@@ -532,7 +532,6 @@
 				"title": "Restart Databricks Cluster Kernel",
 				"shortTitle": "Restart Databricks Kernel"
 			},
-
 			{
 				"command": "databricksJobs.refresh",
 				"title": "Refresh",
@@ -661,7 +660,6 @@
 				"title": "Delete",
 				"icon": "$(remove-close)"
 			},
-
 			{
 				"title": "New Databricks Notebook",
 				"shortTitle": "Databricks Notebook",
@@ -883,21 +881,33 @@
 					"group": "inline"
 				}
 			]
-		}				
+		}
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./"
+		"vscode:prepublish": "npm run package",
+		"webpack": "webpack --mode development",
+		"webpack-dev": "webpack --mode development --watch",
+		"package": "webpack --mode production --devtool hidden-source-map",
+		"test-compile": "tsc -p ./",
+		"build": "webpack --mode production --devtool hidden-source-map",
+		"build-test": "tsc -p ./",
+		"lint": "eslint --max-warnings 0 src --ext ts",
+		"watch": "webpack --watch",
+		"ci-build": "npm run lint && npm run build",
+		"ci-package": "npm run ci-build && npm run package-impl",
+		"test": "npm run build-test && node ./out/test/runTest.js",
+		"package-impl": "vsce package"
 	},
 	"devDependencies": {
 		"@types/node": "^16.11.7",
 		"@types/rimraf": "^2.0.5",
 		"@types/vscode": "^1.68.0",
-		"ts-loader": "^9.3.1",
 		"eslint": "^8.19.0",
+		"terser-webpack-plugin": "^5.3.3",
+		"ts-loader": "^9.3.1",
 		"typescript": "^4.7.4",
-		"webpack": "^5.73.0",
+		"vscode-nls-dev": "^4.0.0",
+		"webpack": "^5.74.0",
 		"webpack-cli": "^4.10.0"
 	},
 	"dependencies": {
