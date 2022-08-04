@@ -70,6 +70,21 @@ export abstract class Helper {
 		});
 	}
 
+	static async pathExists(path: vscode.Uri | string): Promise<boolean> {
+		try {
+			// three '/' in the beginning indicate a local path
+			// however, there are issues if this.localFilePath also starts with a '/' so we do a replace in this special case
+			if(typeof(path) == "string")
+			{
+				path = vscode.Uri.parse(("file:///" + path).replace('////', '///'));
+			}
+			await vscode.workspace.fs.stat(path);
+			return true;
+		} catch {
+			return false;
+		}
+	}
+
 
 	static async delay(ms: number) {
 		return new Promise(resolve => setTimeout(resolve, ms));

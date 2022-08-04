@@ -29,15 +29,15 @@ const config = {
             // provides alternate implementation for node module and source files
         },
         fallback: {
-            "https": false,
-            "http": false,
-            "path": false,
-            "assert": false,
-            "os": false,
+            "https": require.resolve("https-browserify"),
+            "http": require.resolve("stream-http"),
+            "path": require.resolve("path-browserify"),
+            "util": require.resolve("util/"),
+            "assert": require.resolve("assert/"),
+            "os": require.resolve("os-browserify/browser"),
+            "url": require.resolve("url/"),
+            "buffer": require.resolve("buffer/"),
             "fs": false,
-            "util": false,
-            "url": false,
-            "async_hooks": false,
             "tls": false,
             "net": false
         },
