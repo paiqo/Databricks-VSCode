@@ -32,11 +32,17 @@ import { DatabricksSecret } from './vscode/treeviews/secrets/DatabricksSecret';
 
 export async function activate(context: vscode.ExtensionContext) {
 
+	ThisExtension.StatusBar = vscode.window.createStatusBarItem("databricks-vscode", vscode.StatusBarAlignment.Right);
+	ThisExtension.StatusBar.show();
+	ThisExtension.setStatusBar("Initializing ...");
+
 	let isValidated: boolean = await ThisExtension.initialize(context);
 	if (!isValidated) {
 		ThisExtension.log("Issue initializing extension - Please update Databricks settings and restart VSCode!");
 		vscode.window.showErrorMessage("Issue initializing extension - Please update Databricks settings and restart VSCode!");
 	}
+
+	ThisExtension.setStatusBar("Initialized!");
 
 	// register DatabricksConnectionTreeProvider
 	let databricksConnectionTreeProvider = new DatabricksConnectionTreeProvider();

@@ -307,4 +307,20 @@ export abstract class Helper {
 	static parseBoolean(value: string): boolean {
 		return value === 'false' || value === 'undefined' || value === 'null' || value === '0' ? false : !!value;
 	}
+
+	// sooner or later we want to move await from native libraries like (path, os, ...) and use VSCode API implementations instead, e.g. vscode.workspace.fs
+	static async pathExists(path: vscode.Uri | string): Promise<boolean> {
+		try {
+			// three '/' in the beginning indicate a local path
+			// however, there are issues if this.localFilePath also starts with a '/' so we do a replace in this special case
+			if(typeof(path) == "string")
+			{
+				path = vscode.Uri.parse(("file:///" + path).replace('////', '///'));
+			}
+			await vscode.workspace.fs.stat(path);
+			return true;
+		} catch {
+			return false;
+		}
+	}
 }

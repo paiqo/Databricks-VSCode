@@ -14,6 +14,7 @@ export abstract class ThisExtension {
 
 	private static _context: vscode.ExtensionContext;
 	private static _extension: vscode.Extension<any>;
+	private static _statusBar: vscode.StatusBarItem;
 	private static _isValidated: boolean = false;
 	private static _logger: vscode.OutputChannel;
 	private static _connectionManager: DatabricksConnectionManager;
@@ -330,6 +331,28 @@ export abstract class ThisExtension {
 	static getNotebookKernel(clusterId: string): DatabricksKernel {
 		return ThisExtension._kernels[clusterId]
 	}
+
+	// #region StatusBar
+	static set StatusBar(value: vscode.StatusBarItem) {
+		this._statusBar = value;
+	}
+
+	static get StatusBar(): vscode.StatusBarItem {
+		return this._statusBar;
+	}
+
+	static setStatusBar(text: string, inProgress: boolean = false): void {
+		if(inProgress)
+		{
+			this.StatusBar.text = "$(loading~spin) " + text;
+		}
+		else
+		{
+			this.StatusBar.text = text;
+		}
+		
+	}
+	//#endregion
 }
 
 // represents the structure how the ExportFormats and FileExtensions for the different language are defined in the VS Code settings
