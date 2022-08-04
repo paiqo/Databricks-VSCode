@@ -131,7 +131,9 @@ export class DatabricksKernel implements vscode.NotebookController {
 		}
 	}
 
-	private parseCommand(cmd: string): [ContextLanguage, string, NotebookMagic] {
+	private parseCommand(document: vscode.TextDocument): [ContextLanguage, string, NotebookMagic] {
+		let cmd = document.getText();
+		
 		if (cmd[0] == "%") {
 			let lines = cmd.split('\n');
 			let magicText = lines[0].split(" ")[0].slice(1).trim();
@@ -148,7 +150,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 			return [language, commandText, magicText as NotebookMagic];
 		}
-		return [this.Language, cmd, undefined];
+		return [document.languageId as ContextLanguage, cmd, undefined];
 	}
 
 	private async _doExecution(cell: vscode.NotebookCell): Promise<void> {
@@ -156,13 +158,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 		execution.executionOrder = ++this._executionOrder;
 		execution.start(Date.now());
 
-
-		let commandText = cell.document.getText();
-		let language: ContextLanguage = null;
-		let magic: NotebookMagic = null;
-
-		[language, commandText, magic] = this.parseCommand(commandText);
-
+		let [language, commandText, magic] = this.parseCommand(cell.document);
 		ThisExtension.log("Executing " + language + ":\n" + commandText);
 
 		execution.clearOutput();
@@ -184,6 +180,9 @@ export class DatabricksKernel implements vscode.NotebookController {
 				execution.end(false, Date.now());
 				return;
 		}
+
+		console.log("run", commandText, language)
+
 		let command = await DatabricksApiService.runCommand(this.ExecutionContext, commandText, language);
 		execution.token.onCancellationRequested(() => {
 			DatabricksApiService.cancelCommand(command);
