@@ -181,8 +181,6 @@ export class DatabricksKernel implements vscode.NotebookController {
 				return;
 		}
 
-		console.log("run", commandText, language)
-
 		let command = await DatabricksApiService.runCommand(this.ExecutionContext, commandText, language);
 		execution.token.onCancellationRequested(() => {
 			DatabricksApiService.cancelCommand(command);
