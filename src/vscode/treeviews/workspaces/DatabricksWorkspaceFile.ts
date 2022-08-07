@@ -24,8 +24,8 @@ export class DatabricksWorkspaceFile extends DatabricksWorkspaceTreeItem {
 		return tooltip;
 	}
 
-	protected getIconPath(theme: string): string {
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, 'workspace', 'file' + '.png');
+	protected getIconPath(theme: string): vscode.Uri {
+		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, 'workspace', 'file' + '.png');
 	}
 
 	readonly command = null;

@@ -1,7 +1,7 @@
-import { CloudProvider, AccessTokenSecure, ConnectionSource } from './_types';
+import * as vscode from 'vscode';
+
+import { AccessTokenSecure, ConnectionSource } from './_types';
 import { ExportFormatsConfiguration, LocalSyncSubfolderConfiguration } from '../../../ThisExtension';
-
-
 export interface iDatabricksConnection {
 	displayName: string;
 	personalAccessToken: string;

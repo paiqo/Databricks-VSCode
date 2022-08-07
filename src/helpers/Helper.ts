@@ -9,6 +9,7 @@ import * as fspath from 'path';
 import * as fs from 'fs';
 import * as UniqueFileName from 'uniquefilename';
 import { ThisExtension } from '../ThisExtension';
+const url = require('url');
 
 export abstract class Helper {
 	private static CodeCellTag: string = "# %% Code Cell";
@@ -83,6 +84,26 @@ export abstract class Helper {
 		return obj as T;
 	}
 
+	static getToken(text: string, separator: string, token: number): string {
+		let parts: string[] = text.split(separator);
+
+		if(token < 0)
+		{
+			return parts.slice(token)[0];
+		}
+		return parts[token];
+	}
+
+	static runAsyncFunction<T>(func: Function, args: any = undefined): T {
+		return (async function () {
+			if(args == undefined)
+			{
+				return func()
+			}
+			return func(args);
+		}()) as unknown as T;
+	}
+
 	static ensureLocalFolder(path: string, pathIsFile: boolean = false): void {
 		let folder = path;
 		if (pathIsFile) {
@@ -119,12 +140,12 @@ export abstract class Helper {
 		this._tempFiles.push(filePath);
 	}
 
-	static async openTempFile(content: string = '', fileName: string = 'db-vscode-temp.json', open: boolean = true): Promise<string> {
+	static async openTempFile(content: string = '', fileName: string = 'db-vscode-temp.json', open: boolean = true): Promise<vscode.Uri> {
 		let tempDir = this.resolvePath(os.tmpdir());
 		let filePath = `${tempDir}${fspath.sep}${fileName}`;
 		let uniqueFilePath = await UniqueFileName.get(filePath, {});
 
-
+		
 		fs.writeFile(uniqueFilePath, content, (err) => { if (err) { vscode.window.showErrorMessage(err.message); } });
 		this.addTempFile(uniqueFilePath);
 
@@ -179,16 +200,13 @@ export abstract class Helper {
 		ThisExtension.updateConfigurationSetting("python.dataScience.useNotebookEditor", this._openAsNotebookOriginalSetting, ThisExtension.SettingScope);
 	}
 
-	static async showDiff(filePath1: string, filePath2: string): Promise<void> {
-		let localFileUri = vscode.Uri.file(filePath1);
-		let onlnieFileUri = vscode.Uri.file(filePath2);
-
+	static async showDiff(filePath1: vscode.Uri, filePath2: vscode.Uri): Promise<void> {
 		let options: vscode.TextDocumentShowOptions = {
 			"preserveFocus": true,
 			"preview": false
 		};
 
-		vscode.commands.executeCommand("vscode.diff", localFileUri, onlnieFileUri, "Online <-> Local", options);
+		vscode.commands.executeCommand("vscode.diff", filePath1, filePath2, "Online <-> Local", options);
 	}
 
 	static resolvePath(filepath: string): string {
@@ -306,21 +324,5 @@ export abstract class Helper {
 
 	static parseBoolean(value: string): boolean {
 		return value === 'false' || value === 'undefined' || value === 'null' || value === '0' ? false : !!value;
-	}
-
-	// sooner or later we want to move await from native libraries like (path, os, ...) and use VSCode API implementations instead, e.g. vscode.workspace.fs
-	static async pathExists(path: vscode.Uri | string): Promise<boolean> {
-		try {
-			// three '/' in the beginning indicate a local path
-			// however, there are issues if this.localFilePath also starts with a '/' so we do a replace in this special case
-			if(typeof(path) == "string")
-			{
-				path = vscode.Uri.parse(("file:///" + path).replace('////', '///'));
-			}
-			await vscode.workspace.fs.stat(path);
-			return true;
-		} catch {
-			return false;
-		}
 	}
 }

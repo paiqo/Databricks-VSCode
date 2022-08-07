@@ -24,7 +24,11 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		this._object_id = object_id;
 		this._parent = parent;
 
-		super.label = path.split('/').pop();
+		this.init();
+	}
+
+	init(): void {
+		super.label = this.path.split('/').pop();
 
 		super.iconPath = {
 			light: this.getIconPath("light"),
@@ -32,8 +36,8 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		};
 	}
 
-	protected getIconPath(theme: string): string {
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, 'workspace', this.object_type.toLowerCase() + '.png');
+	protected getIconPath(theme: string): vscode.Uri {
+		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, 'workspace', this.object_type.toLowerCase() + '.png');
 	}	
 
 	command = null;

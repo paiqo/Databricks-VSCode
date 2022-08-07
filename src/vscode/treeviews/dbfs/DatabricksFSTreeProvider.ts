@@ -3,6 +3,8 @@ import { DatabricksFSTreeItem } from './DatabricksFSTreeItem';
 import { DatabricksFSDirectory } from './DatabricksFSDirectory';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { Helper } from '../../../helpers/Helper';
+import { ThisExtension } from '../../../ThisExtension';
+import { FSHelper } from '../../../helpers/FSHelper';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<DatabricksFSTreeItem> {
@@ -37,9 +39,17 @@ export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<Databri
 		} 
 		else 
 		{
-			let items: DatabricksFSTreeItem[] = await new DatabricksFSDirectory("/", null, "Online").getChildren();
+			let dbfsRootFolder = vscode.Uri.joinPath(vscode.Uri.file(ThisExtension.ActiveConnection.localSyncFolder), ThisExtension.ActiveConnection.WorkspaceSubFolder);
+			
+			// if the workspace folder does not yet exist we create it and return an empty array (as nothing can exist below it yet);
+			if (!await FSHelper.pathExists(dbfsRootFolder)) {
+				FSHelper.ensureFolder(dbfsRootFolder);
+				//vscode.window.showWarningMessage("With release v5.0.0 the sub-folder 'Workspace' was added for synced Workspace items. This supports better integratino with CI/CD and DatabricksPS PowerShell module. Please move your local files manually to '" + workspaceRootFolder + "' or sync them again! This message will only show up once!");
+				return Promise.resolve([]);
+			}
+			let items: DatabricksFSTreeItem[] = await new DatabricksFSDirectory("/", "Online", dbfsRootFolder, null).getChildren();
 
-			items.forEach(x => x.parent = null); 
+			//items.forEach(x => x.parent = null); 
 			// remove the artificial parent again
 			return items;
 		}

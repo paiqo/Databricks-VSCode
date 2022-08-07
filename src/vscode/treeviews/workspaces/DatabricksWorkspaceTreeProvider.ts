@@ -1,10 +1,9 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
-import * as fs from 'fs';
 import { DatabricksWorkspaceTreeItem } from './DatabricksWorkspaceTreeItem';
 import { DatabricksWorkspaceDirectory } from './DatabricksWorkspaceDirectory';
 import { ThisExtension } from '../../../ThisExtension';
 import { Helper } from '../../../helpers/Helper';
+import { FSHelper } from '../../../helpers/FSHelper';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
@@ -15,14 +14,14 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 
 	constructor() { }
 
-	refresh(showInfoMessage: boolean = false, item: DatabricksWorkspaceTreeItem = null): void {
+	async refresh(showInfoMessage: boolean = false, item: DatabricksWorkspaceTreeItem = null): Promise<void> {
 		if (showInfoMessage) {
 			Helper.showTemporaryInformationMessage('Refreshing Workspace ...');
 		}
 		this._onDidChangeTreeData.fire(item);
 	}
 
-	getTreeItem(element: DatabricksWorkspaceTreeItem): DatabricksWorkspaceTreeItem {
+	async getTreeItem(element: DatabricksWorkspaceTreeItem): Promise<DatabricksWorkspaceTreeItem> {
 		return element;
 	}
 
@@ -30,7 +29,7 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 		return element.parent;
 	}
 
-	getChildren(element?: DatabricksWorkspaceTreeItem): Thenable<DatabricksWorkspaceTreeItem[]> {
+	async getChildren(element?: DatabricksWorkspaceTreeItem): Promise<DatabricksWorkspaceTreeItem[]> {
 		if(!DatabricksApiService.isInitialized) { 			
 			return Promise.resolve([]);
 		}
@@ -39,14 +38,16 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 			return element.getChildren();
 		}
 		else {
-			let workspaceRootFolder = fspath.join(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ActiveConnection.WorkspaceSubFolder);
-			if (!fs.existsSync(workspaceRootFolder)) {
-				Helper.ensureLocalFolder(workspaceRootFolder);
+			let workspaceRootFolder = vscode.Uri.joinPath(vscode.Uri.file(ThisExtension.ActiveConnection.localSyncFolder), ThisExtension.ActiveConnection.WorkspaceSubFolder);
+			
+			// if the workspace folder does not yet exist we create it and return an empty array (as nothing can exist below it yet);
+			if (!await FSHelper.pathExists(workspaceRootFolder)) {
+				FSHelper.ensureFolder(workspaceRootFolder);
 				//vscode.window.showWarningMessage("With release v5.0.0 the sub-folder 'Workspace' was added for synced Workspace items. This supports better integratino with CI/CD and DatabricksPS PowerShell module. Please move your local files manually to '" + workspaceRootFolder + "' or sync them again! This message will only show up once!");
 				return Promise.resolve([]);
 			}
 			else {
-				return new DatabricksWorkspaceDirectory("/", -1, "Online").getChildren();
+				return new DatabricksWorkspaceDirectory("/", -1, "Online", workspaceRootFolder).getChildren();
 			}
 		}
 	}

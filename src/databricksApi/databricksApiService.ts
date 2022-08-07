@@ -18,6 +18,7 @@ import { ThisExtension } from '../ThisExtension';
 import { DatabricksConnectionTreeItem } from '../vscode/treeviews/connections/DatabricksConnectionTreeItem';
 import { SecretBackendType } from '../vscode/treeviews/secrets/_types';
 import { iDatabricksRepo } from '../vscode/treeviews/repos/_types';
+import { FSHelper } from '../helpers/FSHelper';
 
 export abstract class DatabricksApiService {
 	private static API_SUB_URL: string = "/api/";
@@ -77,18 +78,15 @@ export abstract class DatabricksApiService {
 	//#endregion
 
 	//#region Helpers
-	private static writeBase64toFile(base64String: string, filePath: string): void {
-		Helper.ensureLocalFolder(filePath, true);
-		fs.writeFile(filePath, base64String, { encoding: 'base64' }, function (err) {
-			if (err) {
-				vscode.window.showErrorMessage(`ERROR writing file: ${err}`);
-			}
-		});
+	private static async writeBase64toFile(base64String: string, filePath: vscode.Uri): Promise<void> {
+		FSHelper.ensureFolder(filePath);
+		
+		await vscode.workspace.fs.writeFile(filePath, Buffer.from(base64String, 'base64'));
 	}
 
-	private static readBase64FromFile(filePath: string): string {
+	private static async readBase64FromFile(filePath: vscode.Uri): Promise<string> {
 		// read binary data
-		var bitmap = fs.readFileSync(filePath);
+		var bitmap = await vscode.workspace.fs.readFile(filePath);
 		// convert binary data to base64 encoded string
 		return Buffer.from(bitmap).toString('base64');
 	}
@@ -357,7 +355,7 @@ export abstract class DatabricksApiService {
 		return items;
 	}
 
-	static async downloadWorkspaceItem(path: string, localPath: string, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
+	static async downloadWorkspaceItem(path: string, localPath: vscode.Uri, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
 		let endpoint = '2.0/workspace/export';
 		let body = {
 			path: path,
@@ -373,7 +371,7 @@ export abstract class DatabricksApiService {
 		this.writeBase64toFile(result.content, localPath);
 	}
 
-	static async uploadWorkspaceItem(localPath: string, path: string, language: WorkspaceItemLanguage, overwrite: boolean = true, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
+	static async uploadWorkspaceItem(localPath: vscode.Uri, path: string, language: WorkspaceItemLanguage, overwrite: boolean = true, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
 		let endpoint = '2.0/workspace/import';
 		let body = {
 			content: this.readBase64FromFile(localPath),
@@ -536,6 +534,7 @@ export abstract class DatabricksApiService {
 		return response;
 	}
 
+	// todo change localPath to vscode.Uri
 	static async exportJobRun(run_id: number, localPath: string): Promise<void> {
 		let endpoint = this.JOB_API_VERSION + '/jobs/runs/export';
 		let body = {
@@ -546,7 +545,7 @@ export abstract class DatabricksApiService {
 
 		let result = response.data;
 
-		this.writeBase64toFile(result.content, localPath);
+		this.writeBase64toFile(result.content, vscode.Uri.file(localPath));
 	}
 
 	//#endregion
@@ -664,16 +663,16 @@ export abstract class DatabricksApiService {
 		return response;
 	}
 
-	static async uploadDBFSFile(localPath: string, dbfsPath: string, overwrite: boolean, batchSize: number = 1048000): Promise<void> {
+	static async uploadDBFSFile(localPath: vscode.Uri, dbfsPath: string, overwrite: boolean, batchSize: number = 1048000): Promise<void> {
 
 		// https://2ality.com/2018/04/async-iter-nodejs.html#reading-asynchronously-via-async-iteration
 
 		// this object is necessary so the single and asyncronous API calls are executed in the right order
 		let batchesLoaded: object[] = [];
 
-		let readStream = fs.createReadStream(localPath, { highWaterMark: batchSize });
-
 		let handle = await this.createDBFSFile(dbfsPath, overwrite);
+
+		let readStream = await vscode.workspace.fs.readFile(localPath);
 
 		for await (const chunk of readStream) {
 			let response: object = await this.appendDBFSFileContent(handle, chunk.toString('base64'));
@@ -684,7 +683,7 @@ export abstract class DatabricksApiService {
 		this.closeDBFSFile(handle);
 	}
 
-	static async downloadDBFSFile(dbfsPath: string, localPath: string, overwrite: boolean, batchSize: number = 512000): Promise<void> {
+	static async downloadDBFSFile(dbfsPath: string, localPath: vscode.Uri, overwrite: boolean, batchSize: number = 512000): Promise<void> {
 
 		let dbfsItem: iDatabricksFSItem = await this.getDBFSItem(dbfsPath);
 
@@ -701,7 +700,7 @@ export abstract class DatabricksApiService {
 		let offset = 0;
 		let content: { data: { bytes_read: number, data: string } };
 
-		Helper.ensureLocalFolder(localPath, true);
+		FSHelper.ensureFolder(localPath);
 		let writeStream = fs.createWriteStream(localPath, { highWaterMark: batchSize, encoding: 'base64' });
 
 		if (totalSize > 0) // we may also download empty files where the code would not work otherwise
@@ -713,6 +712,7 @@ export abstract class DatabricksApiService {
 
 				content = await this.readDBFSFileContent(dbfsPath, offset, batchSize);
 
+				vscode.workspace.fs.writeFile(localPath, Buffer.from(content, 'base64'));
 				writeStream.write(content.data.data, 'base64', function (err) {
 					if (err) {
 						vscode.window.showErrorMessage(`ERROR writing file: ${err}`);

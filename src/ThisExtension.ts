@@ -27,6 +27,10 @@ export abstract class ThisExtension {
 		return this._context.extensionPath;
 	}
 
+	static get rootUri(): vscode.Uri {
+		return this._context.extensionUri;
+	}
+
 	static get extensionContext(): vscode.ExtensionContext {
 		return this._context;
 	}

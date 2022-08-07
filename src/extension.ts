@@ -100,7 +100,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	let databricksFSTreeProvider = new DatabricksFSTreeProvider();
 	vscode.window.registerTreeDataProvider('databricksFS', databricksFSTreeProvider);
 	vscode.commands.registerCommand('databricksFS.refresh', (showInfoMessage: boolean = true, item: DatabricksFSDirectory = null) => databricksFSTreeProvider.refresh(showInfoMessage, item));
-	vscode.commands.registerCommand('databricksFS.add', () => new DatabricksFSDirectory("/", null, "Online").add());
+	vscode.commands.registerCommand('databricksFS.add', () => new DatabricksFSDirectory("/", "Online", null, null).add());
 
 	vscode.commands.registerCommand('databricksFSItem.click', (fsItem: DatabricksFSFile) => fsItem.click());
 	vscode.commands.registerCommand('databricksFSItem.add', (fsItem: DatabricksFSDirectory) => fsItem.add());
