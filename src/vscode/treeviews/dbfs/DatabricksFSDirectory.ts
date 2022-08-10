@@ -21,7 +21,7 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 		local_path?: vscode.Uri,
 		parent: DatabricksFSDirectory = undefined
 	) {
-		super(path, true, 0, parent, vscode.TreeItemCollapsibleState.Collapsed);
+		super(path, true, 0, 0, parent, vscode.TreeItemCollapsibleState.Collapsed);
 
 		this._localPath = local_path;
 		this._onlinePathExists = source != "Local";

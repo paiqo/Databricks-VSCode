@@ -569,6 +569,10 @@ export abstract class DatabricksApiService {
 
 		let response = await this.get(endpoint, { params: body });
 
+		if(!response)
+		{
+			return undefined;
+		}
 		let result = response.data;
 
 		return result;
@@ -606,6 +610,18 @@ export abstract class DatabricksApiService {
 		let body = {
 			path: path,
 			recursive: recursive
+		};
+
+		let response = await this.post(endpoint, body);
+
+		return response;
+	}
+
+	static async moveDBFSItem(pathSource: string, pathDestination: string): Promise<object> {
+		let endpoint = '2.0/dbfs/move';
+		let body = {
+			source_path: pathSource,
+			destination_path: pathDestination
 		};
 
 		let response = await this.post(endpoint, body);
@@ -661,12 +677,6 @@ export abstract class DatabricksApiService {
 	}
 
 	static async uploadDBFSFile(localPath: vscode.Uri, dbfsPath: string, overwrite: boolean, batchSize: number = 1048000): Promise<void> {
-
-		// https://2ality.com/2018/04/async-iter-nodejs.html#reading-asynchronously-via-async-iteration
-
-		// this object is necessary so the single and asyncronous API calls are executed in the right order
-		let batchesLoaded: object[] = [];
-
 		let handle = await this.createDBFSFile(dbfsPath, overwrite);
 
 		let content: Uint8Array = await vscode.workspace.fs.readFile(localPath);

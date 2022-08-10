@@ -11,6 +11,7 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 	private _path: string;
 	private _is_dir: boolean;
 	private _fileSize: number;
+	private _modification_time: number;
 	private _parent: DatabricksFSDirectory;
 	protected _isInitialized: boolean = false;
 
@@ -18,6 +19,7 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		path: string,
 		is_dir: boolean,
 		size: number,
+		modifcation_time: number,
 		parent?: DatabricksFSDirectory,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
@@ -25,6 +27,7 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		this._path = path;
 		this._is_dir = is_dir;
 		this._fileSize = size;
+		this._modification_time = modifcation_time;
 		this._parent = parent;
 
 		// files are not expandable
@@ -79,6 +82,10 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		return this._fileSize;
 	}
 
+	get modification_time(): number {
+		return this._modification_time;
+	}
+
 	get parent(): DatabricksFSDirectory {
 		return this._parent;
 	}
@@ -88,12 +95,12 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 	}
 
 	public static fromInterface(item: iDatabricksFSItem, parent: DatabricksFSDirectory): DatabricksFSTreeItem {
-		return new DatabricksFSTreeItem(item.path, item.is_dir, item.file_size);
+		return new DatabricksFSTreeItem(item.path, item.is_dir, item.file_size, item.modification_time);
 	}
 
 	static fromJson(jsonString: string): DatabricksFSTreeItem {
 		let item: iDatabricksFSItem = JSON.parse(jsonString);
-		return new DatabricksFSTreeItem(item.path, item.is_dir, item.file_size);
+		return new DatabricksFSTreeItem(item.path, item.is_dir, item.file_size, item.modification_time);
 	}
 
 	public CopyPathToClipboard(): void {

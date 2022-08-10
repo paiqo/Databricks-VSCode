@@ -35,8 +35,12 @@ export abstract class FSHelper {
 		return vscode.Uri.joinPath(base, ...pathSegments)
 	}
 
-	static basename(path: vscode.Uri){
+	static basename(path: vscode.Uri): string{
 		return Helper.getToken(path.path, this.SEPARATOR, -1);
+	}
+
+	static parent(uri: vscode.Uri): vscode.Uri{
+		return uri.with({path: uri.path.split(this.SEPARATOR).slice(0, -1).join(this.SEPARATOR)});
 	}
 
 	static join(...paths: string[])

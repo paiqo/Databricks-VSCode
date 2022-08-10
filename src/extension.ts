@@ -28,6 +28,7 @@ import { DatabricksRepoRepository } from './vscode/treeviews/repos/DatabricksRep
 import { DatabricksCluster } from './vscode/treeviews/clusters/DatabricksCluster';
 import { DatabricksSecretScope } from './vscode/treeviews/secrets/DatabricksSecretScope';
 import { DatabricksSecret } from './vscode/treeviews/secrets/DatabricksSecret';
+import { DatabricksFileSystemProvider } from './vscode/filesystemProvider/DatabricksFileSystemProvider';
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -42,6 +43,15 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 
 	ThisExtension.setStatusBar("Initialized!");
+
+	const dbfsProvider = new DatabricksFileSystemProvider();
+    context.subscriptions.push(vscode.workspace.registerFileSystemProvider('dbfs', dbfsProvider, { isCaseSensitive: true }));
+
+	/*context.subscriptions.push(vscode.commands.registerCommand('memfs.workspaceInit', _ => {
+        vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('dbfs:/'), name: "MemFS - Sample" });
+    }));
+	*/
+	vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('dbfs:/'), name: "Databricks - DBFS" });
 
 	// register DatabricksConnectionTreeProvider
 	let databricksConnectionTreeProvider = new DatabricksConnectionTreeProvider();
