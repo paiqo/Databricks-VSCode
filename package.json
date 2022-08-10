@@ -830,17 +830,17 @@
 				},
 				{
 					"command": "databricksFSItem.download",
-					"when": "view == databricksFS && viewItem == FILE || viewItem == FILE_WITH_LOCAL_COPY",
+					"when": "view == databricksFS && viewItem =~ /.*,DOWNLOAD,.*/",
 					"group": "inline"
 				},
 				{
 					"command": "databricksFSItem.upload",
-					"when": "view == databricksFS && viewItem == FILE_WITH_LOCAL_COPY",
+					"when": "view == databricksFS && viewItem =~ /.*,UPLOAD,.*/",
 					"group": "inline"
 				},
 				{
 					"command": "databricksFSItem.delete",
-					"when": "view == databricksFS && viewItem == FILE || viewItem == FILE_WITH_LOCAL_COPY",
+					"when": "view == databricksFS &&  viewItem =~ /.*,DELETE,.*/",
 					"group": "inline"
 				},
 				{

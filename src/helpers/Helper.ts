@@ -94,6 +94,7 @@ export abstract class Helper {
 		return parts[token];
 	}
 
+	// not working!
 	static runAsyncFunction<T>(func: Function, args: any = undefined): T {
 		return (async function () {
 			if(args == undefined)
@@ -103,6 +104,17 @@ export abstract class Helper {
 			return func(args);
 		}()) as unknown as T;
 	}
+	// not working!
+	static runAsyncFunction2<T>(func: Function, args: any = undefined): T {
+		const immediatelyResolvedPromise = () => {
+			const resultPromise = new Promise((resolve, reject) => {
+				resolve(func(args))
+			})
+			return resultPromise.then(x => x as unknown as T);
+		}
+		return immediatelyResolvedPromise as unknown as T;
+	}
+	
 
 	static ensureLocalFolder(path: string, pathIsFile: boolean = false): void {
 		let folder = path;

@@ -1,24 +1,21 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
-import { iDatabricksWorkspaceItem } from '../vscode/treeviews/workspaces/iDatabricksworkspaceItem';
-import { WorkspaceItemExportFormat, WorkspaceItemLanguage } from '../vscode/treeviews/workspaces/_types';
-
-import { iDatabricksRuntimeVersion } from '../vscode/treeviews/clusters/iDatabricksRuntimeVersion';
-
-import { iDatabricksFSItem } from '../vscode/treeviews/dbfs/iDatabricksFSItem';
-
-import { DatabricksSecretTreeItem } from '../vscode/treeviews/secrets/DatabricksSecretTreeItem';
-import { iDatabricksSecretScope } from '../vscode/treeviews/secrets/iDatabricksSecretScope';
-import { iDatabricksSecret } from '../vscode/treeviews/secrets/iDatabricksSecret';
 
 import { Helper } from '../helpers/Helper';
+import { FSHelper } from '../helpers/FSHelper';
+import { ThisExtension } from '../ThisExtension';
+
+import { iDatabricksWorkspaceItem } from '../vscode/treeviews/workspaces/iDatabricksworkspaceItem';
+import { WorkspaceItemExportFormat, WorkspaceItemLanguage } from '../vscode/treeviews/workspaces/_types';
+import { iDatabricksRuntimeVersion } from '../vscode/treeviews/clusters/iDatabricksRuntimeVersion';
+import { iDatabricksFSItem } from '../vscode/treeviews/dbfs/iDatabricksFSItem';
+import { iDatabricksSecretScope } from '../vscode/treeviews/secrets/iDatabricksSecretScope';
+import { iDatabricksSecret } from '../vscode/treeviews/secrets/iDatabricksSecret';
 import { ContextLanguage, ExecutionCommand, ExecutionContext, iDatabricksJobResponse, iDatabricksJobRunResponse, iDatabricksRepoResponse } from './_types';
 import { iDatabricksCluster } from '../vscode/treeviews/clusters/iDatabricksCluster';
-import { ThisExtension } from '../ThisExtension';
 import { DatabricksConnectionTreeItem } from '../vscode/treeviews/connections/DatabricksConnectionTreeItem';
 import { SecretBackendType } from '../vscode/treeviews/secrets/_types';
 import { iDatabricksRepo } from '../vscode/treeviews/repos/_types';
-import { FSHelper } from '../helpers/FSHelper';
+
 
 export abstract class DatabricksApiService {
 	private static API_SUB_URL: string = "/api/";
@@ -672,13 +669,18 @@ export abstract class DatabricksApiService {
 
 		let handle = await this.createDBFSFile(dbfsPath, overwrite);
 
-		let readStream = await vscode.workspace.fs.readFile(localPath);
+		let content: Uint8Array = await vscode.workspace.fs.readFile(localPath);
 
-		for await (const chunk of readStream) {
-			let response: object = await this.appendDBFSFileContent(handle, chunk.toString('base64'));
+		let totalSize = content.length;
+		let offset = 0;
+		do {
+				if (offset + batchSize > totalSize) {
+					batchSize = totalSize - offset;
+				}
 
-			batchesLoaded.push(response);
-		}
+				await this.appendDBFSFileContent(handle, Buffer.from(content.slice(offset, offset + batchSize)).toString('base64'));
+				offset = offset + batchSize;
+			} while (offset < totalSize);
 
 		this.closeDBFSFile(handle);
 	}
@@ -691,17 +693,18 @@ export abstract class DatabricksApiService {
 			throw "The specified path is a directory and not a file!";
 		}
 
-		// remove file if it exists
-		//fs.unlink(localPath, (err) => {
-		//if (err) throw err;
-		//});
+		if(FSHelper.pathExists(localPath) && !overwrite)
+		{
+			ThisExtension.log("Local path exists and Overwrite is not used!");
+			return;
+		}
 
 		let totalSize = dbfsItem.file_size;
 		let offset = 0;
-		let content: { data: { bytes_read: number, data: string } };
+		let dbfsContent: { data: { bytes_read: number, data: string } };
 
-		FSHelper.ensureFolder(localPath);
-		let writeStream = fs.createWriteStream(localPath, { highWaterMark: batchSize, encoding: 'base64' });
+		let contentBytesBatch: Uint8Array = new Uint8Array(batchSize);
+		let contentBytes: Uint8Array = new Uint8Array(totalSize);
 
 		if (totalSize > 0) // we may also download empty files where the code would not work otherwise
 		{
@@ -710,20 +713,17 @@ export abstract class DatabricksApiService {
 					batchSize = totalSize - offset;
 				}
 
-				content = await this.readDBFSFileContent(dbfsPath, offset, batchSize);
+				dbfsContent = await this.readDBFSFileContent(dbfsPath, offset, batchSize);
+				contentBytesBatch = Buffer.from(dbfsContent.data.data, 'base64');
 
-				vscode.workspace.fs.writeFile(localPath, Buffer.from(content, 'base64'));
-				writeStream.write(content.data.data, 'base64', function (err) {
-					if (err) {
-						vscode.window.showErrorMessage(`ERROR writing file: ${err}`);
-					}
-				}
-				);
+				// add the batch to the corresponding offset of the final buffer
+				contentBytes.set(contentBytesBatch, offset);
 
 				offset = offset + batchSize;
 			} while (offset < totalSize);
 		}
-		writeStream.close();
+		
+		await vscode.workspace.fs.writeFile(localPath, contentBytes);
 	}
 	//#endregion
 

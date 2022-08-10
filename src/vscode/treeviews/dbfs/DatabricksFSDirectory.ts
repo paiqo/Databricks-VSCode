@@ -60,8 +60,12 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 	}
 
 	// used in package.json to filter commands via viewItem == FOLDER
+	// used in package.json to filter commands via viewItem =~ /.*,DOWNLOAD,.*/",
 	get _contextValue(): string {
-		return 'FOLDER';
+		let states: string[] = ["FOLDER"];
+
+		// use , as separator to allow to check for ,<value>, in package.json when condition
+		return "," + states.join(",") + ",";
 	}
 
 	get localPath(): vscode.Uri {
@@ -105,9 +109,40 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 			}
 		}
 
+		let onlinePaths: string[] = onlineItems.map((x) => (x as iDatabricksFSItem).path);
+
 		let localItems: DatabricksFSTreeItem[] = [];
 		if (this.localPathExists) {
-			// TODO browse local directory for files
+			let localContent: [string, vscode.FileType][] = await vscode.workspace.fs.readDirectory(this.localPath);
+
+			for (let local of localContent) {
+				let localUri: vscode.Uri = vscode.Uri.joinPath(this.localPath, local[0]);
+
+				let localRelativePath = FSHelper.join(this.path, local[0]);
+
+
+				if (!onlinePaths.includes(localRelativePath)) {
+					switch (local[1]) // remove extension
+					{
+						case vscode.FileType.File:
+							localItems.push(new DatabricksFSFile(localRelativePath, -1, "Local", localUri, this));
+							break;
+						case vscode.FileType.Directory:
+							localItems.push(new DatabricksFSDirectory(localRelativePath, "Local", localUri, this));
+							break;
+					}
+
+				}
+				else {
+					for (let existingItem of onlineItems) {
+						if (existingItem.path == localRelativePath) {
+							(existingItem as DatabricksFSFile).localPath = localUri;
+							existingItem.init();
+							break;
+						}
+					}
+				}
+			}
 		}
 
 		let allItems = onlineItems.concat(localItems);

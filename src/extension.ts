@@ -29,7 +29,6 @@ import { DatabricksCluster } from './vscode/treeviews/clusters/DatabricksCluster
 import { DatabricksSecretScope } from './vscode/treeviews/secrets/DatabricksSecretScope';
 import { DatabricksSecret } from './vscode/treeviews/secrets/DatabricksSecret';
 
-
 export async function activate(context: vscode.ExtensionContext) {
 
 	ThisExtension.StatusBar = vscode.window.createStatusBarItem("databricks-vscode", vscode.StatusBarAlignment.Right);

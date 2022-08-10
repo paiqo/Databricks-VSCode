@@ -48,6 +48,8 @@ export abstract class FSHelper {
 			items.push(Helper.trimChar(path, this.SEPARATOR))
 		}
 
+		items = items.filter(x => x);
+
 		return this.SEPARATOR + items.join(this.SEPARATOR);
 	}
 

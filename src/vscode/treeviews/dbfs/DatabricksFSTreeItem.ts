@@ -12,7 +12,8 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 	private _is_dir: boolean;
 	private _fileSize: number;
 	private _parent: DatabricksFSDirectory;
-	
+	protected _isInitialized: boolean = false;
+
 	constructor(
 		path: string,
 		is_dir: boolean,
@@ -26,16 +27,25 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		this._fileSize = size;
 		this._parent = parent;
 
-		super.label = path.split('/').pop();
-		super.iconPath = {
-			light: this.getIconPath("light"),
-			dark: this.getIconPath("dark")
-		};
-
 		// files are not expandable
-		if(!this.is_dir)
-		{
+		if (!this.is_dir) {
 			super.collapsibleState = undefined;
+		}
+
+		this._isInitialized = true;
+
+		this.init();
+	}
+
+	init(): void {
+		// we can only run initialize for this class after all values had been set in the constructor
+		// but we must not run it as part of the call to super()
+		if (this._isInitialized) {
+			super.label = this.path.split('/').pop();
+			super.iconPath = {
+				light: this.getIconPath("light"),
+				dark: this.getIconPath("dark")
+			};
 		}
 	}
 
@@ -57,15 +67,15 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 	}
 
 	/* iDatabrickFSItem implementatin */
-	get path (): string {
+	get path(): string {
 		return this._path;
 	}
 
-	get is_dir (): boolean {
+	get is_dir(): boolean {
 		return this._is_dir;
 	}
 
-	get file_size (): number {
+	get file_size(): number {
 		return this._fileSize;
 	}
 
