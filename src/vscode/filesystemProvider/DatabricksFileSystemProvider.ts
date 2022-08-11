@@ -90,28 +90,23 @@ export class DatabricksFileSystemProvider implements vscode.FileSystemProvider {
         if (dbfsItem && options.create && !options.overwrite) {
             throw vscode.FileSystemError.FileExists(uri);
         }
-        if (!dbfsItem) {
-            let handle = await DatabricksApiService.createDBFSFile(uri.path, options.overwrite);
+        
+		let handle = await DatabricksApiService.createDBFSFile(uri.path, options.overwrite);
 
-			let batchSize: number = 524288; // 512 kB
-			const totalSize = content.length;
-			let offset = 0;
-			do {
-					if (offset + batchSize > totalSize) {
-						batchSize = totalSize - offset;
-					}
+		let batchSize: number = 524288; // 512 kB
+		const totalSize = content.length;
+		let offset = 0;
+		do {
+				if (offset + batchSize > totalSize) {
+					batchSize = totalSize - offset;
+				}
 
-					await DatabricksApiService.appendDBFSFileContent(handle, Buffer.from(content.slice(offset, offset + batchSize)).toString('base64'));
-					offset = offset + batchSize;
-				} while (offset < totalSize);
+				await DatabricksApiService.appendDBFSFileContent(handle, Buffer.from(content.slice(offset, offset + batchSize)).toString('base64'));
+				offset = offset + batchSize;
+			} while (offset < totalSize);
 
-			DatabricksApiService.closeDBFSFile(handle);
-        }
-		/*
-        entry.mtime = Date.now();
-        entry.size = content.byteLength;
-        entry.data = content;
-		*/
+		DatabricksApiService.closeDBFSFile(handle);
+
         this._fireSoon({ type: vscode.FileChangeType.Changed, uri });
     }
 

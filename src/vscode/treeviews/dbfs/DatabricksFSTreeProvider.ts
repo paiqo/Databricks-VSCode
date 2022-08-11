@@ -49,8 +49,9 @@ export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<Databri
 			}
 			let items: DatabricksFSTreeItem[] = await new DatabricksFSDirectory("/", "Online", dbfsRootFolder, null).getChildren();
 
-			//items.forEach(x => x.parent = null); 
-			// remove the artificial parent again
+			// remove the artificial parent again to make sure to refresh the root 
+			items.forEach(x => x.parent = null); 
+			
 			return items;
 		}
 	}
