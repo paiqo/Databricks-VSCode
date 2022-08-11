@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Extension to manage your Databricks workspace and ease local development",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -55,7 +55,8 @@
 		"onView:databricksFS",
 		"onView:databricksSecrets",
 		"onView:databricksSql",
-		"onView:databricksRepos"
+		"onView:databricksRepos",
+		"onFileSystem:dbfs"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -568,15 +569,26 @@
 				"title": "Open Browser",
 				"icon": "$(globe)"
 			},
+
+			{
+				"command": "databricksFS.addToWorkspace",
+				"title": "Add DBFS to workspace",
+				"icon": "$(symbol-class)"
+			},
 			{
 				"command": "databricksFS.refresh",
 				"title": "Refresh",
 				"icon": "$(refresh)"
 			},
 			{
-				"command": "databricksFS.add",
+				"command": "databricksFS.addFile",
 				"title": "Add",
-				"icon": "$(add)"
+				"icon": "$(new-file)"
+			},
+			{
+				"command": "databricksFS.addDirectory",
+				"title": "Add",
+				"icon": "$(file-directory-create)"
 			},
 			{
 				"command": "databricksFSItem.download",
@@ -593,9 +605,14 @@
 				"title": "Preview File"
 			},
 			{
-				"command": "databricksFSItem.add",
+				"command": "databricksFSItem.addFile",
 				"title": "Add",
-				"icon": "$(add)"
+				"icon": "$(new-file)"
+			},
+			{
+				"command": "databricksFSItem.addDirectory",
+				"title": "Add Directory",
+				"icon": "$(file-directory-create)"
 			},
 			{
 				"command": "databricksFSItem.delete",
@@ -716,7 +733,17 @@
 					"group": "navigation"
 				},
 				{
-					"command": "databricksFS.add",
+					"command": "databricksFS.addFile",
+					"when": "view == databricksFS",
+					"group": "navigation"
+				},
+				{
+					"command": "databricksFS.addDirectory",
+					"when": "view == databricksFS",
+					"group": "navigation"
+				},
+				{
+					"command": "databricksFS.addToWorkspace",
 					"when": "view == databricksFS",
 					"group": "navigation"
 				},
@@ -824,8 +851,13 @@
 					"group": "inline"
 				},
 				{
-					"command": "databricksFSItem.add",
-					"when": "view == databricksFS && viewItem == FOLDER",
+					"command": "databricksFSItem.addFile",
+					"when": "view == databricksFS && viewItem =~ /.*,ADDFILE,.*/",
+					"group": "inline"
+				},
+				{
+					"command": "databricksFSItem.addDirectory",
+					"when": "view == databricksFS && viewItem =~ /.*,ADDDIRECTORY,.*/",
 					"group": "inline"
 				},
 				{

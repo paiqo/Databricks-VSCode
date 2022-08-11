@@ -138,44 +138,6 @@ export abstract class Helper {
 		});
 	}
 
-	static get tempFiles(): string[] {
-		if (this._tempFiles == undefined) {
-			return [];
-		}
-		return this._tempFiles;
-	}
-
-	static addTempFile(filePath: string): void {
-		if (this._tempFiles == undefined) {
-			this._tempFiles = [];
-		}
-		this._tempFiles.push(filePath);
-	}
-
-	static async openTempFile(content: string = '', fileName: string = 'db-vscode-temp.json', open: boolean = true): Promise<vscode.Uri> {
-		let tempDir = this.resolvePath(os.tmpdir());
-		let filePath = `${tempDir}${fspath.sep}${fileName}`;
-		let uniqueFilePath = await UniqueFileName.get(filePath, {});
-
-		
-		fs.writeFile(uniqueFilePath, content, (err) => { if (err) { vscode.window.showErrorMessage(err.message); } });
-		this.addTempFile(uniqueFilePath);
-
-		if (open) {
-			setTimeout(() => vscode.workspace
-				.openTextDocument(uniqueFilePath)
-				.then(vscode.window.showTextDocument), 500);			
-		}
-
-		return uniqueFilePath;
-	}
-
-	static removeTempFiles(): void {
-		for (const tempFile of Helper.tempFiles) {
-			fs.unlink(tempFile, (err) => { if (err) { vscode.window.showErrorMessage(err.message); } });
-		}
-	}
-
 	private static initOpenAsNotebookOriginalSetting(): void {
 		if (this._openAsNotebookOriginalSetting == undefined) {
 			this._openAsNotebookOriginalSetting = ThisExtension.getConfigurationSetting<boolean>(this.openAsNotebookSettingName).value;

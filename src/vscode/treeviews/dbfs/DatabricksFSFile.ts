@@ -151,28 +151,23 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 			.then(vscode.window.showTextDocument);
 	}
 
-	async download(asTempFile: boolean = false): Promise<vscode.Uri> {
+	async download(): Promise<vscode.Uri> {
 		try {
 			//vscode.window.showInformationMessage(`Download of item ${this._path}) started ...`);
 			let localPath: vscode.Uri;
 
-			if (asTempFile) {
-				localPath = await Helper.openTempFile('', this.label + '-ONLINE', false);
+			if (this.localPathExists) {
+				localPath = this.localPath;
 			}
 			else {
-				if (this.localPathExists) {
-					localPath = this.localPath;
-				}
-				else {
-					localPath = vscode.Uri.joinPath(vscode.Uri.file(ThisExtension.ActiveConnection.localSyncFolder), ThisExtension.ActiveConnection.DatabricksFSSubFolder, this.path);
-				}
+				localPath = vscode.Uri.joinPath(vscode.Uri.file(ThisExtension.ActiveConnection.localSyncFolder), ThisExtension.ActiveConnection.DatabricksFSSubFolder, this.path);
 			}
 
 			await DatabricksApiService.downloadDBFSFile(this.path, localPath, true);
 
 			Helper.showTemporaryInformationMessage(`Download of DBFS item ${this.path} to '${localPath}' finished!`);
 
-			if (ThisExtension.RefreshAfterUpDownload && !asTempFile) {
+			if (ThisExtension.RefreshAfterUpDownload) {
 				setTimeout(() => this.refreshParent(), 500);
 			}
 
@@ -226,9 +221,6 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 	}
 
 	async compare(): Promise<void> {
-		let onlineFileTempPath: vscode.Uri = await this.download(true);
-
-		// if(this._languageFileExtension.isNotebook) { await Helper.disableOpenAsNotebook(); }
-		Helper.showDiff(onlineFileTempPath, this.localPath);
+		Helper.showDiff(vscode.Uri.parse("dbfs:/" + this.path), this.localPath);
 	}
 }

@@ -44,15 +44,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	ThisExtension.setStatusBar("Initialized!");
 
-	const dbfsProvider = new DatabricksFileSystemProvider();
-    context.subscriptions.push(vscode.workspace.registerFileSystemProvider('dbfs', dbfsProvider, { isCaseSensitive: true }));
-
-	/*context.subscriptions.push(vscode.commands.registerCommand('memfs.workspaceInit', _ => {
-        vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('dbfs:/'), name: "MemFS - Sample" });
-    }));
-	*/
-	vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('dbfs:/'), name: "Databricks - DBFS" });
-
 	// register DatabricksConnectionTreeProvider
 	let databricksConnectionTreeProvider = new DatabricksConnectionTreeProvider();
 	vscode.window.registerTreeDataProvider('DatabricksConnections', databricksConnectionTreeProvider);
@@ -74,8 +65,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksWorkspaceItem.compare', (workspaceItem: DatabricksWorkspaceNotebook) => workspaceItem.compare());
 	vscode.commands.registerCommand('databricksWorkspaceItem.copyPath', (workspaceItem: DatabricksWorkspaceTreeItem) => workspaceItem.CopyPathToClipboard());
 
-		vscode.commands.registerCommand('databricksWorkspaceItem.delete', (workspaceItem: DatabricksWorkspaceNotebook | DatabricksWorkspaceDirectory) => workspaceItem.delete());
-	
+	vscode.commands.registerCommand('databricksWorkspaceItem.delete', (workspaceItem: DatabricksWorkspaceNotebook | DatabricksWorkspaceDirectory) => workspaceItem.delete());
+
 	// register DatabricksClusterTreeProvider
 	let databricksClusterTreeProvider = new DatabricksClusterTreeProvider();
 	vscode.window.registerTreeDataProvider('databricksClusters', databricksClusterTreeProvider);
@@ -89,7 +80,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksClusterItem.useForSQL', (cluster: DatabricksCluster) => cluster.useForSQL());
 	vscode.commands.registerCommand('databricksClusterItem.createKernel', (cluster: DatabricksCluster) => cluster.createKernel());
 	vscode.commands.registerCommand('databricksClusterItem.restartKernel', (cluster: DatabricksCluster) => cluster.restartKernel());
-	
+
 	databricksClusterTreeProvider.autoRefresh();
 
 	// register DatabricksJobsTreeProvider
@@ -109,15 +100,24 @@ export async function activate(context: vscode.ExtensionContext) {
 	let databricksFSTreeProvider = new DatabricksFSTreeProvider();
 	vscode.window.registerTreeDataProvider('databricksFS', databricksFSTreeProvider);
 	vscode.commands.registerCommand('databricksFS.refresh', (showInfoMessage: boolean = true, item: DatabricksFSDirectory = null) => databricksFSTreeProvider.refresh(showInfoMessage, item));
-	vscode.commands.registerCommand('databricksFS.add', () => new DatabricksFSDirectory("/", "Online", null, null).add());
+	vscode.commands.registerCommand('databricksFS.addFile', () => new DatabricksFSDirectory("/", "Online", null, null).addFile());
+	vscode.commands.registerCommand('databricksFS.addDirectory', () => new DatabricksFSDirectory("/", "Online", null, null).addDirectory());
 
 	vscode.commands.registerCommand('databricksFSItem.click', (fsItem: DatabricksFSFile) => fsItem.click());
-	vscode.commands.registerCommand('databricksFSItem.add', (fsItem: DatabricksFSDirectory) => fsItem.add());
+	vscode.commands.registerCommand('databricksFSItem.addFile', (fsItem: DatabricksFSDirectory) => fsItem.addFile());
+	vscode.commands.registerCommand('databricksFSItem.addDirectory', (fsItem: DatabricksFSDirectory) => fsItem.addDirectory());
 	vscode.commands.registerCommand('databricksFSItem.download', (fsItem: DatabricksFSFile | DatabricksFSDirectory) => fsItem.download());
 	vscode.commands.registerCommand('databricksFSItem.upload', (fsItem: DatabricksFSFile | DatabricksFSDirectory) => fsItem.upload());
 	vscode.commands.registerCommand('databricksFSItem.delete', (fsItem: DatabricksFSFile | DatabricksFSDirectory) => fsItem.delete());
 	vscode.commands.registerCommand('databricksFSItem.copyPath', (fsItem: DatabricksFSTreeItem) => fsItem.CopyPathToClipboard());
 
+	// DBFS File System Provider
+	const dbfsProvider = new DatabricksFileSystemProvider();
+	context.subscriptions.push(vscode.workspace.registerFileSystemProvider('dbfs', dbfsProvider, { isCaseSensitive: true }));
+	vscode.commands.registerCommand('databricksFS.addToWorkspace', _ => {
+		vscode.window.showWarningMessage("This feature is still experimental!");
+		vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('dbfs:/'), name: "Databricks - DBFS" });
+	});
 
 	// register DatabricksSecretTreeProvider
 	let databricksSecretTreeProvider = new DatabricksSecretTreeProvider();
@@ -141,7 +141,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksRepos.refresh', (showInfoMessage: boolean = true) => databricksRepoTreeProvider.refresh(showInfoMessage));
 	vscode.commands.registerCommand('databricksRepo.checkOut', (repo: DatabricksRepoRepository) => repo.checkOut());
 	vscode.commands.registerCommand('databricksRepo.delete', (repo: DatabricksRepoRepository) => repo.delete());
-	
+
 
 	// register DatabricksNotebook Commands
 	vscode.commands.registerCommand('databricksNotebook.new', async function () {
@@ -155,5 +155,5 @@ export async function activate(context: vscode.ExtensionContext) {
 
 
 export function deactivate() {
-	ThisExtension.cleanUp();
+	ThisExtension.dispose();
 }

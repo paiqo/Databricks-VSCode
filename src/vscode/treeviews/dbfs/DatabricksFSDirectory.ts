@@ -62,7 +62,7 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 	// used in package.json to filter commands via viewItem == FOLDER
 	// used in package.json to filter commands via viewItem =~ /.*,DOWNLOAD,.*/",
 	get _contextValue(): string {
-		let states: string[] = ["FOLDER"];
+		let states: string[] = ["FOLDER", "ADDFILE", "ADDDIRECTORY", "DELETE"];
 
 		// use , as separator to allow to check for ,<value>, in package.json when condition
 		return "," + states.join(",") + ",";
@@ -151,7 +151,7 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 		return allItems;
 	}
 
-	async add(): Promise<void> {
+	async addFile(): Promise<void> {
 		let files: vscode.Uri[] = await vscode.window.showOpenDialog({ canSelectMany: true });
 
 		if (!files) {
@@ -174,6 +174,18 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 		}
 	}
 
+	async addDirectory(): Promise<void> {
+		let newName = await Helper.showInputBox("<new directory>", "Name of the new Directory");
+
+		if (newName) {
+			vscode.workspace.fs.createDirectory(vscode.Uri.joinPath(this.dbfsUri, newName));
+
+			if (ThisExtension.RefreshAfterUpDownload) {
+				setTimeout(() => this.refreshParent(), 500);
+			}
+		}
+	}
+
 	async upload(): Promise<void> {
 		vscode.window.showErrorMessage("[Upload] is currently not supported on directories.");
 		return;
@@ -185,7 +197,23 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 	}
 
 	async delete(): Promise<void> {
-		vscode.window.showErrorMessage("For safety reasons, only a single file can be deleted!");
-		return;
+		let confirm: string = await Helper.showInputBox("", "Confirm deletion by typeing the directory name '" + this.label + "' again.");
+
+		if (!confirm) {
+			ThisExtension.log("Deletion of DBFS directory '" + this.label + "' aborted!")
+			return;
+		}
+		if(confirm != this.label)
+		{
+			ThisExtension.log("Deletion of DBFS directory '" + this.label + "' aborted due to wrong confirmation '" + confirm + "'");
+			vscode.window.showErrorMessage(`Deletion NOT confirmed!\n('${this.label}' != '${confirm}')`);
+			return;
+		}
+
+		await vscode.workspace.fs.delete(this.dbfsUri);
+
+		if (ThisExtension.RefreshAfterUpDownload) {
+			setTimeout(() => this.refreshParent(), 500);
+		}
 	}
 }

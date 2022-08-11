@@ -87,8 +87,8 @@ export abstract class ThisExtension {
 		return true;
 	}
 
-	static cleanUp(): void {
-		Helper.removeTempFiles();
+	static dispose(): void {
+		
 	}
 
 	private static updateGlobalSettings(): void {

@@ -15,6 +15,7 @@ import { iDatabricksCluster } from '../vscode/treeviews/clusters/iDatabricksClus
 import { DatabricksConnectionTreeItem } from '../vscode/treeviews/connections/DatabricksConnectionTreeItem';
 import { SecretBackendType } from '../vscode/treeviews/secrets/_types';
 import { iDatabricksRepo } from '../vscode/treeviews/repos/_types';
+import { AxiosError } from 'axios';
 
 
 export abstract class DatabricksApiService {

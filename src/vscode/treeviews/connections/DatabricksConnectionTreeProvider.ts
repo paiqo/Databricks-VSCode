@@ -41,7 +41,6 @@ export class DatabricksConnectionTreeProvider implements vscode.TreeDataProvider
 				{
 					this._isInitialized = true;
 					con.activate();
-
 				}
 				envItems.push(con);
 			}

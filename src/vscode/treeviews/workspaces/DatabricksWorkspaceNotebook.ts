@@ -204,19 +204,16 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 		return DatabricksWorkspaceNotebook.fromInterface(item, parent);
 	}
 
-	async download(asTempFile: boolean = false): Promise<vscode.Uri> {
+	async download(): Promise<vscode.Uri> {
 		try {
 			//vscode.window.showInformationMessage(`Download of item ${this._path}) started ...`);
 			let localPath: vscode.Uri = this.localPath;
-			if (asTempFile) {
-				localPath = await Helper.openTempFile('', this.label + '-ONLINE', false);
-			}
 
 			let response = await DatabricksApiService.downloadWorkspaceItem(this.path, localPath, this.exportFormat);
 
 			Helper.showTemporaryInformationMessage(`Download of item ${FSHelper.basename(localPath)} finished!`);
 
-			if (ThisExtension.RefreshAfterUpDownload && !asTempFile) {
+			if (ThisExtension.RefreshAfterUpDownload) {
 				setTimeout(() => this.refreshParent(), 500);
 			}
 
@@ -272,9 +269,10 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 	}
 
 	async compare(): Promise<void> {
-		let onlineFileTempPath: vscode.Uri = await this.download(true);
+		// todo enable again once the File System API for Databricks Workspace was added!
+		throw Error("Compare is currently disabled!");
+		let onlineFileTempPath: vscode.Uri = await this.download();
 
-		// if(this._languageFileExtension.isNotebook) { await Helper.disableOpenAsNotebook(); }
 		Helper.showDiff(onlineFileTempPath, this.localPath);
 	}
 

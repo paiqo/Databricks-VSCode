@@ -204,7 +204,7 @@ export class DatabricksSQLTable extends DatabricksSQLTreeItem {
 		};
 	}
 
-	async showDefinition(): Promise<void> {
-		await Helper.openTempFile(this._tableDetails.createStatement, `create_${this.databaseName}_${this.tableName}.sql`);
+	async showDefinition(): Promise<vscode.TextDocument> {
+		return vscode.workspace.openTextDocument({ language: "sql", content: this._tableDetails.createStatement });
 	}
 }
