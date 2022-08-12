@@ -338,7 +338,37 @@ export abstract class DatabricksApiService {
 		return items;
 	}
 
-	static async downloadWorkspaceItem(path: string, localPath: vscode.Uri, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
+	static async getWorkspaceItem(path: string): Promise<iDatabricksWorkspaceItem> {
+		let endpoint = '2.0/workspace/get-status';
+		let body = { path: path };
+
+		let response = await this.get(endpoint, { params: body });
+
+		if (!response) {
+			return undefined;
+		}
+		let result = response.data;
+
+		return result;
+	}
+
+	static async downloadWorkspaceItem(path: string, format: WorkspaceItemExportFormat = "SOURCE"): Promise<Uint8Array> {
+		let endpoint = '2.0/workspace/export';
+		let body = {
+			path: path,
+			format: format
+		};
+
+		ThisExtension.log(`Downloading '${path}' ...`);
+
+		let response = await this.get(endpoint, { params: body });
+
+		let result = response.data;
+
+		return Buffer.from(result.content, 'base64') as Uint8Array;
+	}
+
+	static async downloadWorkspaceItemToFile(path: string, localPath: vscode.Uri, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
 		let endpoint = '2.0/workspace/export';
 		let body = {
 			path: path,
@@ -354,7 +384,24 @@ export abstract class DatabricksApiService {
 		this.writeBase64toFile(result.content, localPath);
 	}
 
-	static async uploadWorkspaceItem(localPath: vscode.Uri, path: string, language: WorkspaceItemLanguage, overwrite: boolean = true, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
+	static async uploadWorkspaceItem(content: Uint8Array, path: string, language: WorkspaceItemLanguage, overwrite: boolean = true, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
+		let endpoint = '2.0/workspace/import';
+		let body = {
+			content: Buffer.from(content).toString('base64'),
+			path: path,
+			language: language,
+			overwrite: overwrite,
+			format: format
+		};
+
+		ThisExtension.log(`Uploading file to '${path}' ...`);
+
+		let response = await this.post(endpoint, body);
+
+		let result = response.data;
+	}
+
+	static async uploadWorkspaceItemFromFile(localPath: vscode.Uri, path: string, language: WorkspaceItemLanguage, overwrite: boolean = true, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
 		let endpoint = '2.0/workspace/import';
 		let body = {
 			content: this.readBase64FromFile(localPath),

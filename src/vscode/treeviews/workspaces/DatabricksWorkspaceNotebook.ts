@@ -209,7 +209,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 			//vscode.window.showInformationMessage(`Download of item ${this._path}) started ...`);
 			let localPath: vscode.Uri = this.localPath;
 
-			let response = await DatabricksApiService.downloadWorkspaceItem(this.path, localPath, this.exportFormat);
+			let response = await DatabricksApiService.downloadWorkspaceItemToFile(this.path, localPath, this.exportFormat);
 
 			Helper.showTemporaryInformationMessage(`Download of item ${FSHelper.basename(localPath)} finished!`);
 
@@ -226,7 +226,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 
 	async upload(): Promise<void> {
 		try {
-			let response = DatabricksApiService.uploadWorkspaceItem(this.localPath, this.path, this.language, true, this.exportFormat);
+			let response = DatabricksApiService.uploadWorkspaceItemFromFile(this.localPath, this.path, this.language, true, this.exportFormat);
 			Helper.showTemporaryInformationMessage(`Upload of item ${this.path}) finished!`);
 
 			if (ThisExtension.RefreshAfterUpDownload) {

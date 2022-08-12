@@ -29,6 +29,7 @@ import { DatabricksCluster } from './vscode/treeviews/clusters/DatabricksCluster
 import { DatabricksSecretScope } from './vscode/treeviews/secrets/DatabricksSecretScope';
 import { DatabricksSecret } from './vscode/treeviews/secrets/DatabricksSecret';
 import { DatabricksFileSystemProvider } from './vscode/filesystemProvider/DatabricksFileSystemProvider';
+import { DatabricksWorkspaceProvider } from './vscode/filesystemProvider/DatabricksWorkspaceProvider';
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -43,6 +44,15 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 
 	ThisExtension.setStatusBar("Initialized!");
+
+	const workspaceProvider = new DatabricksWorkspaceProvider();
+	context.subscriptions.push(vscode.workspace.registerFileSystemProvider('dbws', workspaceProvider, { isCaseSensitive: true }));
+	vscode.commands.registerCommand('databricksWorkspace.addToWorkspace', _ => {
+		vscode.window.showWarningMessage("This feature is still experimental!");
+		vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('dbws:/'), name: "Databricks - Workspace" });
+	});
+
+	vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('dbws:/'), name: "Databricks - Workspace" });
 
 	// register DatabricksConnectionTreeProvider
 	let databricksConnectionTreeProvider = new DatabricksConnectionTreeProvider();
