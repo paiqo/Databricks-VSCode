@@ -885,7 +885,10 @@ export abstract class DatabricksApiService {
 		else if (tag != undefined) {
 			body.tag = tag;
 		}
-
+		else
+		{
+			throw Error("Parameter <branch> or <tag> need to be provided when calling updateRep()!");
+		}
 
 		let response = await this.patch(endpoint, body);
 

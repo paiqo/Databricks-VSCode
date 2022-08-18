@@ -11,11 +11,11 @@ import { DatabricksRepoTreeItem } from './DatabricksRepoTreeItem';
 export class DatabricksRepoRepository extends DatabricksRepoTreeItem {
 	
 	constructor(
-		id: number,
 		definition: iDatabricksRepo,
+		parent?: DatabricksRepoTreeItem,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.None
 	) {
-		super(collapsibleState);
+		super(parent, collapsibleState);
 
 		this.id = definition.id.toString();
 		this._definition = definition;
@@ -119,9 +119,23 @@ export class DatabricksRepoRepository extends DatabricksRepoTreeItem {
 		let tag: string = undefined;
 		if (type == "tag") { tag = target; }
 
-		setTimeout(() => vscode.commands.executeCommand("databricksRepos.refresh", false), 2000);
+		let ret: iDatabricksRepo = await DatabricksApiService.updateRepo(this.databricks_id, branch, tag);		
 
-		return await DatabricksApiService.updateRepo(this.databricks_id, branch, tag);		
+		setTimeout(() => this.refreshParent(), 500);
+
+		return ret;
+	}
+
+	async pull(): Promise<iDatabricksRepo> {
+		
+		let branch: string = this.definition.branch;
+		let tag: string = this.definition.tag;
+
+		let ret: iDatabricksRepo = await DatabricksApiService.updateRepo(this.databricks_id, branch, tag);		
+
+		setTimeout(() => this.refreshParent(), 500);
+
+		return ret;
 	}
 
 	async delete(): Promise<void> {
@@ -134,6 +148,6 @@ export class DatabricksRepoRepository extends DatabricksRepoTreeItem {
 
 		await DatabricksApiService.deleteRepo(this.databricks_id);
 
-		setTimeout(() => vscode.commands.executeCommand("databricksRepos.refresh", false), 500);
+		setTimeout(() => this.refreshParent(), 500);
 	}
 }

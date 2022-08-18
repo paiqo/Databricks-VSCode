@@ -13,14 +13,14 @@ export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<Databri
 
 	constructor() {	}
 
-	refresh(showInfoMessage: boolean = false, item: DatabricksFSTreeItem = null): void {
+	async refresh(showInfoMessage: boolean = false, item: DatabricksFSTreeItem = null): Promise<void> {
 		if(showInfoMessage){
 			Helper.showTemporaryInformationMessage('Refreshing DBFS ...');
 		}
 		this._onDidChangeTreeData.fire(item);
 	}
 
-	getTreeItem(element: DatabricksFSTreeItem): vscode.TreeItem {
+	async getTreeItem(element: DatabricksFSTreeItem): Promise<DatabricksFSTreeItem> {
 		return element;
 	}
 

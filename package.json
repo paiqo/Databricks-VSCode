@@ -669,9 +669,14 @@
 				"icon": "$(refresh)"
 			},
 			{
+				"command": "databricksRepo.pull",
+				"title": "Pull",
+				"icon": "$(repo-pull)"
+			},
+			{
 				"command": "databricksRepo.checkOut",
 				"title": "Check-Out",
-				"icon": "$(repo-pull)"
+				"icon": "$(repo-clone)"
 			},
 			{
 				"command": "databricksRepo.delete",
@@ -792,7 +797,7 @@
 				{
 					"command": "databricksWorkspaceItem.delete",
 					"when": "view == databricksWorkspace",
-					"group": "inline@2"
+					"group": "inline@99"
 				},
 				{
 					"command": "databricksWorkspaceItem.copyPath",
@@ -816,7 +821,7 @@
 				{
 					"command": "databricksClusterItem.delete",
 					"when": "view == databricksClusters",
-					"group": "inline"
+					"group": "inline@99"
 				},
 				{
 					"command": "databricksClusterItem.useForSQL",
@@ -873,7 +878,7 @@
 				{
 					"command": "databricksFSItem.delete",
 					"when": "view == databricksFS &&  viewItem =~ /.*,DELETE,.*/",
-					"group": "inline"
+					"group": "inline@99"
 				},
 				{
 					"command": "databricksFSItem.copyPath",
@@ -882,7 +887,7 @@
 				{
 					"command": "databricksSecretScope.delete",
 					"when": "view == databricksSecrets && viewItem == SCOPE_DATABRICKS",
-					"group": "inline"
+					"group": "inline@99"
 				},
 				{
 					"command": "databricksSecretScope.addSecret",
@@ -897,7 +902,7 @@
 				{
 					"command": "databricksSecret.delete",
 					"when": "view == databricksSecrets && viewItem == SECRET_DATABRICKS",
-					"group": "inline"
+					"group": "inline@99"
 				},
 				{
 					"command": "databricksSQLTable.showDefinition",
@@ -905,14 +910,19 @@
 					"group": "inline"
 				},
 				{
+					"command": "databricksRepo.pull",
+					"when": "view == databricksRepos && viewItem == REPOSITORY",
+					"group": "inline@1"
+				},
+				{
 					"command": "databricksRepo.checkOut",
 					"when": "view == databricksRepos && viewItem == REPOSITORY",
-					"group": "inline"
+					"group": "inline@2"
 				},
 				{
 					"command": "databricksRepo.delete",
 					"when": "view == databricksRepos && viewItem == REPOSITORY",
-					"group": "inline"
+					"group": "inline@99"
 				}
 			]
 		}				

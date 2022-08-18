@@ -16,7 +16,7 @@ export class DatabricksRepoDirectory extends DatabricksRepoTreeItem {
 		directory: string,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
-		super(collapsibleState);
+		super(undefined, collapsibleState);
 
 		this._directory = directory;
 
@@ -43,7 +43,7 @@ export class DatabricksRepoDirectory extends DatabricksRepoTreeItem {
 		let repoItems: DatabricksRepoTreeItem[] = [];
 
 		if (responseData != undefined) {
-			responseData.repos.map(item => repoItems.push(new DatabricksRepoRepository(item.id, item)));
+			responseData.repos.map(item => repoItems.push(new DatabricksRepoRepository(item, this)));
 			Helper.sortArrayByProperty(repoItems, "label", "ASC");
 		}
 		

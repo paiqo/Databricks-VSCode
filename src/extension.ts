@@ -30,6 +30,7 @@ import { DatabricksSecretScope } from './vscode/treeviews/secrets/DatabricksSecr
 import { DatabricksSecret } from './vscode/treeviews/secrets/DatabricksSecret';
 import { DatabricksFileSystemProvider } from './vscode/filesystemProvider/DatabricksFileSystemProvider';
 import { DatabricksWorkspaceProvider } from './vscode/filesystemProvider/DatabricksWorkspaceProvider';
+import { DatabricksRepoTreeItem } from './vscode/treeviews/repos/DatabricksRepoTreeItem';
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -148,8 +149,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	// register DatabricksRepoProvider
 	let databricksRepoTreeProvider = new DatabricksRepoTreeProvider();
 	vscode.window.registerTreeDataProvider('databricksRepos', databricksRepoTreeProvider);
-	vscode.commands.registerCommand('databricksRepos.refresh', (showInfoMessage: boolean = true) => databricksRepoTreeProvider.refresh(showInfoMessage));
+	vscode.commands.registerCommand('databricksRepos.refresh', (showInfoMessage: boolean = true, item: DatabricksRepoTreeItem = null) => databricksRepoTreeProvider.refresh(showInfoMessage, item));
 	vscode.commands.registerCommand('databricksRepo.checkOut', (repo: DatabricksRepoRepository) => repo.checkOut());
+	vscode.commands.registerCommand('databricksRepo.pull', (repo: DatabricksRepoRepository) => repo.pull());
 	vscode.commands.registerCommand('databricksRepo.delete', (repo: DatabricksRepoRepository) => repo.delete());
 
 
