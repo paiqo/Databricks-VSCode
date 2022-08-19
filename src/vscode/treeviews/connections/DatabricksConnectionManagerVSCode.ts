@@ -7,8 +7,7 @@ import { DatabricksConnectionTreeItem } from './DatabricksConnectionTreeItem';
 
 export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManager{
 
-	private _settingScope: ConfigSettingSource;
-	
+	private _settingScope: ConfigSettingSource;	
 
 	constructor() {
 		super();
@@ -39,6 +38,8 @@ export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManag
 				ThisExtension.log("Setting 'databricks.lastActiveConnection' to '" + this._lastActiveConnectionName + "' ...");
 				ThisExtension.updateConfigurationSetting("databricks.lastActiveConnection", this._lastActiveConnectionName, this._settingScope);
 				this._initialized = true;
+
+				this.activateConnection(this.LastActiveConnection);
 			} catch (error) {
 				let msg = "Could not activate Connection '" + this._lastActiveConnectionName + "'!";
 				ThisExtension.log(msg);
@@ -110,5 +111,51 @@ export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManag
 
 			ThisExtension.updateConfigurationSetting("databricks.connections", configConnections.value, ThisExtension.SettingScope);
 		}
+	}
+
+	async getAccessToken(con: iDatabricksConnection): Promise<string> {
+		let accessToken: string = con.personalAccessToken;
+		const secureTokenName: string = con.displayName + "-API-Token";
+		const secureTokenStore = ThisExtension.SensitiveValueStore;
+
+		if (!accessToken) {
+			switch (secureTokenStore) {
+				case "SystemKeyChain":
+					ThisExtension.log("Getting Personal Access Token from System KeyChain '" + secureTokenName + "'");
+					accessToken = await ThisExtension.getSecureSetting(secureTokenName);
+
+					if (!accessToken) {
+						let msg = "Databricks Personal Access Token not found in System Key Chain!";
+						ThisExtension.log(msg);
+						ThisExtension.log("Please add the Personal access token again using the configuration property 'personalAccessToken' and refersh the connections.");
+						vscode.window.showErrorMessage(msg);
+					}
+
+					break;
+
+				case "ExternalConfigFile":
+					ThisExtension.log("Getting Personal Access Token from External Config File");
+					throw "Not yet implemented!";
+
+					break;
+
+				case "VSCodeSettings":
+					throw "Not yet implemented!";
+
+					break;
+
+				default:
+					throw "Invalid Sensitive Value Store !";
+
+					break;
+			}
+		}
+
+		if (!accessToken) {
+			ThisExtension.log("ERROR: Could not load PersonalAccessToken '" + secureTokenName + "' from '" + secureTokenStore + "'!");
+			vscode.window.showErrorMessage("Could not load PersonalAccessToken '" + secureTokenName + "' from '" + secureTokenStore + "'!");
+		}
+
+		return accessToken;
 	}
 }

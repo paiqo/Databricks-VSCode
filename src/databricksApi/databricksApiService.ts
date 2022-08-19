@@ -16,6 +16,7 @@ import { DatabricksConnectionTreeItem } from '../vscode/treeviews/connections/Da
 import { SecretBackendType } from '../vscode/treeviews/secrets/_types';
 import { iDatabricksRepo } from '../vscode/treeviews/repos/_types';
 import { AxiosError } from 'axios';
+import { iDatabricksConnection } from '../vscode/treeviews/connections/iDatabricksConnection';
 
 
 export abstract class DatabricksApiService {
@@ -28,7 +29,7 @@ export abstract class DatabricksApiService {
 
 
 	//#region Initialization
-	static async initialize(Connection: DatabricksConnectionTreeItem): Promise<boolean> {
+	static async initialize(con: iDatabricksConnection): Promise<boolean> {
 		try {
 			ThisExtension.log("Initializing Databricks API Service ...");
 			const axios = require('axios');
@@ -39,17 +40,17 @@ export abstract class DatabricksApiService {
 				httpsAgent: new httpsAgent({
 					rejectUnauthorized: ThisExtension.rejectUnauthorizedSSL
 				}),
-				baseURL: Helper.trimChar(Connection.apiRootUrl, '/') + this.API_SUB_URL,
+				baseURL: Helper.trimChar(con.apiRootUrl, '/') + this.API_SUB_URL,
 				proxy: ThisExtension.useProxy
 			});
 
 			// Alter defaults after instance has been created
-			let accessToken = await Connection.getAccessToken();
+			let accessToken = await ThisExtension.ConnectionManager.getAccessToken(con);
 			this._apiService.defaults.headers.common['Authorization'] = "Bearer " + accessToken;
 			this._apiService.defaults.headers.common['Content-Type'] = 'application/json';
 			this._apiService.defaults.headers.common['Accept'] = 'application/json';
 
-			ThisExtension.log(`Testing new Databricks API (${Connection.apiRootUrl}) settings ()...`);
+			ThisExtension.log(`Testing new Databricks API (${con.apiRootUrl}) settings ...`);
 			this._connectionTestRunning = true;
 			let workspaceList = await this.listWorkspaceItems("/");
 			this._connectionTestRunning = false;
@@ -60,7 +61,7 @@ export abstract class DatabricksApiService {
 			}
 			else {
 				ThisExtension.log(JSON.stringify(workspaceList));
-				throw new Error(`Invalid Configuration for Databricks REST API: Cannot access '${Connection.apiRootUrl}' with token '${accessToken}'!`);
+				throw new Error(`Invalid Configuration for Databricks REST API: Cannot access '${con.apiRootUrl}' with token '${accessToken}'!`);
 			}
 		} catch (error) {
 			this._connectionTestRunning = false;

@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 
 import { WorkspaceItemExportFormat, WorkspaceItemLanguage } from './_types';
 import { ThisExtension, ExportFormatsConfiguration } from '../../../ThisExtension';
-import { isUndefined } from 'util';
 
 export class LanguageFileExtensionMapper {
 	private _language: WorkspaceItemLanguage;

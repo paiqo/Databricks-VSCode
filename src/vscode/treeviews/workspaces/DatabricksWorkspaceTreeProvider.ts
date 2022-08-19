@@ -38,7 +38,7 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 			return element.getChildren();
 		}
 		else {
-			let workspaceRootFolder = vscode.Uri.joinPath(vscode.Uri.file(ThisExtension.ActiveConnection.localSyncFolder), ThisExtension.ActiveConnection.WorkspaceSubFolder);
+			let workspaceRootFolder = vscode.Uri.joinPath(vscode.Uri.file(ThisExtension.ActiveConnection.localSyncFolder), ThisExtension.ConnectionManager.SubfolderConfiguration().Workspace);
 			
 			// if the workspace folder does not yet exist we create it and return an empty array (as nothing can exist below it yet);
 			if (!await FSHelper.pathExists(workspaceRootFolder)) {

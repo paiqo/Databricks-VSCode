@@ -41,12 +41,12 @@ export abstract class ThisExtension {
 
 	static get ActiveConnectionName(): string {
 		if (!this.ActiveConnection) {
-			return this.ConnectionManager.LastActiveconnectionName;
+			return this.ConnectionManager.LastActiveConnectionName;
 		}
 		return this.ActiveConnection.displayName;
 	}
 
-	static ActiveConnection: DatabricksConnectionTreeItem;
+	static ActiveConnection: iDatabricksConnection;
 
 	static get RefreshAfterUpDownload(): boolean {
 		return true;
@@ -67,7 +67,7 @@ export abstract class ThisExtension {
 
 			this._context = context;			
 
-			ThisExtension.updateGlobalSettings();
+			ThisExtension.readGlobalSettings();
 
 			let connectionManager = this.getConfigurationSetting("databricks.connectionManager");
 			switch (connectionManager.value) {
@@ -91,7 +91,7 @@ export abstract class ThisExtension {
 		
 	}
 
-	private static updateGlobalSettings(): void {
+	private static readGlobalSettings(): void {
 		let settingScope: ConfigSettingSource = "Workspace";
 
 		ThisExtension.log("Trying to get config from Workspace settings ...");
