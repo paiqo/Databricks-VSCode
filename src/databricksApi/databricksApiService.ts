@@ -365,7 +365,7 @@ export abstract class DatabricksApiService {
 
 		let result = response.data;
 
-		return Buffer.from(result.content, 'base64') as Uint8Array;
+		return await Buffer.from(result.content, 'base64') as Uint8Array;
 	}
 
 	static async downloadWorkspaceItemToFile(path: string, localPath: vscode.Uri, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
@@ -381,13 +381,13 @@ export abstract class DatabricksApiService {
 
 		let result = response.data;
 
-		this.writeBase64toFile(result.content, localPath);
+		await this.writeBase64toFile(result.content, localPath);
 	}
 
 	static async uploadWorkspaceItem(content: Uint8Array, path: string, language: WorkspaceItemLanguage, overwrite: boolean = true, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
 		let endpoint = '2.0/workspace/import';
 		let body = {
-			content: Buffer.from(content).toString('base64'),
+			content: await Buffer.from(content).toString('base64'),
 			path: path,
 			language: language,
 			overwrite: overwrite,
@@ -404,7 +404,7 @@ export abstract class DatabricksApiService {
 	static async uploadWorkspaceItemFromFile(localPath: vscode.Uri, path: string, language: WorkspaceItemLanguage, overwrite: boolean = true, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
 		let endpoint = '2.0/workspace/import';
 		let body = {
-			content: this.readBase64FromFile(localPath),
+			content: await this.readBase64FromFile(localPath),
 			path: path,
 			language: language,
 			overwrite: overwrite,

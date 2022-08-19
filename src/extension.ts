@@ -50,10 +50,12 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.workspace.registerFileSystemProvider('dbws', workspaceProvider, { isCaseSensitive: true }));
 	vscode.commands.registerCommand('databricksWorkspace.addToWorkspace', _ => {
 		vscode.window.showWarningMessage("This feature is still experimental!");
-		vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('dbws:/'), name: "Databricks - Workspace" });
+		// add at the end of the workspace
+		vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders.length, 0, { uri: vscode.Uri.parse('dbws:/'), name: "Databricks - Workspace" });
 	});
 
-	vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('dbws:/'), name: "Databricks - Workspace" });
+	vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders.length, 0, { uri: vscode.Uri.parse('dbws:/'), name: "Databricks - Workspace" });
+	
 
 	// register DatabricksConnectionTreeProvider
 	let databricksConnectionTreeProvider = new DatabricksConnectionTreeProvider();
@@ -127,7 +129,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.workspace.registerFileSystemProvider('dbfs', dbfsProvider, { isCaseSensitive: true }));
 	vscode.commands.registerCommand('databricksFS.addToWorkspace', _ => {
 		vscode.window.showWarningMessage("This feature is still experimental!");
-		vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('dbfs:/'), name: "Databricks - DBFS" });
+		// add at the end of the workspace
+		vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders.length, 0, { uri: vscode.Uri.parse('dbfs:/'), name: "Databricks - DBFS" });
 	});
 
 	// register DatabricksSecretTreeProvider

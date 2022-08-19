@@ -5,54 +5,182 @@
 
 
 import * as vscode from 'vscode';
-import { DatabricksApiService } from '../../databricksApi/databricksApiService';
+
 import { FSHelper } from '../../helpers/FSHelper';
+import { LanguageFileExtensionMapper } from '../treeviews/workspaces/LanguageFileExtensionMapper';
+import { WorkspaceItemExportFormat, WorkspaceItemLanguage, WorkspaceItemType } from '../treeviews/workspaces/_types';
+import { DatabricksApiService } from '../../databricksApi/databricksApiService';
+
 import { iDatabricksWorkspaceItem } from '../treeviews/workspaces/iDatabricksworkspaceItem';
-import { WorkspaceItemLanguage } from '../treeviews/workspaces/_types';
+import { ThisExtension } from '../../ThisExtension';
 
-export class DatabricksWorkspaceProviderFile implements vscode.FileStat {
+export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabricksWorkspaceItem {
+	// vscode.FileStat properties, basically all are read-only
+	get ctime(): number {
+		return Date.now() - 1000;
+	}
 
-    type: vscode.FileType;
-    ctime: number;
-    mtime: number;
-    size: number;
-	
-	fileName: string;
-	language: WorkspaceItemLanguage;
+	get mtime(): number {
+		return Date.now() - 1000;
+	}
 
-    constructor(fileName: string) {
-        this.type = vscode.FileType.File;
-        this.ctime = Date.now();
-        this.mtime = Date.now();
-        this.size = 0;
+	get size(): number {
+		return 0;
+	}
 
-		this.fileName = fileName;
-		this.language = "PYTHON";
-    }
+	get type(): vscode.FileType {
+		if (["DIRECTORY", "REPO"].includes(this.object_type) || !this.mapper) {
+			return vscode.FileType.Directory;
+		}
+		if (["NOTEBOOK"].includes(this.object_type) || this.mapper) {
+			return vscode.FileType.File;
+		}
+		return undefined;
+	}
+
+
+	// iDatabricksWorkspaceItem properties
+	object_id: number;
+	object_type: WorkspaceItemType;
+	path: string;
+
+	mapper: LanguageFileExtensionMapper;
+
+	constructor() { }
+
+	get showInFilesystem(): boolean {
+		return (this.type != undefined);
+	}
+
+	get filesystemEntry(): [string, vscode.FileType] {
+		return [this.uriPath, this.type];
+	}
+
+	get exists(): boolean {
+		if (this.object_id == -1) {
+			return false;
+		}
+
+		return true;
+	}
+
+	// the path used when communicating with the API
+	get apiPath(): string {
+		return this.path;
+	}
+
+	set apiPath(value: string) {
+		this.path = value;
+	}
+
+	// the path used when used as URI
+	get uriPath(): string {
+		if (this.type == vscode.FileType.Directory) {
+			return this.path;
+		}
+		if (this.type == vscode.FileType.File) {
+			return this.path + this.mapper.extension;
+		}
+	}
+
+	set uriPath(value: string) {
+		if (this.type == vscode.FileType.Directory) {
+			this.path = value;
+		}
+		if (this.type == vscode.FileType.File) {
+			this.path = value.replace(this.mapper.extension, "");
+		}
+	}
+
+	get exportFormat(): WorkspaceItemExportFormat {
+		return this.mapper.exportFormat;
+	}
+
+	get isNotebook(): boolean {
+		if (this.mapper) {
+			return this.mapper.isNotebook;
+		}
+		return false;
+	}
+
+	get language(): WorkspaceItemLanguage {
+		if (this.mapper) {
+			return this.mapper.language;
+		}
+		return undefined;
+	}
+
+	set language(value: WorkspaceItemLanguage) {
+		if (value) {
+			this.mapper = LanguageFileExtensionMapper.fromLanguage(value);
+		}
+		else {
+			this.mapper = undefined;
+		}
+	}
+
+	async loadFromAPI(): Promise<void> {
+		const item: iDatabricksWorkspaceItem = await DatabricksApiService.getWorkspaceItem(this.apiPath);
+
+		if (!item) {
+			this.object_id = -1;
+		}
+		else {
+			this.path = item.path;
+			this.language = item.language;
+			this.object_id = item.object_id;
+			this.object_type = item.object_type;
+		}
+	}
+
+	static async getInstance(source: vscode.Uri | iDatabricksWorkspaceItem): Promise<DatabricksWorkspaceProviderItem> {
+		let newInstance: DatabricksWorkspaceProviderItem = new DatabricksWorkspaceProviderItem();
+		if (source instanceof vscode.Uri) {
+			// VSCode always queries for some internal fiels on every filesystem
+			if (source.path.startsWith("/.vscode")) {
+				return undefined;
+			}
+			newInstance.mapper = LanguageFileExtensionMapper.fromUri(source);
+			newInstance.uriPath = source.path;
+			await newInstance.loadFromAPI();
+		}
+		else {
+			// from API
+			newInstance.mapper = LanguageFileExtensionMapper.fromLanguage(source.language)
+			newInstance.apiPath = source.path;
+			newInstance.object_id = source.object_id;
+			newInstance.object_type = source.object_type;
+			newInstance.language = source.language;
+		}
+
+		return newInstance;
+	}
 }
 
 export class DatabricksWorkspaceProvider implements vscode.FileSystemProvider {
 	// --- manage file metadata
 
-	async stat(uri: vscode.Uri): Promise<vscode.FileStat> {
-		const entry: iDatabricksWorkspaceItem = await DatabricksApiService.getWorkspaceItem(uri.path);
-		if (!entry) {
+	async stat(uri: vscode.Uri): Promise<DatabricksWorkspaceProviderItem> {
+		let entry = await DatabricksWorkspaceProviderItem.getInstance(uri);
+
+		if (!entry.exists) {
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
-		return {
-			type: entry.object_type == "DIRECTORY" ? vscode.FileType.Directory : vscode.FileType.File,
-			size: null,
-			mtime: null,
-			ctime: null
-		}
+
+		return entry;
 	}
 
 	async readDirectory(uri: vscode.Uri): Promise<[string, vscode.FileType][]> {
+		// URI and API path are the same for directories
 		const entries = await DatabricksApiService.listWorkspaceItems(uri.path);
 
 		const result: [string, vscode.FileType][] = [];
 		for (const entry of entries) {
-			result.push([entry.path, entry.object_type == "DIRECTORY" ? vscode.FileType.Directory : vscode.FileType.File]);
+			let item = await DatabricksWorkspaceProviderItem.getInstance(entry);
+
+			if (item.showInFilesystem) {
+				result.push(item.filesystemEntry);
+			}
 		}
 		return result;
 	}
@@ -60,38 +188,39 @@ export class DatabricksWorkspaceProvider implements vscode.FileSystemProvider {
 	// --- manage file contents
 
 	async readFile(uri: vscode.Uri): Promise<Uint8Array> {
-		let remoteItem: iDatabricksWorkspaceItem = await DatabricksApiService.getWorkspaceItem(uri.path);
+		let remoteItem: DatabricksWorkspaceProviderItem = await DatabricksWorkspaceProviderItem.getInstance(uri);
 
-		if (!remoteItem) {
+		if (!remoteItem.exists) {
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
-		if (remoteItem.object_type == "DIRECTORY") {
+		if (remoteItem.type == vscode.FileType.Directory) {
 			throw vscode.FileSystemError.FileIsADirectory(uri);
 		}
 
-		let contentBytes: Uint8Array = await DatabricksApiService.downloadWorkspaceItem(uri.path, "SOURCE");
+		let contentBytes: Uint8Array = await DatabricksApiService.downloadWorkspaceItem(remoteItem.apiPath, remoteItem.exportFormat);
 
 		return contentBytes
 	}
 
 	async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
-		let remoteItem: iDatabricksWorkspaceItem = await DatabricksApiService.getWorkspaceItem(uri.path);
+		let remoteItem: DatabricksWorkspaceProviderItem = await DatabricksWorkspaceProviderItem.getInstance(uri);
 
-		if (remoteItem && remoteItem.object_type == "DIRECTORY") {
+		if (remoteItem.exists && remoteItem.type == vscode.FileType.Directory) {
 			throw vscode.FileSystemError.FileIsADirectory(uri);
 		}
-		if (!remoteItem && !options.create) {
+		if (!remoteItem.exists && !options.create) {
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
-		if (remoteItem && options.create && !options.overwrite) {
+		if (remoteItem.exists && options.create && !options.overwrite) {
 			throw vscode.FileSystemError.FileExists(uri);
 		}
-		if(!remoteItem)
-		{
-			// e.g. when a new file is created
-			// get extension from new file -> derive language, etc.
+		// when a new file is added (remote does not yet exists and no content is provided), we just upload an empty file in SOURCE format.
+		if (!remoteItem.exists && content.length == 0) {
+			await DatabricksApiService.uploadWorkspaceItem(content, remoteItem.apiPath, remoteItem.language, options.overwrite, "SOURCE");
 		}
-		await DatabricksApiService.uploadWorkspaceItem(content, uri.path, remoteItem.language, options.overwrite);
+		else {
+			await DatabricksApiService.uploadWorkspaceItem(content, remoteItem.apiPath, remoteItem.language, options.overwrite, remoteItem.exportFormat);
+		}
 
 		this._fireSoon({ type: vscode.FileChangeType.Changed, uri });
 	}
@@ -109,7 +238,8 @@ export class DatabricksWorkspaceProvider implements vscode.FileSystemProvider {
 	}
 
 	async delete(uri: vscode.Uri): Promise<void> {
-		await DatabricksApiService.deleteWorkspaceItem(uri.path, true);
+		let remoteItem: DatabricksWorkspaceProviderItem = await DatabricksWorkspaceProviderItem.getInstance(uri);
+		await DatabricksApiService.deleteWorkspaceItem(remoteItem.apiPath, true);
 
 		this._fireSoon({ type: vscode.FileChangeType.Changed, uri: FSHelper.parent(uri) }, { uri, type: vscode.FileChangeType.Deleted });
 	}

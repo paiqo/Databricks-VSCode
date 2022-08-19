@@ -151,28 +151,27 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 			let localContent: [string, vscode.FileType][] = await vscode.workspace.fs.readDirectory(this.localPath);
 
 			for (let local of localContent) {
-				let localUri: vscode.Uri = vscode.Uri.joinPath(this.localPath, local[0]);
-				//let localFile: fspath.ParsedPath = fspath.parse(local);
-				let localFullPath = FSHelper.joinPath(this.localPath, local[0]);
-				let shownLocalFile = Helper.getToken(localUri.path, '/', -1);
+				let localUri: vscode.Uri = await FSHelper.joinPath(this.localPath, local[0]);
+				let shownLocalFile = FSHelper.basename(localUri);
+
 				if (local[1] == vscode.FileType.File) // remove extension
 				{
-					shownLocalFile = shownLocalFile.replace(shownLocalFile.split('.')[-1], '');
+					shownLocalFile = FSHelper.basename(FSHelper.removeExtension(localUri));
 				}
-				let localRelativePath = (this.path + '/' + shownLocalFile).replace('//', '/');
+				let localRelativePath = FSHelper.join(this.path, shownLocalFile);
 
 				if (!onlinePaths.includes(localRelativePath)) {
 					let languageFileExtension: LanguageFileExtensionMapper = undefined;
 
 					if (local[1] == vscode.FileType.File) {
-						let ext = LanguageFileExtensionMapper.extensionFromFileName(Helper.getToken(localUri.path, "/", -1));
+						let ext = LanguageFileExtensionMapper.extensionFromFileName(FSHelper.basename(localUri));
 
 						if (LanguageFileExtensionMapper.supportedFileExtensions.includes(ext)
 							|| ThisExtension.allFileExtensions.includes(ext)) {
-							languageFileExtension = LanguageFileExtensionMapper.fromFileName(Helper.getToken(localUri.path, "/", -1));
+							languageFileExtension = LanguageFileExtensionMapper.fromFileName(FSHelper.basename(localUri));
 						}
 						else {
-							vscode.window.showWarningMessage("File " + localFullPath + " has no valid extension and will be ignored! Supported extensions can be confiugred using setting 'exportFormats'.");
+							vscode.window.showWarningMessage("File " + localUri + " has no valid extension and will be ignored! Supported extensions can be confiugred using setting 'exportFormats'.");
 							continue;
 						}
 						localItems.push(new DatabricksWorkspaceNotebook(localRelativePath, -1, "Local", languageFileExtension, localUri, this));

@@ -226,7 +226,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 
 	async upload(): Promise<void> {
 		try {
-			let response = DatabricksApiService.uploadWorkspaceItemFromFile(this.localPath, this.path, this.language, true, this.exportFormat);
+			let response = await DatabricksApiService.uploadWorkspaceItemFromFile(this.localPath, this.path, this.language, true, this.exportFormat);
 			Helper.showTemporaryInformationMessage(`Upload of item ${this.path}) finished!`);
 
 			if (ThisExtension.RefreshAfterUpDownload) {
@@ -303,7 +303,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 		}
 		if (confirm.includes("Databricks")) {
 			ThisExtension.log(`Deleting Databricks file '${this.path}'!`);
-			DatabricksApiService.deleteWorkspaceItem(this.path, false);
+			await DatabricksApiService.deleteWorkspaceItem(this.path, false);
 		}
 
 		// we always call refresh

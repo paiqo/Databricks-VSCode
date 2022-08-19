@@ -448,6 +448,11 @@
 				"icon": "$(cloud-upload)"
 			},
 			{
+				"command": "databricksWorkspace.addToWorkspace",
+				"title": "Add Databricks to VSCode workspace",
+				"icon": "$(symbol-class)"
+			},
+			{
 				"command": "databricksWorkspaceItem.click",
 				"title": "Open File"
 			},
@@ -572,7 +577,7 @@
 
 			{
 				"command": "databricksFS.addToWorkspace",
-				"title": "Add DBFS to workspace",
+				"title": "Add DBFS to VSCode workspace",
 				"icon": "$(symbol-class)"
 			},
 			{
@@ -716,6 +721,11 @@
 					"command": "databricksWorkspace.upload",
 					"when": "view == databricksWorkspace",
 					"group": "navigation@1"
+				},
+				{
+					"command": "databricksWorkspace.addToWorkspace",
+					"when": "view == databricksWorkspace",
+					"group": "navigation"
 				},
 				{
 					"command": "databricksClusters.refresh",
