@@ -12,9 +12,9 @@
             ],
             "sourceMaps": true,
             "outFiles": [
-                "${workspaceRoot}/out/src/**/*.js"
+                "${workspaceRoot}/dist/**/*.js"
             ],
-            "preLaunchTask": "npm: webpack-dev",
+            "preLaunchTask": "npm: watch",
             "skipFiles": [
                 "<node_internals>/**/*.js",
                 "main.js",
@@ -30,7 +30,7 @@
             "port": 5870,
             "restart": true,
             "outFiles": [
-                "${workspaceRoot}/out/src"
+                "${workspaceFolder}/dist/**/*.js"
             ],
             "skipFiles": [
                 "<node_internals>/**/*.js",

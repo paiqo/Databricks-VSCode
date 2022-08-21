@@ -12,7 +12,6 @@ import { DatabricksJobTreeProvider } from './vscode/treeviews/jobs/DatabricksJob
 import { DatabricksJobTreeItem } from './vscode/treeviews/jobs/DatabricksJobTreeItem';
 import { DatabricksFSTreeProvider } from './vscode/treeviews/dbfs/DatabricksFSTreeProvider';
 import { DatabricksSecretTreeProvider } from './vscode/treeviews/secrets/DatabricksSecretTreeProvider';
-import { DatabricksSecretTreeItem } from './vscode/treeviews/secrets/DatabricksSecretTreeItem';
 import { DatabricksWorkspaceNotebook } from './vscode/treeviews/workspaces/DatabricksWorkspaceNotebook';
 import { DatabricksWorkspaceDirectory } from './vscode/treeviews/workspaces/DatabricksWorkspaceDirectory';
 import { DatabricksFSFile } from './vscode/treeviews/dbfs/DatabricksFSFile';
@@ -46,16 +45,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	ThisExtension.setStatusBar("Initialized!");
 
-	const workspaceProvider = new DatabricksWorkspaceProvider();
-	context.subscriptions.push(vscode.workspace.registerFileSystemProvider('dbws', workspaceProvider, { isCaseSensitive: true }));
-	vscode.commands.registerCommand('databricksWorkspace.addToWorkspace', _ => {
-		vscode.window.showWarningMessage("This feature is still experimental!");
-		// add at the end of the workspace
-		vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders.length, 0, { uri: vscode.Uri.parse('dbws:/'), name: "Databricks - Workspace" });
-	});
-
-	vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders.length, 0, { uri: vscode.Uri.parse('dbws:/'), name: "Databricks - Workspace" });
-	
 
 	// register DatabricksConnectionTreeProvider
 	let databricksConnectionTreeProvider = new DatabricksConnectionTreeProvider();
@@ -77,8 +66,16 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksWorkspaceItem.upload', (workspaceItem: DatabricksWorkspaceNotebook | DatabricksWorkspaceDirectory) => workspaceItem.upload());
 	vscode.commands.registerCommand('databricksWorkspaceItem.compare', (workspaceItem: DatabricksWorkspaceNotebook) => workspaceItem.compare());
 	vscode.commands.registerCommand('databricksWorkspaceItem.copyPath', (workspaceItem: DatabricksWorkspaceTreeItem) => workspaceItem.CopyPathToClipboard());
-
 	vscode.commands.registerCommand('databricksWorkspaceItem.delete', (workspaceItem: DatabricksWorkspaceNotebook | DatabricksWorkspaceDirectory) => workspaceItem.delete());
+
+	// Workspace File System Provider
+	const workspaceProvider = new DatabricksWorkspaceProvider();
+	context.subscriptions.push(vscode.workspace.registerFileSystemProvider('dbws', workspaceProvider, { isCaseSensitive: true }));
+	vscode.commands.registerCommand('databricksWorkspace.addToWorkspace', _ => {
+		vscode.window.showWarningMessage("This feature is still experimental!");
+		// add at the end of the workspace
+		vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders.length, 0, { uri: vscode.Uri.parse('dbws:/'), name: "Databricks - Workspace" });
+	});
 
 	// register DatabricksClusterTreeProvider
 	let databricksClusterTreeProvider = new DatabricksClusterTreeProvider();

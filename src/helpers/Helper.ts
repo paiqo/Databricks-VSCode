@@ -7,9 +7,7 @@ import * as vscode from 'vscode';
 import * as os from 'os';
 import * as fspath from 'path';
 import * as fs from 'fs';
-import * as UniqueFileName from 'uniquefilename';
 import { ThisExtension } from '../ThisExtension';
-const url = require('url');
 
 export abstract class Helper {
 	private static CodeCellTag: string = "# %% Code Cell";
@@ -17,7 +15,6 @@ export abstract class Helper {
 	static JupyterCodeCellsSettingName: string = "jupyter.codeRegularExpression";
 	private static openAsNotebookSettingName: string = 'python.dataScience.useNotebookEditor';
 
-	private static _tempFiles: string[];
 	private static _doubleClickTimer: any;
 
 	private static _openAsNotebookOriginalSetting: boolean;
