@@ -23,14 +23,14 @@ export class DatabricksRepoTreeProvider implements vscode.TreeDataProvider<Datab
 		}
 	}
 
-	refresh(showInfoMessage: boolean = false): void {
+	async refresh(showInfoMessage: boolean = false, item: DatabricksRepoTreeItem = null): Promise<void> {
 		if(showInfoMessage){
 			Helper.showTemporaryInformationMessage('Refreshing Repos ...');
 		}
-		this._onDidChangeTreeData.fire(null);
+		this._onDidChangeTreeData.fire(item);
 	}
 
-	getTreeItem(element: DatabricksRepoTreeItem): vscode.TreeItem {
+	async getTreeItem(element: DatabricksRepoTreeItem): Promise<vscode.TreeItem> {
 		return element;
 	}
 
@@ -61,7 +61,7 @@ export class DatabricksRepoTreeProvider implements vscode.TreeDataProvider<Datab
 		}
 	}
 
-	add(): void {
+	async add(): Promise<void> {
 		vscode.window.showErrorMessage(`Not yet implemented!`);
 	}
 }

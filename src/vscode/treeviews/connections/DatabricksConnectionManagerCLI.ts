@@ -136,4 +136,8 @@ export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager 
 	updateConnection(updatedCon: iDatabricksConnection): void {
 
 	}
+
+	async getAccessToken(con: iDatabricksConnection): Promise<string> {
+		return "";
+	}
 }

@@ -15,6 +15,7 @@ export interface iDatabricksRepo {
 	path: string;
 	url: string;
 	provider: RepoProvider;
-	branch: string;
+	branch?: string;
+	tag?: string;
 	head_commit_id: string;
 }

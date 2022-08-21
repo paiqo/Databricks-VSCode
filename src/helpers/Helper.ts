@@ -9,6 +9,7 @@ import * as fspath from 'path';
 import * as fs from 'fs';
 import * as UniqueFileName from 'uniquefilename';
 import { ThisExtension } from '../ThisExtension';
+const url = require('url');
 
 export abstract class Helper {
 	private static CodeCellTag: string = "# %% Code Cell";
@@ -98,6 +99,38 @@ export abstract class Helper {
 		return obj as T;
 	}
 
+	static getToken(text: string, separator: string, token: number): string {
+		let parts: string[] = text.split(separator);
+
+		if(token < 0)
+		{
+			return parts.slice(token)[0];
+		}
+		return parts[token];
+	}
+
+	// not working!
+	static runAsyncFunction<T>(func: Function, args: any = undefined): T {
+		return (async function () {
+			if(args == undefined)
+			{
+				return func()
+			}
+			return func(args);
+		}()) as unknown as T;
+	}
+	// not working!
+	static runAsyncFunction2<T>(func: Function, args: any = undefined): T {
+		const immediatelyResolvedPromise = () => {
+			const resultPromise = new Promise((resolve, reject) => {
+				resolve(func(args))
+			})
+			return resultPromise.then(x => x as unknown as T);
+		}
+		return immediatelyResolvedPromise as unknown as T;
+	}
+	
+
 	static ensureLocalFolder(path: string, pathIsFile: boolean = false): void {
 		let folder = path;
 		if (pathIsFile) {
@@ -118,44 +151,6 @@ export abstract class Helper {
 			if (name1 < name2) { return -1 * direction_num; }
 			return 0;
 		});
-	}
-
-	static get tempFiles(): string[] {
-		if (this._tempFiles == undefined) {
-			return [];
-		}
-		return this._tempFiles;
-	}
-
-	static addTempFile(filePath: string): void {
-		if (this._tempFiles == undefined) {
-			this._tempFiles = [];
-		}
-		this._tempFiles.push(filePath);
-	}
-
-	static async openTempFile(content: string = '', fileName: string = 'db-vscode-temp.json', open: boolean = true): Promise<string> {
-		let tempDir = this.resolvePath(os.tmpdir());
-		let filePath = `${tempDir}${fspath.sep}${fileName}`;
-		let uniqueFilePath = await UniqueFileName.get(filePath, {});
-
-
-		fs.writeFile(uniqueFilePath, content, (err) => { if (err) { vscode.window.showErrorMessage(err.message); } });
-		this.addTempFile(uniqueFilePath);
-
-		if (open) {
-			setTimeout(() => vscode.workspace
-				.openTextDocument(uniqueFilePath)
-				.then(vscode.window.showTextDocument), 500);			
-		}
-
-		return uniqueFilePath;
-	}
-
-	static removeTempFiles(): void {
-		for (const tempFile of Helper.tempFiles) {
-			fs.unlink(tempFile, (err) => { if (err) { vscode.window.showErrorMessage(err.message); } });
-		}
 	}
 
 	private static initOpenAsNotebookOriginalSetting(): void {
@@ -194,16 +189,13 @@ export abstract class Helper {
 		ThisExtension.updateConfigurationSetting("python.dataScience.useNotebookEditor", this._openAsNotebookOriginalSetting, ThisExtension.SettingScope);
 	}
 
-	static async showDiff(filePath1: string, filePath2: string): Promise<void> {
-		let localFileUri = vscode.Uri.file(filePath1);
-		let onlnieFileUri = vscode.Uri.file(filePath2);
-
+	static async showDiff(filePath1: vscode.Uri, filePath2: vscode.Uri): Promise<void> {
 		let options: vscode.TextDocumentShowOptions = {
 			"preserveFocus": true,
 			"preview": false
 		};
 
-		vscode.commands.executeCommand("vscode.diff", localFileUri, onlnieFileUri, "Online <-> Local", options);
+		vscode.commands.executeCommand("vscode.diff", filePath1, filePath2, "Online <-> Local", options);
 	}
 
 	static resolvePath(filepath: string): string {

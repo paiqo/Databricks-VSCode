@@ -14,6 +14,7 @@ export abstract class ThisExtension {
 
 	private static _context: vscode.ExtensionContext;
 	private static _extension: vscode.Extension<any>;
+	private static _statusBar: vscode.StatusBarItem;
 	private static _isValidated: boolean = false;
 	private static _logger: vscode.OutputChannel;
 	private static _connectionManager: DatabricksConnectionManager;
@@ -26,6 +27,10 @@ export abstract class ThisExtension {
 		return this._context.extensionPath;
 	}
 
+	static get rootUri(): vscode.Uri {
+		return this._context.extensionUri;
+	}
+
 	static get extensionContext(): vscode.ExtensionContext {
 		return this._context;
 	}
@@ -36,12 +41,12 @@ export abstract class ThisExtension {
 
 	static get ActiveConnectionName(): string {
 		if (!this.ActiveConnection) {
-			return this.ConnectionManager.LastActiveconnectionName;
+			return this.ConnectionManager.LastActiveConnectionName;
 		}
 		return this.ActiveConnection.displayName;
 	}
 
-	static ActiveConnection: DatabricksConnectionTreeItem;
+	static ActiveConnection: iDatabricksConnection;
 
 	static get RefreshAfterUpDownload(): boolean {
 		return true;
@@ -62,7 +67,7 @@ export abstract class ThisExtension {
 
 			this._context = context;			
 
-			ThisExtension.updateGlobalSettings();
+			ThisExtension.readGlobalSettings();
 
 			let connectionManager = this.getConfigurationSetting("databricks.connectionManager");
 			switch (connectionManager.value) {
@@ -82,11 +87,11 @@ export abstract class ThisExtension {
 		return true;
 	}
 
-	static cleanUp(): void {
-		Helper.removeTempFiles();
+	static dispose(): void {
+		
 	}
 
-	private static updateGlobalSettings(): void {
+	private static readGlobalSettings(): void {
 		let settingScope: ConfigSettingSource = "Workspace";
 
 		ThisExtension.log("Trying to get config from Workspace settings ...");
@@ -330,6 +335,28 @@ export abstract class ThisExtension {
 	static getNotebookKernel(clusterId: string): DatabricksKernel {
 		return ThisExtension._kernels[clusterId]
 	}
+
+	// #region StatusBar
+	static set StatusBar(value: vscode.StatusBarItem) {
+		this._statusBar = value;
+	}
+
+	static get StatusBar(): vscode.StatusBarItem {
+		return this._statusBar;
+	}
+
+	static setStatusBar(text: string, inProgress: boolean = false): void {
+		if(inProgress)
+		{
+			this.StatusBar.text = "$(loading~spin) " + text;
+		}
+		else
+		{
+			this.StatusBar.text = text;
+		}
+		
+	}
+	//#endregion
 }
 
 // represents the structure how the ExportFormats and FileExtensions for the different language are defined in the VS Code settings

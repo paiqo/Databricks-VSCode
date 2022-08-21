@@ -1,3 +1,5 @@
+import * as vscode from 'vscode';
+
 import { WorkspaceItemExportFormat, WorkspaceItemLanguage } from './_types';
 import { ThisExtension, ExportFormatsConfiguration } from '../../../ThisExtension';
 
@@ -39,6 +41,11 @@ export class LanguageFileExtensionMapper {
 	}
 
 	static fromLanguage(language: WorkspaceItemLanguage): LanguageFileExtensionMapper {
+		if(language == undefined)
+		{
+			return undefined;
+		}
+		
 		let ret: LanguageFileExtensionMapper = new LanguageFileExtensionMapper();
 
 		ret._language = language;
@@ -114,10 +121,23 @@ export class LanguageFileExtensionMapper {
 
 		let tokens = fileName.split('.'); // e.g. '.ipynb' or '.scala'
 
+		if(tokens.length == 1)
+		{
+			return undefined;
+		}
 		return "." + tokens.slice(-1)[0];
 	}
 
 	static fromFileName(fileName: string): LanguageFileExtensionMapper {
-		return this.fromExtension(this.extensionFromFileName(fileName));
+		let extension: string = this.extensionFromFileName(fileName);
+		if(!extension)
+		{
+			return undefined;
+		}
+		return this.fromExtension(extension);
+	}
+
+	static fromUri(uri: vscode.Uri): LanguageFileExtensionMapper {
+		return this.fromFileName(uri.path);
 	}
 }

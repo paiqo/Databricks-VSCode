@@ -1,88 +1,113 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
-import * as fs from 'fs';
+
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { ThisExtension } from '../../../ThisExtension';
-import { iDatabricksFSItem } from './iDatabricksFSItem';
 import { Helper } from '../../../helpers/Helper';
+
+import { iDatabricksFSItem } from './iDatabricksFSItem';
 import { DatabricksFSTreeItem } from './DatabricksFSTreeItem';
 import { DatabricksFSDirectory } from './DatabricksFSDirectory';
+import { FSHelper } from '../../../helpers/FSHelper';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksFSFile extends DatabricksFSTreeItem {
 
-	protected _isInitialized: boolean = false;
 	private _onlinePathExists: boolean = true;
+	private _localPath: vscode.Uri = undefined;
+	private _localStats: vscode.FileStat;
+	protected _isInitialized: boolean = false;
 
 	constructor(
 		path: string,
 		size: number,
-		parent: DatabricksFSDirectory,
-		source: "Online" | "Local"
+		source: "Online" | "Local",
+		local_path?: vscode.Uri,
+		parent: DatabricksFSDirectory = undefined
 	) {
-		super(path, false, size, parent, vscode.TreeItemCollapsibleState.None);
+		super(path, false, size, 0, parent, vscode.TreeItemCollapsibleState.None);
 
-		if (source == "Local") {
-			this._onlinePathExists = false;
+		this._localPath = local_path;
+		this._onlinePathExists = source != "Local";
+
+		this._isInitialized = true;
+
+		this.init();
+	}
+
+	init(): void {
+		// we can only run initialize for this class after all values had been set in the constructor
+		// but we must not run it as part of the call to super()
+		if (this._isInitialized) {
+			super.label = Helper.getToken(this.path, '/', -1);
+			super.tooltip = this._tooltip;
+			super.description = this._description;
+			super.contextValue = this._contextValue;
+			super.iconPath = {
+				light: this.getIconPath("light"),
+				dark: this.getIconPath("dark")
+			}
 		}
-
-		super.label = path.split('/').pop();
-		super.tooltip = this._tooltip;
-		super.description = this._description;
-		super.contextValue = this._contextValue;
-		super.iconPath = {
-			light: this.getIconPath("light"),
-			dark: this.getIconPath("dark")
-		};
 	}
 
 	get _tooltip(): string {
-		let tooltip: string = "Path: " + this.path + "\n";
+		let tooltip: string = "";
+		if (this.onlinePathExists) {
+			tooltip = `DBFS: ${this.path}\n (${Helper.bytesToSize(this.file_size)})`;
+		}
+		else 
+		{
+			tooltip += "DBFS: [not yet uploaded]\n";
+		}
 
-		if (!this.localPathExists) {
-			tooltip += "Local Path: [not yet downloaded] " + this.localFilePath + "\n";
+		if (this.localPathExists) {
+
+			tooltip += `Local: ${this.localPath.fsPath}\n`;
 		}
 		else {
-			tooltip += "Local Path: [downloaded] " + this.localFilePath + "\n";
+			tooltip += "Local: [not yet downloaded]\n";
 		}
 
-		tooltip += `Size: ${Helper.bytesToSize(this.file_size)}`;
-
-		return tooltip;
+		return tooltip.trim();
 	}
 
 	// description is show next to the label
 	get _description(): string {
-		return `${this.path} (${Helper.bytesToSize(this.file_size)})`;
+		if (this.onlinePathExists)
+		{
+			return `${this.path} (${Helper.bytesToSize(this.file_size)})`;
+		}
+		return this.path;
 	}
 
-	// used in package.json to filter commands via viewItem == FOLDER
+	// used in package.json to filter commands via viewItem =~ /.*,DOWNLOAD,.*/",
 	get _contextValue(): string {
+		let states: string[] = ["FILE"];
+
 		if (this.localPathExists) {
-			return 'FILE_WITH_LOCAL_COPY';
+			states.push("UPLOAD");
 		}
-		else {
-			return 'FILE';
+		if (this.onlinePathExists) {
+			states.push("DOWNLOAD")
 		}
+		if (this.localPathExists || this.onlinePathExists) {
+			states.push("DELETE")
+		}
+
+		// use , as separator to allow to check for ,<value>, in package.json when condition
+		return "," + states.join(",") + ",";
 	}
 
 	readonly command = {
 		command: 'databricksFSItem.click', title: "Open File", arguments: [this]
 	};
 
-	get localFolderPath(): string {
-		return fspath.join(
-			ThisExtension.ActiveConnection.localSyncFolder,
-			ThisExtension.ActiveConnection.DatabricksFSSubFolder,
-			fspath.dirname(this.path));
+	get localPath(): vscode.Uri {
+		return this._localPath
 	}
 
-	get localFilePath(): string {
-		return fspath.join(
-			ThisExtension.ActiveConnection.localSyncFolder,
-			ThisExtension.ActiveConnection.DatabricksFSSubFolder,
-			this.path);
+	set localPath(value: vscode.Uri) {
+		this._localPath = value;
 	}
 
 	get localFileName(): string {
@@ -90,13 +115,10 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 	}
 
 	get localPathExists(): boolean {
-		return fs.existsSync(this.localFilePath);
-	}
-
-	get localFileUri(): vscode.Uri {
-		// three '/' in the beginning indicate a local path
-		// however, there are issues if this.localFilePath also starts with a '/' so we do a replace in this special case
-		return vscode.Uri.parse(("file:///" + this.localFilePath).replace('////', '///'));
+		if (this.localPath) {
+			return true;
+		}
+		return false;
 	}
 
 	get onlinePathExists(): boolean {
@@ -104,11 +126,11 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 	}
 
 	get localFileExtension(): string {
-		return fspath.extname(this.path);
+		return this.localPath.path.split('.').slice(-1, -1)[0];
 	}
 
 	public static fromInterface(item: iDatabricksFSItem, parent: DatabricksFSDirectory): DatabricksFSFile {
-		return new DatabricksFSFile(item.path, item.file_size, parent, "Online");
+		return new DatabricksFSFile(item.path, item.file_size, "Online", null, parent);
 	}
 
 	async click(): Promise<void> {
@@ -125,24 +147,27 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 		}
 
 		vscode.workspace
-			.openTextDocument(this.localFileUri)
+			.openTextDocument(this.localPath)
 			.then(vscode.window.showTextDocument);
 	}
 
-	async download(asTempFile: boolean = false): Promise<string> {
+	async download(): Promise<vscode.Uri> {
 		try {
 			//vscode.window.showInformationMessage(`Download of item ${this._path}) started ...`);
-			let localPath = this.localFilePath;
-			if (asTempFile) {
-				localPath = await Helper.openTempFile('', this.label + '-ONLINE', false);
-				localPath += this.localFileExtension;
+			let localPath: vscode.Uri;
+
+			if (this.localPathExists) {
+				localPath = this.localPath;
+			}
+			else {
+				localPath = vscode.Uri.joinPath(vscode.Uri.file(ThisExtension.ActiveConnection.localSyncFolder), ThisExtension.ConnectionManager.SubfolderConfiguration().DBFS, this.path);
 			}
 
-			let response = await DatabricksApiService.downloadDBFSFile(this.path, localPath, true);
+			await DatabricksApiService.downloadDBFSFile(this.path, localPath, true);
 
-			Helper.showTemporaryInformationMessage(`Download of item ${this.path} finished!`);
+			Helper.showTemporaryInformationMessage(`Download of DBFS item ${this.path} to '${localPath}' finished!`);
 
-			if (ThisExtension.RefreshAfterUpDownload && !asTempFile) {
+			if (ThisExtension.RefreshAfterUpDownload) {
 				setTimeout(() => this.refreshParent(), 500);
 			}
 
@@ -155,13 +180,10 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 
 	async upload(): Promise<void> {
 		try {
-			let localFilePath = fspath.join(
-				ThisExtension.ActiveConnection.localSyncFolder,
-				ThisExtension.ActiveConnection.DatabricksFSSubFolder,
-				this.path
-			);
-			let response = DatabricksApiService.uploadDBFSFile(localFilePath, this.path, true);
+			await DatabricksApiService.uploadDBFSFile(this.localPath, this.path, true);
+			
 			Helper.showTemporaryInformationMessage(`Upload of item ${this.path}) finished!`);
+
 			if (ThisExtension.RefreshAfterUpDownload) {
 				setTimeout(() => this.refreshParent(), 500);
 			}
@@ -181,18 +203,17 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 
 		let confirm = await Helper.showQuickPick(options, `Which files do you want to delete?`)
 
-		if(!confirm || confirm == "Cancel")
-		{
+		if (!confirm || confirm == "Cancel") {
 			ThisExtension.log("Deletion of DBFS file '" + this.path + "' aborted!")
 			return;
 		}
 
 		if (confirm.includes("local")) {
-			ThisExtension.log(`Deleting local file '${this.localFilePath}'!`);
-			fs.unlink(this.localFilePath, (err) => { if (err) { vscode.window.showErrorMessage(err.message); } });
+			ThisExtension.log(`Deleting local file '${this.localPath}'!`);
+			await vscode.workspace.fs.delete(this.localPath, { recursive: true });
 		}
 		if (confirm.includes("DBFS")) {
-			DatabricksApiService.deleteDBFSItem(this.path, false);	
+			await DatabricksApiService.deleteDBFSItem(this.path, false);
 		}
 
 		// we always call refresh
@@ -200,9 +221,6 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 	}
 
 	async compare(): Promise<void> {
-		let onlineFileTempPath: string = await this.download(true);
-
-		// if(this._languageFileExtension.isNotebook) { await Helper.disableOpenAsNotebook(); }
-		Helper.showDiff(onlineFileTempPath, this.localFilePath);
+		Helper.showDiff(vscode.Uri.parse("dbfs:/" + this.path), this.localPath);
 	}
 }

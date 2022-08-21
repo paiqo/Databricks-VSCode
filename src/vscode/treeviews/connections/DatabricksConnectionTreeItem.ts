@@ -205,48 +205,6 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		}
 	}
 
-	public async getAccessToken(): Promise<string> {
-		if (!this.personalAccessToken) {
-			switch (this._secureTokenStore) {
-				case "SystemKeyChain":
-					ThisExtension.log("Getting Personal Access Token from System KeyChain '" + this._secureTokenName + "'");
-					this._personalAccessToken = await ThisExtension.getSecureSetting(this._secureTokenName);
-
-					if (!this._personalAccessToken) {
-						let msg = "Databricks Personal Access Token not found in System Key Chain!";
-						ThisExtension.log(msg);
-						ThisExtension.log("Please add the Personal access token again using the configuration property 'personalAccessToken' and refersh the connections.");
-						vscode.window.showErrorMessage(msg);
-					}
-
-					break;
-
-				case "ExternalConfigFile":
-					ThisExtension.log("Getting Personal Access Token from External Config File");
-					throw "Not yet implemented!";
-
-					break;
-
-				case "VSCodeSettings":
-					throw "Not yet implemented!";
-
-					break;
-
-				default:
-					throw "Invalid Sensitive Value Store !";
-
-					break;
-			}
-		}
-
-		if (!this.personalAccessToken) {
-			ThisExtension.log("ERROR: Could not load PersonalAccessToken '" + this._secureTokenName + "' from '" + this._secureTokenStore + "'!");
-			vscode.window.showErrorMessage("Could not load PersonalAccessToken '" + this._secureTokenName + "' from '" + this._secureTokenStore + "'!");
-		}
-
-		return this.personalAccessToken;
-	}
-
 	private updateConnectionConfig(secureTokenName: string | undefined, cliProfileName: string | undefined): void {
 		this._personalAccessTokenSecure = { "keyTarSettingName": secureTokenName, "databricksCLIProfileName": cliProfileName };
 
@@ -327,39 +285,11 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 	}
 
 	async activate(): Promise<void> {
-		ThisExtension.log(`Activating Databricks Connection '${this.displayName}' ...`);
+		await ThisExtension.ConnectionManager.activateConnection(this);
 
-		ThisExtension.ActiveConnection = this;
-		await ThisExtension.updateConfigurationSetting("databricks.lastActiveConnection", this.displayName);
+		this._isActive = true;
 
-		if (await DatabricksApiService.initialize(this)) {
-			
-			if (this.useCodeCells) {
-				let codeCellsCurrentValue = ThisExtension.getConfigurationSetting(Helper.JupyterCodeCellsSettingName).value;
-				if(!codeCellsCurrentValue.includes(Helper.DatabricksCommandTagRegEx)) // Databricks tag was not yet added
-				{
-					await ThisExtension.updateConfigurationSetting(Helper.JupyterCodeCellsSettingName, "^(" + Helper.DatabricksCommandTagRegEx + "|" + codeCellsCurrentValue.slice(2));
-				}
-			}
-			else {
-				await ThisExtension.updateConfigurationSetting(Helper.JupyterCodeCellsSettingName, undefined);
-			}
-
-			this._isActive = true;
-			ThisExtension.SQLClusterID = undefined;
-
-			Helper.delay(100);
-
-			vscode.commands.executeCommand("databricksWorkspace.refresh", false);
-			vscode.commands.executeCommand("databricksClusters.refresh", false);
-			vscode.commands.executeCommand("databricksJobs.refresh", false);
-			vscode.commands.executeCommand("databricksFS.refresh", false);
-			vscode.commands.executeCommand("databricksSecrets.refresh", false);
-			vscode.commands.executeCommand("databricksSQL.refresh", false);
-			vscode.commands.executeCommand("databricksRepos.refresh", false);
-
-			vscode.commands.executeCommand("databricksConnections.refresh", false);
-		}
+		vscode.commands.executeCommand("databricksConnections.refresh", false);
 	}
 
 	get WorkspaceSubFolder(): string {

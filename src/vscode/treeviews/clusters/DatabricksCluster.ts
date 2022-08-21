@@ -214,8 +214,8 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 		setTimeout(() => vscode.commands.executeCommand("databricksClusters.refresh", false), 1000);
 	}
 
-	async showDefinition(): Promise<void> {
-		await Helper.openTempFile(JSON.stringify(this.definition, null, "\t"), this.cluster_name + '.json');
+	async showDefinition(): Promise<vscode.TextDocument> {
+		return vscode.workspace.openTextDocument({ language: "json", content: JSON.stringify(this.definition, null, "\t") });
 	}
 
 	async useForSQL(): Promise<void> {

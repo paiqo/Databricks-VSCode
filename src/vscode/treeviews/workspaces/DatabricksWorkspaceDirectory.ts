@@ -1,6 +1,4 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
-import * as fs from 'fs';
 
 import { iDatabricksWorkspaceItem } from './iDatabricksworkspaceItem';
 import { ThisExtension } from '../../../ThisExtension';
@@ -11,41 +9,48 @@ import { DatabricksWorkspaceTreeItem } from './DatabricksWorkspaceTreeItem';
 import { DatabricksWorkspaceLibrary } from './DatabricksWorkspaceLibrary';
 import { DatabricksWorkspaceNotebook } from './DatabricksWorkspaceNotebook';
 
-import { WorkspaceItemType } from './_types';
 import { DatabricksWorkspaceFile } from './DatabricksWorkspaceFile';
+import { FSHelper } from '../../../helpers/FSHelper';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 
-	protected _isInitialized: boolean = false;
 	private _onlinePathExists: boolean = true;
+	private _localPath: vscode.Uri = undefined;
+	private _isInitialized: boolean = false;
 
 	constructor(
 		path: string,
 		object_id: number,
 		source: "Online" | "Local",
-		parent: DatabricksWorkspaceTreeItem = null
+		local_path?: vscode.Uri,
+		parent: DatabricksWorkspaceTreeItem = undefined
 	) {
 		super(path, "DIRECTORY", object_id, parent, vscode.TreeItemCollapsibleState.Collapsed);
 
-		if (source == "Local") {
-			this._onlinePathExists = false;
-		}
+		this._localPath = local_path;
+		this._onlinePathExists = source != "Local";
 
-		// all properties from super are evaluated BEFORE already (1st line) and may return wrong results if if not all 
-		// values of this had been initialized before
 		this._isInitialized = true;
 
-		super.label = path.split('/').pop();
-		super.tooltip = this._tooltip;
-		super.contextValue = this._contextValue;
-		super.iconPath = {
-			light: this.getIconPath("light"),
-			dark: this.getIconPath("dark")
-		};
+		this.init();
 	}
 
+	init(): void {
+		// we can only run initialize for this class after all values had been set in the constructor
+		// but we must not run it as part of the call to super()
+		if(this._isInitialized)
+		{
+			super.label = this.path.split('/').pop();
+			super.tooltip = this._tooltip;
+			super.contextValue = this._contextValue;
+			super.iconPath = {
+				light: this.getIconPath("light"),
+				dark: this.getIconPath("dark")
+			};
+		}
+	}
 
 	get _tooltip(): string {
 		let tooltip: string = this.path + "\n";
@@ -77,23 +82,28 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 		return "," + states.join(",") + ",";
 	}
 
-	protected getIconPath(theme: string): string {
-		if (!this._isInitialized) { return null; }
-
+	protected getIconPath(theme: string): vscode.Uri {
 		let sync_state: string = "";
 
 		if (this.localPathExists && !this.onlinePathExists) { sync_state = "_OFFLINE"; }
 		if (!this.localPathExists && this.onlinePathExists) { sync_state = "_ONLINE"; }
 
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, 'workspace', 'directory' + sync_state + '.png');
+		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, 'workspace', 'directory' + sync_state + '.png');
 	}
 
-	get localPath(): string {
-		return fspath.join(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ActiveConnection.WorkspaceSubFolder, this.path);
+	get localPath(): vscode.Uri {
+		return this._localPath;
+	}
+
+	set localPath(value: vscode.Uri) {
+		this._localPath = value;
 	}
 
 	get localPathExists(): boolean {
-		return fs.existsSync(this.localPath);
+		if (this.localPath) {
+			return true;
+		}
+		return false;
 	}
 
 	get onlinePathExists(): boolean {
@@ -101,7 +111,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 	}
 
 	public static fromInterface(item: iDatabricksWorkspaceItem, parent: DatabricksWorkspaceTreeItem = null): DatabricksWorkspaceDirectory {
-		return new DatabricksWorkspaceDirectory(item.path, item.object_id, "Online", parent);
+		return new DatabricksWorkspaceDirectory(item.path, item.object_id, "Online", null, parent);
 	}
 
 	public static fromJSON(jsonString: string, parent: DatabricksWorkspaceTreeItem = null): DatabricksWorkspaceDirectory {
@@ -138,37 +148,47 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 
 		let localItems: DatabricksWorkspaceTreeItem[] = [];
 		if (this.localPathExists) {
-			let localContent: string[] = fs.readdirSync(this.localPath);
+			let localContent: [string, vscode.FileType][] = await vscode.workspace.fs.readDirectory(this.localPath);
 
 			for (let local of localContent) {
-				let localFile: fspath.ParsedPath = fspath.parse(local);
-				let localFullPath = fspath.join(this.localPath, local);
-				let shownLocalFile = localFile.base;
-				let isFile = fs.lstatSync(localFullPath).isFile();
-				if (isFile) // remove extension
+				let localUri: vscode.Uri = await FSHelper.joinPath(this.localPath, local[0]);
+				let shownLocalFile = FSHelper.basename(localUri);
+
+				if (local[1] == vscode.FileType.File) // remove extension
 				{
-					shownLocalFile = shownLocalFile.replace(LanguageFileExtensionMapper.extensionFromFileName(shownLocalFile), '');
+					shownLocalFile = FSHelper.basename(FSHelper.removeExtension(localUri));
 				}
-				let localRelativePath = (this.path + '/' + shownLocalFile).replace('//', '/');
+				let localRelativePath = FSHelper.join(this.path, shownLocalFile);
 
 				if (!onlinePaths.includes(localRelativePath)) {
 					let languageFileExtension: LanguageFileExtensionMapper = undefined;
 
-					if (isFile) {
-						let ext = LanguageFileExtensionMapper.extensionFromFileName(localFile.base);
+					if (local[1] == vscode.FileType.File) {
+						let ext = LanguageFileExtensionMapper.extensionFromFileName(FSHelper.basename(localUri));
 
 						if (LanguageFileExtensionMapper.supportedFileExtensions.includes(ext)
 							|| ThisExtension.allFileExtensions.includes(ext)) {
-							languageFileExtension = LanguageFileExtensionMapper.fromFileName(localFile.base);
+							languageFileExtension = LanguageFileExtensionMapper.fromFileName(FSHelper.basename(localUri));
 						}
 						else {
-							vscode.window.showWarningMessage("File " + localFullPath + " has no valid extension and will be ignored! Supported extensions can be confiugred using setting 'exportFormats'.");
+							vscode.window.showWarningMessage("File " + localUri + " has no valid extension and will be ignored! Supported extensions can be confiugred using setting 'exportFormats'.");
 							continue;
 						}
-						localItems.push(new DatabricksWorkspaceNotebook(localRelativePath, -1, "Local", languageFileExtension, this));
+						localItems.push(new DatabricksWorkspaceNotebook(localRelativePath, -1, "Local", languageFileExtension, localUri, this));
 					}
 					else {
-						localItems.push(new DatabricksWorkspaceDirectory(localRelativePath, -1, "Local", this));
+						localItems.push(new DatabricksWorkspaceDirectory(localRelativePath, -1, "Local", localUri, this));
+					}
+				}
+				else {
+					for(let existingItem of onlineItems)
+					{
+						if(existingItem.path == localRelativePath)
+						{
+							(existingItem as DatabricksWorkspaceDirectory).localPath = localUri;
+							existingItem.init();
+							break;
+						}
 					}
 				}
 			}
@@ -181,7 +201,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 	}
 
 	async download(): Promise<void> {
-		Helper.ensureLocalFolder(this.localPath);
+		FSHelper.ensureFolder(this.localPath);
 		let items: iDatabricksWorkspaceItem[] = await this.getChildren();
 
 		for (let item of items) {
@@ -221,33 +241,31 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 	async delete(): Promise<void> {
 		let options: string[] = ["Cancel"];
 
-		if(this.onlinePathExists)
-		{
-			options.push("Delete in Workspace only")
+		if (this.onlinePathExists) {
+			options.push("Delete on Databricks only")
 		}
 		if (this.localPathExists) {
-			options.push("Delete local file only")
+			options.push("Delete locally only")
 
-			if(this.onlinePathExists)
-			{
-				options.push("Delete in Workspace and locally")
+			if (this.onlinePathExists) {
+				options.push("Delete on Databricks and locally")
 			}
 		}
 
-		let confirm = await Helper.showQuickPick(options, `Which files do you want to delete?`)
+		let confirm = await Helper.showQuickPick(options, `Which locations do you want to delete?`)
 
-		if(!confirm || confirm == "Cancel")
-		{
+		if (!confirm || confirm == "Cancel") {
 			ThisExtension.log("Deletion of Workspace directory '" + this.path + "' aborted!")
 			return;
 		}
 
-		if (confirm.includes("local")) {
-			ThisExtension.log(`Deleting local file '${this.localPath}'!`);
-			fs.unlink(this.localPath, (err) => { if (err) { vscode.window.showErrorMessage(err.message); } });
+		if (confirm.includes("locally")) {
+			ThisExtension.log(`Deleting local directory '${this.localPath}'!`);
+			await vscode.workspace.fs.delete(this.localPath, { recursive: true });
 		}
-		if (confirm.includes("Workspace")) {
-			DatabricksApiService.deleteWorkspaceItem(this.path, true);	
+		if (confirm.includes("Databricks")) {
+			ThisExtension.log(`Deleting Databricks directory '${this.path}'!`);
+			DatabricksApiService.deleteWorkspaceItem(this.path, true);
 		}
 
 		// we always call refresh

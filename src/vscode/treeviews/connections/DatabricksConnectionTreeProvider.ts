@@ -37,11 +37,10 @@ export class DatabricksConnectionTreeProvider implements vscode.TreeDataProvider
 
 			if(DatabricksConnectionTreeItem.validate(con))
 			{
-				if(con.displayName == ThisExtension.ConnectionManager.LastActiveconnectionName && !this._isInitialized)
+				if(con.displayName == ThisExtension.ConnectionManager.LastActiveConnectionName && !this._isInitialized)
 				{
 					this._isInitialized = true;
-					con.activate();
-
+					//con.activate();
 				}
 				envItems.push(con);
 			}

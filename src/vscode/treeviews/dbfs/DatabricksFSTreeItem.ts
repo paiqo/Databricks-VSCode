@@ -11,12 +11,15 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 	private _path: string;
 	private _is_dir: boolean;
 	private _fileSize: number;
+	private _modification_time: number;
 	private _parent: DatabricksFSDirectory;
-	
+	protected _isInitialized: boolean = false;
+
 	constructor(
 		path: string,
 		is_dir: boolean,
 		size: number,
+		modifcation_time: number,
 		parent?: DatabricksFSDirectory,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
@@ -24,18 +27,28 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		this._path = path;
 		this._is_dir = is_dir;
 		this._fileSize = size;
+		this._modification_time = modifcation_time;
 		this._parent = parent;
 
-		super.label = path.split('/').pop();
-		super.iconPath = {
-			light: this.getIconPath("light"),
-			dark: this.getIconPath("dark")
-		};
-
 		// files are not expandable
-		if(!this.is_dir)
-		{
+		if (!this.is_dir) {
 			super.collapsibleState = undefined;
+		}
+
+		this._isInitialized = true;
+
+		this.init();
+	}
+
+	init(): void {
+		// we can only run initialize for this class after all values had been set in the constructor
+		// but we must not run it as part of the call to super()
+		if (this._isInitialized) {
+			super.label = this.path.split('/').pop();
+			super.iconPath = {
+				light: this.getIconPath("light"),
+				dark: this.getIconPath("dark")
+			};
 		}
 	}
 
@@ -57,16 +70,20 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 	}
 
 	/* iDatabrickFSItem implementatin */
-	get path (): string {
+	get path(): string {
 		return this._path;
 	}
 
-	get is_dir (): boolean {
+	get is_dir(): boolean {
 		return this._is_dir;
 	}
 
-	get file_size (): number {
+	get file_size(): number {
 		return this._fileSize;
+	}
+
+	get modification_time(): number {
+		return this._modification_time;
 	}
 
 	get parent(): DatabricksFSDirectory {
@@ -77,13 +94,17 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		this._parent = value;
 	}
 
+	get dbfsUri(): vscode.Uri {
+		return vscode.Uri.parse("dbfs:" + this.path);
+	}
+
 	public static fromInterface(item: iDatabricksFSItem, parent: DatabricksFSDirectory): DatabricksFSTreeItem {
-		return new DatabricksFSTreeItem(item.path, item.is_dir, item.file_size);
+		return new DatabricksFSTreeItem(item.path, item.is_dir, item.file_size, item.modification_time);
 	}
 
 	static fromJson(jsonString: string): DatabricksFSTreeItem {
 		let item: iDatabricksFSItem = JSON.parse(jsonString);
-		return new DatabricksFSTreeItem(item.path, item.is_dir, item.file_size);
+		return new DatabricksFSTreeItem(item.path, item.is_dir, item.file_size, item.modification_time);
 	}
 
 	public CopyPathToClipboard(): void {

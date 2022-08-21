@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { ThisExtension } from '../../ThisExtension';
 import { ContextLanguage, ExecutionContext } from '../../databricksApi/_types';
 import { DatabricksApiService } from '../../databricksApi/databricksApiService';
+import { Helper } from '../../helpers/Helper';
 
 export type NotebookMagic =
 	"sql"
@@ -124,10 +125,13 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 	async executeHandler(cells: vscode.NotebookCell[], _notebook: vscode.NotebookDocument, _controller: vscode.NotebookController): Promise<void> {
 		if (this.ExecutionContext == undefined || this.ExecutionContext == null) {
+			ThisExtension.setStatusBar("Initializing Kernel ...", true);
 			await this.initializeExecutionContext();
+			ThisExtension.setStatusBar("Kernel initialized!");
 		}
 		for (let cell of cells) {
-			this._doExecution(cell);
+			await this._doExecution(cell);
+			await Helper.wait(10); // Force some delay before executing/queueing the next cell
 		}
 	}
 

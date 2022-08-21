@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Extension to manage your Databricks workspace and ease local development",
-	"version": "1.0.999",
+	"version": "1.1.0",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -55,9 +55,10 @@
 		"onView:databricksFS",
 		"onView:databricksSecrets",
 		"onView:databricksSql",
-		"onView:databricksRepos"
+		"onView:databricksRepos",
+		"onFileSystem:dbfs"
 	],
-	"main": "./dist/extension.js",
+	"main": "./out/extension.js",
 	"contributes": {
 		"configuration": [
 			{
@@ -447,6 +448,11 @@
 				"icon": "$(cloud-upload)"
 			},
 			{
+				"command": "databricksWorkspace.addToWorkspace",
+				"title": "Add Databricks to VSCode workspace",
+				"icon": "$(symbol-class)"
+			},
+			{
 				"command": "databricksWorkspaceItem.click",
 				"title": "Open File"
 			},
@@ -532,6 +538,7 @@
 				"title": "Restart Databricks Cluster Kernel",
 				"shortTitle": "Restart Databricks Kernel"
 			},
+
 			{
 				"command": "databricksJobs.refresh",
 				"title": "Refresh",
@@ -567,15 +574,26 @@
 				"title": "Open Browser",
 				"icon": "$(globe)"
 			},
+
+			{
+				"command": "databricksFS.addToWorkspace",
+				"title": "Add DBFS to VSCode workspace",
+				"icon": "$(symbol-class)"
+			},
 			{
 				"command": "databricksFS.refresh",
 				"title": "Refresh",
 				"icon": "$(refresh)"
 			},
 			{
-				"command": "databricksFS.add",
+				"command": "databricksFS.addFile",
 				"title": "Add",
-				"icon": "$(add)"
+				"icon": "$(new-file)"
+			},
+			{
+				"command": "databricksFS.addDirectory",
+				"title": "Add",
+				"icon": "$(file-directory-create)"
 			},
 			{
 				"command": "databricksFSItem.download",
@@ -592,9 +610,14 @@
 				"title": "Preview File"
 			},
 			{
-				"command": "databricksFSItem.add",
+				"command": "databricksFSItem.addFile",
 				"title": "Add",
-				"icon": "$(add)"
+				"icon": "$(new-file)"
+			},
+			{
+				"command": "databricksFSItem.addDirectory",
+				"title": "Add Directory",
+				"icon": "$(file-directory-create)"
 			},
 			{
 				"command": "databricksFSItem.delete",
@@ -651,15 +674,21 @@
 				"icon": "$(refresh)"
 			},
 			{
+				"command": "databricksRepo.pull",
+				"title": "Pull",
+				"icon": "$(repo-pull)"
+			},
+			{
 				"command": "databricksRepo.checkOut",
 				"title": "Check-Out",
-				"icon": "$(repo-pull)"
+				"icon": "$(repo-clone)"
 			},
 			{
 				"command": "databricksRepo.delete",
 				"title": "Delete",
 				"icon": "$(remove-close)"
 			},
+
 			{
 				"title": "New Databricks Notebook",
 				"shortTitle": "Databricks Notebook",
@@ -694,6 +723,11 @@
 					"group": "navigation@1"
 				},
 				{
+					"command": "databricksWorkspace.addToWorkspace",
+					"when": "view == databricksWorkspace",
+					"group": "navigation"
+				},
+				{
 					"command": "databricksClusters.refresh",
 					"when": "view == databricksClusters",
 					"group": "navigation"
@@ -714,7 +748,17 @@
 					"group": "navigation"
 				},
 				{
-					"command": "databricksFS.add",
+					"command": "databricksFS.addFile",
+					"when": "view == databricksFS",
+					"group": "navigation"
+				},
+				{
+					"command": "databricksFS.addDirectory",
+					"when": "view == databricksFS",
+					"group": "navigation"
+				},
+				{
+					"command": "databricksFS.addToWorkspace",
 					"when": "view == databricksFS",
 					"group": "navigation"
 				},
@@ -763,7 +807,7 @@
 				{
 					"command": "databricksWorkspaceItem.delete",
 					"when": "view == databricksWorkspace",
-					"group": "inline@2"
+					"group": "inline@99"
 				},
 				{
 					"command": "databricksWorkspaceItem.copyPath",
@@ -787,7 +831,7 @@
 				{
 					"command": "databricksClusterItem.delete",
 					"when": "view == databricksClusters",
-					"group": "inline"
+					"group": "inline@99"
 				},
 				{
 					"command": "databricksClusterItem.useForSQL",
@@ -822,24 +866,29 @@
 					"group": "inline"
 				},
 				{
-					"command": "databricksFSItem.add",
-					"when": "view == databricksFS && viewItem == FOLDER",
+					"command": "databricksFSItem.addFile",
+					"when": "view == databricksFS && viewItem =~ /.*,ADDFILE,.*/",
+					"group": "inline"
+				},
+				{
+					"command": "databricksFSItem.addDirectory",
+					"when": "view == databricksFS && viewItem =~ /.*,ADDDIRECTORY,.*/",
 					"group": "inline"
 				},
 				{
 					"command": "databricksFSItem.download",
-					"when": "view == databricksFS && viewItem == FILE || viewItem == FILE_WITH_LOCAL_COPY",
+					"when": "view == databricksFS && viewItem =~ /.*,DOWNLOAD,.*/",
 					"group": "inline"
 				},
 				{
 					"command": "databricksFSItem.upload",
-					"when": "view == databricksFS && viewItem == FILE_WITH_LOCAL_COPY",
+					"when": "view == databricksFS && viewItem =~ /.*,UPLOAD,.*/",
 					"group": "inline"
 				},
 				{
 					"command": "databricksFSItem.delete",
-					"when": "view == databricksFS && viewItem == FILE || viewItem == FILE_WITH_LOCAL_COPY",
-					"group": "inline"
+					"when": "view == databricksFS &&  viewItem =~ /.*,DELETE,.*/",
+					"group": "inline@99"
 				},
 				{
 					"command": "databricksFSItem.copyPath",
@@ -848,7 +897,7 @@
 				{
 					"command": "databricksSecretScope.delete",
 					"when": "view == databricksSecrets && viewItem == SCOPE_DATABRICKS",
-					"group": "inline"
+					"group": "inline@99"
 				},
 				{
 					"command": "databricksSecretScope.addSecret",
@@ -863,7 +912,7 @@
 				{
 					"command": "databricksSecret.delete",
 					"when": "view == databricksSecrets && viewItem == SECRET_DATABRICKS",
-					"group": "inline"
+					"group": "inline@99"
 				},
 				{
 					"command": "databricksSQLTable.showDefinition",
@@ -871,69 +920,54 @@
 					"group": "inline"
 				},
 				{
+					"command": "databricksRepo.pull",
+					"when": "view == databricksRepos && viewItem == REPOSITORY",
+					"group": "inline@1"
+				},
+				{
 					"command": "databricksRepo.checkOut",
 					"when": "view == databricksRepos && viewItem == REPOSITORY",
-					"group": "inline"
+					"group": "inline@2"
 				},
 				{
 					"command": "databricksRepo.delete",
 					"when": "view == databricksRepos && viewItem == REPOSITORY",
-					"group": "inline"
+					"group": "inline@99"
 				}
 			]
-		}
+		}				
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run package",
-		"webpack": "webpack --mode development",
-		"webpack-dev": "webpack --mode development --watch",
-		"package": "webpack --mode production --devtool hidden-source-map",
-		"test-compile": "tsc -p ./",
-		"build": "webpack --mode production --devtool hidden-source-map",
-		"build-test": "tsc -p ./",
-		"lint": "eslint --max-warnings 0 src --ext ts",
-		"watch": "webpack --watch",
-		"ci-build": "npm run lint && npm run build",
-		"ci-package": "npm run ci-build && npm run package-impl",
-		"test": "npm run build-test && node ./out/test/runTest.js",
-		"package-impl": "vsce package"
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./"
 	},
 	"devDependencies": {
 		"@types/node": "^16.11.7",
 		"@types/rimraf": "^2.0.5",
 		"@types/vscode": "^1.68.0",
-		"eslint": "^8.19.0",
-		"terser-webpack-plugin": "^5.3.3",
 		"ts-loader": "^9.3.1",
+		"eslint": "^8.19.0",
 		"typescript": "^4.7.4",
-		"vscode-nls-dev": "^4.0.0",
-		"webpack": "^5.74.0",
+		"webpack": "^5.73.0",
 		"webpack-cli": "^4.10.0"
 	},
 	"dependencies": {
 		"@angular/common": "^14.0.1",
 		"@angular/core": "^14.0.1",
-		"assert": "^2.0.0",
 		"axios": "^0.27.2",
-		"buffer": "^6.0.3",
 		"file-saver": "^2.0.5",
 		"follow-redirects": "^1.14.8",
 		"ftp": "^0.3.10",
 		"https-agent": "^1.0.0",
-		"https-browserify": "^1.0.0",
 		"jsonc-parser": "^0.4.2",
 		"mkdirp": "^0.5.1",
-		"os-browserify": "^0.3.0",
-		"path-browserify": "^1.0.1",
 		"promise.prototype.finally": "^3.1.3",
 		"replace-in-file": "^6.3.2",
 		"request": "^2.88.2",
 		"rimraf": "^2.6.2",
 		"rxjs": "^6.6.7",
-		"stream-http": "^3.2.0",
 		"sync-request": "^6.1.0",
-		"uniquefilename": "^1.1.2",
-		"url": "^0.11.0",
-		"util": "^0.12.4"
+		"uniquefilename": "^1.1.2"
 	}
 }

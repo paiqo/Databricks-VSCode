@@ -1,43 +1,49 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
-import * as fs from 'fs';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { ThisExtension } from '../../../ThisExtension';
 import { iDatabricksFSItem } from './iDatabricksFSItem';
 import { Helper } from '../../../helpers/Helper';
 import { DatabricksFSTreeItem } from './DatabricksFSTreeItem';
 import { DatabricksFSFile } from './DatabricksFSFile';
+import { FSHelper } from '../../../helpers/FSHelper';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 
-	protected _isInitialized: boolean = false;
 	private _onlinePathExists: boolean = true;
-	
+	private _localPath: vscode.Uri = undefined;
+	protected _isInitialized: boolean = false;
+
 	constructor(
 		path: string,
-		parent: DatabricksFSDirectory,
-		source: "Online" | "Local"
+		source: "Online" | "Local",
+		local_path?: vscode.Uri,
+		parent: DatabricksFSDirectory = undefined
 	) {
-		super(path, true, 0, parent, vscode.TreeItemCollapsibleState.Collapsed);
-		
-		if (source == "Local") {
-			this._onlinePathExists = false;
-		}
+		super(path, true, 0, 0, parent, vscode.TreeItemCollapsibleState.Collapsed);
 
-		// all properties from super are evaluated BEFORE already (1st line) and may return wrong results if if not all 
-		// values of this had been initialized before
+		this._localPath = local_path;
+		this._onlinePathExists = source != "Local";
+
 		this._isInitialized = true;
 
-		super.label = path.split('/').pop();
-		super.tooltip = this._tooltip;
-		super.description = this._description;
-		super.contextValue = this._contextValue;
-		super.iconPath = {
-			light: this.getIconPath("light"),
-			dark: this.getIconPath("dark")
-		};
+		this.init();
+	}
+
+	init(): void {
+		// we can only run initialize for this class after all values had been set in the constructor
+		// but we must not run it as part of the call to super()
+		if (this._isInitialized) {
+			super.label = this.path.split('/').pop();
+			super.tooltip = this._tooltip;
+			super.description = this._description;
+			super.contextValue = this._contextValue;
+			super.iconPath = {
+				light: this.getIconPath("light"),
+				dark: this.getIconPath("dark")
+			};
+		}
 	}
 
 	get _tooltip(): string {
@@ -54,25 +60,27 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 	}
 
 	// used in package.json to filter commands via viewItem == FOLDER
+	// used in package.json to filter commands via viewItem =~ /.*,DOWNLOAD,.*/",
 	get _contextValue(): string {
-		return 'FOLDER';
+		let states: string[] = ["FOLDER", "ADDFILE", "ADDDIRECTORY", "DELETE"];
+
+		// use , as separator to allow to check for ,<value>, in package.json when condition
+		return "," + states.join(",") + ",";
 	}
 
-	get localPath(): string {
-		return fspath.join(
-			ThisExtension.ActiveConnection.localSyncFolder, 
-			ThisExtension.ActiveConnection.DatabricksFSSubFolder, 
-			this.path);
+	get localPath(): vscode.Uri {
+		return this._localPath;
+	}
+
+	set localPath(value: vscode.Uri) {
+		this._localPath = value;
 	}
 
 	get localPathExists(): boolean {
-		return fs.existsSync(this.localPath);
-	}
-
-	get localFileUri(): vscode.Uri {
-		// three '/' in the beginning indicate a local path
-		// however, there are issues if this.localFilePath also starts with a '/' so we do a replace in this special case
-		return vscode.Uri.parse(("file:///" + this.localPath).replace('////', '///'));
+		if (this.localPath) {
+			return true;
+		}
+		return false;
 	}
 
 	get onlinePathExists(): boolean {
@@ -80,7 +88,7 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 	}
 
 	public static fromInterface(item: iDatabricksFSItem, parent: DatabricksFSDirectory): DatabricksFSDirectory {
-		return new DatabricksFSDirectory(item.path, parent, "Online");
+		return new DatabricksFSDirectory(item.path, "Online", null, parent);
 	}
 
 
@@ -94,17 +102,47 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 					if (item.is_dir) {
 						onlineItems.push(DatabricksFSDirectory.fromInterface(item, this));
 					}
-					else
-					{
+					else {
 						onlineItems.push(DatabricksFSFile.fromInterface(item, this));
 					}
 				}
 			}
 		}
 
+		let onlinePaths: string[] = onlineItems.map((x) => (x as iDatabricksFSItem).path);
+
 		let localItems: DatabricksFSTreeItem[] = [];
 		if (this.localPathExists) {
-			// TODO browse local directory for files
+			let localContent: [string, vscode.FileType][] = await vscode.workspace.fs.readDirectory(this.localPath);
+
+			for (let local of localContent) {
+				let localUri: vscode.Uri = vscode.Uri.joinPath(this.localPath, local[0]);
+
+				let localRelativePath = FSHelper.join(this.path, local[0]);
+
+
+				if (!onlinePaths.includes(localRelativePath)) {
+					switch (local[1]) // remove extension
+					{
+						case vscode.FileType.File:
+							localItems.push(new DatabricksFSFile(localRelativePath, -1, "Local", localUri, this));
+							break;
+						case vscode.FileType.Directory:
+							localItems.push(new DatabricksFSDirectory(localRelativePath, "Local", localUri, this));
+							break;
+					}
+
+				}
+				else {
+					for (let existingItem of onlineItems) {
+						if (existingItem.path == localRelativePath) {
+							(existingItem as DatabricksFSFile).localPath = localUri;
+							existingItem.init();
+							break;
+						}
+					}
+				}
+			}
 		}
 
 		let allItems = onlineItems.concat(localItems);
@@ -113,29 +151,38 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 		return allItems;
 	}
 
-	async add(): Promise<void> {
+	async addFile(): Promise<void> {
 		let files: vscode.Uri[] = await vscode.window.showOpenDialog({ canSelectMany: true });
 
-		if(!files)
-		{
+		if (!files) {
 			return;
 		}
 
-		for(let file of files)
-		{
-			let dbfsPath = fspath.join(this.path, fspath.basename(file.fsPath)).split('\\').join('/');
-			let response = DatabricksApiService.uploadDBFSFile(file.fsPath, dbfsPath, true );
+		for (let file of files) {
+			let dbfsPath = FSHelper.join(this.path, FSHelper.basename(file));
+			let response = DatabricksApiService.uploadDBFSFile(file, dbfsPath, true);
 
 			response.catch((error) => {
 				vscode.window.showErrorMessage(`ERROR: ${error}`);
 			}).then(() => {
 				Helper.showTemporaryInformationMessage(`Upload of item ${dbfsPath} finished!`);
 
-				if(ThisExtension.RefreshAfterUpDownload)
-				{
+				if (ThisExtension.RefreshAfterUpDownload) {
 					setTimeout(() => this.refreshParent(), 500);
 				}
 			});
+		}
+	}
+
+	async addDirectory(): Promise<void> {
+		let newName = await Helper.showInputBox("<new directory>", "Name of the new Directory");
+
+		if (newName) {
+			vscode.workspace.fs.createDirectory(vscode.Uri.joinPath(this.dbfsUri, newName));
+
+			if (ThisExtension.RefreshAfterUpDownload) {
+				setTimeout(() => this.refreshParent(), 500);
+			}
 		}
 	}
 
@@ -150,7 +197,23 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 	}
 
 	async delete(): Promise<void> {
-		vscode.window.showErrorMessage("For safety reasons, only a single file can be deleted!");
-		return;
+		let confirm: string = await Helper.showInputBox("", "Confirm deletion by typeing the directory name '" + this.label + "' again.");
+
+		if (!confirm) {
+			ThisExtension.log("Deletion of DBFS directory '" + this.label + "' aborted!")
+			return;
+		}
+		if(confirm != this.label)
+		{
+			ThisExtension.log("Deletion of DBFS directory '" + this.label + "' aborted due to wrong confirmation '" + confirm + "'");
+			vscode.window.showErrorMessage(`Deletion NOT confirmed!\n('${this.label}' != '${confirm}')`);
+			return;
+		}
+
+		await vscode.workspace.fs.delete(this.dbfsUri);
+
+		if (ThisExtension.RefreshAfterUpDownload) {
+			setTimeout(() => this.refreshParent(), 500);
+		}
 	}
 }

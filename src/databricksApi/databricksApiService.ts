@@ -1,23 +1,23 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
-import { iDatabricksWorkspaceItem } from '../vscode/treeviews/workspaces/iDatabricksworkspaceItem';
-import { WorkspaceItemExportFormat, WorkspaceItemLanguage } from '../vscode/treeviews/workspaces/_types';
-
-import { iDatabricksRuntimeVersion } from '../vscode/treeviews/clusters/iDatabricksRuntimeVersion';
-
-import { iDatabricksFSItem } from '../vscode/treeviews/dbfs/iDatabricksFSItem';
-
-import { DatabricksSecretTreeItem } from '../vscode/treeviews/secrets/DatabricksSecretTreeItem';
-import { iDatabricksSecretScope } from '../vscode/treeviews/secrets/iDatabricksSecretScope';
-import { iDatabricksSecret } from '../vscode/treeviews/secrets/iDatabricksSecret';
 
 import { Helper } from '../helpers/Helper';
+import { FSHelper } from '../helpers/FSHelper';
+import { ThisExtension } from '../ThisExtension';
+
+import { iDatabricksWorkspaceItem } from '../vscode/treeviews/workspaces/iDatabricksworkspaceItem';
+import { WorkspaceItemExportFormat, WorkspaceItemLanguage } from '../vscode/treeviews/workspaces/_types';
+import { iDatabricksRuntimeVersion } from '../vscode/treeviews/clusters/iDatabricksRuntimeVersion';
+import { iDatabricksFSItem } from '../vscode/treeviews/dbfs/iDatabricksFSItem';
+import { iDatabricksSecretScope } from '../vscode/treeviews/secrets/iDatabricksSecretScope';
+import { iDatabricksSecret } from '../vscode/treeviews/secrets/iDatabricksSecret';
 import { ContextLanguage, ExecutionCommand, ExecutionContext, iDatabricksJobResponse, iDatabricksJobRunResponse, iDatabricksRepoResponse } from './_types';
 import { iDatabricksCluster } from '../vscode/treeviews/clusters/iDatabricksCluster';
-import { ThisExtension } from '../ThisExtension';
 import { DatabricksConnectionTreeItem } from '../vscode/treeviews/connections/DatabricksConnectionTreeItem';
 import { SecretBackendType } from '../vscode/treeviews/secrets/_types';
 import { iDatabricksRepo } from '../vscode/treeviews/repos/_types';
+import { AxiosError } from 'axios';
+import { iDatabricksConnection } from '../vscode/treeviews/connections/iDatabricksConnection';
+
 
 export abstract class DatabricksApiService {
 	private static API_SUB_URL: string = "/api/";
@@ -25,11 +25,11 @@ export abstract class DatabricksApiService {
 	private static _apiService: any;
 	private static _isInitialized: boolean = false;
 	private static _connectionTestRunning: boolean = false;
-	
+
 
 
 	//#region Initialization
-	static async initialize(Connection: DatabricksConnectionTreeItem): Promise<boolean> {
+	static async initialize(con: iDatabricksConnection): Promise<boolean> {
 		try {
 			ThisExtension.log("Initializing Databricks API Service ...");
 			const axios = require('axios');
@@ -37,20 +37,20 @@ export abstract class DatabricksApiService {
 
 			// Set config defaults when creating the instance
 			this._apiService = axios.create({
-				httpsAgent: new httpsAgent({  
+				httpsAgent: new httpsAgent({
 					rejectUnauthorized: ThisExtension.rejectUnauthorizedSSL
 				}),
-				baseURL: Helper.trimChar(Connection.apiRootUrl, '/') + this.API_SUB_URL,
+				baseURL: Helper.trimChar(con.apiRootUrl, '/') + this.API_SUB_URL,
 				proxy: ThisExtension.useProxy
 			});
 
 			// Alter defaults after instance has been created
-			let accessToken = await Connection.getAccessToken();
+			let accessToken = await ThisExtension.ConnectionManager.getAccessToken(con);
 			this._apiService.defaults.headers.common['Authorization'] = "Bearer " + accessToken;
 			this._apiService.defaults.headers.common['Content-Type'] = 'application/json';
 			this._apiService.defaults.headers.common['Accept'] = 'application/json';
 
-			ThisExtension.log(`Testing new Databricks API (${Connection.apiRootUrl}) settings ()...`);
+			ThisExtension.log(`Testing new Databricks API (${con.apiRootUrl}) settings ...`);
 			this._connectionTestRunning = true;
 			let workspaceList = await this.listWorkspaceItems("/");
 			this._connectionTestRunning = false;
@@ -61,7 +61,7 @@ export abstract class DatabricksApiService {
 			}
 			else {
 				ThisExtension.log(JSON.stringify(workspaceList));
-				throw new Error(`Invalid Configuration for Databricks REST API: Cannot access '${Connection.apiRootUrl}' with token '${accessToken}'!`);
+				throw new Error(`Invalid Configuration for Databricks REST API: Cannot access '${con.apiRootUrl}' with token '${accessToken}'!`);
 			}
 		} catch (error) {
 			this._connectionTestRunning = false;
@@ -77,18 +77,15 @@ export abstract class DatabricksApiService {
 	//#endregion
 
 	//#region Helpers
-	private static writeBase64toFile(base64String: string, filePath: string): void {
-		Helper.ensureLocalFolder(filePath, true);
-		fs.writeFile(filePath, base64String, { encoding: 'base64' }, function (err) {
-			if (err) {
-				vscode.window.showErrorMessage(`ERROR writing file: ${err}`);
-			}
-		});
+	private static async writeBase64toFile(base64String: string, filePath: vscode.Uri): Promise<void> {
+		FSHelper.ensureFolder(filePath);
+
+		await vscode.workspace.fs.writeFile(filePath, Buffer.from(base64String, 'base64'));
 	}
 
-	private static readBase64FromFile(filePath: string): string {
+	private static async readBase64FromFile(filePath: vscode.Uri): Promise<string> {
 		// read binary data
-		var bitmap = fs.readFileSync(filePath);
+		var bitmap = await vscode.workspace.fs.readFile(filePath);
 		// convert binary data to base64 encoded string
 		return Buffer.from(bitmap).toString('base64');
 	}
@@ -111,18 +108,7 @@ export abstract class DatabricksApiService {
 				response = await this._apiService.get(endpoint, params);
 				this.logResponse(response);
 			} catch (error) {
-				let errResponse = error.response;
-
-				let errorMessage = errResponse.data.message;
-				if (!errorMessage) {
-					errorMessage = errResponse.headers["x-databricks-reason-phrase"];
-				}
-
-				ThisExtension.log("ERROR: " + error.message);
-				ThisExtension.log("ERROR: " + errorMessage);
-				ThisExtension.log("ERROR: " + JSON.stringify(errResponse.data));
-
-				vscode.window.showErrorMessage(errorMessage);
+				this.handleApiException(error);
 
 				return undefined;
 			}
@@ -140,18 +126,7 @@ export abstract class DatabricksApiService {
 			response = await this._apiService.post(endpoint, body);
 			this.logResponse(response);
 		} catch (error) {
-			let errResponse = error.response;
-
-			let errorMessage = errResponse.data.message;
-			if (!errorMessage) {
-				errorMessage = errResponse.headers["x-databricks-reason-phrase"];
-			}
-
-			ThisExtension.log("ERROR: " + error.message);
-			ThisExtension.log("ERROR: " + errorMessage);
-			ThisExtension.log("ERROR: " + JSON.stringify(errResponse.data));
-
-			vscode.window.showErrorMessage(errorMessage);
+			this.handleApiException(error);
 
 			return undefined;
 		}
@@ -168,18 +143,7 @@ export abstract class DatabricksApiService {
 			response = await this._apiService.patch(endpoint, body);
 			this.logResponse(response);
 		} catch (error) {
-			let errResponse = error.response;
-
-			let errorMessage = errResponse.data.message;
-			if (!errorMessage) {
-				errorMessage = errResponse.headers["x-databricks-reason-phrase"];
-			}
-
-			ThisExtension.log("ERROR: " + error.message);
-			ThisExtension.log("ERROR: " + errorMessage);
-			ThisExtension.log("ERROR: " + JSON.stringify(errResponse.data));
-
-			vscode.window.showErrorMessage(errorMessage);
+			this.handleApiException(error);
 
 			return undefined;
 		}
@@ -196,6 +160,16 @@ export abstract class DatabricksApiService {
 			response = await this._apiService.delete(endpoint, body);
 			this.logResponse(response);
 		} catch (error) {
+			this.handleApiException(error);
+
+			return undefined;
+		}
+
+		return response;
+	}
+
+	private static async handleApiException(error: Error, showErrorMessage: boolean = false, raise: boolean = false): Promise<void> {
+		if (error instanceof AxiosError) {
 			let errResponse = error.response;
 
 			let errorMessage = errResponse.data.message;
@@ -207,12 +181,22 @@ export abstract class DatabricksApiService {
 			ThisExtension.log("ERROR: " + errorMessage);
 			ThisExtension.log("ERROR: " + JSON.stringify(errResponse.data));
 
-			vscode.window.showErrorMessage(errorMessage);
-
-			return undefined;
+			if (showErrorMessage) {
+				vscode.window.showErrorMessage(errorMessage);
+			}
+		}
+		else {
+			ThisExtension.log("ERROR: " + error.message);
+			ThisExtension.log("ERROR: " + error.name);
+			if (error.stack) {
+				ThisExtension.log("ERROR: " + error.stack);
+			}
 		}
 
-		return response;
+		if(raise)
+		{
+			throw error;
+		}
 	}
 	//#endregion
 
@@ -246,7 +230,7 @@ export abstract class DatabricksApiService {
 		let ret = {
 			"command_id": response.data.id,
 			"cluster_id": context.cluster_id,
-			"language":  language || context.language,
+			"language": language || context.language,
 			"context_id": context.context_id
 		};
 
@@ -275,25 +259,23 @@ export abstract class DatabricksApiService {
 		} while (awaitCompletion && !["Finished", "Cancelled", "Error"].includes(apiResults.data.status));
 
 		if (apiResults.data.status == "Finished") {
-			if(rawOutput)
-			{
+			if (rawOutput) {
 				return apiResults.data;
 			}
 			if (apiResults.data.results.resultType == "table") {
 				let data = [];
 				let schema = apiResults.data.results.schema;
-		
-				for(let row of apiResults.data.results.data)
-				{
+
+				for (let row of apiResults.data.results.data) {
 					let newRow = {};
 
 					for (let i = 0; i < schema.length; i++) {
-						newRow[schema[i].name] = row[i];					
+						newRow[schema[i].name] = row[i];
 					}
-			
+
 					data.push(newRow);
 				}
-		
+
 				return data;
 			}
 			else if (apiResults.data.results.resultType == "text") {
@@ -339,7 +321,7 @@ export abstract class DatabricksApiService {
 	}
 
 	//#endregion
-	
+
 	//#region Workspace API
 	static async listWorkspaceItems(path: string): Promise<iDatabricksWorkspaceItem[]> {
 		let endpoint = '2.0/workspace/list';
@@ -357,7 +339,37 @@ export abstract class DatabricksApiService {
 		return items;
 	}
 
-	static async downloadWorkspaceItem(path: string, localPath: string, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
+	static async getWorkspaceItem(path: string): Promise<iDatabricksWorkspaceItem> {
+		let endpoint = '2.0/workspace/get-status';
+		let body = { path: path };
+
+		let response = await this.get(endpoint, { params: body });
+
+		if (!response) {
+			return undefined;
+		}
+		let result = response.data;
+
+		return result;
+	}
+
+	static async downloadWorkspaceItem(path: string, format: WorkspaceItemExportFormat = "SOURCE"): Promise<Uint8Array> {
+		let endpoint = '2.0/workspace/export';
+		let body = {
+			path: path,
+			format: format
+		};
+
+		ThisExtension.log(`Downloading '${path}' ...`);
+
+		let response = await this.get(endpoint, { params: body });
+
+		let result = response.data;
+
+		return await Buffer.from(result.content, 'base64') as Uint8Array;
+	}
+
+	static async downloadWorkspaceItemToFile(path: string, localPath: vscode.Uri, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
 		let endpoint = '2.0/workspace/export';
 		let body = {
 			path: path,
@@ -370,13 +382,30 @@ export abstract class DatabricksApiService {
 
 		let result = response.data;
 
-		this.writeBase64toFile(result.content, localPath);
+		await this.writeBase64toFile(result.content, localPath);
 	}
 
-	static async uploadWorkspaceItem(localPath: string, path: string, language: WorkspaceItemLanguage, overwrite: boolean = true, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
+	static async uploadWorkspaceItem(content: Uint8Array, path: string, language: WorkspaceItemLanguage, overwrite: boolean = true, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
 		let endpoint = '2.0/workspace/import';
 		let body = {
-			content: this.readBase64FromFile(localPath),
+			content: await Buffer.from(content).toString('base64'),
+			path: path,
+			language: language,
+			overwrite: overwrite,
+			format: format
+		};
+
+		ThisExtension.log(`Uploading file to '${path}' ...`);
+
+		let response = await this.post(endpoint, body);
+
+		let result = response.data;
+	}
+
+	static async uploadWorkspaceItemFromFile(localPath: vscode.Uri, path: string, language: WorkspaceItemLanguage, overwrite: boolean = true, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
+		let endpoint = '2.0/workspace/import';
+		let body = {
+			content: await this.readBase64FromFile(localPath),
 			path: path,
 			language: language,
 			overwrite: overwrite,
@@ -413,7 +442,7 @@ export abstract class DatabricksApiService {
 		let result = response.data;
 	}
 	//#endregion
-	
+
 	//#region Clusters API
 	static async listClusters(): Promise<iDatabricksCluster[]> {
 		let endpoint = '2.0/clusters/list';
@@ -536,6 +565,7 @@ export abstract class DatabricksApiService {
 		return response;
 	}
 
+	// todo change localPath to vscode.Uri
 	static async exportJobRun(run_id: number, localPath: string): Promise<void> {
 		let endpoint = this.JOB_API_VERSION + '/jobs/runs/export';
 		let body = {
@@ -546,7 +576,7 @@ export abstract class DatabricksApiService {
 
 		let result = response.data;
 
-		this.writeBase64toFile(result.content, localPath);
+		this.writeBase64toFile(result.content, vscode.Uri.file(localPath));
 	}
 
 	//#endregion
@@ -573,6 +603,9 @@ export abstract class DatabricksApiService {
 
 		let response = await this.get(endpoint, { params: body });
 
+		if (!response) {
+			return undefined;
+		}
 		let result = response.data;
 
 		return result;
@@ -610,6 +643,18 @@ export abstract class DatabricksApiService {
 		let body = {
 			path: path,
 			recursive: recursive
+		};
+
+		let response = await this.post(endpoint, body);
+
+		return response;
+	}
+
+	static async moveDBFSItem(pathSource: string, pathDestination: string): Promise<object> {
+		let endpoint = '2.0/dbfs/move';
+		let body = {
+			source_path: pathSource,
+			destination_path: pathDestination
 		};
 
 		let response = await this.post(endpoint, body);
@@ -664,27 +709,26 @@ export abstract class DatabricksApiService {
 		return response;
 	}
 
-	static async uploadDBFSFile(localPath: string, dbfsPath: string, overwrite: boolean, batchSize: number = 1048000): Promise<void> {
-
-		// https://2ality.com/2018/04/async-iter-nodejs.html#reading-asynchronously-via-async-iteration
-
-		// this object is necessary so the single and asyncronous API calls are executed in the right order
-		let batchesLoaded: object[] = [];
-
-		let readStream = fs.createReadStream(localPath, { highWaterMark: batchSize });
-
+	static async uploadDBFSFile(localPath: vscode.Uri, dbfsPath: string, overwrite: boolean, batchSize: number = 1048000): Promise<void> {
 		let handle = await this.createDBFSFile(dbfsPath, overwrite);
 
-		for await (const chunk of readStream) {
-			let response: object = await this.appendDBFSFileContent(handle, chunk.toString('base64'));
+		let content: Uint8Array = await vscode.workspace.fs.readFile(localPath);
 
-			batchesLoaded.push(response);
-		}
+		let totalSize = content.length;
+		let offset = 0;
+		do {
+			if (offset + batchSize > totalSize) {
+				batchSize = totalSize - offset;
+			}
+
+			await this.appendDBFSFileContent(handle, Buffer.from(content.slice(offset, offset + batchSize)).toString('base64'));
+			offset = offset + batchSize;
+		} while (offset < totalSize);
 
 		this.closeDBFSFile(handle);
 	}
 
-	static async downloadDBFSFile(dbfsPath: string, localPath: string, overwrite: boolean, batchSize: number = 512000): Promise<void> {
+	static async downloadDBFSFile(dbfsPath: string, localPath: vscode.Uri, overwrite: boolean, batchSize: number = 512000): Promise<void> {
 
 		let dbfsItem: iDatabricksFSItem = await this.getDBFSItem(dbfsPath);
 
@@ -692,17 +736,17 @@ export abstract class DatabricksApiService {
 			throw "The specified path is a directory and not a file!";
 		}
 
-		// remove file if it exists
-		//fs.unlink(localPath, (err) => {
-		//if (err) throw err;
-		//});
+		if (FSHelper.pathExists(localPath) && !overwrite) {
+			ThisExtension.log("Local path exists and Overwrite is not used!");
+			return;
+		}
 
 		let totalSize = dbfsItem.file_size;
 		let offset = 0;
-		let content: { data: { bytes_read: number, data: string } };
+		let dbfsContent: { data: { bytes_read: number, data: string } };
 
-		Helper.ensureLocalFolder(localPath, true);
-		let writeStream = fs.createWriteStream(localPath, { highWaterMark: batchSize, encoding: 'base64' });
+		let contentBytesBatch: Uint8Array = new Uint8Array(batchSize);
+		let contentBytes: Uint8Array = new Uint8Array(totalSize);
 
 		if (totalSize > 0) // we may also download empty files where the code would not work otherwise
 		{
@@ -711,19 +755,17 @@ export abstract class DatabricksApiService {
 					batchSize = totalSize - offset;
 				}
 
-				content = await this.readDBFSFileContent(dbfsPath, offset, batchSize);
+				dbfsContent = await this.readDBFSFileContent(dbfsPath, offset, batchSize);
+				contentBytesBatch = Buffer.from(dbfsContent.data.data, 'base64');
 
-				writeStream.write(content.data.data, 'base64', function (err) {
-					if (err) {
-						vscode.window.showErrorMessage(`ERROR writing file: ${err}`);
-					}
-				}
-				);
+				// add the batch to the corresponding offset of the final buffer
+				contentBytes.set(contentBytesBatch, offset);
 
 				offset = offset + batchSize;
 			} while (offset < totalSize);
 		}
-		writeStream.close();
+
+		await vscode.workspace.fs.writeFile(localPath, contentBytes);
 	}
 	//#endregion
 
@@ -816,10 +858,8 @@ export abstract class DatabricksApiService {
 		let endpoint = '2.0/repos';
 
 		let body: any = {};
-		if(path_prefix != undefined)
-		{
-			if(!path_prefix.startsWith("/Repos/"))
-			{
+		if (path_prefix != undefined) {
+			if (!path_prefix.startsWith("/Repos/")) {
 				path_prefix = "/Repos/" + path_prefix;
 			}
 			body.path_prefix = path_prefix;
@@ -840,15 +880,16 @@ export abstract class DatabricksApiService {
 		let endpoint = `2.0/repos/${repo_id}`;
 
 		let body: any = {};
-		if(branch != undefined)
-		{
+		if (branch != undefined) {
 			body.branch = branch;
 		}
-		else if(tag != undefined)
-		{
+		else if (tag != undefined) {
 			body.tag = tag;
 		}
-		
+		else
+		{
+			throw Error("Parameter <branch> or <tag> need to be provided when calling updateRep()!");
+		}
 
 		let response = await this.patch(endpoint, body);
 
@@ -858,7 +899,7 @@ export abstract class DatabricksApiService {
 	static async deleteRepo(repo_id: number): Promise<void> {
 		let endpoint = `2.0/repos/${repo_id}`;
 
-		let body: any = {};	
+		let body: any = {};
 
 		let response = await this.delete(endpoint, body);
 	}
