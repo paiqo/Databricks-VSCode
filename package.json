@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Extension to manage your Databricks workspace and ease local development",
-	"version": "1.0.0",
+	"version": "1.0.999",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {

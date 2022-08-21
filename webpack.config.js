@@ -3,49 +3,29 @@
 'use strict';
 
 const path = require('path');
-const webpack = require('webpack');
 
-/**@type {import('webpack').Configuration}*/
-const config = {
-    target: 'webworker', // vscode extensions run in webworker context for VS Code web 📖 -> https://webpack.js.org/configuration/target/#target
+//@ts-check
+/** @typedef {import('webpack').Configuration} WebpackConfig **/
+
+/** @type WebpackConfig */
+const extensionConfig = {
+    target: 'node', // VS Code extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
+    mode: 'none', // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
 
     entry: './src/extension.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
     output: {
         // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
         path: path.resolve(__dirname, 'dist'),
         filename: 'extension.js',
-        libraryTarget: 'commonjs2',
-        devtoolModuleFilenameTemplate: '../[resource-path]'
+        libraryTarget: 'commonjs2'
     },
-    devtool: 'source-map',
     externals: {
         vscode: 'commonjs vscode' // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
+        // modules added here also need to be added in the .vscodeignore file
     },
     resolve: {
         // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
-        mainFields: ['browser', 'module', 'main'], // look for `browser` entry point in imported node modules
-        extensions: ['.ts', '.tsx', '.js', '.jsx'],
-        alias: {
-            // provides alternate implementation for node module and source files
-        },
-        fallback: {
-            "https": require.resolve("https-browserify"),
-            "http": require.resolve("stream-http"),
-            "path": require.resolve("path-browserify"),
-            "util": require.resolve("util/"),
-            "assert": require.resolve("assert/"),
-            "os": require.resolve("os-browserify/browser"),
-            "url": require.resolve("url/"),
-            "buffer": require.resolve("buffer/"),
-            "fs": false,
-            "tls": false,
-            "net": false
-        },
-        modules: [
-            './src',
-            './node_modules',
-            path.join(__dirname, 'node_modules')
-        ]
+        extensions: ['.ts', '.js']
     },
     module: {
         rules: [
@@ -59,6 +39,10 @@ const config = {
                 ]
             }
         ]
-    }
+    },
+    devtool: 'nosources-source-map',
+    infrastructureLogging: {
+        level: "log", // enables logging required for problem matchers
+    },
 };
-module.exports = config;
+module.exports = [extensionConfig];
