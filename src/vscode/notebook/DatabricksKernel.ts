@@ -239,13 +239,22 @@ export class DatabricksKernel implements vscode.NotebookController {
 			execution.appendOutput(output);
 		}
 		else if (result.results.resultType == "text") {
-			if (result.results.data != '') {
-				execution.appendOutput(new vscode.NotebookCellOutput([
-					vscode.NotebookCellOutputItem.text(result.results.data, 'text/plain')
-				]));
-
-
+			let cellOutput = new vscode.NotebookCellOutput([]);
+			let textData: string = result.results.data as string
+			if (textData != '') {
+				cellOutput.items.push(vscode.NotebookCellOutputItem.text(result.results.data, 'text/plain'));
 			}
+			// check text output for most common HTML tags/snippets to optionally also render the output as HTML
+			if(textData.includes('<!DOCTYPE html>') 
+			|| textData.includes('</html>')
+			|| textData.includes('</div>')
+			|| textData.includes('</table>')
+			)
+			{
+				cellOutput.items.push(vscode.NotebookCellOutputItem.text((result.results.data as string).trim(), 'text/html'));
+			}
+
+			execution.appendOutput(cellOutput);
 		}
 		else if (result.results.resultType == "images") {
 			// add support for multiple images, each rendered as individual output
