@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as fspath from 'path';
-import * as fs from 'fs';
 
 import { WorkspaceItemExportFormat, WorkspaceItemLanguage, WorkspaceItemType } from './_types';
 import { iDatabricksWorkspaceItem } from './iDatabricksworkspaceItem';
@@ -9,7 +8,6 @@ import { DatabricksApiService } from '../../../databricksApi/databricksApiServic
 import { Helper } from '../../../helpers/Helper';
 import { LanguageFileExtensionMapper } from './LanguageFileExtensionMapper';
 import { DatabricksWorkspaceTreeItem } from './DatabricksWorkspaceTreeItem';
-import { DatabricksWorkspaceDirectory } from './DatabricksWorkspaceDirectory';
 import { FSHelper } from '../../../helpers/FSHelper';
 
 

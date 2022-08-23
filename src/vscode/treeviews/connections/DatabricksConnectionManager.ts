@@ -12,7 +12,7 @@ export abstract class DatabricksConnectionManager {
 
 	protected _initialized: boolean;
 
-	abstract initialize(): void;
+	abstract initialize(): Promise<void>;
 	abstract loadConnections(): void;
 
 	abstract updateConnection(updatedCon: iDatabricksConnection): void;

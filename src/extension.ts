@@ -30,21 +30,26 @@ import { DatabricksSecret } from './vscode/treeviews/secrets/DatabricksSecret';
 import { DatabricksFileSystemProvider } from './vscode/filesystemProvider/DatabricksFileSystemProvider';
 import { DatabricksWorkspaceProvider } from './vscode/filesystemProvider/DatabricksWorkspaceProvider';
 import { DatabricksRepoTreeItem } from './vscode/treeviews/repos/DatabricksRepoTreeItem';
+import { FSHelper } from './helpers/FSHelper';
+import { DatabricksKernelManager } from './vscode/notebook/DatabricksKernelManager';
 
 export async function activate(context: vscode.ExtensionContext) {
 
 	ThisExtension.StatusBar = vscode.window.createStatusBarItem("databricks-vscode", vscode.StatusBarAlignment.Right);
 	ThisExtension.StatusBar.show();
-	ThisExtension.setStatusBar("Initializing ...");
+	ThisExtension.setStatusBar("Initializing ...", true);
 
 	let isValidated: boolean = await ThisExtension.initialize(context);
-	if (!isValidated) {
+	if (isValidated === false) {
 		ThisExtension.log("Issue initializing extension - Please update Databricks settings and restart VSCode!");
 		vscode.window.showErrorMessage("Issue initializing extension - Please update Databricks settings and restart VSCode!");
 	}
 
 	ThisExtension.setStatusBar("Initialized!");
 
+	ThisExtension.setStatusBar("Initializing Kernels ...", true);
+	DatabricksKernelManager.initialize();
+	ThisExtension.setStatusBar("Kernels initialized!");
 
 	// register DatabricksConnectionTreeProvider
 	let databricksConnectionTreeProvider = new DatabricksConnectionTreeProvider();
@@ -72,9 +77,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	const workspaceProvider = new DatabricksWorkspaceProvider();
 	context.subscriptions.push(vscode.workspace.registerFileSystemProvider('dbws', workspaceProvider, { isCaseSensitive: true }));
 	vscode.commands.registerCommand('databricksWorkspace.addToWorkspace', _ => {
-		vscode.window.showWarningMessage("This feature is still experimental!");
-		// add at the end of the workspace
-		vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders.length, 0, { uri: vscode.Uri.parse('dbws:/'), name: "Databricks - Workspace" });
+		FSHelper.addToWorkspace(vscode.Uri.parse('dbws:/'), "Databricks - Workspace");
 	});
 
 	// register DatabricksClusterTreeProvider
@@ -125,9 +128,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	const dbfsProvider = new DatabricksFileSystemProvider();
 	context.subscriptions.push(vscode.workspace.registerFileSystemProvider('dbfs', dbfsProvider, { isCaseSensitive: true }));
 	vscode.commands.registerCommand('databricksFS.addToWorkspace', _ => {
-		vscode.window.showWarningMessage("This feature is still experimental!");
-		// add at the end of the workspace
-		vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders.length, 0, { uri: vscode.Uri.parse('dbfs:/'), name: "Databricks - DBFS" });
+		FSHelper.addToWorkspace(vscode.Uri.parse('dbfs:/'), "Databricks - DBFS");
 	});
 
 	// register DatabricksSecretTreeProvider

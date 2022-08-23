@@ -17,7 +17,7 @@ export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager 
 		this.initialize();
 	}
 
-	initialize(): void {
+	async initialize(): Promise<void> {
 		ThisExtension.log("Initializing ConnectionManager CLI ...");
 		this.loadConnections();
 
@@ -37,6 +37,9 @@ export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager 
 				ThisExtension.log("Setting 'databricks.lastActiveConnection' to '" + this._lastActiveConnectionName + "' ...");
 				ThisExtension.updateConfigurationSetting("databricks.lastActiveConnection", this._lastActiveConnectionName);
 				this._initialized = true;
+
+				await this.activateConnection(this.LastActiveConnection);
+				
 			} catch (error) {
 				let msg = "Could not activate Connection '" + this._lastActiveConnectionName + "'!";
 				ThisExtension.log(msg);

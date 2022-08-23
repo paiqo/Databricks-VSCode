@@ -1,11 +1,10 @@
 import * as vscode from 'vscode';
+
 import { WorkspaceItemLanguage } from './vscode/treeviews/workspaces/_types';
 import { DatabricksConnectionManager } from './vscode/treeviews/connections/DatabricksConnectionManager';
-import { Helper } from './helpers/Helper';
 import { iDatabricksConnection } from './vscode/treeviews/connections/iDatabricksConnection';
 import { DatabricksConnectionManagerVSCode } from './vscode/treeviews/connections/DatabricksConnectionManagerVSCode';
 import { SensitiveValueStore } from './vscode/treeviews/connections/_types';
-import { DatabricksConnectionTreeItem } from './vscode/treeviews/connections/DatabricksConnectionTreeItem';
 import { DatabricksConnectionManagerCLI } from './vscode/treeviews/connections/DatabricksConnectionManagerCLI';
 import { DatabricksKernel } from './vscode/notebook/DatabricksKernel';
 
@@ -21,7 +20,7 @@ export abstract class ThisExtension {
 	private static _settingScope: ConfigSettingSource;
 	private static _sensitiveValueStore: SensitiveValueStore;
 	private static _sqlClusterId: string;
-	private static _kernels: Map<string, DatabricksKernel> = new Map<string, DatabricksKernel>();
+	
 
 	static get rootPath(): string {
 		return this._context.extensionPath;
@@ -80,11 +79,13 @@ export abstract class ThisExtension {
 				default:
 					this.log("'" + connectionManager + "' is not a valid value for config setting 'databricks.connectionManager!");
 			}
+
+			await this.ConnectionManager.initialize();
+
+			return true;
 		} catch (error) {
 			return false;
 		}
-
-		return true;
 	}
 
 	static dispose(): void {
@@ -325,16 +326,7 @@ export abstract class ThisExtension {
 		return false;
 	}
 
-	static setNotebookKernel(clusterId: string, kernel: DatabricksKernel): void {
-		if(!(clusterId in ThisExtension._kernels.keys))
-		{
-			ThisExtension._kernels[clusterId] = kernel;
-		}
-	}
-
-	static getNotebookKernel(clusterId: string): DatabricksKernel {
-		return ThisExtension._kernels[clusterId]
-	}
+	
 
 	// #region StatusBar
 	static set StatusBar(value: vscode.StatusBarItem) {

@@ -7,6 +7,7 @@ import { iDatabricksCluster } from './iDatabricksCluster';
 import { Helper } from '../../../helpers/Helper';
 import { DatabricksKernel } from '../../notebook/DatabricksKernel';
 import { DatabricksClusterTreeItem } from './DatabricksClusterTreeItem';
+import { DatabricksKernelManager } from '../../notebook/DatabricksKernelManager';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksCluster extends DatabricksClusterTreeItem {
@@ -32,10 +33,6 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
-
-		if (this.state == "RUNNING") {
-			this.createKernel(false);
-		}
 	}
 
 	get _tooltip(): string {
@@ -133,12 +130,8 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 		return this._source;
 	}
 
-	private get NotebookKernelName(): string {
-		return this.cluster_id + "-jupyter-notebook";
-	}
-
 	private get NotebookKernel(): DatabricksKernel {
-		return ThisExtension.getNotebookKernel(this.NotebookKernelName);
+		return DatabricksKernelManager.getNotebookKernel(this.definition);
 	}
 
 	public get NotebookKernelExists(): boolean {
@@ -148,12 +141,8 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 		return false;
 	}
 
-	private get InteractiveKernelName(): string {
-		return this.cluster_id + "-interactive";
-	}
-
 	private get InteractiveKernel(): DatabricksKernel {
-		return ThisExtension.getNotebookKernel(this.InteractiveKernelName);
+		return DatabricksKernelManager.getNotebookKernel(this.definition);
 	}
 
 	public get InteractiveKernelExists(): boolean {
@@ -225,36 +214,10 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 	}
 
 	async createKernel(logMessages: boolean = true): Promise<void> {
-		if (!this.NotebookKernel) {
-			let notebookKernel: DatabricksKernel = new DatabricksKernel(this.cluster_id, this.cluster_name);
-			ThisExtension.setNotebookKernel(this.NotebookKernelName, notebookKernel);
-			if (logMessages) {
-				ThisExtension.log(`Notebook Kernel for Databricks cluster '${this.cluster_id}' created!`)
-			}
-		}
-		else {
-			if (logMessages) {
-				ThisExtension.log(`Notebook Kernel for Databricks cluster '${this.cluster_id}' already exists!`)
-			}
-		}
-
-		if (!this.InteractiveKernel) {
-			let interactiveKernel: DatabricksKernel = new DatabricksKernel(this.cluster_id, this.cluster_name, "interactive");
-			ThisExtension.setNotebookKernel(this.InteractiveKernelName, interactiveKernel);
-			if (logMessages) {
-				ThisExtension.log(`Interactive Kernel for Databricks cluster '${this.cluster_id}' created!`)
-			}
-		}
-		else {
-			if (logMessages) {
-				ThisExtension.log(`Interactive Kernel for Databricks cluster '${this.cluster_id}' already exists!`)
-			}
-		}
+		DatabricksKernelManager.createKernel(this.definition, logMessages);
 	}
 
 	async restartKernel(): Promise<void> {
-		if (this.NotebookKernelExists) {
-			this.NotebookKernel.restart();
-		}
+		DatabricksKernelManager.restartNotebookKernel(this.definition);
 	}
 }

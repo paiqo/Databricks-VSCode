@@ -1,7 +1,5 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
 
-import { WorkspaceItemType } from './_types';
 import { iDatabricksWorkspaceItem } from './iDatabricksworkspaceItem';
 import { ThisExtension } from '../../../ThisExtension';
 import { DatabricksWorkspaceTreeItem } from './DatabricksWorkspaceTreeItem';

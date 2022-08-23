@@ -163,7 +163,7 @@ export class DatabricksWorkspaceProvider implements vscode.FileSystemProvider {
 	async stat(uri: vscode.Uri): Promise<DatabricksWorkspaceProviderItem> {
 		let entry = await DatabricksWorkspaceProviderItem.getInstance(uri);
 
-		if (!entry.exists) {
+		if (!entry || !entry.exists) {
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
 

@@ -8,14 +8,22 @@ import { ThisExtension } from '../ThisExtension';
 import { Helper } from './Helper';
 
 export abstract class FSHelper {
-	private static _tempFiles: string[];
 	static SEPARATOR: string = '/';
 
-	// sooner or later we want to move await from native libraries like (path, os, ...) and use VSCode API implementations instead, e.g. vscode.workspace.fs
+	static async addToWorkspace(uri: vscode.Uri, name: string): Promise<void> {
+		if (!vscode.workspace.workspaceFolders) {
+			vscode.window.showErrorMessage("Please save your current session as a VSCode workspace first to use this feature!");
+		}
+		else {
+			// add at the end of the workspace
+			vscode.window.showWarningMessage("This feature is still experimental!");
+			vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders.length, 0, { uri: uri, name: name });
+		}
+	}
+
 	static async pathExists(uri: vscode.Uri | string): Promise<boolean> {
 		try {
-			if(typeof(uri) == "string")
-			{
+			if (typeof (uri) == "string") {
 				uri = vscode.Uri.file(uri);
 			}
 			await vscode.workspace.fs.stat(uri);
@@ -35,42 +43,36 @@ export abstract class FSHelper {
 		return vscode.Uri.joinPath(base, ...pathSegments)
 	}
 
-	static basename(uri: vscode.Uri): string{
+	static basename(uri: vscode.Uri): string {
 		return Helper.getToken(uri.path, this.SEPARATOR, -1);
 	}
 
-	static parent(uri: vscode.Uri): vscode.Uri{
-		return uri.with({path: uri.path.split(this.SEPARATOR).slice(0, -1).join(this.SEPARATOR)});
+	static parent(uri: vscode.Uri): vscode.Uri {
+		return uri.with({ path: uri.path.split(this.SEPARATOR).slice(0, -1).join(this.SEPARATOR) });
 	}
 
-	static removeExtension(uri: vscode.Uri): vscode.Uri
-	{
+	static removeExtension(uri: vscode.Uri): vscode.Uri {
 		let extension: string = this.extension(uri);
 
-		if(extension)
-		{
-			return uri.with({path: uri.path.replace(extension, "")})
+		if (extension) {
+			return uri.with({ path: uri.path.replace(extension, "") })
 		}
 		return uri;
 	}
 
-	static extension(uri: vscode.Uri): string
-	{
+	static extension(uri: vscode.Uri): string {
 		let splits: string[] = uri.path.split('.');
 
-		if(splits.length > 1)
-		{
+		if (splits.length > 1) {
 			return "." + splits.slice(-1)[0];
 		}
 		return undefined;
 	}
 
-	static join(...paths: string[])
-	{
+	static join(...paths: string[]) {
 		let items: string[] = [];
 
-		for(let path of paths)
-		{
+		for (let path of paths) {
 			items.push(Helper.trimChar(path, this.SEPARATOR))
 		}
 
