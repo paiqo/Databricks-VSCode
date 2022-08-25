@@ -204,8 +204,16 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 
 	async download(): Promise<vscode.Uri> {
 		try {
+			let localPath: vscode.Uri;
 			//vscode.window.showInformationMessage(`Download of item ${this._path}) started ...`);
-			let localPath: vscode.Uri = this.localPath;
+			if(this.localPathExists)
+			{
+				localPath = this.localPath;
+			}
+			else
+			{
+				localPath = vscode.Uri.file(this.localFolderPath + "/" + this.label + this.localFileExtension);
+			}
 
 			let response = await DatabricksApiService.downloadWorkspaceItemToFile(this.path, localPath, this.exportFormat);
 

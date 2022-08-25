@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
 
 import { ThisExtension } from '../../ThisExtension';
-import { ContextLanguage, ExecutionContext } from '../../databricksApi/_types';
+import { ContextLanguage, ExecutionCommand, ExecutionContext } from '../../databricksApi/_types';
 import { DatabricksApiService } from '../../databricksApi/databricksApiService';
 import { Helper } from '../../helpers/Helper';
+import { FSHelper } from '../../helpers/FSHelper';
 
 export type NotebookMagic =
 	"sql"
@@ -35,7 +36,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 	private _executionOrder: number;
 	private _clusterId: string;
 	private _language: ContextLanguage;
-	private _executionContext: ExecutionContext;
+	private _executionContexts: Map<string, ExecutionContext>;
 
 	constructor(clusterId: string, clusterName: string, notebookType: KernelType = 'jupyter-notebook', language: ContextLanguage = "python") {
 		this.notebookType = notebookType;
@@ -45,6 +46,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 		this.label = DatabricksKernel.getLabel(clusterName);
 
 		this._executionOrder = 0;
+		this._executionContexts = new Map<string, ExecutionContext>;
 
 		ThisExtension.log("Creating new " + this.notebookType + " kernel '" + this.id + "'");
 		this._controller = vscode.notebooks.createNotebookController(this.id,
@@ -81,34 +83,66 @@ export class DatabricksKernel implements vscode.NotebookController {
 		return this._language;
 	}
 
-	get ExecutionContext(): ExecutionContext {
-		return this._executionContext;
-	}
-
-	set ExecutionContext(value: ExecutionContext) {
-		this._executionContext = value;
-	}
-
-	private async initializeExecutionContext(): Promise<void> {
-		this._executionContext = await DatabricksApiService.getExecutionContext(this.ClusterID, this.Language);
-	}
+	
 
 	async disposeController(): Promise<void> {
-		if (this.ExecutionContext) {
-			await DatabricksApiService.removeExecutionContext(this.ExecutionContext);
-			this.ExecutionContext = null;
+		for(let context of this._executionContexts.entries())
+		{
+			await DatabricksApiService.removeExecutionContext(context[1]);
 		}
+
+		this._executionContexts.clear();
 	}
 
 	async dispose(): Promise<void> {
 		this.Controller.dispose();
 	}
 
-	async restart(): Promise<void> {
-		ThisExtension.log(`Restarting notebook kernel ${this.Controller.id} ...`)
-		// we simply remove the current execution context and close it on the Cluster
-		// the next execution will then create a new context
-		await this.disposeController();
+	async restart(notebookUri: vscode.Uri = undefined): Promise<void> {
+		if(notebookUri == undefined)
+		{
+			ThisExtension.log(`Restarting notebook kernel ${this.Controller.id} ...`)
+			// we simply remove the current execution context and close it on the Cluster
+			// the next execution will then create a new context
+			await this.disposeController();
+		}
+		else
+		{
+			ThisExtension.log(`Restarting notebook kernel ${this.Controller.id} for notebook ${notebookUri.toString()} ...`);
+			this._executionContexts.delete(notebookUri.toString());
+		}
+	}
+
+	private async initializeExecutionContext(): Promise<ExecutionContext> {
+		return await DatabricksApiService.getExecutionContext(this.ClusterID, this.Language);
+	}
+
+	setNotebookContext(notebookUri: vscode.Uri, context: ExecutionContext): void {
+		this._executionContexts.set(notebookUri.toString(), context);
+	}
+
+	getNotebookContext(notebookUri: vscode.Uri): ExecutionContext {
+		let path = notebookUri.toString();
+		if(this._executionContexts.has(path))
+		{
+			return this._executionContexts.get(path);
+		}
+		return undefined;
+	}
+
+	async updateRepoContext(notebookUri: vscode.Uri): Promise<void> {
+		let paths: string[] = notebookUri.path.split(FSHelper.SEPARATOR);
+		// if we are working with a notebook from the Databricks Repos folder (works with dbws:/ and locally synced notebooks)
+		if(paths.includes("Repos"))
+		{
+			ThisExtension.log("NotebookKernel: Setting up FilesInRepo support for " + notebookUri);
+			let driverPath: string = `/Workspace/${paths.slice(paths.indexOf("Repos"), paths.indexOf("Repos") + 3).join(FSHelper.SEPARATOR)}`
+			let context: ExecutionContext = this.getNotebookContext(notebookUri);
+			let commandText: string = `import sys \nsys.path.append('${driverPath}')`;
+			let command: ExecutionCommand = await DatabricksApiService.runCommand(context, commandText, "python");
+			let result = await DatabricksApiService.getCommandResult(command, true, true);
+			ThisExtension.log(`NotebookKernel: Successfully set up FilesInRepo by running sys.path.append('${driverPath}')`)
+		}
 	}
 
 	createNotebookCellExecution(cell: vscode.NotebookCell): vscode.NotebookCellExecution {
@@ -124,13 +158,16 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 
 	async executeHandler(cells: vscode.NotebookCell[], _notebook: vscode.NotebookDocument, _controller: vscode.NotebookController): Promise<void> {
-		if (this.ExecutionContext == undefined || this.ExecutionContext == null) {
+		let execContext: ExecutionContext = this.getNotebookContext(_notebook.uri);
+		if (!execContext) {
 			ThisExtension.setStatusBar("Initializing Kernel ...", true);
-			await this.initializeExecutionContext();
+			execContext = await this.initializeExecutionContext()
+			this.setNotebookContext(_notebook.uri, execContext);
+			this.updateRepoContext(_notebook.uri);
 			ThisExtension.setStatusBar("Kernel initialized!");
 		}
 		for (let cell of cells) {
-			await this._doExecution(cell);
+			await this._doExecution(cell, execContext);
 			await Helper.wait(10); // Force some delay before executing/queueing the next cell
 		}
 	}
@@ -155,7 +192,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 		return [this.Language, cmd, undefined];
 	}
 
-	private async _doExecution(cell: vscode.NotebookCell): Promise<void> {
+	private async _doExecution(cell: vscode.NotebookCell, context: ExecutionContext): Promise<void> {
 		const execution = this.Controller.createNotebookCellExecution(cell);
 		execution.executionOrder = ++this._executionOrder;
 		execution.start(Date.now());
@@ -166,7 +203,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 		let magic: NotebookMagic = null;
 
 		[language, commandText, magic] = this.parseCommand(commandText);
-
+		
 		ThisExtension.log("Executing " + language + ":\n" + commandText);
 
 		execution.clearOutput();
@@ -188,7 +225,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 				execution.end(false, Date.now());
 				return;
 		}
-		let command = await DatabricksApiService.runCommand(this.ExecutionContext, commandText, language);
+		let command = await DatabricksApiService.runCommand(context, commandText, language);
 		execution.token.onCancellationRequested(() => {
 			DatabricksApiService.cancelCommand(command);
 
@@ -232,8 +269,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 			let output: vscode.NotebookCellOutput = new vscode.NotebookCellOutput([
 				vscode.NotebookCellOutputItem.text(html, 'text/html'),
-				vscode.NotebookCellOutputItem.json(data, 'application/json'), // to be used by proper JSON/table renderers
-				vscode.NotebookCellOutputItem.json(data, 'text/plain') // for easy copying of results as JSON
+				vscode.NotebookCellOutputItem.json(data, 'application/json') // to be used by proper JSON/table renderers
 			])
 			output.metadata = { row_count: data.length, truncated: result.results.truncated };
 			execution.appendOutput(output);
@@ -280,12 +316,10 @@ export class DatabricksKernel implements vscode.NotebookController {
 		}
 
 
-		/*
-		// just for debugging
-		execution.appendOutput(new vscode.NotebookCellOutput([
-			vscode.NotebookCellOutputItem.json(result, 'text/x-json')
-		]));
-		*/
+		if(["pip"].includes(magic))
+		{
+			await this.updateRepoContext(cell.notebook.uri);
+		}
 
 		execution.end(result.status == "Finished", Date.now());
 	}

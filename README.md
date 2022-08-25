@@ -22,6 +22,10 @@ The extensions can be downloaded from the official Visual Studio Code extension 
   - Execute local code against a running Databricks cluster
   - interactive cell-by-cell execution as in Databricks web UI
   - rich output and visualization of results
+- [File System Integration](#file-system-integration)
+  - integrate DBFS and Databricks Workspace/notebooks next to your local file system
+  - easy drag&drop between local, DBFS and also workspace/notebooks
+  - similar, well-known UI; same behavior as if DBFS and workspace/notebooks were offline
 - [Connection Manager](#connection-manager)
   - Easy configuration via standard VS Code settings
   - Manage and switch between multiple Databricks workspaces (e.g. DEV/TEST/PROD)
@@ -49,6 +53,13 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 - Integration for CI/CD using [DatabricksPS](https://www.powershellgallery.com/packages/DatabricksPS) PowerShell module
 
 # Release Notes
+
+**v1.1.0:**
+- added File System APIs for `dbfs:/` (same as in Databricks) and also `dbws:/` for the workspace/notebooks
+- added support for [Files in Repos](https://docs.databricks.com/repos/work-with-notebooks-other-files.html)
+- fixed issue with `Execute All Cells` in notebook kernel
+- fixed issue with multiple notebooks connected to the same kernel
+- added packaging of the source code with webpack for improved loading times
 
 **v1.0.0:**
 - added support for [Notebook Kernel](#notebook-kernel) to allow execution of code on the Databricks cluster from within VSCode notebooks
@@ -242,6 +253,11 @@ The cluster manager also distinguishes between regular user-created clusters and
 Using Databricks Notebook Kernels you can execute local code againt a running Databricks cluster. Simply open a `.ipynb` notebook and select the Databricks kernel of your choice. A new kernel will be added automatically for each Databricks cluster that is currently running. In case you need to restart the kernel, you can do so by right-clicking the underlying cluster in the [Cluster Manager](#cluster-manager) and select `Restart Databricks Kernel`.
 The execution of the first cell may take a bit longer as the remote execution context has to be set up before any commands can be executed. The notebook kernel supports the magics `%sql`, `%python`, `%r`, `%scala`, `%md` and also `%pip`. Depending on the output of the cell, the results are rendered accordingly - e.g. as text, as table or as image. Due to the limitations of the underlying APIs, the output is limited to one output type so you should avoid mixing `print(...)`, `display(df)` and `df.plot` as only one of them will be show.
 If you need richer output especially for tables, you can install additional Notebook Renderer Extensions. We recommend [vscode-data-table](https://github.com/RandomFractals/vscode-data-table). Unfortunately the author decided to unpublish the extension from the offical VSCode market place but it can still be downloaded the `.vsix` from the [Github Releases](https://github.com/RandomFractals/vscode-data-table/releases)
+
+# File System Integration
+![File System Integration](/images/FileSystemIntegration.jpg?raw=true "File System Integration")
+
+The File System Integration allows you to mount DBFS and the Databricks workspace/notebooks directly into your VSCode Explorer. You can simply open (or preview) all files and also save them back as if the files were local. So no local copy of your notebooks is necessary anymore but you can work with the files directly. When you open it, it is downloaded, when you save it, it is uploaded again.
 
 # SQL Browser
 ![SQL Browser](/images/SQLBrowser.jpg?raw=true "SQL Browser")

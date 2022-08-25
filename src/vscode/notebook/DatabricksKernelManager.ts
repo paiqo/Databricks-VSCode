@@ -26,14 +26,14 @@ export abstract class DatabricksKernelManager  {
 	}
 
 	static setKernel(kernelName: string, kernel: DatabricksKernel): void {
-		if(!(kernelName in this._kernels.keys))
+		if(!this._kernels.has(kernelName))
 		{
-			this._kernels[kernelName] = kernel;
+			this._kernels.set(kernelName, kernel);
 		}
 	}
 
 	static getKernel(kernelName: string): DatabricksKernel {
-		return this._kernels[kernelName];
+		return this._kernels.get(kernelName);
 	}
 
 	static getNotebookKernelName(cluster: iDatabricksCluster): string {
