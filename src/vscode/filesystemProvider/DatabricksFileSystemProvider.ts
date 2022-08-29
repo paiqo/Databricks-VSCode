@@ -6,6 +6,7 @@
 import * as vscode from 'vscode';
 import { DatabricksApiService } from '../../databricksApi/databricksApiService';
 import { FSHelper } from '../../helpers/FSHelper';
+import { Helper } from '../../helpers/Helper';
 import { iDatabricksFSItem } from '../treeviews/dbfs/iDatabricksFSItem';
 
 export class DatabricksFileSystemProvider implements vscode.FileSystemProvider {
@@ -29,7 +30,7 @@ export class DatabricksFileSystemProvider implements vscode.FileSystemProvider {
 
 		const result: [string, vscode.FileType][] = [];
 		for (const entry of entries) {
-			result.push([entry.path, entry.is_dir ? vscode.FileType.Directory : vscode.FileType.File]);
+			result.push([Helper.getToken(entry.path, FSHelper.SEPARATOR, -1), entry.is_dir ? vscode.FileType.Directory : vscode.FileType.File]);
 		}
 		return result;
 	}

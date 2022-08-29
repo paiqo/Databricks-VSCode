@@ -6,6 +6,7 @@ import { WorkspaceItemExportFormat, WorkspaceItemLanguage, WorkspaceItemType } f
 import { DatabricksApiService } from '../../databricksApi/databricksApiService';
 
 import { iDatabricksWorkspaceItem } from '../treeviews/workspaces/iDatabricksworkspaceItem';
+import { Helper } from '../../helpers/Helper';
 
 export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabricksWorkspaceItem {
 	// vscode.FileStat properties, basically all are read-only
@@ -22,6 +23,11 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 	}
 
 	get type(): vscode.FileType {
+		if(["FILE"].includes(this.object_type))
+		{
+			//return vscode.FileType.Unknown;
+			return vscode.FileType.File;
+		}
 		if (["DIRECTORY", "REPO"].includes(this.object_type) || !this.mapper) {
 			return vscode.FileType.Directory;
 		}
@@ -46,7 +52,7 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 	}
 
 	get filesystemEntry(): [string, vscode.FileType] {
-		return [this.uriPath, this.type];
+		return [Helper.getToken(this.uriPath, FSHelper.SEPARATOR, -1), this.type];
 	}
 
 	get exists(): boolean {
@@ -68,12 +74,11 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 
 	// the path used when used as URI
 	get uriPath(): string {
-		if (this.type == vscode.FileType.Directory) {
-			return this.path;
-		}
-		if (this.type == vscode.FileType.File) {
+		if (this.type == vscode.FileType.File && this.mapper) {
 			return this.path + this.mapper.extension;
 		}
+		
+		return this.path;
 	}
 
 	set uriPath(value: string) {

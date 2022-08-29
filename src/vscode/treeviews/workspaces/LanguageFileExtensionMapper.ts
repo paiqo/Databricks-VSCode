@@ -108,7 +108,10 @@ export class LanguageFileExtensionMapper {
 			case ".sql":
 				ret._language = "SQL";
 				break;
-			default: throw new Error("Language for extension '" + ret.extension + "' is not defined!");
+			default: 
+				ThisExtension.log("Invalid file extension found: " + ret.extension);
+				//throw new Error("Language for extension '" + ret.extension + "' is not defined!");
+				return undefined;				
 		}
 
 		return ret;
