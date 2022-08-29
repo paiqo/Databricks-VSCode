@@ -33,7 +33,7 @@ export abstract class DatabricksConnectionManager {
 		return this.Connections.find( (x) => x.displayName == this.LastActiveConnectionName);
 	}
 
-	async activateConnection(con: iDatabricksConnection): Promise<void> {
+	async activateConnection(con: iDatabricksConnection, refreshComponents: boolean = false): Promise<void> {
 		ThisExtension.log(`Activating Databricks Connection '${con.displayName}' ...`);
 
 		ThisExtension.ActiveConnection = con;
@@ -54,15 +54,18 @@ export abstract class DatabricksConnectionManager {
 
 			ThisExtension.SQLClusterID = undefined;
 
-			Helper.delay(100);
+			if(refreshComponents)
+			{
+				Helper.delay(100);
 
-			vscode.commands.executeCommand("databricksWorkspace.refresh", false);
-			vscode.commands.executeCommand("databricksClusters.refresh", false);
-			vscode.commands.executeCommand("databricksJobs.refresh", false);
-			vscode.commands.executeCommand("databricksFS.refresh", false);
-			vscode.commands.executeCommand("databricksSecrets.refresh", false);
-			vscode.commands.executeCommand("databricksSQL.refresh", false);
-			vscode.commands.executeCommand("databricksRepos.refresh", false);
+				vscode.commands.executeCommand("databricksWorkspace.refresh", false);
+				vscode.commands.executeCommand("databricksClusters.refresh", false);
+				vscode.commands.executeCommand("databricksJobs.refresh", false);
+				vscode.commands.executeCommand("databricksFS.refresh", false);
+				vscode.commands.executeCommand("databricksSecrets.refresh", false);
+				vscode.commands.executeCommand("databricksSQL.refresh", false);
+				vscode.commands.executeCommand("databricksRepos.refresh", false);
+			}
 		}
 	}
 

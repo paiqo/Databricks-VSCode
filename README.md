@@ -24,8 +24,8 @@ The extensions can be downloaded from the official Visual Studio Code extension 
   - rich output and visualization of results
 - [File System Integration](#file-system-integration)
   - integrate DBFS and Databricks Workspace/notebooks next to your local file system
-  - easy drag&drop between local, DBFS and also workspace/notebooks
-  - similar, well-known UI; same behavior as if DBFS and workspace/notebooks were offline
+  - easy drag&drop between local, DBFS and also workspace/notebooks!
+  - similar, well-known UI; same behavior as if DBFS and workspace/notebooks existed locally
 - [Connection Manager](#connection-manager)
   - Easy configuration via standard VS Code settings
   - Manage and switch between multiple Databricks workspaces (e.g. DEV/TEST/PROD)
@@ -53,6 +53,17 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 - Integration for CI/CD using [DatabricksPS](https://www.powershellgallery.com/packages/DatabricksPS) PowerShell module
 
 # Release Notes
+
+**v1.1.1:**
+- make [File System Integration](#file-system-integration) work without having to open the Databricks tab first
+- fixed issues with [File System Integration](#file-system-integration)
+  - folders with a single sub-folder only now work
+  - fixed an issue where Repos did not work/could not be browsed properly
+- switch focus to VSCode Explorer when adding DBFS/Workspace to the VSCode workspace
+- added `Pull` Button to the [Repo Manager](#repo-manager) to pull the latest changes from Git
+- added proper HTML output for notebooks/executions that returned HTML as plain text
+- fixed issue with [Workspace Manager](#workspace-Manager) where files could not be downloaded properly anymore
+
 
 **v1.1.0:**
 - added File System APIs for `dbfs:/` (same as in Databricks) and also `dbws:/` for the workspace/notebooks
@@ -257,7 +268,7 @@ If you need richer output especially for tables, you can install additional Note
 # File System Integration
 ![File System Integration](/images/FileSystemIntegration.jpg?raw=true "File System Integration")
 
-The File System Integration allows you to mount DBFS and the Databricks workspace/notebooks directly into your VSCode Explorer. You can simply open (or preview) all files and also save them back as if the files were local. So no local copy of your notebooks is necessary anymore but you can work with the files directly. When you open it, it is downloaded, when you save it, it is uploaded again.
+The File System Integration allows you to mount DBFS and the Databricks workspace/notebooks directly into your VSCode Explorer. You can simply open (or preview) all files and also save them back as if the files were local. So no local copy of your notebooks is necessary anymore but you can work with the files from the Databricks workspace directly. Everything happens automatically - when you open a file, it is downloaded, when you save it, it is uploaded again.
 
 # SQL Browser
 ![SQL Browser](/images/SQLBrowser.jpg?raw=true "SQL Browser")

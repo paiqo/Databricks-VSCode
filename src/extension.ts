@@ -154,16 +154,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksRepo.checkOut', (repo: DatabricksRepoRepository) => repo.checkOut());
 	vscode.commands.registerCommand('databricksRepo.pull', (repo: DatabricksRepoRepository) => repo.pull());
 	vscode.commands.registerCommand('databricksRepo.delete', (repo: DatabricksRepoRepository) => repo.delete());
-
-
-	// register DatabricksNotebook Commands
-	vscode.commands.registerCommand('databricksNotebook.new', async function () {
-		const newNotebook = await vscode.workspace.openNotebookDocument('jupyter-notebook', new vscode.NotebookData(
-			[new vscode.NotebookCellData(vscode.NotebookCellKind.Code, '/Hello{1,7} Notebooks/', 'plaintext')]
-		));
-
-		await vscode.commands.executeCommand('vscode.open', newNotebook.uri);
-	});
 }
 
 

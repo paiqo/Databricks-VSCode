@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Extension to manage your Databricks workspace and ease local development",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -689,11 +689,6 @@
 				"command": "databricksRepo.delete",
 				"title": "Delete",
 				"icon": "$(remove-close)"
-			},
-			{
-				"title": "New Databricks Notebook",
-				"shortTitle": "Databricks Notebook",
-				"command": "databricksNotebook.new"
 			}
 		],
 		"menus": {

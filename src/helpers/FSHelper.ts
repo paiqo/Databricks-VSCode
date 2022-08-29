@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { ThisExtension } from '../ThisExtension';
 import { Helper } from './Helper';
 
 export abstract class FSHelper {
@@ -18,6 +17,8 @@ export abstract class FSHelper {
 			// add at the end of the workspace
 			vscode.window.showWarningMessage("This feature is still experimental!");
 			vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders.length, 0, { uri: uri, name: name });
+
+			vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", uri);
 		}
 	}
 
