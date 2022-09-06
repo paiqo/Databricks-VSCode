@@ -23,8 +23,7 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 	}
 
 	get type(): vscode.FileType {
-		if(["FILE"].includes(this.object_type))
-		{
+		if (["FILE"].includes(this.object_type)) {
 			//return vscode.FileType.Unknown;
 			return vscode.FileType.File;
 		}
@@ -77,16 +76,17 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 		if (this.type == vscode.FileType.File && this.mapper) {
 			return this.path + this.mapper.extension;
 		}
-		
+
 		return this.path;
 	}
 
 	set uriPath(value: string) {
-		if (this.type == vscode.FileType.Directory) {
-			this.path = value;
-		}
-		if (this.type == vscode.FileType.File) {
+		// for NOTEBOOK files we remove the extension defined in the mapper
+		if (this.type == vscode.FileType.File && this.mapper) {
 			this.path = value.replace(this.mapper.extension, "");
+		}
+		else {
+			this.path = value;
 		}
 	}
 
@@ -118,7 +118,12 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 	}
 
 	async loadFromAPI(): Promise<void> {
-		const item: iDatabricksWorkspaceItem = await DatabricksApiService.getWorkspaceItem(this.apiPath);
+		let item: iDatabricksWorkspaceItem = await DatabricksApiService.getWorkspaceItem(this.apiPath);
+
+		if (!item) {
+			// try again with the uriPath - e.g. to read FILE items
+			item = await DatabricksApiService.getWorkspaceItem(this.uriPath);
+		}
 
 		if (!item) {
 			this.object_id = -1;
@@ -128,14 +133,22 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 			this.language = item.language;
 			this.object_id = item.object_id;
 			this.object_type = item.object_type;
+
+			if (item.object_type == "FILE") {
+				this.mapper = undefined;
+			}
 		}
 	}
 
 	static async getInstance(source: vscode.Uri | iDatabricksWorkspaceItem): Promise<DatabricksWorkspaceProviderItem> {
 		let newInstance: DatabricksWorkspaceProviderItem = new DatabricksWorkspaceProviderItem();
 		if (source instanceof vscode.Uri) {
-			// VSCode always queries for some internal fiels on every filesystem
-			if (source.path.startsWith("/.vscode")) {
+			// VSCode always queries for some internal files on every filesystem ?!
+			if (source.path.startsWith("/.vscode")
+				|| source.path.startsWith("/.git")
+				|| source.path == "/pom.xml"
+				|| source.path == "/node_modules"
+				|| source.path.endsWith("AndroidManifest.xml")) {
 				return undefined;
 			}
 			newInstance.mapper = LanguageFileExtensionMapper.fromUri(source);
@@ -156,8 +169,8 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 }
 
 export class DatabricksWorkspaceProvider implements vscode.FileSystemProvider {
-	// --- manage file metadata
 
+	// --- manage file metadata
 	async stat(uri: vscode.Uri): Promise<DatabricksWorkspaceProviderItem> {
 		let entry = await DatabricksWorkspaceProviderItem.getInstance(uri);
 
@@ -195,13 +208,21 @@ export class DatabricksWorkspaceProvider implements vscode.FileSystemProvider {
 			throw vscode.FileSystemError.FileIsADirectory(uri);
 		}
 
-		let contentBytes: Uint8Array = await DatabricksApiService.downloadWorkspaceItem(remoteItem.apiPath, remoteItem.exportFormat);
+		let contentBytes: Uint8Array = undefined;
+		if (remoteItem.object_type == "FILE") {
+			contentBytes = await DatabricksApiService.downloadWorkspaceFile(remoteItem.uriPath);
+		}
+		else {
+			contentBytes = await DatabricksApiService.downloadWorkspaceItem(remoteItem.apiPath, remoteItem.exportFormat);
+		}
 
 		return contentBytes
 	}
 
 	async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
 		let remoteItem: DatabricksWorkspaceProviderItem = await DatabricksWorkspaceProviderItem.getInstance(uri);
+
+
 
 		if (remoteItem.exists && remoteItem.type == vscode.FileType.Directory) {
 			throw vscode.FileSystemError.FileIsADirectory(uri);
@@ -212,12 +233,18 @@ export class DatabricksWorkspaceProvider implements vscode.FileSystemProvider {
 		if (remoteItem.exists && options.create && !options.overwrite) {
 			throw vscode.FileSystemError.FileExists(uri);
 		}
-		// when a new file is added (remote does not yet exists and no content is provided), we just upload an empty file in SOURCE format.
-		if (!remoteItem.exists && content.length == 0) {
-			await DatabricksApiService.uploadWorkspaceItem(content, remoteItem.apiPath, remoteItem.language, options.overwrite, "SOURCE");
+
+		if (remoteItem.object_type == "FILE") {
+			await DatabricksApiService.uploadWorkspaceFile(remoteItem.uriPath, content);
 		}
 		else {
-			await DatabricksApiService.uploadWorkspaceItem(content, remoteItem.apiPath, remoteItem.language, options.overwrite, remoteItem.exportFormat);
+			// when a new file is added (remote does not yet exists and no content is provided), we just upload an empty file in SOURCE format.
+			if (!remoteItem.exists && content.length == 0) {
+				await DatabricksApiService.uploadWorkspaceItem(content, remoteItem.apiPath, remoteItem.language, options.overwrite, "SOURCE");
+			}
+			else {
+				await DatabricksApiService.uploadWorkspaceItem(content, remoteItem.apiPath, remoteItem.language, options.overwrite, remoteItem.exportFormat);
+			}
 		}
 
 		this._fireSoon({ type: vscode.FileChangeType.Changed, uri });

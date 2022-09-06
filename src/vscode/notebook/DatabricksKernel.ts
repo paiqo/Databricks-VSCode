@@ -181,7 +181,8 @@ export class DatabricksKernel implements vscode.NotebookController {
 			if (["python", "sql", "scala", "r"].includes(magicText)) {
 				language = magicText as ContextLanguage;
 			}
-			if (["pip"].includes(magicText)) {
+			else
+			{
 				// we can run %pip commands "as-is" using the Python language
 				language = "python";
 				commandText = cmd;

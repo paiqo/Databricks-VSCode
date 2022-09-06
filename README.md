@@ -11,7 +11,7 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 
 # Features
 
-- [Workspace Manager](#workspace-Manager)
+- [Workspace Manager](#workspace-manager)
   - Up-/download of notebooks and whole folders
   - Compare/Diff of local vs online notebook
   - Support for [Code Cells](https://code.visualstudio.com/docs/python/jupyter-support-py#_jupyter-code-cells) if you do not want to use the .ipynb format
@@ -54,6 +54,9 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 
 # Release Notes
 
+**v1.1.2:**
+- make [File System Integration](#file-system-integration) work without non-notebook files (e.g. Files in Repos)
+
 **v1.1.1:**
 - make [File System Integration](#file-system-integration) work without having to open the Databricks tab first
 - fixed issues with [File System Integration](#file-system-integration)
@@ -62,8 +65,7 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 - switch focus to VSCode Explorer when adding DBFS/Workspace to the VSCode workspace
 - added `Pull` Button to the [Repo Manager](#repo-manager) to pull the latest changes from Git
 - added proper HTML output for notebooks/executions that returned HTML as plain text
-- fixed issue with [Workspace Manager](#workspace-Manager) where files could not be downloaded properly anymore
-
+- fixed issue with [Workspace Manager](#workspace-manager) where files could not be downloaded properly anymore
 
 **v1.1.0:**
 - added File System APIs for `dbfs:/` (same as in Databricks) and also `dbws:/` for the workspace/notebooks
@@ -231,7 +233,7 @@ You can also change the following other settings:
 
 You can either work with a single Connection or configure multiple Connections. If you use multiple Connections, you will see your list in the Connections view and icons indicating which one is currently active. To change the Connection, simply click the "Activate" button next to an inactive Connection. All other views will update automatically.
 
-To change an existing connection - please see [Setup and Configuration](#setup-and-configuration)
+To change an existing connection - please see [Setup and Configuration](#setup-and-configuration-vscode-connection-manager))
 
 # Workspace Manager
 ![Workspace Manager](/images/WorkspaceManager.jpg?raw=true "Workspace Manager")
@@ -298,7 +300,7 @@ This can come in handy if you want to quickly add a new secret as this is otherw
 # Repo Manager
 ![Repo Manager](/images/RepoManager.jpg?raw=true "Repo Manager")
 
-Using the Repo Manager you can interact with the Repos API which allows you to add new repositories to the Databricks workspace and also update/check-out specific branches and tags. The latest branch/tag can then be found via the [Workspace Browser](#workspace-browser)
+Using the Repo Manager you can interact with the Repos API which allows you to add new repositories to the Databricks workspace and also update/check-out specific branches and tags. The latest branch/tag can then be found via the [Workspace Manager](#workspace-manager)
 
 ## FAQ
 

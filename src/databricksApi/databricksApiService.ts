@@ -419,6 +419,31 @@ export abstract class DatabricksApiService {
 		let result = response.data;
 	}
 
+	static async downloadWorkspaceFile(path: string): Promise<Uint8Array> {
+		let endpoint = '2.0/workspace-files/import-file/' + Helper.trimChar(path, '/');
+
+		ThisExtension.log(`Downloading '${path}' ...`);
+
+		let response = await this.get(endpoint);
+
+		let result = response.data;
+
+		return await Buffer.from(result, 'latin1') as Uint8Array;
+	}
+
+	static async uploadWorkspaceFile(path: string, content: Uint8Array): Promise<void> {
+		let endpoint = '2.0/workspace-files/import-file/' + Helper.trimChar(path, '/');
+
+		ThisExtension.log(`Uploading '${path}' ...`);
+
+		let body = (await Buffer.from(content).toString('latin1')) as any as object;
+
+		let response = await this.post(endpoint, body);
+
+		let result = response.data;
+	}
+
+
 	static async createWorkspaceFolder(path: string): Promise<void> {
 		let endpoint = '2.0/workspace/mkdirs';
 		let body = {
