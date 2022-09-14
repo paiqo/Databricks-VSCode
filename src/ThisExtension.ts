@@ -7,6 +7,8 @@ import { DatabricksConnectionManagerVSCode } from './vscode/treeviews/connection
 import { SensitiveValueStore } from './vscode/treeviews/connections/_types';
 import { DatabricksConnectionManagerCLI } from './vscode/treeviews/connections/DatabricksConnectionManagerCLI';
 import { DatabricksKernel } from './vscode/notebook/DatabricksKernel';
+import { PublicApi } from '@databricks/databricks-vscode-types';
+import { DatabricksConnectionManagerBricks } from './vscode/treeviews/connections/DatabricksConnectionManagerBricks';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -55,7 +57,7 @@ export abstract class ThisExtension {
 		return this._isValidated;
 	}
 
-	static async initialize(context: vscode.ExtensionContext): Promise<boolean> {
+	static async initialize(context: vscode.ExtensionContext, dbApi: PublicApi): Promise<boolean> {
 		try {
 			this._logger = vscode.window.createOutputChannel(context.extension.id);
 			this.log("Logger initialized!");
@@ -68,17 +70,18 @@ export abstract class ThisExtension {
 
 			ThisExtension.readGlobalSettings();
 
-			let connectionManager = this.getConfigurationSetting("databricks.connectionManager");
-			switch (connectionManager.value) {
-				case "VSCode Settings":
-					this._connectionManager = new DatabricksConnectionManagerVSCode();
-					break;
-				case "Databricks CLI Profiles":
-					this._connectionManager = new DatabricksConnectionManagerCLI();
-					break;
-				default:
-					this.log("'" + connectionManager + "' is not a valid value for config setting 'databricks.connectionManager!");
-			}
+			// let connectionManager = this.getConfigurationSetting("databricks.connectionManager");
+			// switch (connectionManager.value) {
+			// 	case "VSCode Settings":
+			// 		this._connectionManager = new DatabricksConnectionManagerVSCode();
+			// 		break;
+			// 	case "Databricks CLI Profiles":
+			// 		this._connectionManager = new DatabricksConnectionManagerCLI();
+			// 		break;
+			// 	default:
+			// 		this.log("'" + connectionManager + "' is not a valid value for config setting 'databricks.connectionManager!");
+			// }
+			this._connectionManager = new DatabricksConnectionManagerBricks(dbApi);
 
 			await this.ConnectionManager.initialize();
 

@@ -32,14 +32,18 @@ import { DatabricksWorkspaceProvider } from './vscode/filesystemProvider/Databri
 import { DatabricksRepoTreeItem } from './vscode/treeviews/repos/DatabricksRepoTreeItem';
 import { FSHelper } from './helpers/FSHelper';
 import { DatabricksKernelManager } from './vscode/notebook/DatabricksKernelManager';
+import {PublicApi} from "@databricks/databricks-vscode-types"
 
 export async function activate(context: vscode.ExtensionContext) {
+
+	await vscode.extensions.getExtension<PublicApi>('databricks.databricks-vscode').activate();
+	const dbApi = vscode.extensions.getExtension<PublicApi>('databricks.databricks-vscode').exports;
 
 	ThisExtension.StatusBar = vscode.window.createStatusBarItem("databricks-vscode", vscode.StatusBarAlignment.Right);
 	ThisExtension.StatusBar.show();
 	ThisExtension.setStatusBar("Initializing ...", true);
 
-	let isValidated: boolean = await ThisExtension.initialize(context);
+	let isValidated: boolean = await ThisExtension.initialize(context, dbApi);
 	if (isValidated === false) {
 		ThisExtension.log("Issue initializing extension - Please update Databricks settings and restart VSCode!");
 		vscode.window.showErrorMessage("Issue initializing extension - Please update Databricks settings and restart VSCode!");

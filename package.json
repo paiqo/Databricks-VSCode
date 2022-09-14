@@ -48,7 +48,8 @@
 		"notebookKernelJupyterNotebook"
 	],
 	"extensionDependencies": [
-		"RandomFractalsInc.vscode-data-table"
+		"RandomFractalsInc.vscode-data-table",
+		"databricks.databricks-vscode"
 	],
 	"activationEvents": [
 		"onView:DatabricksConnections",
@@ -372,17 +373,8 @@
 				}
 			}
 		],
-		"viewsContainers": {
-			"activitybar": [
-				{
-					"id": "databricks",
-					"title": "Databricks",
-					"icon": "resources/databricks_sidebar.png"
-				}
-			]
-		},
 		"views": {
-			"databricks": [
+			"databricksBar": [
 				{
 					"id": "DatabricksConnections",
 					"name": "Connections"
@@ -952,7 +944,9 @@
 		"glob": "^8.0.3",
 		"mocha": "^10.0.0",
 		"webpack": "^5.74.0",
-		"webpack-cli": "^4.10.0"
+		"webpack-cli": "^4.10.0",
+		"@databricks/databricks-vscode-types": "file:../databricks-vscode/packages/databricks-vscode-types",
+		"@databricks/databricks-sdk-js": "file:../databricks-vscode/packages/databricks-sdk-js"
 	},
 	"dependencies": {
 		"@angular/common": "^14.0.1",
