@@ -14,6 +14,7 @@ export type NotebookMagic =
 	| "sh"
 	| "fs"
 	| "pip"
+	| "run"
 	;
 
 export type KernelType =
@@ -83,31 +84,31 @@ export class DatabricksKernel implements vscode.NotebookController {
 		return this._language;
 	}
 
-	
+
 
 	async disposeController(): Promise<void> {
-		for(let context of this._executionContexts.entries())
-		{
-			await DatabricksApiService.removeExecutionContext(context[1]);
+		for (let context of this._executionContexts.entries()) {
+			try {
+				await DatabricksApiService.removeExecutionContext(context[1]);
+			}
+			catch (e) { };
 		}
 
 		this._executionContexts.clear();
 	}
 
 	async dispose(): Promise<void> {
-		this.Controller.dispose();
+		this.Controller.dispose(); // bound to disposeController() above
 	}
 
 	async restart(notebookUri: vscode.Uri = undefined): Promise<void> {
-		if(notebookUri == undefined)
-		{
+		if (notebookUri == undefined) {
 			ThisExtension.log(`Restarting notebook kernel ${this.Controller.id} ...`)
 			// we simply remove the current execution context and close it on the Cluster
 			// the next execution will then create a new context
 			await this.disposeController();
 		}
-		else
-		{
+		else {
 			ThisExtension.log(`Restarting notebook kernel ${this.Controller.id} for notebook ${notebookUri.toString()} ...`);
 			this._executionContexts.delete(notebookUri.toString());
 		}
@@ -123,8 +124,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 	getNotebookContext(notebookUri: vscode.Uri): ExecutionContext {
 		let path = notebookUri.toString();
-		if(this._executionContexts.has(path))
-		{
+		if (this._executionContexts.has(path)) {
 			return this._executionContexts.get(path);
 		}
 		return undefined;
@@ -133,8 +133,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 	async updateRepoContext(notebookUri: vscode.Uri): Promise<void> {
 		let paths: string[] = notebookUri.path.split(FSHelper.SEPARATOR);
 		// if we are working with a notebook from the Databricks Repos folder (works with dbws:/ and locally synced notebooks)
-		if(paths.includes("Repos"))
-		{
+		if (paths.includes("Repos")) {
 			ThisExtension.log("NotebookKernel: Setting up FilesInRepo support for " + notebookUri);
 			let driverPath: string = `/Workspace/${paths.slice(paths.indexOf("Repos"), paths.indexOf("Repos") + 3).join(FSHelper.SEPARATOR)}`
 			let context: ExecutionContext = this.getNotebookContext(notebookUri);
@@ -181,8 +180,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 			if (["python", "sql", "scala", "r"].includes(magicText)) {
 				language = magicText as ContextLanguage;
 			}
-			else
-			{
+			else {
 				// we can run %pip commands "as-is" using the Python language
 				language = "python";
 				commandText = cmd;
@@ -197,131 +195,184 @@ export class DatabricksKernel implements vscode.NotebookController {
 		const execution = this.Controller.createNotebookCellExecution(cell);
 		execution.executionOrder = ++this._executionOrder;
 		execution.start(Date.now());
-
-
-		let commandText = cell.document.getText();
-		let language: ContextLanguage = null;
-		let magic: NotebookMagic = null;
-
-		[language, commandText, magic] = this.parseCommand(commandText);
-		
-		ThisExtension.log("Executing " + language + ":\n" + commandText);
-
 		execution.clearOutput();
 
-		switch (magic) {
-			case "md":
-				execution.appendOutput(new vscode.NotebookCellOutput([
-					vscode.NotebookCellOutputItem.text(commandText, 'text/markdown')
-				]));
+		// wrap a try/catch around the whole execution to make sure we never get stuck
+		try {
+			let commandText: string = cell.document.getText();
+			let language: ContextLanguage = null;
+			let magic: NotebookMagic = null;
 
-				execution.end(true, Date.now());
-				return;
-			case "fs":
-			case "sh":
+			[language, commandText, magic] = this.parseCommand(commandText);
+
+			ThisExtension.log("Executing " + language + ":\n" + commandText);
+
+			switch (magic) {
+				case "md":
+					execution.appendOutput(new vscode.NotebookCellOutput([
+						vscode.NotebookCellOutputItem.text(commandText, 'text/markdown')
+					]));
+
+					execution.end(true, Date.now());
+					return;
+				case "fs":
+				case "sh":
+					execution.appendOutput(new vscode.NotebookCellOutput([
+						vscode.NotebookCellOutputItem.text("Magic %" + magic + " is not supported in remote executions!", 'text/plain')
+					]));
+
+					execution.end(false, Date.now());
+					return;
+				case "run":
+					let runFile: string = Helper.trimChar(commandText.substring(commandText.indexOf(' ') + 1), '"');
+					let runUri: vscode.Uri = vscode.Uri.joinPath(FSHelper.parent(cell.notebook.uri), runFile);
+					ThisExtension.log("Executing %run for '" + runUri + "' ...");
+					switch (runUri.scheme) {
+						case "dbws":
+							// we cannot use vscode.workspace.fs here as we need the SOURCE file and not the ipynb file 
+							commandText = Buffer.from(await DatabricksApiService.downloadWorkspaceItem(runUri.path, "SOURCE")).toString();
+							break;
+						case "file":
+							// %run is not aware of filetypes/extensions/langauges so we need to check which ones actually exist locally
+							let allFiles = await vscode.workspace.fs.readDirectory(FSHelper.parent(runUri));
+							let relevantFiles = allFiles.filter(x => x[0].startsWith(FSHelper.basename(runUri)));
+
+							if(relevantFiles.length == 1)
+							{
+								runUri = vscode.Uri.joinPath(FSHelper.parent(runUri), relevantFiles[0][0]);
+								commandText = Buffer.from(await vscode.workspace.fs.readFile(runUri)).toString();
+
+								if(FSHelper.extension(runUri) == ".ipynb")
+								{
+									let notebookJSON = JSON.parse(commandText);
+									let cells = notebookJSON["cells"];
+									cells = cells.filter(x => x["cell_type"] == "code"); // only take code cells
+
+									let commands: string[] = [];
+									for(let cell of cells)
+									{
+										commands.push(cell["source"].join("\n"));
+									}
+
+									commandText = commands.join("\n");
+								}
+							}
+							else{
+								throw vscode.FileSystemError.FileNotFound(runUri);
+							}
+							break;
+						default:
+							throw new Error("%run is not supported for FileSystem scheme '" + runUri.scheme + "'!");
+					}
+
+					ThisExtension.log("Finished getting actual code for %run '" + runUri + "' ...");
+					break;
+			}
+			let command = await DatabricksApiService.runCommand(context, commandText, language);
+			execution.token.onCancellationRequested(() => {
+				DatabricksApiService.cancelCommand(command);
+
 				execution.appendOutput(new vscode.NotebookCellOutput([
-					vscode.NotebookCellOutputItem.text("Magic %" + magic + " is not supported in remote executions!", 'text/plain')
+					vscode.NotebookCellOutputItem.text("Execution cancelled!", 'text/plain'),
 				]));
 
 				execution.end(false, Date.now());
 				return;
-		}
-		let command = await DatabricksApiService.runCommand(context, commandText, language);
-		execution.token.onCancellationRequested(() => {
-			DatabricksApiService.cancelCommand(command);
+			});
 
+			let result = await DatabricksApiService.getCommandResult(command, true, true);
+
+			if (result.results.resultType == "table") {
+				let data: Array<any> = [];
+				let html: string;
+
+				html = '<div style="height:300px;overflow:auto;resize:both;"><table style="width:100%" class="searchable sortable"><thead><tr>';
+
+				let schema = result.results.schema;
+
+				for (let col of schema) {
+					html += '<th>' + col.name + '</th>';
+				}
+
+				html += '</tr></thead><tbody>';
+
+				for (let row of result.results.data) {
+					let newRow = {};
+
+					html += '<tr>';
+					for (let i = 0; i < schema.length; i++) {
+						html += '<td>' + row[i] + '</td>';
+						newRow[schema[i].name] = row[i];
+					}
+					html += '</tr>';
+					data.push(newRow);
+				}
+
+				html += '</tbody></table></div>';
+
+				let output: vscode.NotebookCellOutput = new vscode.NotebookCellOutput([
+					vscode.NotebookCellOutputItem.text(html, 'text/html'),
+					vscode.NotebookCellOutputItem.json(data, 'application/json'), // to be used by proper JSON/table renderers
+					vscode.NotebookCellOutputItem.json(result.results, 'application/databricks-table') // the original result from databricks including schema and datatypes for more advanced renderers
+				])
+				output.metadata = { row_count: data.length, truncated: result.results.truncated };
+				execution.appendOutput(output);
+			}
+			else if (result.results.resultType == "text") {
+				let cellOutput = new vscode.NotebookCellOutput([]);
+				let textData: string = result.results.data as string
+				if (textData != '') {
+					cellOutput.items.push(vscode.NotebookCellOutputItem.text(result.results.data, 'text/plain'));
+				}
+				// check text output for most common HTML tags/snippets to optionally also render the output as HTML
+				if (textData.includes('<!DOCTYPE html>')
+					|| textData.includes('</html>')
+					|| textData.includes('</div>')
+					|| textData.includes('</table>')
+				) {
+					cellOutput.items.push(vscode.NotebookCellOutputItem.text((result.results.data as string).trim(), 'text/html'));
+				}
+
+				execution.appendOutput(cellOutput);
+			}
+			else if (result.results.resultType == "images") {
+				// add support for multiple images, each rendered as individual output
+				for (let fileName of result.results.fileNames) {
+					// we derive the mimeType from the actual file provided by Databricks and load the actual content from the base64 string
+					let mimeType: string = fileName.split(";")[0].split(":")[1];
+					let content: string = fileName.split(";", 2)[1];
+					execution.appendOutput(new vscode.NotebookCellOutput([
+						new vscode.NotebookCellOutputItem(Buffer.from(content.split(",")[1], (content.split(",")[0] as BufferEncoding)), mimeType),
+					]))
+				}
+			}
+			else if (result.results.resultType == "error") {
+				execution.appendOutput(new vscode.NotebookCellOutput([
+					vscode.NotebookCellOutputItem.text(result.results.summary, 'text/html')
+				]));
+
+				execution.appendOutput(new vscode.NotebookCellOutput([
+					vscode.NotebookCellOutputItem.error(new Error(result.results.cause)),
+				]));
+
+				execution.end(false, Date.now());
+				return;
+			}
+
+
+			if (["pip"].includes(magic)) {
+				await this.updateRepoContext(cell.notebook.uri);
+			}
+
+			execution.end(result.status == "Finished", Date.now());
+
+		} catch (error) {
 			execution.appendOutput(new vscode.NotebookCellOutput([
-				vscode.NotebookCellOutputItem.text("Execution cancelled!", 'text/plain'),
+				vscode.NotebookCellOutputItem.text(error, 'text/plain')
 			]));
 
 			execution.end(false, Date.now());
 			return;
-		});
-
-		let result = await DatabricksApiService.getCommandResult(command, true, true);
-
-		if (result.results.resultType == "table") {
-			let data: Array<any> = [];
-			let html: string;
-
-			html = '<div style="height:300px;overflow:auto;resize:both;"><table class="searchable sortable"><thead><tr>';
-
-			let schema = result.results.schema;
-
-			for (let col of schema) {
-				html += '<th>' + col.name + '</th>';
-			}
-
-			html += '</tr></thead><tbody>';
-
-			for (let row of result.results.data) {
-				let newRow = {};
-
-				html += '<tr>';
-				for (let i = 0; i < schema.length; i++) {
-					html += '<td>' + row[i] + '</td>';
-					newRow[schema[i].name] = row[i];
-				}
-				html += '</tr>';
-				data.push(newRow);
-			}
-
-			html += '</tbody></table></div>';
-
-			let output: vscode.NotebookCellOutput = new vscode.NotebookCellOutput([
-				vscode.NotebookCellOutputItem.text(html, 'text/html'),
-				vscode.NotebookCellOutputItem.json(data, 'application/json') // to be used by proper JSON/table renderers
-			])
-			output.metadata = { row_count: data.length, truncated: result.results.truncated };
-			execution.appendOutput(output);
 		}
-		else if (result.results.resultType == "text") {
-			let cellOutput = new vscode.NotebookCellOutput([]);
-			let textData: string = result.results.data as string
-			if (textData != '') {
-				cellOutput.items.push(vscode.NotebookCellOutputItem.text(result.results.data, 'text/plain'));
-			}
-			// check text output for most common HTML tags/snippets to optionally also render the output as HTML
-			if(textData.includes('<!DOCTYPE html>') 
-			|| textData.includes('</html>')
-			|| textData.includes('</div>')
-			|| textData.includes('</table>')
-			)
-			{
-				cellOutput.items.push(vscode.NotebookCellOutputItem.text((result.results.data as string).trim(), 'text/html'));
-			}
-
-			execution.appendOutput(cellOutput);
-		}
-		else if (result.results.resultType == "images") {
-			// add support for multiple images, each rendered as individual output
-			for (let fileName of result.results.fileNames) {
-				// we derive the mimeType from the actual file provided by Databricks and load the actual content from the base64 string
-				let mimeType: string = fileName.split(";")[0].split(":")[1];
-				let content: string = fileName.split(";", 2)[1];
-				execution.appendOutput(new vscode.NotebookCellOutput([
-					new vscode.NotebookCellOutputItem(Buffer.from(content.split(",")[1], (content.split(",")[0] as BufferEncoding)), mimeType),
-				]))
-			}
-		}
-		else if (result.results.resultType == "error") {
-			execution.appendOutput(new vscode.NotebookCellOutput([
-				vscode.NotebookCellOutputItem.text(result.results.summary, 'text/html')
-			]));
-
-			execution.appendOutput(new vscode.NotebookCellOutput([
-				vscode.NotebookCellOutputItem.error(new Error(result.results.cause)),
-			]));
-
-			execution.end(false, Date.now());
-		}
-
-
-		if(["pip"].includes(magic))
-		{
-			await this.updateRepoContext(cell.notebook.uri);
-		}
-
-		execution.end(result.status == "Finished", Date.now());
 	}
 }

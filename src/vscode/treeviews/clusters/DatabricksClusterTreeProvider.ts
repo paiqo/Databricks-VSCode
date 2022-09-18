@@ -15,7 +15,7 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 
 	constructor() { }
 
-	async autoRefresh(timeoutSeconds: number = 10) {
+	async autoRefresh(timeoutSeconds: number = 30) {
 		while (true) {
 			await new Promise(resolve => setTimeout(resolve, timeoutSeconds * 1000));
 

@@ -214,7 +214,7 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 	}
 
 	async createKernel(logMessages: boolean = true): Promise<void> {
-		DatabricksKernelManager.createKernel(this.definition, logMessages);
+		DatabricksKernelManager.createKernels(this.definition, logMessages);
 	}
 
 	async restartKernel(): Promise<void> {

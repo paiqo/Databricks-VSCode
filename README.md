@@ -54,6 +54,10 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 
 # Release Notes
 
+**v1.1.3:**
+- added support for `%run` in notebooks
+- added auto-refresh for new notebook kernels
+
 **v1.1.2:**
 - make [File System Integration](#file-system-integration) work without non-notebook files (e.g. Files in Repos)
 
