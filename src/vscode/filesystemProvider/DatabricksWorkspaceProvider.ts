@@ -144,11 +144,7 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 		let newInstance: DatabricksWorkspaceProviderItem = new DatabricksWorkspaceProviderItem();
 		if (source instanceof vscode.Uri) {
 			// VSCode always queries for some internal files on every filesystem ?!
-			if (source.path.startsWith("/.vscode")
-				|| source.path.startsWith("/.git")
-				|| source.path == "/pom.xml"
-				|| source.path == "/node_modules"
-				|| source.path.endsWith("AndroidManifest.xml")) {
+			if (FSHelper.isVSCodeInternalURI(source)) {
 				return undefined;
 			}
 			newInstance.mapper = LanguageFileExtensionMapper.fromUri(source);

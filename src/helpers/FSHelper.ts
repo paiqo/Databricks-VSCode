@@ -82,4 +82,15 @@ export abstract class FSHelper {
 		return this.SEPARATOR + items.join(this.SEPARATOR);
 	}
 
+	static isVSCodeInternalURI(uri: vscode.Uri): boolean {
+		if (uri.path.startsWith("/.vscode")
+			|| uri.path.startsWith("/.git")
+			|| uri.path == "/pom.xml"
+			|| uri.path == "/node_modules"
+			|| uri.path.endsWith("AndroidManifest.xml")) {
+			return true;
+		}
+		return false;
+	}
+
 }

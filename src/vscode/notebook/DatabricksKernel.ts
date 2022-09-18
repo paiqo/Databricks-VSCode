@@ -237,37 +237,39 @@ export class DatabricksKernel implements vscode.NotebookController {
 							let allFiles = await vscode.workspace.fs.readDirectory(FSHelper.parent(runUri));
 							let relevantFiles = allFiles.filter(x => x[0].startsWith(FSHelper.basename(runUri)));
 
-							if(relevantFiles.length == 1)
-							{
+							if (relevantFiles.length == 1) {
 								runUri = vscode.Uri.joinPath(FSHelper.parent(runUri), relevantFiles[0][0]);
 								commandText = Buffer.from(await vscode.workspace.fs.readFile(runUri)).toString();
 
-								if(FSHelper.extension(runUri) == ".ipynb")
-								{
+								if (FSHelper.extension(runUri) == ".ipynb") {
 									let notebookJSON = JSON.parse(commandText);
 									let cells = notebookJSON["cells"];
 									cells = cells.filter(x => x["cell_type"] == "code"); // only take code cells
 
 									let commands: string[] = [];
-									for(let cell of cells)
-									{
+									for (let cell of cells) {
 										commands.push(cell["source"].join("\n"));
 									}
 
 									commandText = commands.join("\n");
 								}
 							}
-							else{
+							else {
 								throw vscode.FileSystemError.FileNotFound(runUri);
 							}
 							break;
 						default:
 							throw new Error("%run is not supported for FileSystem scheme '" + runUri.scheme + "'!");
 					}
+					let outputRun: vscode.NotebookCellOutput = new vscode.NotebookCellOutput([
+						vscode.NotebookCellOutputItem.text(commandText, 'text/plain')
+					])
 
+					execution.appendOutput(outputRun);
 					ThisExtension.log("Finished getting actual code for %run '" + runUri + "' ...");
 					break;
 			}
+			
 			let command = await DatabricksApiService.runCommand(context, commandText, language);
 			execution.token.onCancellationRequested(() => {
 				DatabricksApiService.cancelCommand(command);

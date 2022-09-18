@@ -13,6 +13,12 @@ export class DatabricksFileSystemProvider implements vscode.FileSystemProvider {
 	// --- manage file metadata
 
 	async stat(uri: vscode.Uri): Promise<vscode.FileStat> {
+		// VSCode always queries for some internal files on every filesystem ?!
+		if(FSHelper.isVSCodeInternalURI(uri))
+		{
+			throw vscode.FileSystemError.FileNotFound(uri);
+		}
+
 		const entry: iDatabricksFSItem = await DatabricksApiService.getDBFSItem(uri.path);
 		if (!entry) {
 			throw vscode.FileSystemError.FileNotFound(uri);
@@ -38,7 +44,13 @@ export class DatabricksFileSystemProvider implements vscode.FileSystemProvider {
 	// --- manage file contents
 
 	async readFile(uri: vscode.Uri): Promise<Uint8Array> {
-		let dbfsItem: iDatabricksFSItem = await DatabricksApiService.getDBFSItem(uri.path);
+		// VSCode always queries for some internal files on every filesystem ?!
+		if(FSHelper.isVSCodeInternalURI(uri))
+		{
+			throw vscode.FileSystemError.FileNotFound(uri);
+		}
+
+		const dbfsItem: iDatabricksFSItem = await DatabricksApiService.getDBFSItem(uri.path);
 
 		if (!dbfsItem) {
 			throw vscode.FileSystemError.FileNotFound(uri);
@@ -73,7 +85,7 @@ export class DatabricksFileSystemProvider implements vscode.FileSystemProvider {
 	}
 
 	async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
-		let dbfsItem: iDatabricksFSItem = await DatabricksApiService.getDBFSItem(uri.path);
+		const dbfsItem: iDatabricksFSItem = await DatabricksApiService.getDBFSItem(uri.path);
 
 		if (dbfsItem && dbfsItem.is_dir) {
 			throw vscode.FileSystemError.FileIsADirectory(uri);
