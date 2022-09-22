@@ -8,6 +8,7 @@ import { DatabricksApiService } from '../../../databricksApi/databricksApiServic
 import { DatabricksJobTreeItem } from './DatabricksJobTreeItem';
 import { DatabricksJobRun } from './DatabricksJobRun';
 import { iDatabricksJob } from './iDatabricksJob';
+import { FSHelper } from '../../../helpers/FSHelper';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksJob extends DatabricksJobTreeItem {
@@ -71,7 +72,7 @@ export class DatabricksJob extends DatabricksJobTreeItem {
 
 	get link(): string {
 		let actConn = ThisExtension.ActiveConnection;
-		let link: string = `${actConn.apiRootUrl}/?#job/${this.job_id}`;
+		let link: string = Helper.trimChar(FSHelper.join(actConn.apiRootUrl, "?#job", this.job_id.toString()), '/');
 		
 		return link;
 	}

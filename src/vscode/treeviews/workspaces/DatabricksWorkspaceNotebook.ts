@@ -215,7 +215,8 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 				localPath = vscode.Uri.file(this.localFolderPath + "/" + this.label + this.localFileExtension);
 			}
 
-			let response = await DatabricksApiService.downloadWorkspaceItemToFile(this.path, localPath, this.exportFormat);
+			await DatabricksApiService.downloadWorkspaceItemToFile(this.path, localPath, this.exportFormat);
+			this._localPath = localPath;
 
 			Helper.showTemporaryInformationMessage(`Download of item ${FSHelper.basename(localPath)} finished!`);
 
@@ -275,9 +276,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 	}
 
 	async compare(): Promise<void> {
-		// todo enable again once the File System API for Databricks Workspace was added!
-		throw Error("Compare is currently disabled!");
-		let onlineFileTempPath: vscode.Uri = await this.download();
+		let onlineFileTempPath: vscode.Uri = vscode.Uri.parse("dbws:" + this.path);
 
 		Helper.showDiff(onlineFileTempPath, this.localPath);
 	}

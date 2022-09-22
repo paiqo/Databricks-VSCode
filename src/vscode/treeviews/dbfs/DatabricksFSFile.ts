@@ -164,6 +164,7 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 			}
 
 			await DatabricksApiService.downloadDBFSFile(this.path, localPath, true);
+			this._localPath = localPath;
 
 			Helper.showTemporaryInformationMessage(`Download of DBFS item ${this.path} to '${localPath}' finished!`);
 

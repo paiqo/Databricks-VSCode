@@ -77,7 +77,7 @@ export abstract class FSHelper {
 			items.push(Helper.trimChar(path, this.SEPARATOR))
 		}
 
-		items = items.filter(x => x);
+		items = items.filter(x => x); // filters out items that would be undefined/null/empty etc.
 
 		return this.SEPARATOR + items.join(this.SEPARATOR);
 	}
