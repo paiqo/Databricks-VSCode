@@ -43,7 +43,7 @@ export class DatabricksRepoDirectory extends DatabricksRepoTreeItem {
 		let repoItems: DatabricksRepoTreeItem[] = [];
 
 		if (responseData != undefined) {
-			responseData.repos.map(item => repoItems.push(new DatabricksRepoRepository(item, this)));
+			responseData.map(item => repoItems.push(new DatabricksRepoRepository(item, this)));
 			Helper.sortArrayByProperty(repoItems, "label", "ASC");
 		}
 		

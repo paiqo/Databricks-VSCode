@@ -193,8 +193,7 @@ export abstract class DatabricksApiService {
 			}
 		}
 
-		if(raise)
-		{
+		if (raise) {
 			throw error;
 		}
 	}
@@ -879,26 +878,37 @@ export abstract class DatabricksApiService {
 	//#endregion
 
 	//#region Repos API (v2.0)
-	static async listRepos(path_prefix: string = undefined): Promise<iDatabricksRepoResponse> {
+	static async listRepos(path_prefix: string = undefined): Promise<iDatabricksRepo[]> {
 		let endpoint = '2.0/repos';
 
 		let body: any = {};
 		if (path_prefix != undefined) {
 			if (!path_prefix.startsWith("/Repos/")) {
-				path_prefix = "/Repos/" + path_prefix;
+				path_prefix = FSHelper.join("Repos", path_prefix);
 			}
 			body.path_prefix = path_prefix;
 		}
 
-		let response = await this.get(endpoint, { params: body });
+		let result: any = undefined;
+		let repos: iDatabricksRepo[] = [];
+		do {
+			let response = await this.get(endpoint, { params: body });
 
-		let result = response.data as iDatabricksRepoResponse;
+			result = response.data as iDatabricksRepoResponse;
 
-		if (result == undefined) {
-			return { repos: [] };
-		}
+			if (result == undefined) {
+				return [];
+			}
 
-		return result;
+			repos = repos.concat(result.repos);
+
+			if (result.next_page_token) {
+				ThisExtension.log("Getting next page of Repos ...")
+				body.next_page_token = result.next_page_token
+			}
+		} while (result.next_page_token)
+
+		return repos;
 	}
 
 	static async updateRepo(repo_id: number, branch: string = undefined, tag: string = undefined): Promise<iDatabricksRepo> {
@@ -911,8 +921,7 @@ export abstract class DatabricksApiService {
 		else if (tag != undefined) {
 			body.tag = tag;
 		}
-		else
-		{
+		else {
 			throw Error("Parameter <branch> or <tag> need to be provided when calling updateRep()!");
 		}
 

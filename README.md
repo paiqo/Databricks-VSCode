@@ -54,6 +54,12 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 
 # Release Notes
 
+**v1.1.4:**
+- fixed some issues with legacy DBFS and Workspace browser
+- fixed an issue with workspace browser file compare
+- fixed an issue when opening a job in the browser
+- fixed issue where Repo Manager did not use pagination of the API and hence did not show more than 20 entries
+
 **v1.1.3:**
 - added support for `%run` in notebooks
 - added auto-refresh for new notebook kernels

@@ -51,7 +51,7 @@ export class DatabricksRepoTreeProvider implements vscode.TreeDataProvider<Datab
 			let repoItems: DatabricksRepoTreeItem[] = [];
 
 			if (responseData != undefined) {
-				responseData.repos.map(item => directories.push(item.path.split("/")[2]));
+				responseData.map(item => directories.push(item.path.split("/")[2]));
 				directories = Array.from(new Set(directories));
 				directories.map(item => repoItems.push(new DatabricksRepoDirectory(item)));
 				Helper.sortArrayByProperty(repoItems, "label", "ASC");
