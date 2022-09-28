@@ -171,12 +171,15 @@ export class DatabricksKernel implements vscode.NotebookController {
 		}
 	}
 
-	private parseCommand(cmd: string): [ContextLanguage, string, NotebookMagic] {
+	private parseCommand(cell: vscode.NotebookCell): [ContextLanguage, string, NotebookMagic] {
+		let cmd: string = cell.document.getText();
+		let magicText: string = undefined;
+		let commandText: string = cmd;
+		let language: ContextLanguage = this.Language;
 		if (cmd[0] == "%") {
 			let lines = cmd.split('\n');
-			let magicText = lines[0].split(" ")[0].slice(1).trim();
-			let commandText = lines.slice(1).join('\n');
-			let language: ContextLanguage = this.Language;
+			magicText = lines[0].split(" ")[0].slice(1).trim();
+			commandText = lines.slice(1).join('\n');
 			if (["python", "sql", "scala", "r"].includes(magicText)) {
 				language = magicText as ContextLanguage;
 			}
@@ -185,10 +188,11 @@ export class DatabricksKernel implements vscode.NotebookController {
 				language = "python";
 				commandText = cmd;
 			}
-
-			return [language, commandText, magicText as NotebookMagic];
 		}
-		return [this.Language, cmd, undefined];
+
+		commandText = commandText.replace(/dbutils\.notebook\.run\((["'])\./gm, "dbutils.notebook.run($1" + FSHelper.parent(cell.notebook.uri).path);
+
+		return [language, commandText, magicText as NotebookMagic];
 	}
 
 	private async _doExecution(cell: vscode.NotebookCell, context: ExecutionContext): Promise<void> {
@@ -203,7 +207,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 			let language: ContextLanguage = null;
 			let magic: NotebookMagic = null;
 
-			[language, commandText, magic] = this.parseCommand(commandText);
+			[language, commandText, magic] = this.parseCommand(cell);
 
 			ThisExtension.log("Executing " + language + ":\n" + commandText);
 

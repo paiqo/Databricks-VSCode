@@ -55,6 +55,7 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 # Release Notes
 
 **v1.1.4:**
+- added support for `dbutils.notebook.run` in Live-mode (via mounting `dbws:/...` in VSCode workspace)
 - fixed some issues with legacy DBFS and Workspace browser
 - fixed an issue with workspace browser file compare
 - fixed an issue when opening a job in the browser
