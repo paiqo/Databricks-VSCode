@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
 
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { ThisExtension } from '../../../ThisExtension';
 import { iDatabricksCluster } from './iDatabricksCluster';
 import { DatabricksClusterTreeItem } from './DatabricksClusterTreeItem';
 import { DatabricksCluster } from './DatabricksCluster';
+import { FSHelper } from '../../../helpers/FSHelper';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksClusterJobClusters extends DatabricksClusterTreeItem {
@@ -19,8 +19,8 @@ export class DatabricksClusterJobClusters extends DatabricksClusterTreeItem {
 		};
 	}
 
-	private getIconPath(theme: string): string {
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, "workspace", "directory" + '.png');
+	private getIconPath(theme: string): vscode.Uri {
+		return FSHelper.joinPathSync(ThisExtension.rootPath, 'resources', theme, "workspace", "directory" + '.png');
 	}
 
 	async getChildren(): Promise<DatabricksClusterTreeItem[]> {

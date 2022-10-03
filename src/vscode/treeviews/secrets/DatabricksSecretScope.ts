@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
 
 import { ThisExtension } from '../../../ThisExtension';
 import { Helper } from '../../../helpers/Helper';
@@ -9,6 +8,7 @@ import { iDatabricksSecretScope } from './iDatabricksSecretScope';
 import { DatabricksSecretTreeItem } from './DatabricksSecretTreeItem';
 import { DatabricksSecret } from './DatabricksSecret';
 import { iDatabricksSecret } from './iDatabricksSecret';
+import { FSHelper } from '../../../helpers/FSHelper';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksSecretScope extends DatabricksSecretTreeItem {
@@ -43,8 +43,8 @@ export class DatabricksSecretScope extends DatabricksSecretTreeItem {
 		return "";
 	}
 
-	private getIconPath(theme: string): string {
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, 'workspace', 'directory' + '.png');
+	private getIconPath(theme: string): vscode.Uri {
+		return FSHelper.joinPathSync(ThisExtension.rootPath, 'resources', theme, 'workspace', 'directory' + '.png');
 	}
 
 	get Scope(): string {

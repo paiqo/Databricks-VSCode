@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
 
 import { WorkspaceItemExportFormat, WorkspaceItemLanguage, WorkspaceItemType } from './_types';
 import { iDatabricksWorkspaceItem } from './iDatabricksworkspaceItem';
@@ -143,8 +142,8 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 		}
 	};
 
-	get localFolderPath(): string {
-		return fspath.join(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.SubfolderConfiguration().Workspace, fspath.dirname(this.path));
+	get localFolderPath(): vscode.Uri {
+		return FSHelper.parent(FSHelper.joinPathSync(vscode.Uri.file(ThisExtension.ActiveConnection.localSyncFolder), ThisExtension.ConnectionManager.SubfolderConfiguration().Workspace));
 	}
 
 	get localPath(): vscode.Uri {

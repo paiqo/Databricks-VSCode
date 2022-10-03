@@ -8,7 +8,6 @@ import { LanguageFileExtensionMapper } from './LanguageFileExtensionMapper';
 import { DatabricksWorkspaceTreeItem } from './DatabricksWorkspaceTreeItem';
 import { DatabricksWorkspaceLibrary } from './DatabricksWorkspaceLibrary';
 import { DatabricksWorkspaceNotebook } from './DatabricksWorkspaceNotebook';
-
 import { DatabricksWorkspaceFile } from './DatabricksWorkspaceFile';
 import { FSHelper } from '../../../helpers/FSHelper';
 

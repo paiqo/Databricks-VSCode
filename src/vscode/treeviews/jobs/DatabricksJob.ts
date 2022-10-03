@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
 
 import { ThisExtension } from '../../../ThisExtension';
 import { Helper } from '../../../helpers/Helper';
@@ -47,10 +46,10 @@ export class DatabricksJob extends DatabricksJobTreeItem {
 		return this.type;
 	}
 
-	protected  getIconPath(theme: string): string {
+	protected  getIconPath(theme: string): vscode.Uri {
 		let state: string = "job";
 
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, state + '.png');
+		return FSHelper.joinPathSync(ThisExtension.rootPath, 'resources', theme, state + '.png');
 	}
 
 	readonly command = {

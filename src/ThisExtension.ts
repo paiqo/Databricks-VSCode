@@ -22,8 +22,8 @@ export abstract class ThisExtension {
 	private static _sqlClusterId: string;
 	
 
-	static get rootPath(): string {
-		return this._context.extensionPath;
+	static get rootPath(): vscode.Uri {
+		return vscode.Uri.file(this._context.extensionPath);
 	}
 
 	static get rootUri(): vscode.Uri {

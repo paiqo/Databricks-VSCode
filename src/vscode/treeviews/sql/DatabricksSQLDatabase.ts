@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+
 import { DatabricksSQLTreeItem } from './DatabricksSQLTreeItem';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { ExecutionContext } from '../../../databricksApi/_types';

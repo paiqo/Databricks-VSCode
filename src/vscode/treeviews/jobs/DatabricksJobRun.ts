@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
 
 import { ThisExtension } from '../../../ThisExtension';
 import { Helper } from '../../../helpers/Helper';
@@ -7,6 +6,7 @@ import { Helper } from '../../../helpers/Helper';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { DatabricksJobTreeItem } from './DatabricksJobTreeItem';
 import { iDatabricksJobRun } from './iDatabricksJobRun';
+import { FSHelper } from '../../../helpers/FSHelper';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksJobRun extends DatabricksJobTreeItem {
@@ -64,10 +64,10 @@ export class DatabricksJobRun extends DatabricksJobTreeItem {
 		return this.type;
 	}
 
-	protected getIconPath(theme: string): string {
+	protected getIconPath(theme: string): vscode.Uri {
 		let state: string = this.state;
 
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, state + '.png');
+		return FSHelper.joinPathSync(ThisExtension.rootPath, 'resources', theme, state + '.png');
 	}
 
 	readonly command = {

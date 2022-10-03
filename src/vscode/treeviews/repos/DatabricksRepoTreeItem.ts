@@ -1,9 +1,6 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
-import { iDatabricksRepo, RepoProvider } from './_types';
-import { Helper } from '../../../helpers/Helper';
-import { ThisExtension } from '../../../ThisExtension';
-import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
+
+import { iDatabricksRepo } from './_types';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html

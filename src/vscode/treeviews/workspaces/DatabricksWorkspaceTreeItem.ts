@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { WorkspaceItemType, WorkspaceItemLanguage } from './_types';
+import { WorkspaceItemType } from './_types';
 import { iDatabricksWorkspaceItem } from './iDatabricksworkspaceItem';
 import { ThisExtension } from '../../../ThisExtension';
 

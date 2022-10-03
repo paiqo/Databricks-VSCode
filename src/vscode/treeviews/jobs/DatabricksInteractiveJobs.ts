@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
+
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { ThisExtension } from '../../../ThisExtension';
 import { Helper } from '../../../helpers/Helper';
 import { DatabricksJobTreeItem } from './DatabricksJobTreeItem';
 import { DatabricksJobRun } from './DatabricksJobRun';
+import { FSHelper } from '../../../helpers/FSHelper';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksInteractiveJobs extends DatabricksJobTreeItem {
@@ -25,10 +26,8 @@ export class DatabricksInteractiveJobs extends DatabricksJobTreeItem {
 		super.contextValue = "INTERACTIVE_JOBS";
 	}
 
-	protected  getIconPath(theme: string): string {
-		let state: string = "job";
-
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, 'workspace', 'directory' + '.png');
+	protected  getIconPath(theme: string): vscode.Uri {
+		return FSHelper.joinPathSync(ThisExtension.rootPath, 'resources', theme, 'workspace', 'directory' + '.png');
 	}
 
 	readonly command = null;

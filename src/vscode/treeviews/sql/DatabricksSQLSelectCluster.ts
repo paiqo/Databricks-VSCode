@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
+
 import { DatabricksSQLTreeItem } from './DatabricksSQLTreeItem';
-import { ThisExtension } from '../../../ThisExtension';
 import { SQLItemType } from './_types';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html

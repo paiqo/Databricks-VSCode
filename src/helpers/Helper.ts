@@ -5,9 +5,9 @@
 
 import * as vscode from 'vscode';
 import * as os from 'os';
-import * as fspath from 'path';
-import * as fs from 'fs';
+
 import { ThisExtension } from '../ThisExtension';
+import { FSHelper } from './FSHelper';
 
 export abstract class Helper {
 	private static CodeCellTag: string = "# %% Code Cell";
@@ -129,12 +129,12 @@ export abstract class Helper {
 	
 
 	static ensureLocalFolder(path: string, pathIsFile: boolean = false): void {
-		let folder = path;
+		let folder: vscode.Uri = vscode.Uri.file(path);
 		if (pathIsFile) {
-			folder = fspath.dirname(path);
+			folder = FSHelper.parent(folder);
 		}
-		if (!fs.existsSync(folder)) {
-			fs.mkdirSync(folder, { recursive: true });
+		if (!FSHelper.pathExists(folder)) {
+			vscode.workspace.fs.createDirectory(folder);
 		}
 	}
 
@@ -304,8 +304,8 @@ export abstract class Helper {
 		return null;
 	}
 
-	static getUserDir(): string {
-		return os.homedir();
+	static getUserDir(): vscode.Uri {
+		return vscode.Uri.file(os.homedir());
 	}
 
 	static parseBoolean(value: string): boolean {

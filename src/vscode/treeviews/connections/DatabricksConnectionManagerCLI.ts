@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
-import * as fs from 'fs';
+
 import * as os from 'os';
 import { ExportFormatsConfiguration, ThisExtension, LocalSyncSubfolderConfiguration } from '../../../ThisExtension';
 import { iDatabricksConnection } from './iDatabricksConnection';
 import { DatabricksConnectionManager } from './DatabricksConnectionManager';
 import { DatabricksConnectionTreeItem } from './DatabricksConnectionTreeItem';
 import { Helper } from '../../../helpers/Helper';
+import { FSHelper } from '../../../helpers/FSHelper';
 
 export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager {
 
@@ -48,15 +48,19 @@ export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager 
 		}
 	}
 
-	loadConnections(): void {
-		let configFile = process.env.DATABRICKS_CONFIG_FILE;
-
-		if (configFile == undefined) {
-			configFile = fspath.join(Helper.getUserDir(), ".databrickscfg");
+	async loadConnections(): Promise<void> {
+		let configFileEnv = process.env.DATABRICKS_CONFIG_FILE;
+		let configFile: vscode.Uri;
+		if (configFileEnv == undefined) {
+			configFile = FSHelper.joinPathSync(Helper.getUserDir(), ".databrickscfg");
+		}
+		else
+		{
+			configFile = vscode.Uri.file(configFileEnv)
 		}
 
 		try {
-			var data = fs.readFileSync(configFile, 'utf8');
+			var data = Buffer.from(await vscode.workspace.fs.readFile(configFile)).toString('utf8');
 
 			this._connections = [];
 			let connectionParameters: iDatabricksConnection = undefined;
@@ -78,7 +82,7 @@ export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager 
 						displayName: Helper.getFirstRegexGroup(/\[([^\]]*)\]/gm, line),
 						personalAccessToken: undefined, // mandatory in CLI config
 						apiRootUrl: undefined, // mandatory in CLI config
-						localSyncFolder: fspath.join(Helper.getUserDir(), "DatabricksSync", Helper.getFirstRegexGroup(/\[([^\]]*)\]/gm, line)),
+						localSyncFolder: await FSHelper.joinPath(Helper.getUserDir(), "DatabricksSync", Helper.getFirstRegexGroup(/\[([^\]]*)\]/gm, line)),
 						_source: "CLI-profile"
 					};
 				}

@@ -1,10 +1,6 @@
 import * as vscode from 'vscode';
-import { SQLItemType } from './_types';
-import { Helper } from '../../../helpers/Helper';
-import { DatabricksSQLDatabase } from './DatabricksSQLDatabase';
+
 import { DatabricksSQLTreeItem } from './DatabricksSQLTreeItem';
-import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
-import { ThisExtension } from '../../../ThisExtension';
 import { ExecutionContext } from '../../../databricksApi/_types';
 import { iSQLTableColumn } from './iSQLTableDetails';
 

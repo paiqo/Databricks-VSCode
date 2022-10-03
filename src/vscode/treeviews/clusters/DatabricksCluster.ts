@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { ThisExtension } from '../../../ThisExtension';
 import { ClusterState, ClusterSource } from './_types';
@@ -8,6 +7,7 @@ import { Helper } from '../../../helpers/Helper';
 import { DatabricksKernel } from '../../notebook/DatabricksKernel';
 import { DatabricksClusterTreeItem } from './DatabricksClusterTreeItem';
 import { DatabricksKernelManager } from '../../notebook/DatabricksKernelManager';
+import { FSHelper } from '../../../helpers/FSHelper';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksCluster extends DatabricksClusterTreeItem {
@@ -94,12 +94,12 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 		return "," + states.join(",") + ",";
 	}
 
-	private getIconPath(theme: string): string {
+	private getIconPath(theme: string): vscode.Uri {
 		let state = (this.contextValue.includes("STOPPED") ? 'stop' : 'start');
 		if (this.state == "PENDING") {
 			state = "pending";
 		}
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, state + '.png');
+		return FSHelper.joinPathSync(ThisExtension.rootPath, 'resources', theme, state + '.png');
 	}
 
 	readonly command = {

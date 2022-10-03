@@ -44,6 +44,10 @@ export abstract class FSHelper {
 		return vscode.Uri.joinPath(base, ...pathSegments)
 	}
 
+	static joinPathSync(base: vscode.Uri, ...pathSegments: string[]): vscode.Uri {
+		return vscode.Uri.joinPath(base, ...pathSegments)
+	}
+
 	static basename(uri: vscode.Uri): string {
 		return Helper.getToken(uri.path, this.SEPARATOR, -1);
 	}

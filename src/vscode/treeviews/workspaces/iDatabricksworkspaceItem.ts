@@ -1,4 +1,4 @@
-import { WorkspaceItemExportFormat, WorkspaceItemLanguage, WorkspaceItemType } from './_types';
+import { WorkspaceItemLanguage, WorkspaceItemType } from './_types';
 
 export interface iDatabricksWorkspaceItem {
 	path: string;

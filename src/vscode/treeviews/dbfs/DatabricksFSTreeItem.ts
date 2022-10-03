@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
+
 import { ThisExtension } from '../../../ThisExtension';
 import { iDatabricksFSItem } from './iDatabricksFSItem';
 import { DatabricksFSDirectory } from './DatabricksFSDirectory';
-import { DatabricksFSFile } from './DatabricksFSFile';
+import { FSHelper } from '../../../helpers/FSHelper';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -52,9 +52,9 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		}
 	}
 
-	protected getIconPath(theme: string): string {
+	protected getIconPath(theme: string): vscode.Uri {
 		let itemType = (this.is_dir ? 'directory' : 'notebook');
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, 'workspace', itemType + '.png');
+		return FSHelper.joinPathSync(ThisExtension.rootPath, 'resources', theme, 'workspace', itemType + '.png');
 	}
 
 	readonly command = null;

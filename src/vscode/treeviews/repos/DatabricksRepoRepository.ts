@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
+
 import { iDatabricksRepo, RepoProvider } from './_types';
 import { Helper } from '../../../helpers/Helper';
 import { ThisExtension } from '../../../ThisExtension';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { DatabricksRepoTreeItem } from './DatabricksRepoTreeItem';
+import { FSHelper } from '../../../helpers/FSHelper';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -63,8 +64,8 @@ export class DatabricksRepoRepository extends DatabricksRepoTreeItem {
 		return "REPOSITORY";
 	}
 
-	protected getIconPath(theme: string): string {
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, 'repos', 'repo.png');
+	protected getIconPath(theme: string): vscode.Uri {
+		return FSHelper.joinPathSync(ThisExtension.rootPath, 'resources', theme, 'repos', 'repo.png');
 	}
 
 	public async getChildren(): Promise<DatabricksRepoTreeItem[]> {

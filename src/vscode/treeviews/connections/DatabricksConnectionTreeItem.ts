@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
+
 import { ThisExtension, ExportFormatsConfiguration, LocalSyncSubfolderConfiguration } from '../../../ThisExtension';
 import { CloudProvider, AccessTokenSecure, ConnectionSource, SensitiveValueStore } from './_types';
 import { iDatabricksConnection } from './iDatabricksConnection';
 import { Helper } from '../../../helpers/Helper';
-import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
+import { FSHelper } from '../../../helpers/FSHelper';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -84,9 +84,9 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		return 'INACTIVE';
 	}
 
-	private getIconPath(theme: string): string {
+	private getIconPath(theme: string): vscode.Uri {
 		let state = this.isActive ? 'connected' : 'disconnected';
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, state + '.png');
+		return FSHelper.joinPathSync(ThisExtension.rootPath, 'resources', theme, state + '.png');
 	}
 
 

@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+
 import { DatabricksWorkspaceTreeItem } from './DatabricksWorkspaceTreeItem';
 import { DatabricksWorkspaceDirectory } from './DatabricksWorkspaceDirectory';
 import { ThisExtension } from '../../../ThisExtension';
