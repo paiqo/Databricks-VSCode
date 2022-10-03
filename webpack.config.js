@@ -16,7 +16,7 @@ const webConfig = /** @type WebpackConfig */ {
         "extension-web": "./src/extension.ts" // source of the web extension main file
     },
     output: {
-        filename: "browser.js",
+        filename: "extension.js",
         path: path.join(__dirname, "./dist/web"),
         libraryTarget: "commonjs",
     },
@@ -69,7 +69,7 @@ const nodeConfig = {
     entry: './src/extension.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
     output: {
         // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
-        path: path.join(__dirname, "./dist/desktop"),
+        path: path.join(__dirname, "./dist/node"),
         filename: 'extension.js',
         libraryTarget: 'commonjs2'
     },

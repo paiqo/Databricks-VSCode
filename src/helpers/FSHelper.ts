@@ -97,4 +97,48 @@ export abstract class FSHelper {
 		return false;
 	}
 
+	static resolvePath(path: string | vscode.Uri): vscode.Uri {
+		let uri: vscode.Uri;
+
+		if (typeof (path) == "string") {
+				uri = vscode.Uri.file(path);
+			}
+		else
+		{
+			uri = path;
+		}
+		// replace environment variables in path
+		const envVarRegex = /\$([A-Z_]+[A-Z0-9_]*)|\${([A-Z0-9_]*)}|%([^%]+)%/ig;
+
+		do {
+			uri = uri.with({path: uri.path.replace(envVarRegex, (_, a, b, c) => process.env[a || b || c])}) ;
+		} while(uri.path.match(envVarRegex));
+
+		if (uri.path[0] === '~') {
+			uri = FSHelper.joinPathSync(this.getUserDir(), uri.path.slice(1));
+		}
+		
+		return uri;
+
+		/*
+		Migrate to Portable mode
+		You can also migrate an existing installation to Portable mode:
+
+		Download the VS Code ZIP distribution for your platform.
+		Create the data or code-portable-data folder as above.
+		Copy the user data directory Code to data and rename it to user-data:
+		Windows %APPDATA%\Code
+		macOS $HOME/Library/Application Support/Code
+		Linux $HOME/.config/Code
+		Copy the extensions directory to data:
+		Windows %USERPROFILE%\.vscode\extensions
+		macOS ~/.vscode/extensions
+		Linux ~/.vscode/extensions
+		*/
+	}
+
+	static getUserDir(): vscode.Uri {
+		const homeVar: string = process.platform === 'win32' ? 'USERPROFILE' : 'HOME';
+		return vscode.Uri.file(process.env[homeVar]);
+	}
 }

@@ -160,7 +160,7 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 				localPath = this.localPath;
 			}
 			else {
-				localPath = vscode.Uri.joinPath(vscode.Uri.file(ThisExtension.ActiveConnection.localSyncFolder), ThisExtension.ConnectionManager.SubfolderConfiguration().DBFS, this.path);
+				localPath = vscode.Uri.joinPath(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.SubfolderConfiguration().DBFS, this.path);
 			}
 
 			await DatabricksApiService.downloadDBFSFile(this.path, localPath, true);

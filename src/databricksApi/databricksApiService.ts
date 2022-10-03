@@ -40,7 +40,7 @@ export abstract class DatabricksApiService {
 				httpsAgent: new httpsAgent({
 					rejectUnauthorized: ThisExtension.rejectUnauthorizedSSL
 				}),
-				baseURL: Helper.trimChar(con.apiRootUrl, '/') + this.API_SUB_URL,
+				baseURL: Helper.trimChar(con.apiRootUrl.toString(true), '/') + this.API_SUB_URL,
 				proxy: ThisExtension.useProxy
 			});
 
@@ -402,6 +402,11 @@ export abstract class DatabricksApiService {
 	}
 
 	static async uploadWorkspaceItemFromFile(localPath: vscode.Uri, path: string, language: WorkspaceItemLanguage, overwrite: boolean = true, format: WorkspaceItemExportFormat = "SOURCE"): Promise<void> {
+		// make sure the folder exists
+		let pathItems = path.split('/');
+		const fileName = pathItems.pop();
+		await this.createWorkspaceFolder(pathItems.join("/"))
+		
 		let endpoint = '2.0/workspace/import';
 		let body = {
 			content: await this.readBase64FromFile(localPath),

@@ -3,7 +3,6 @@ import * as vscode from 'vscode';
 import { ThisExtension, ExportFormatsConfiguration, LocalSyncSubfolderConfiguration } from '../../../ThisExtension';
 import { CloudProvider, AccessTokenSecure, ConnectionSource, SensitiveValueStore } from './_types';
 import { iDatabricksConnection } from './iDatabricksConnection';
-import { Helper } from '../../../helpers/Helper';
 import { FSHelper } from '../../../helpers/FSHelper';
 
 
@@ -11,8 +10,8 @@ import { FSHelper } from '../../../helpers/FSHelper';
 export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDatabricksConnection {
 	_displayName: string;
 	_personalAccessToken: string;
-	_apiRootUrl: string;
-	_localSyncFolder: string;
+	_apiRootUrl: vscode.Uri;
+	_localSyncFolder: vscode.Uri;
 	_localSyncSubfolders: LocalSyncSubfolderConfiguration;
 	_isActive: boolean;
 	_exportFormats: ExportFormatsConfiguration;
@@ -33,8 +32,8 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		this._displayName = definition.displayName;
 		this._personalAccessToken = definition.personalAccessToken;
 		this._personalAccessTokenSecure = definition.personalAccessTokenSecure;
-		this._apiRootUrl = Helper.trimChar(definition.apiRootUrl, '/', false, true);
-		this._localSyncFolder = Helper.resolvePath(definition.localSyncFolder);
+		this._apiRootUrl = definition.apiRootUrl;
+		this._localSyncFolder = FSHelper.resolvePath(definition.localSyncFolder);
 		this._localSyncSubfolders = definition.localSyncSubfolders;
 		this._exportFormats = definition.exportFormats;
 		this._useCodeCells = definition.useCodeCells;
@@ -59,20 +58,20 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 
 	//tooltip = this._tooltip;
 	private get _tooltip(): string {
-		return  `Host: ${this.apiRootUrl}\n` + 
-				`CloudProvider: ${this.cloudProvider}\n` + 
-				`LocalSyncFolder: ${this.localSyncFolder}\n` + 
-				`LocalSyncSubFolders: ${JSON.stringify(this.localSyncSubfolders)}\n` + 
-				`ExportFormats: ${JSON.stringify(this.exportFormats)}\n` + 
-				`UseCodeCells: ${this.useCodeCells}\n` + 
-				`Source: ${this.source}`;
+		return `Host: ${this.apiRootUrl}\n` +
+			`CloudProvider: ${this.cloudProvider}\n` +
+			`LocalSyncFolder: ${this.localSyncFolder}\n` +
+			`LocalSyncSubFolders: ${JSON.stringify(this.localSyncSubfolders)}\n` +
+			`ExportFormats: ${JSON.stringify(this.exportFormats)}\n` +
+			`UseCodeCells: ${this.useCodeCells}\n` +
+			`Source: ${this.source}`;
 	}
 
 	// description is show next to the label
 	//description = this._description;
 	private get _description(): string {
 		//return "";
-		return `${fspath.join(Helper.trimChar(Helper.trimChar(this.localSyncFolder, '/', false, true), '\\', false, true), " ")}`;
+		return this.localSyncFolder.fsPath;
 	}
 
 	// used in package.json to filter commands via viewItem == ACTIVE
@@ -96,10 +95,10 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 	}
 
 	get cloudProvider(): CloudProvider {
-		if (this.apiRootUrl.toLowerCase().includes('azuredatabricks')) {
+		if (this.apiRootUrl.authority.toLowerCase().includes('azuredatabricks')) {
 			return "Azure";
 		}
-		if (this.apiRootUrl.toLowerCase().includes('.gcp.')) {
+		if (this.apiRootUrl.authority.toLowerCase().includes('.gcp.')) {
 			return "GCP";
 		}
 		else {
@@ -107,7 +106,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		}
 	}
 
-	get apiRootUrl(): string {
+	get apiRootUrl(): vscode.Uri {
 		return this._apiRootUrl;
 	}
 
@@ -115,7 +114,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		return this._personalAccessToken;
 	}
 
-	get localSyncFolder(): string {
+	get localSyncFolder(): vscode.Uri {
 		return this._localSyncFolder;
 	}
 
@@ -239,6 +238,21 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 			}
 			return false;
 		}
+		else {
+			if (typeof (con.apiRootUrl) == "string") {
+				try {
+
+					let uri: vscode.Uri = vscode.Uri.parse(con.apiRootUrl);
+					con.apiRootUrl = uri;
+				}
+
+				catch (error) {
+					msg = 'Configuration ' + con.displayName + ': Property "apiRootUrl" is not a valid URL! Please check your user and/or workspace settings!';
+					ThisExtension.log(msg);
+					vscode.window.showErrorMessage(msg);
+				}
+			}
+		}
 		if (!this.propertyIsValid(con.personalAccessToken) && !this.propertyIsValid(con.personalAccessTokenSecure)) {
 			if (showMessage) {
 				msg = 'Configuration ' + con.displayName + ': Property "personalAccessToken" or "personalAccessTokenSecure" is not valid! Please check your user and/or workspace settings!';
@@ -254,6 +268,22 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 				vscode.window.showErrorMessage(msg);
 			}
 			return false;
+		}
+		else {
+			if (typeof (con.localSyncFolder) == "string") {
+				try {
+
+					let uri: vscode.Uri = vscode.Uri.file(con.localSyncFolder);
+					con.localSyncFolder = uri;
+				}
+
+				catch
+				{
+					msg = 'Configuration ' + con.displayName + ': Property "localSyncFolder" is not a valid path! Please check your user and/or workspace settings!';
+					ThisExtension.log(msg);
+					vscode.window.showErrorMessage(msg);
+				}
+			}
 		}
 
 		// check defaultvalues, etc.

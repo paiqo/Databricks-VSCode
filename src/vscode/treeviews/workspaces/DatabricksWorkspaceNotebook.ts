@@ -143,7 +143,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 	};
 
 	get localFolderPath(): vscode.Uri {
-		return FSHelper.parent(FSHelper.joinPathSync(vscode.Uri.file(ThisExtension.ActiveConnection.localSyncFolder), ThisExtension.ConnectionManager.SubfolderConfiguration().Workspace));
+		return FSHelper.parent(FSHelper.joinPathSync(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.SubfolderConfiguration().Workspace));
 	}
 
 	get localPath(): vscode.Uri {

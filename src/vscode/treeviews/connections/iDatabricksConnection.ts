@@ -6,8 +6,8 @@ export interface iDatabricksConnection {
 	displayName: string;
 	personalAccessToken: string;
 	personalAccessTokenSecure?: AccessTokenSecure;
-	apiRootUrl: string;
-	localSyncFolder: string | vscode.Uri;
+	apiRootUrl: vscode.Uri;
+	localSyncFolder: vscode.Uri;
 	localSyncSubfolders?: LocalSyncSubfolderConfiguration;
 	exportFormats?: ExportFormatsConfiguration;
 	useCodeCells?: boolean;

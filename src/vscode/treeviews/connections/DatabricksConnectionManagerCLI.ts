@@ -52,7 +52,7 @@ export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager 
 		let configFileEnv = process.env.DATABRICKS_CONFIG_FILE;
 		let configFile: vscode.Uri;
 		if (configFileEnv == undefined) {
-			configFile = FSHelper.joinPathSync(Helper.getUserDir(), ".databrickscfg");
+			configFile = FSHelper.joinPathSync(FSHelper.getUserDir(), ".databrickscfg");
 		}
 		else
 		{
@@ -82,7 +82,7 @@ export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager 
 						displayName: Helper.getFirstRegexGroup(/\[([^\]]*)\]/gm, line),
 						personalAccessToken: undefined, // mandatory in CLI config
 						apiRootUrl: undefined, // mandatory in CLI config
-						localSyncFolder: await FSHelper.joinPath(Helper.getUserDir(), "DatabricksSync", Helper.getFirstRegexGroup(/\[([^\]]*)\]/gm, line)),
+						localSyncFolder: await FSHelper.joinPath(FSHelper.getUserDir(), "DatabricksSync", Helper.getFirstRegexGroup(/\[([^\]]*)\]/gm, line)),
 						_source: "CLI-profile"
 					};
 				}
@@ -91,13 +91,13 @@ export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager 
 
 					switch (kvp[0]) {
 						case "host":
-							connectionParameters.apiRootUrl = kvp[1];
+							connectionParameters.apiRootUrl = vscode.Uri.parse(kvp[1]);
 							break;
 						case "token":
 							connectionParameters.personalAccessToken = kvp[1];
 							break;
 						case "localSyncFolder":
-							connectionParameters.localSyncFolder = kvp[1];
+							connectionParameters.localSyncFolder = vscode.Uri.file(kvp[1]);
 							break;
 						case "localSyncSubfolders":
 							connectionParameters.localSyncSubfolders = JSON.parse(kvp[1]) as LocalSyncSubfolderConfiguration;

@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+
 import { ExportFormatsConfiguration, ThisExtension, ConfigSettingSource, LocalSyncSubfolderConfiguration } from '../../../ThisExtension';
 import { iDatabricksConnection } from './iDatabricksConnection';
 import { AccessTokenSecure } from './_types';
@@ -74,8 +75,8 @@ export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManag
 		ThisExtension.log("Loading Connection from 'databricks.default.*' ...");
 		let defaultConnection: iDatabricksConnection = {
 				"displayName": ThisExtension.getConfigurationSetting<string>('databricks.connection.default.displayName', this._settingScope).value,
-				"apiRootUrl": ThisExtension.getConfigurationSetting<string>('databricks.connection.default.apiRootUrl', this._settingScope).value,
-				"localSyncFolder": ThisExtension.getConfigurationSetting<string>('databricks.connection.default.localSyncFolder', this._settingScope).value,
+				"apiRootUrl": vscode.Uri.parse(ThisExtension.getConfigurationSetting<string>('databricks.connection.default.apiRootUrl', this._settingScope).value),
+				"localSyncFolder": vscode.Uri.file(ThisExtension.getConfigurationSetting<string>('databricks.connection.default.localSyncFolder', this._settingScope).value),
 				"localSyncSubfolders": ThisExtension.getConfigurationSetting<LocalSyncSubfolderConfiguration>('databricks.connection.default.localSyncSubfolders', this._settingScope).value,
 				"personalAccessToken": ThisExtension.getConfigurationSetting<string>('databricks.connection.default.personalAccessToken', this._settingScope).value,
 				"personalAccessTokenSecure": ThisExtension.getConfigurationSetting<AccessTokenSecure>('databricks.connection.default.personalAccessTokenSecure', this._settingScope).value,

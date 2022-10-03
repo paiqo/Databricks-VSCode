@@ -62,8 +62,8 @@
 		"onFileSystem:dbfs",
 		"onFileSystem:dbws"
 	],
-	"main": "./dist/destkop/extension.js",
-	"browser": "./dist/web/browser.js",
+	"main": "./dist/node/extension.js",
+	"browser": "./dist/web/extension.js",
 	"contributes": {
 		"configuration": [
 			{
