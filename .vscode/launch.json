@@ -1,7 +1,7 @@
 // A launch configuration that compiles the extension and then opens it inside a new window
 {
     "version": "0.2.0",
-    "configurations": [  
+    "configurations": [
         {
             "name": "Launch Extension",
             "type": "extensionHost",
@@ -12,7 +12,7 @@
             ],
             "sourceMaps": true,
             "outFiles": [
-                "${workspaceRoot}/dist/**/*.js"
+                "${workspaceRoot}/dist/desktop/**/*.js"
             ],
             "preLaunchTask": "npm: watch",
             "skipFiles": [
@@ -22,6 +22,20 @@
                 "extensionHostProcess.js",
                 "${workspaceFolder}/node_modules/**/*.js"
             ]
+        },
+        {
+            "name": "Run Web Extension in VS Code",
+            "type": "pwa-extensionHost",
+            "debugWebWorkerHost": true,
+            "request": "launch",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}",
+                "--extensionDevelopmentKind=web"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/dist/web/**/*.js"
+            ],
+            "preLaunchTask": "npm: watch"
         },
         {
             "type": "node",
