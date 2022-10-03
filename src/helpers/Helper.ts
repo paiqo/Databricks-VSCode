@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import * as os from 'os';
 
 import { ThisExtension } from '../ThisExtension';
 import { FSHelper } from './FSHelper';

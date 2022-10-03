@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 
-import * as os from 'os';
 import { ExportFormatsConfiguration, ThisExtension, LocalSyncSubfolderConfiguration } from '../../../ThisExtension';
 import { iDatabricksConnection } from './iDatabricksConnection';
 import { DatabricksConnectionManager } from './DatabricksConnectionManager';
@@ -64,8 +63,9 @@ export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager 
 
 			this._connections = [];
 			let connectionParameters: iDatabricksConnection = undefined;
-			for (let line of data.split(os.EOL)) {
-				if (line.trim().length == 0) {
+			for (let line of data.split("\n")) {
+				line = line.trim();
+				if (line.length == 0) {
 					continue;
 				}
 				if (line.startsWith("[") && line.endsWith("]")) {
