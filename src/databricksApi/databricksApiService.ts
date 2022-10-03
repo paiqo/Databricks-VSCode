@@ -12,12 +12,12 @@ import { iDatabricksSecretScope } from '../vscode/treeviews/secrets/iDatabricksS
 import { iDatabricksSecret } from '../vscode/treeviews/secrets/iDatabricksSecret';
 import { ContextLanguage, ExecutionCommand, ExecutionContext, iDatabricksJobResponse, iDatabricksJobRunResponse, iDatabricksRepoResponse } from './_types';
 import { iDatabricksCluster } from '../vscode/treeviews/clusters/iDatabricksCluster';
-import { DatabricksConnectionTreeItem } from '../vscode/treeviews/connections/DatabricksConnectionTreeItem';
 import { SecretBackendType } from '../vscode/treeviews/secrets/_types';
 import { iDatabricksRepo } from '../vscode/treeviews/repos/_types';
 import { AxiosError } from 'axios';
 import { iDatabricksConnection } from '../vscode/treeviews/connections/iDatabricksConnection';
 
+import fetch from 'node-fetch'
 
 export abstract class DatabricksApiService {
 	private static API_SUB_URL: string = "/api/";
@@ -96,6 +96,48 @@ export abstract class DatabricksApiService {
 	}
 
 	private static async get(endpoint: string, params: object = null): Promise<any> {
+		if (!this._isInitialized && !this._connectionTestRunning) {
+			ThisExtension.log("API has not yet been initialized! Please connect first!");
+		}
+		else {
+			ThisExtension.log("GET " + endpoint);
+			ThisExtension.log("Params:" + JSON.stringify(params));
+
+			let response: any = "Request not yet executed!";
+			try {
+				const config = {
+					method: "GET",
+					headers: this._apiService.defaults.headers.common
+					};
+				response = await fetch(this.getFullUrl(endpoint, params), config);
+				let json = await response.json();
+				let ret = { data: json };
+				this.logResponse(ret);
+
+				return ret;
+			} catch (error) {
+				this.handleApiException(error);
+
+				return undefined;
+			}
+
+			
+		}
+	}
+
+	private static getFullUrl(endpoint: string, params: object): string
+	{
+		let uri = vscode.Uri.parse(this._apiService.defaults.baseURL + endpoint);
+
+		if(params)
+		{
+			uri = uri.with({query: Object.entries(params["params"]).map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&')})
+		}
+
+		return uri.toString(true);
+	}
+
+	private static async get_orig(endpoint: string, params: object = null): Promise<any> {
 		if (!this._isInitialized && !this._connectionTestRunning) {
 			ThisExtension.log("API has not yet been initialized! Please connect first!");
 		}
