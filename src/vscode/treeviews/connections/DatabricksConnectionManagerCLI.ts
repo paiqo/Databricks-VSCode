@@ -12,13 +12,11 @@ export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager 
 	constructor() {
 		super();
 		this._initialized = false;
-
-		this.initialize();
 	}
 
 	async initialize(): Promise<void> {
 		ThisExtension.log("Initializing ConnectionManager CLI ...");
-		this.loadConnections();
+		await this.loadConnections();
 
 		if (this._connections.length == 0) {
 			let msg: string = "No connections have been configured yet! Please add a connection via the VSCode Settings -> Databricks before proceeding!";
@@ -26,9 +24,9 @@ export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager 
 			vscode.window.showErrorMessage(msg);
 		}
 		else {
-			this._lastActiveConnectionName = ThisExtension.getConfigurationSetting("databricks.lastActiveConnection").value;
+			this._lastActiveConnectionName = ThisExtension.getConfigurationSetting("databricks.lastActiveConnection", ThisExtension.SettingScope).value;
 
-			if (!this._lastActiveConnectionName) {
+			if (!this._lastActiveConnectionName || !this._connections.some((x) => x.displayName == this._lastActiveConnectionName)) {
 				ThisExtension.log("Setting 'databricks.lastActiveConnection' is not set - using first available connection instead!");
 				this._lastActiveConnectionName = this._connections[0].displayName;
 			}
@@ -122,7 +120,7 @@ export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager 
 				}
 			}
 		} catch (e) {
-			console.log('Error:', e.stack);
+			ThisExtension.log(e);
 		}
 		/*
 				let connection: iDatabricksConnection = {
@@ -142,9 +140,5 @@ export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager 
 
 	updateConnection(updatedCon: iDatabricksConnection): void {
 
-	}
-
-	async getAccessToken(con: iDatabricksConnection): Promise<string> {
-		return "";
 	}
 }

@@ -17,7 +17,10 @@ export abstract class DatabricksConnectionManager {
 
 	abstract updateConnection(updatedCon: iDatabricksConnection): void;
 
-	abstract getAccessToken(con: iDatabricksConnection): Promise<string>;
+	async getAccessToken(con: iDatabricksConnection): Promise<string>
+	{
+		return con.personalAccessToken;
+	}
 
 	public get Connections(): iDatabricksConnection[] {
 		while (!this._initialized) { Helper.wait(500); }

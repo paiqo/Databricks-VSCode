@@ -15,12 +15,12 @@ export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManag
 		this._initialized = false;
 		this._settingScope = ThisExtension.SettingScope;
 
-		this.initialize();
+		//this.initialize();
 	}
 
 	async initialize(): Promise<void> {
 		ThisExtension.log("Initializing ConnectionManager VSCode ...");
-		this.loadConnections();
+		await this.loadConnections();
 
 		if (this._connections.length == 0) {
 			let msg: string = "No connections have been configured yet! Please add a connection via the VSCode Settings -> Databricks before proceeding!";
@@ -50,7 +50,7 @@ export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManag
 		}
 	}
 
-	loadConnections(): void {
+	async loadConnections(): Promise<void> {
 		/*
 		there are 2 different areas from where Connections can be loaded from:
 		1) the VSCode setting 'databricks.connection.default.*' - a single connection that can be easily configured in the UI
