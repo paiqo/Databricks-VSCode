@@ -262,7 +262,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 				vscode.window.showWarningMessage("Opening local cached file. To open most recent file from Databricks, please manually download it first!");
 		}
 		let viewType: string = "default";
-		if (this.localFileExtension == ".ipynb") {
+		if (this.localFileExtension.endsWith(".ipynb")) {
 			if (vscode.extensions.getExtension("ms-python.python") != undefined) {
 				viewType = "jupyter-notebook";
 			}
