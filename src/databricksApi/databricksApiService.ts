@@ -17,21 +17,29 @@ import { iDatabricksRepo } from '../vscode/treeviews/repos/_types';
 import { AxiosError } from 'axios';
 import { iDatabricksConnection } from '../vscode/treeviews/connections/iDatabricksConnection';
 
-import fetch from 'node-fetch'
+
+import { fetch, getProxyAgent, wrapForForcedInsecureSSL } from '@env/fetch';
+import { RequestInit, Response } from '@env/fetch';
 
 export abstract class DatabricksApiService {
 	private static API_SUB_URL: string = "/api/";
 	private static JOB_API_VERSION = "2.1";
-	private static _apiService: any;
+	
 	private static _isInitialized: boolean = false;
 	private static _connectionTestRunning: boolean = false;
+	private static _apiBaseUrl: string;
+	private static _headers;
 
-
+	private static _apiService: any; // to be removed
 
 	//#region Initialization
 	static async initialize(con: iDatabricksConnection): Promise<boolean> {
 		try {
 			ThisExtension.log("Initializing Databricks API Service ...");
+
+			let accessToken = await ThisExtension.ConnectionManager.getAccessToken(con);
+			this._apiBaseUrl = Helper.trimChar(con.apiRootUrl.toString(true), '/') + this.API_SUB_URL;
+			/*
 			const axios = require('axios');
 			const httpsAgent = require('https-agent');
 
@@ -40,15 +48,23 @@ export abstract class DatabricksApiService {
 				httpsAgent: new httpsAgent({
 					rejectUnauthorized: ThisExtension.rejectUnauthorizedSSL
 				}),
-				baseURL: Helper.trimChar(con.apiRootUrl.toString(true), '/') + this.API_SUB_URL,
+				
 				proxy: ThisExtension.useProxy
 			});
+			
 
 			// Alter defaults after instance has been created
-			let accessToken = await ThisExtension.ConnectionManager.getAccessToken(con);
+			
 			this._apiService.defaults.headers.common['Authorization'] = "Bearer " + accessToken;
 			this._apiService.defaults.headers.common['Content-Type'] = 'application/json';
 			this._apiService.defaults.headers.common['Accept'] = 'application/json';
+			*/
+
+			this._headers =  {
+					"Authorization" :'Bearer ' + accessToken,
+					"Content-Type" : 'application/json',
+					"Accept" :'application/json'
+			}
 
 			ThisExtension.log(`Testing new Databricks API (${con.apiRootUrl}) settings ...`);
 			this._connectionTestRunning = true;
@@ -95,20 +111,22 @@ export abstract class DatabricksApiService {
 		ThisExtension.log(JSON.stringify(response.data));
 	}
 
-	private static async get(endpoint: string, params: object = null): Promise<any> {
+	private static async get(endpoint: string, params: object = null, log: boolean = true): Promise<any> {
 		if (!this._isInitialized && !this._connectionTestRunning) {
 			ThisExtension.log("API has not yet been initialized! Please connect first!");
 		}
 		else {
-			ThisExtension.log("GET " + endpoint);
-			ThisExtension.log("Params:" + JSON.stringify(params));
+			if(log){
+				ThisExtension.log("GET " + endpoint);
+				ThisExtension.log("Params:" + JSON.stringify(params));
+			}
 
 			let response: any = "Request not yet executed!";
 			try {
 				const config = {
 					method: "GET",
-					headers: this._apiService.defaults.headers.common
-					};
+					headers: this._headers
+				};
 				response = await fetch(this.getFullUrl(endpoint, params), config);
 				let json = await response.json();
 				let ret = { data: json };
@@ -120,18 +138,18 @@ export abstract class DatabricksApiService {
 
 				return undefined;
 			}
-
-			
 		}
 	}
 
-	private static getFullUrl(endpoint: string, params: object): string
-	{
-		let uri = vscode.Uri.parse(this._apiService.defaults.baseURL + endpoint);
+	private static getFullUrl(endpoint: string, params?: object): string {
+		let uri = vscode.Uri.parse(this._apiBaseUrl + endpoint);
 
-		if(params)
-		{
-			uri = uri.with({query: Object.entries(params["params"]).map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&')})
+		if (params) {
+			let urlParams = []
+			for (let kvp of Object.entries(params["params"])) {
+				urlParams.push(`${kvp[0]}=${kvp[1] as number | string | boolean}`)
+			}
+			uri = uri.with({ query: urlParams.join('&') })
 		}
 
 		return uri.toString(true);
@@ -165,6 +183,30 @@ export abstract class DatabricksApiService {
 
 		let response: any = "Request not yet executed!";
 		try {
+			const config = {
+				method: "POST",
+				headers: this._headers,
+				body: JSON.stringify(body)
+			};
+			response = await fetch(this.getFullUrl(endpoint), config);
+			let json = await response.json();
+			let ret = { data: json };
+			this.logResponse(ret);
+
+			return ret;
+		} catch (error) {
+			this.handleApiException(error);
+
+			return undefined;
+		}
+	}
+
+	private static async post_orig(endpoint: string, body: object): Promise<any> {
+		ThisExtension.log("POST " + endpoint);
+		ThisExtension.log("Body:" + JSON.stringify(body));
+
+		let response: any = "Request not yet executed!";
+		try {
 			response = await this._apiService.post(endpoint, body);
 			this.logResponse(response);
 		} catch (error) {
@@ -176,7 +218,7 @@ export abstract class DatabricksApiService {
 		return response;
 	}
 
-	private static async patch(endpoint: string, body: object): Promise<any> {
+	private static async patch_orig(endpoint: string, body: object): Promise<any> {
 		ThisExtension.log("PATCH " + endpoint);
 		ThisExtension.log("Body:" + JSON.stringify(body));
 
@@ -193,7 +235,31 @@ export abstract class DatabricksApiService {
 		return response;
 	}
 
-	private static async delete(endpoint: string, body: object): Promise<any> {
+	private static async patch(endpoint: string, body: object): Promise<any> {
+		ThisExtension.log("PATCH " + endpoint);
+		ThisExtension.log("Body:" + JSON.stringify(body));
+
+		let response: any = "Request not yet executed!";
+		try {
+			const config = {
+				method: "PATCH",
+				headers: this._headers,
+				body: JSON.stringify(body)
+			};
+			response = await fetch(this.getFullUrl(endpoint), config);
+			let json = await response.json();
+			let ret = { data: json };
+			this.logResponse(ret);
+
+			return ret;
+		} catch (error) {
+			this.handleApiException(error);
+
+			return undefined;
+		}
+	}
+
+	private static async delete_orig(endpoint: string, body: object): Promise<any> {
 		ThisExtension.log("DELETE " + endpoint);
 		ThisExtension.log("Body:" + JSON.stringify(body));
 
@@ -208,6 +274,30 @@ export abstract class DatabricksApiService {
 		}
 
 		return response;
+	}
+
+	private static async delete(endpoint: string, body: object): Promise<any> {
+		ThisExtension.log("DELETE " + endpoint);
+		ThisExtension.log("Body:" + JSON.stringify(body));
+
+		let response: any = "Request not yet executed!";
+		try {
+			const config = {
+				method: "DELETE",
+				headers: this._headers,
+				body: JSON.stringify(body)
+			};
+			response = await fetch(this.getFullUrl(endpoint), config);
+			let json = await response.json();
+			let ret = { data: json };
+			this.logResponse(ret);
+
+			return ret;
+		} catch (error) {
+			this.handleApiException(error);
+
+			return undefined;
+		}
 	}
 
 	private static async handleApiException(error: Error, showErrorMessage: boolean = false, raise: boolean = false): Promise<void> {
@@ -228,8 +318,8 @@ export abstract class DatabricksApiService {
 			}
 		}
 		else {
-			ThisExtension.log("ERROR: " + error.message);
 			ThisExtension.log("ERROR: " + error.name);
+			ThisExtension.log("ERROR: " + error.message);
 			if (error.stack) {
 				ThisExtension.log("ERROR: " + error.stack);
 			}
@@ -448,7 +538,7 @@ export abstract class DatabricksApiService {
 		let pathItems = path.split('/');
 		const fileName = pathItems.pop();
 		await this.createWorkspaceFolder(pathItems.join("/"))
-		
+
 		let endpoint = '2.0/workspace/import';
 		let body = {
 			content: await this.readBase64FromFile(localPath),
@@ -692,7 +782,7 @@ export abstract class DatabricksApiService {
 		};
 
 		// we do not want to log every single file content!
-		let response = await this._apiService.get(endpoint, { params: body });
+		let response = await this.get(endpoint, { params: body }, false);
 		//this.logResponse(response);
 
 		return response;

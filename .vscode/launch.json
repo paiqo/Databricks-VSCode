@@ -12,7 +12,7 @@
             ],
             "sourceMaps": true,
             "outFiles": [
-                "${workspaceRoot}/dist/desktop/**/*.js"
+                "${workspaceRoot}/dist/node/**/*.js"
             ],
             "preLaunchTask": "npm: watch",
             "skipFiles": [
@@ -24,7 +24,7 @@
             ]
         },
         {
-            "name": "Run Web Extension in VS Code",
+            "name": "Launch Web Extension",
             "type": "extensionHost",
             "debugWebWorkerHost": true,
             "request": "launch",
@@ -35,7 +35,14 @@
             "outFiles": [
                 "${workspaceFolder}/dist/web/**/*.js"
             ],
-            "preLaunchTask": "npm: watch"
+            "preLaunchTask": "npm: watch",
+            "skipFiles": [
+                "<node_internals>/**/*.js",
+                "main.js",
+                "extension.bundle.js",
+                "extensionHostProcess.js",
+                "${workspaceFolder}/node_modules/**/*.js"
+            ]
         },
         {
             "type": "node",

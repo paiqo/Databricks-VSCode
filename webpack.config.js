@@ -13,7 +13,7 @@ const webConfig = /** @type WebpackConfig */ {
     mode: "none", // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
     target: "webworker", // web extensions run in a webworker context
     entry: {
-        "extension-web": "./src/extension.ts" // source of the web extension main file
+        extension: "./src/extension.ts" // source of the web extension main file
     },
     output: {
         filename: "extension.js",
@@ -24,7 +24,7 @@ const webConfig = /** @type WebpackConfig */ {
         mainFields: ["browser", "module", "main"], // look for `browser` entry point in imported node modules
         extensions: [".ts", ".js"], // support ts-files and js-files
         alias: {
-            // provides alternate implementation for node module and source files
+            '@env': path.join(__dirname, './src/env/web')
         },
         fallback: {
             // Webpack 5 no longer polyfills Node.js core modules automatically.
@@ -57,7 +57,7 @@ const webConfig = /** @type WebpackConfig */ {
         }),
     ],
     externals: {
-        vscode: "commonjs vscode", // ignored because it doesn't exist
+        vscode: "commonjs vscode" // ignored because it doesn't exist
     },
     performance: {
         hints: false,
@@ -84,7 +84,10 @@ const nodeConfig = {
     },
     resolve: {
         // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
-        extensions: ['.ts', '.js']
+        extensions: ['.ts', '.js'],
+        alias: {
+            '@env': path.join(__dirname, './src/env/node')
+        }
     },
     module: {
         rules: [

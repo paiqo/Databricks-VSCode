@@ -20,7 +20,6 @@ export abstract class ThisExtension {
 	private static _settingScope: ConfigSettingSource;
 	private static _sensitiveValueStore: SensitiveValueStore;
 	private static _sqlClusterId: string;
-	
 
 	static get rootPath(): vscode.Uri {
 		return this._context.extensionUri;
@@ -96,10 +95,11 @@ export abstract class ThisExtension {
 		let settingScope: ConfigSettingSource = "Workspace";
 
 		ThisExtension.log("Trying to get config from Workspace settings ...");
+		let workspaceConnectionManager = ThisExtension.getConfigurationSetting<iDatabricksConnection[]>('databricks.connectionManager', settingScope);
 		let workspaceConnections = ThisExtension.getConfigurationSetting<iDatabricksConnection[]>('databricks.connections', settingScope);
 		let workspaceDefaultConnection = ThisExtension.getConfigurationSetting<string>('databricks.connection.default.displayName', settingScope);
 
-		if (workspaceConnections.value || workspaceDefaultConnection.value) {
+		if (workspaceConnections.value || workspaceDefaultConnection.value || workspaceConnectionManager.value) {
 			ThisExtension.log("Workspace settings found and using them! (User-Settings are ignored)");
 			this._settingScope = "Workspace";
 		}
@@ -205,7 +205,7 @@ export abstract class ThisExtension {
 
 	static getConfigurationSetting<T = string>(setting: string, source?: ConfigSettingSource, allowDefaultValue: boolean = false): ConfigSetting<T> {
 		// usage: ThisExtension.getConfigurationSetting('databricks.connection.default.displayName')
-
+		
 		let value = vscode.workspace.getConfiguration().get(setting) as T;
 		let inspect = vscode.workspace.getConfiguration().inspect(setting);
 

@@ -946,7 +946,8 @@
 		"compile": "webpack",
 		"watch": "webpack --watch",
 		"package": "webpack --mode production --devtool hidden-source-map",
-		"lint": "eslint src --ext ts"
+		"lint": "eslint src --ext ts",
+		"test": "vscode-test-web --extensionDevelopmentPath=. --extensionTestsPath=dist/web/extension.js"
 	},
 	"devDependencies": {
 		"@types/glob": "^7.2.0",
@@ -954,6 +955,7 @@
 		"@types/node": "^16.11.7",
 		"@types/rimraf": "^2.0.5",
 		"@types/vscode": "^1.68.0",
+		"@vscode/test-web": "*",
 		"eslint": "^8.19.0",
 		"glob": "^8.0.3",
 		"mocha": "^10.0.0",
