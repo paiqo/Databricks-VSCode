@@ -10,11 +10,16 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	protected _object_id: number;
 	protected _parent: DatabricksWorkspaceTreeItem;
 
+	protected _onlinePathExists: boolean = true;
+	protected _localPath: vscode.Uri = undefined;
+	protected _isInitialized: boolean = false;
+
 	constructor(
 		path: string,
 		object_type: WorkspaceItemType,
 		object_id: number,
 		parent: DatabricksWorkspaceTreeItem,
+		local_path?: vscode.Uri,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
 		super(path, collapsibleState);
@@ -23,6 +28,9 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		this._object_type = object_type;
 		this._object_id = object_id;
 		this._parent = parent;
+
+		this._localPath = local_path;
+		this._onlinePathExists = object_id == -1 ? false : true;
 
 		this.init();
 	}
@@ -79,6 +87,25 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	public static fromJSON(itemDefinition: string, parent: DatabricksWorkspaceTreeItem = null): DatabricksWorkspaceTreeItem {
 		let item: iDatabricksWorkspaceItem = JSON.parse(itemDefinition);
 		return DatabricksWorkspaceTreeItem.fromInterface(item, parent);
+	}
+
+	get localPath(): vscode.Uri {
+		return this._localPath;
+	}
+
+	set localPath(value: vscode.Uri) {
+		this._localPath = value;
+	}
+
+	get localPathExists(): boolean {
+		if (this.localPath) {
+			return true;
+		}
+		return false;
+	}
+
+	get onlinePathExists(): boolean {
+		return this._onlinePathExists;
 	}
 
 	public CopyPathToClipboard(): void {

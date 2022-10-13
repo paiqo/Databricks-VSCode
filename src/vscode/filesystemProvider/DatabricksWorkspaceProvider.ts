@@ -120,12 +120,12 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 	async loadFromAPI(): Promise<void> {
 		let item: iDatabricksWorkspaceItem = await DatabricksApiService.getWorkspaceItem(this.apiPath);
 
-		if (!item) {
-			// try again with the uriPath - e.g. to read FILE items
+		if (!item || item.object_id == undefined) {
+			// try again with the uriPath - e.g. to read FILE items (files in Repo)
 			item = await DatabricksApiService.getWorkspaceItem(this.uriPath);
 		}
 
-		if (!item) {
+		if (!item || item.object_id == undefined) {
 			this.object_id = -1;
 		}
 		else {
@@ -144,7 +144,8 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 		let newInstance: DatabricksWorkspaceProviderItem = new DatabricksWorkspaceProviderItem();
 		if (source instanceof vscode.Uri) {
 			// VSCode always queries for some internal files on every filesystem ?!
-			if (FSHelper.isVSCodeInternalURI(source)) {
+			if(FSHelper.isVSCodeInternalURI(source))
+			{
 				return undefined;
 			}
 			newInstance.mapper = LanguageFileExtensionMapper.fromUri(source);
@@ -168,6 +169,12 @@ export class DatabricksWorkspaceProvider implements vscode.FileSystemProvider {
 
 	// --- manage file metadata
 	async stat(uri: vscode.Uri): Promise<DatabricksWorkspaceProviderItem> {
+		// VSCode always queries for some internal files on every filesystem ?!
+		if(FSHelper.isVSCodeInternalURI(uri))
+		{
+			throw vscode.FileSystemError.FileNotFound(uri);
+		}
+
 		let entry = await DatabricksWorkspaceProviderItem.getInstance(uri);
 
 		if (!entry || !entry.exists) {
@@ -193,7 +200,6 @@ export class DatabricksWorkspaceProvider implements vscode.FileSystemProvider {
 	}
 
 	// --- manage file contents
-
 	async readFile(uri: vscode.Uri): Promise<Uint8Array> {
 		let remoteItem: DatabricksWorkspaceProviderItem = await DatabricksWorkspaceProviderItem.getInstance(uri);
 
@@ -217,8 +223,6 @@ export class DatabricksWorkspaceProvider implements vscode.FileSystemProvider {
 
 	async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
 		let remoteItem: DatabricksWorkspaceProviderItem = await DatabricksWorkspaceProviderItem.getInstance(uri);
-
-
 
 		if (remoteItem.exists && remoteItem.type == vscode.FileType.Directory) {
 			throw vscode.FileSystemError.FileIsADirectory(uri);
@@ -247,7 +251,6 @@ export class DatabricksWorkspaceProvider implements vscode.FileSystemProvider {
 	}
 
 	// --- manage files/folders
-
 	async rename(oldUri: vscode.Uri, newUri: vscode.Uri, options: { overwrite: boolean }): Promise<void> {
 
 		// there is no rename in the API so we simply read and write the file
@@ -273,7 +276,6 @@ export class DatabricksWorkspaceProvider implements vscode.FileSystemProvider {
 
 
 	// --- manage file events
-
 	private _emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
 	private _bufferedEvents: vscode.FileChangeEvent[] = [];
 	private _fireSoonHandle?: NodeJS.Timer;

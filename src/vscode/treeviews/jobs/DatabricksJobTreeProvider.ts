@@ -55,13 +55,11 @@ export class DatabricksJobTreeProvider implements vscode.TreeDataProvider<Databr
 	}
 
 	async getJobs(): Promise<DatabricksJob[]> {
-		let responseData = await DatabricksApiService.listJobs();
-		// array of file is in result.files
-		let items = responseData.jobs;
+		let jobs = await DatabricksApiService.listJobs();
 
 		let jobItems: DatabricksJob[] = [];
-		if (items != undefined) {
-			items.map(item => jobItems.push(new DatabricksJob(item)));
+		if (jobs != undefined) {
+			jobs.map(item => jobItems.push(new DatabricksJob(item)));
 			Helper.sortArrayByProperty(jobItems, "label", "ASC");
 		}
 

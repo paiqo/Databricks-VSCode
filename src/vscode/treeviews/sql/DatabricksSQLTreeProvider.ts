@@ -7,6 +7,7 @@ import { ThisExtension } from '../../../ThisExtension';
 import { DatabricksSQLDatabase } from './DatabricksSQLDatabase';
 import { DatabricksSQLSelectCluster } from './DatabricksSQLSelectCluster';
 import { DatabricksSQLTreeItem } from './DatabricksSQLTreeItem';
+import { iDatabricksApiCommandsStatusResponse } from '../../../databricksApi/_types';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
@@ -45,11 +46,11 @@ export class DatabricksSQLTreeProvider implements vscode.TreeDataProvider<Databr
 
 				let cmd = await DatabricksApiService.runCommand(context, "SHOW DATABASES");
 
-				let result = await DatabricksApiService.getCommandResult(cmd);
+				let result: iDatabricksApiCommandsStatusResponse = await DatabricksApiService.getCommandResult(cmd);
 
 				let databases: DatabricksSQLDatabase[] = [];
-				for (let db of result) {
-					databases.push(new DatabricksSQLDatabase(db.databaseName, context));
+				for (let db of result.results.data) {
+					databases.push(new DatabricksSQLDatabase(db[0], context));
 				}
 
 				return databases;

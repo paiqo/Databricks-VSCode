@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import { DatabricksApiService } from '../../databricksApi/databricksApiService';
+import { iDatabricksApiDbfsReadResponse } from '../../databricksApi/_types';
 import { FSHelper } from '../../helpers/FSHelper';
 import { Helper } from '../../helpers/Helper';
 import { iDatabricksFSItem } from '../treeviews/dbfs/iDatabricksFSItem';
@@ -20,7 +21,7 @@ export class DatabricksFileSystemProvider implements vscode.FileSystemProvider {
 		}
 
 		const entry: iDatabricksFSItem = await DatabricksApiService.getDBFSItem(uri.path);
-		if (!entry) {
+		if (!entry || !entry.path) {
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
 		return {
@@ -62,7 +63,7 @@ export class DatabricksFileSystemProvider implements vscode.FileSystemProvider {
 		let batchSize: number = 524288; // 512 kB
 		const totalSize: number = dbfsItem.file_size;
 		let offset: number = 0;
-		let dbfsContent: { data: { bytes_read: number, data: string } };
+		let dbfsContent: iDatabricksApiDbfsReadResponse
 
 		let contentBytesBatch: Uint8Array = new Uint8Array(batchSize);
 		let contentBytes: Uint8Array = new Uint8Array(totalSize);
@@ -73,7 +74,7 @@ export class DatabricksFileSystemProvider implements vscode.FileSystemProvider {
 			}
 
 			dbfsContent = await DatabricksApiService.readDBFSFileContent(dbfsItem.path, offset, batchSize);
-			contentBytesBatch = Buffer.from(dbfsContent.data.data, 'base64');
+			contentBytesBatch = Buffer.from(dbfsContent.data, 'base64');
 
 			// add the batch to the corresponding offset of the final buffer
 			contentBytes.set(contentBytesBatch, offset);

@@ -190,6 +190,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 			}
 		}
 
+		// we need to convert relative paths to a full path as our Kernel does not have a path itself so relative paths would not work
 		commandText = commandText.replace(/dbutils\.notebook\.run\((["'])\./gm, "dbutils.notebook.run($1" + FSHelper.parent(cell.notebook.uri).path);
 
 		return [language, commandText, magicText as NotebookMagic];

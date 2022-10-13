@@ -15,21 +15,13 @@ import { FSHelper } from '../../../helpers/FSHelper';
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 
-	private _onlinePathExists: boolean = true;
-	private _localPath: vscode.Uri = undefined;
-	private _isInitialized: boolean = false;
-
 	constructor(
 		path: string,
 		object_id: number,
-		source: "Online" | "Local",
 		local_path?: vscode.Uri,
 		parent: DatabricksWorkspaceTreeItem = undefined
 	) {
-		super(path, "DIRECTORY", object_id, parent, vscode.TreeItemCollapsibleState.Collapsed);
-
-		this._localPath = local_path;
-		this._onlinePathExists = source != "Local";
+		super(path, "DIRECTORY", object_id, parent, local_path, vscode.TreeItemCollapsibleState.Collapsed);
 
 		this._isInitialized = true;
 
@@ -39,8 +31,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 	init(): void {
 		// we can only run initialize for this class after all values had been set in the constructor
 		// but we must not run it as part of the call to super()
-		if(this._isInitialized)
-		{
+		if (this._isInitialized) {
 			super.label = this.path.split('/').pop();
 			super.tooltip = this._tooltip;
 			super.contextValue = this._contextValue;
@@ -90,27 +81,8 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, 'workspace', 'directory' + sync_state + '.png');
 	}
 
-	get localPath(): vscode.Uri {
-		return this._localPath;
-	}
-
-	set localPath(value: vscode.Uri) {
-		this._localPath = value;
-	}
-
-	get localPathExists(): boolean {
-		if (this.localPath) {
-			return true;
-		}
-		return false;
-	}
-
-	get onlinePathExists(): boolean {
-		return this._onlinePathExists;
-	}
-
 	public static fromInterface(item: iDatabricksWorkspaceItem, parent: DatabricksWorkspaceTreeItem = null): DatabricksWorkspaceDirectory {
-		return new DatabricksWorkspaceDirectory(item.path, item.object_id, "Online", null, parent);
+		return new DatabricksWorkspaceDirectory(item.path, item.object_id, null, parent);
 	}
 
 	public static fromJSON(jsonString: string, parent: DatabricksWorkspaceTreeItem = null): DatabricksWorkspaceDirectory {
@@ -173,17 +145,15 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 							vscode.window.showWarningMessage("File " + localUri + " has no valid extension and will be ignored! Supported extensions can be confiugred using setting 'exportFormats'.");
 							continue;
 						}
-						localItems.push(new DatabricksWorkspaceNotebook(localRelativePath, -1, "Local", languageFileExtension, localUri, this));
+						localItems.push(new DatabricksWorkspaceNotebook(localRelativePath, -1, languageFileExtension, localUri, this));
 					}
 					else {
-						localItems.push(new DatabricksWorkspaceDirectory(localRelativePath, -1, "Local", localUri, this));
+						localItems.push(new DatabricksWorkspaceDirectory(localRelativePath, -1, localUri, this));
 					}
 				}
 				else {
-					for(let existingItem of onlineItems)
-					{
-						if(existingItem.path == localRelativePath)
-						{
+					for (let existingItem of onlineItems) {
+						if (existingItem.path == localRelativePath) {
 							(existingItem as DatabricksWorkspaceDirectory).localPath = localUri;
 							existingItem.init();
 							break;
@@ -201,17 +171,28 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 
 	async download(): Promise<void> {
 		FSHelper.ensureFolder(this.localPath);
-		let items: iDatabricksWorkspaceItem[] = await this.getChildren();
+		let items: DatabricksWorkspaceTreeItem[] = await this.getChildren() as DatabricksWorkspaceTreeItem[];
 
 		for (let item of items) {
-			switch (item.object_type) {
-				case "NOTEBOOK":
-					DatabricksWorkspaceNotebook.fromInterface(item).download();
-					break;
-				case "DIRECTORY":
-				case "REPO":
-					DatabricksWorkspaceDirectory.fromInterface(item).download();
-					break;
+
+			if (item.onlinePathExists) // we can only download items that exist online
+			{
+				switch (item.object_type) {
+					case "NOTEBOOK":
+						let nb = DatabricksWorkspaceNotebook.fromInterface(item);
+
+						nb.localPath = await FSHelper.joinPath(this.localPath, nb.label + nb.localFileExtension);
+						await nb.download();
+						break;
+					case "DIRECTORY":
+					case "REPO":
+						let dir = DatabricksWorkspaceDirectory.fromInterface(item);
+
+						dir.localPath = await FSHelper.joinPath(this.localPath, dir.label.toString());
+						await dir.download();
+
+						break;
+				}
 			}
 		}
 
@@ -220,17 +201,28 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 
 	async upload(): Promise<void> {
 		DatabricksApiService.createWorkspaceFolder(this.path);
-		let items: iDatabricksWorkspaceItem[] = await this.getChildren();
+		let items: DatabricksWorkspaceTreeItem[] = await this.getChildren() as DatabricksWorkspaceTreeItem[];
 
 		for (let item of items) {
-			switch (item.object_type) {
-				case "NOTEBOOK":
-					DatabricksWorkspaceNotebook.fromInterface(item).upload();
-					break;
-				case "DIRECTORY":
-				case "REPO":
-					DatabricksWorkspaceDirectory.fromInterface(item).upload();
-					break;
+			if (item.localPathExists) // we can only upload files that exist locally
+			{
+				switch (item.object_type) {
+					case "NOTEBOOK":
+						let nb = DatabricksWorkspaceNotebook.fromInterface(item);
+
+						nb.localPath = await FSHelper.joinPath(this.localPath, nb.label + nb.localFileExtension);
+						await nb.upload();
+						
+						break;
+					case "DIRECTORY":
+					case "REPO":
+						let dir = DatabricksWorkspaceDirectory.fromInterface(item);
+
+						dir.localPath = await FSHelper.joinPath(this.localPath, dir.label.toString());
+						await dir.upload();
+
+						break;
+				}
 			}
 		}
 

@@ -8,6 +8,7 @@ import { DatabricksJobTreeItem } from './DatabricksJobTreeItem';
 import { DatabricksJobRun } from './DatabricksJobRun';
 import { iDatabricksJob } from './iDatabricksJob';
 import { FSHelper } from '../../../helpers/FSHelper';
+import { iDatabricksJobRun } from './iDatabricksJobRun';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksJob extends DatabricksJobTreeItem {
@@ -97,12 +98,12 @@ export class DatabricksJob extends DatabricksJobTreeItem {
 	}
 
 	async getChildren(): Promise<DatabricksJobRun[]> {
-		let responseData = await DatabricksApiService.listJobRuns(this.job_id);
+		let response: iDatabricksJobRun[] = await DatabricksApiService.listJobRuns(this.job_id);
 		// array of file is in result.files
-		let items = responseData.runs;
+		let items = response;
 
 		let jobItems: DatabricksJobRun[] = [];
-		if (items != undefined) {
+		if (items) {
 			items.map(item => jobItems.push(DatabricksJobRun.fromJSON(JSON.stringify(item))));
 			Helper.sortArrayByProperty(jobItems, "start_time", "DESC");
 		}

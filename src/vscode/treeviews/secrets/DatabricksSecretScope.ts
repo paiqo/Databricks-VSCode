@@ -56,7 +56,7 @@ export class DatabricksSecretScope extends DatabricksSecretTreeItem {
 	}
 
 	async getChildren(): Promise<DatabricksSecretTreeItem[]> {
-		let items: iDatabricksSecret[] = await DatabricksApiService.listSecrets(this.Scope, this.BackendType);
+		let items: iDatabricksSecret[] = await DatabricksApiService.listSecrets(this.Scope);
 
 		let secretItems: DatabricksSecret[] = []
 

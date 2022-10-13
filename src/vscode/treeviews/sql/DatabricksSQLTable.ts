@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { Helper } from '../../../helpers/Helper';
 import { DatabricksSQLTreeItem } from './DatabricksSQLTreeItem';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
-import { ExecutionContext } from '../../../databricksApi/_types';
+import { ExecutionContext, iDatabricksApiCommandsStatusResponse } from '../../../databricksApi/_types';
 import { DatabricksSQLColumn } from './DatabricksSQLColumn';
 import { iSQLTableColumn, iSQLTableDetails, iSQLTableProperty } from './iSQLTableDetails';
 
@@ -113,11 +113,11 @@ export class DatabricksSQLTable extends DatabricksSQLTreeItem {
 	private static async getTableDetailsFromDatabricks(databaseName: string, tableName: string, sqlContext): Promise<iSQLTableDetails> {
 		let cmd = await DatabricksApiService.runCommand(sqlContext, `SHOW CREATE TABLE \`${databaseName}\`.\`${tableName}\``);
 
-		let result = await DatabricksApiService.getCommandResult(cmd);
+		let result: iDatabricksApiCommandsStatusResponse = await DatabricksApiService.getCommandResult(cmd);
 
 		try
 		{
-			let sqlCmd: string = result[0].createtab_stmt;
+			let sqlCmd: string = result.results.data[0][0];
 
 			let tableDetails = await this.parseCreateTableStatement(sqlCmd);
 			tableDetails.name = tableName;
@@ -128,13 +128,13 @@ export class DatabricksSQLTable extends DatabricksSQLTreeItem {
 		catch(error)
 		{
 			let errorTable:iSQLTableDetails = {
-					createStatement: result.data.results.summary + "\n" + result.data.results.cause,
+					createStatement: result.results.summary + "\n" + result.results.cause,
 					databaseName: databaseName,
 					name: tableName,
-					type: result.data.results.resultType,
+					type: result.results.resultType,
 					isManaged: false,
 					format: "ERROR",
-					location: result.data.results.summary,
+					location: result.results.summary,
 					isTemporary: false,
 					columns: [],
 					partitioningColumns: [],

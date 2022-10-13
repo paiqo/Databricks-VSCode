@@ -13,7 +13,7 @@ export class DatabricksWorkspaceFile extends DatabricksWorkspaceTreeItem {
 		object_id: number,
 		parent: DatabricksWorkspaceTreeItem
 	) {
-		super(path, "FILE", object_id, parent, vscode.TreeItemCollapsibleState.None);
+		super(path, "FILE", object_id, parent, undefined, vscode.TreeItemCollapsibleState.None);
 
 		super.tooltip = this._tooltip;
 	}

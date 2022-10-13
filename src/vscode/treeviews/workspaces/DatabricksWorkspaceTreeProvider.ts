@@ -48,16 +48,16 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 				return Promise.resolve([]);
 			}
 			else {
-				return new DatabricksWorkspaceDirectory("/", -1, "Online", workspaceRootFolder).getChildren();
+				return new DatabricksWorkspaceDirectory("/", 0, workspaceRootFolder).getChildren();
 			}
 		}
 	}
 
-	download(): void {
-		new DatabricksWorkspaceDirectory("/", -1, "Online").download();
+	async download(): Promise<void> {
+		await new DatabricksWorkspaceDirectory("/", 0).download();
 	}
 
-	upload(): void {
-		new DatabricksWorkspaceDirectory("/", -1, "Online").upload();
+	async upload(): Promise<void> {
+		await new DatabricksWorkspaceDirectory("/", 0).upload();
 	}
 }

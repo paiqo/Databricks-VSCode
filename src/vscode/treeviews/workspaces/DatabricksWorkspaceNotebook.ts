@@ -13,24 +13,17 @@ import { FSHelper } from '../../../helpers/FSHelper';
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 
-	private _onlinePathExists: boolean = true;
-	private _localPath: vscode.Uri = undefined;
-	private _isInitialized: boolean = false;
 	private _language: WorkspaceItemLanguage;
 	private _languageFileExtension: LanguageFileExtensionMapper;
 
 	constructor(
 		path: string,
 		object_id: number,
-		source: "Online" | "Local",
 		language: WorkspaceItemLanguage | LanguageFileExtensionMapper = undefined,
 		local_path?: vscode.Uri,
 		parent: DatabricksWorkspaceTreeItem = undefined
 	) {
-		super(path, "NOTEBOOK", object_id, parent, vscode.TreeItemCollapsibleState.None);
-
-		this._localPath = local_path;
-		this._onlinePathExists = source != "Local";
+		super(path, "NOTEBOOK", object_id, parent, local_path, vscode.TreeItemCollapsibleState.None);
 
 		if (language instanceof LanguageFileExtensionMapper) {
 			this._language = language.language;
@@ -143,37 +136,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 	};
 
 	get localFolderPath(): vscode.Uri {
-		return FSHelper.parent(FSHelper.joinPathSync(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.SubfolderConfiguration().Workspace));
-	}
-
-	get localPath(): vscode.Uri {
-		return this._localPath;
-	}
-
-	set localPath(value: vscode.Uri) {
-		this._localPath = value;
-	}
-
-	get localPathExists(): boolean {
-		if (this.localPath) {
-			return true;
-		}
-		return false;
-		/*
-		for (let ext of ThisExtension.allLanguageFileExtensions(this.language)) {
-			let pathToCheck = this.localPath.replace(this.localFileExtension, ext);
-
-			if (fs.existsSync(pathToCheck)) {
-				this._languageFileExtension = LanguageFileExtensionMapper.fromExtension(ext);
-				return true;
-			}
-		}
-		return false;
-		*/
-	}
-
-	get onlinePathExists(): boolean {
-		return this._onlinePathExists;
+		return FSHelper.parent(FSHelper.joinPathSync(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.SubfolderConfiguration().Workspace, this.path));
 	}
 
 	get localFileExtension(): string {
@@ -192,7 +155,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 	}
 
 	public static fromInterface(item: iDatabricksWorkspaceItem, parent: DatabricksWorkspaceTreeItem = null): DatabricksWorkspaceNotebook {
-		let ret = new DatabricksWorkspaceNotebook(item.path, item.object_id, "Online", item.language, null, parent);
+		let ret = new DatabricksWorkspaceNotebook(item.path, item.object_id, item.language, null, parent);
 		return ret;
 	}
 
@@ -211,7 +174,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 			}
 			else
 			{
-				localPath = vscode.Uri.file(this.localFolderPath + "/" + this.label + this.localFileExtension);
+				localPath = await FSHelper.joinPath(this.localFolderPath, this.label + this.localFileExtension);
 			}
 
 			await DatabricksApiService.downloadWorkspaceItemToFile(this.path, localPath, this.exportFormat);
