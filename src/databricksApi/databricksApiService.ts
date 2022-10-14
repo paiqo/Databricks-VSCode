@@ -36,6 +36,7 @@ export abstract class DatabricksApiService {
 		try {
 			ThisExtension.log("Initializing Databricks API Service ...");
 
+			this._isInitialized = false;
 			let accessToken = await ThisExtension.ConnectionManager.getAccessToken(con);
 			this._apiBaseUrl = Helper.trimChar(con.apiRootUrl.toString(true), '/') + this.API_SUB_URL;
 			/*
@@ -69,21 +70,22 @@ export abstract class DatabricksApiService {
 			this._connectionTestRunning = true;
 			let workspaceList = await this.listWorkspaceItems("/");
 			this._connectionTestRunning = false;
-			if (workspaceList.length > 0) {
+			if (workspaceList && workspaceList.length > 0) {
 				ThisExtension.log("Databricks API Service initialized!");
 				this._isInitialized = true;
-				return true;
 			}
 			else {
 				ThisExtension.log(JSON.stringify(workspaceList));
+				vscode.window.showErrorMessage(`Could not initialize Databricks API for URL ${con.apiRootUrl}!`);
 				throw new Error(`Invalid Configuration for Databricks REST API: Cannot access '${con.apiRootUrl}' with token '${accessToken}'!`);
 			}
 		} catch (error) {
 			this._connectionTestRunning = false;
 			ThisExtension.log("ERROR: " + error);
 			vscode.window.showErrorMessage(error);
-			return false;
 		}
+
+		return this.isInitialized;
 	}
 
 	public static get isInitialized(): boolean {
@@ -128,9 +130,9 @@ export abstract class DatabricksApiService {
 	private static getFullUrl(endpoint: string, params?: object): string {
 		let uri = vscode.Uri.parse(this._apiBaseUrl + endpoint);
 
-		if (params && params["params"]) {
+		if (params) {
 			let urlParams = []
-			for (let kvp of Object.entries(params["params"])) {
+			for (let kvp of Object.entries(params)) {
 				urlParams.push(`${kvp[0]}=${kvp[1] as number | string | boolean}`)
 			}
 			uri = uri.with({ query: urlParams.join('&') })
@@ -157,9 +159,10 @@ export abstract class DatabricksApiService {
 
 			let response: Response;
 			try {
-				const config = {
+				const config: RequestInit = {
 					method: "GET",
-					headers: this._headers
+					headers: this._headers,
+					agent: getProxyAgent()
 				};
 				response = await fetch(this.getFullUrl(endpoint, params), config);
 
@@ -189,10 +192,11 @@ export abstract class DatabricksApiService {
 
 		let response: Response;
 		try {
-			const config = {
+			const config: RequestInit = {
 				method: "POST",
 				headers: this._headers,
-				body: bodyType == "JSON" ? JSON.stringify(body): body.toString()
+				body: bodyType == "JSON" ? JSON.stringify(body): body.toString(),
+				agent: getProxyAgent()
 			};
 			response = await fetch(this.getFullUrl(endpoint), config);
 
@@ -204,7 +208,7 @@ export abstract class DatabricksApiService {
 
 				return result;
 			}
-			return await response.text() as T;
+			return await response.text() as any as T;
 		} catch (error) {
 			this.handleApiException(error);
 
@@ -217,10 +221,11 @@ export abstract class DatabricksApiService {
 
 		let response: Response;
 		try {
-			const config = {
+			const config: RequestInit = {
 				method: "PATCH",
 				headers: this._headers,
-				body: JSON.stringify(body)
+				body: JSON.stringify(body),
+				agent: getProxyAgent()
 			};
 			response = await fetch(this.getFullUrl(endpoint), config);
 			let result: T = await response.json() as T
@@ -240,10 +245,11 @@ export abstract class DatabricksApiService {
 
 		let response: Response;
 		try {
-			const config = {
+			const config: RequestInit = {
 				method: "DELETE",
 				headers: this._headers,
-				body: JSON.stringify(body)
+				body: JSON.stringify(body),
+				agent: getProxyAgent()
 			};
 			response = await fetch(this.getFullUrl(endpoint), config);
 			let result: T = await response.json() as T
@@ -272,7 +278,7 @@ export abstract class DatabricksApiService {
 		let endpoint = '2.0/workspace/list';
 		let body = { path: path };
 
-		let response: iDatabricksApiWorkspaceListResponse = await this.get<iDatabricksApiWorkspaceListResponse>(endpoint, { params: body });
+		let response: iDatabricksApiWorkspaceListResponse = await this.get<iDatabricksApiWorkspaceListResponse>(endpoint, body);
 
 		if (!response) {
 			return undefined
@@ -292,7 +298,7 @@ export abstract class DatabricksApiService {
 		let endpoint = '2.0/workspace/get-status';
 		let body = { path: path };
 
-		let response: iDatabricksWorkspaceItem = await this.get<iDatabricksWorkspaceItem>(endpoint, { params: body });
+		let response: iDatabricksWorkspaceItem = await this.get<iDatabricksWorkspaceItem>(endpoint, body);
 
 		if (!response) {
 			return undefined
@@ -310,7 +316,7 @@ export abstract class DatabricksApiService {
 
 		ThisExtension.log(`Downloading '${path}' ...`);
 
-		let response: iDatabricksApiWorkspaceExportResponse = await this.get<iDatabricksApiWorkspaceExportResponse>(endpoint, { params: body });
+		let response: iDatabricksApiWorkspaceExportResponse = await this.get<iDatabricksApiWorkspaceExportResponse>(endpoint, body);
 
 		return await Buffer.from(response.content, 'base64') as Uint8Array;
 	}
@@ -454,7 +460,7 @@ export abstract class DatabricksApiService {
 			commandId: command.command_id
 		};
 
-		let response: iDatabricksApiCommandsStatusResponse = await this.get<iDatabricksApiCommandsStatusResponse>(endpoint, { params: body });
+		let response: iDatabricksApiCommandsStatusResponse = await this.get<iDatabricksApiCommandsStatusResponse>(endpoint, body);
 
 		return response;
 	}
@@ -567,7 +573,7 @@ export abstract class DatabricksApiService {
 		let jobs: iDatabricksJob[] = [];
 		do {
 			
-			response = await this.get<iDatabricksApiJobsListResponse>(endpoint, { params: body });
+			response = await this.get<iDatabricksApiJobsListResponse>(endpoint, body);
 
 			if (!response) {
 				break;
@@ -612,7 +618,7 @@ export abstract class DatabricksApiService {
 
 		let jobRuns: iDatabricksJobRun[] = [];
 		do {
-			response = await this.get<iDatabricksApiJobsRunsListResponse>(endpoint, { params: body });
+			response = await this.get<iDatabricksApiJobsRunsListResponse>(endpoint, body);
 
 			if (!response) {
 				break;
@@ -659,7 +665,7 @@ export abstract class DatabricksApiService {
 			run_id: run_id
 		};
 
-		let response = await this.get(endpoint, { params: body });
+		let response = await this.get(endpoint, body);
 
 		let result = await response.json() as any;
 
@@ -672,7 +678,7 @@ export abstract class DatabricksApiService {
 		let endpoint = '2.0/dbfs/list';
 		let body = { path: path };
 
-		let response: iDatabricksApiDbfsListResponse = await this.get<iDatabricksApiDbfsListResponse>(endpoint, { params: body });
+		let response: iDatabricksApiDbfsListResponse = await this.get<iDatabricksApiDbfsListResponse>(endpoint, body);
 
 		if (!response) {
 			return undefined;
@@ -692,7 +698,7 @@ export abstract class DatabricksApiService {
 		let endpoint = '2.0/dbfs/get-status';
 		let body = { path: path };
 
-		let response: iDatabricksFSItem = await this.get<iDatabricksFSItem>(endpoint, { params: body });
+		let response: iDatabricksFSItem = await this.get<iDatabricksFSItem>(endpoint, body);
 
 		if (!response) {
 			return undefined;
@@ -711,7 +717,7 @@ export abstract class DatabricksApiService {
 		};
 
 		// we do not want to log every single file content!
-		let response: iDatabricksApiDbfsReadResponse = await this.get<iDatabricksApiDbfsReadResponse>(endpoint, { params: body }, false);
+		let response: iDatabricksApiDbfsReadResponse = await this.get<iDatabricksApiDbfsReadResponse>(endpoint, body, false);
 		//this.logResponse(response);
 
 		return response;
@@ -892,7 +898,7 @@ export abstract class DatabricksApiService {
 		let endpoint = '2.0/secrets/list';
 		let body = { scope: scope };
 
-		let response: iDatabricksApiSecretsListResponse = await this.get<iDatabricksApiSecretsListResponse>(endpoint, { params: body });
+		let response: iDatabricksApiSecretsListResponse = await this.get<iDatabricksApiSecretsListResponse>(endpoint, body);
 
 		if(!response)
 		{
@@ -949,7 +955,7 @@ export abstract class DatabricksApiService {
 
 		let repos: iDatabricksRepo[] = [];
 		do {
-			response = await this.get<iDatabricksApiRepoListResponse>(endpoint, { params: body });
+			response = await this.get<iDatabricksApiRepoListResponse>(endpoint, body);
 
 			if (!response) {
 				break;

@@ -281,7 +281,7 @@ export abstract class ThisExtension {
 		return undefined;
 	}
 
-	static get rejectUnauthorizedSSL(): boolean {
+	static get useStrictSSL(): boolean {
 		let httpProxyStrictSSL: ConfigSetting<boolean> = ThisExtension.getConfigurationSetting<boolean>("http.proxyStrictSSL");
 
 		// check if Strict Proxy SSL is NOT enabled

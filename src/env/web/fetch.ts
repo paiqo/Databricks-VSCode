@@ -4,7 +4,10 @@ import type { HttpsProxyAgent } from 'https-proxy-agent';
 
 declare global {
 	interface RequestInit {
+		method?: string;
 		agent?: HttpsProxyAgent | undefined;
+		body?: BodyInit;
+		headers?: HeadersInit;
 	}
 } 
 
