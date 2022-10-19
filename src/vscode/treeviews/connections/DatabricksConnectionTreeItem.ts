@@ -85,7 +85,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 
 	private getIconPath(theme: string): vscode.Uri {
 		let state = this.isActive ? 'connected' : 'disconnected';
-		return FSHelper.joinPathSync(ThisExtension.rootPath, 'resources', theme, state + '.png');
+		return FSHelper.joinPathSync(ThisExtension.rootUri, 'resources', theme, state + '.png');
 	}
 
 

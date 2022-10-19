@@ -99,7 +99,7 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 		if (this.state == "PENDING") {
 			state = "pending";
 		}
-		return FSHelper.joinPathSync(ThisExtension.rootPath, 'resources', theme, state + '.png');
+		return FSHelper.joinPathSync(ThisExtension.rootUri, 'resources', theme, state + '.png');
 	}
 
 	readonly command = {

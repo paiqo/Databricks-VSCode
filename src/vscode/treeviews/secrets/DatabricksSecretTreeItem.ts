@@ -38,6 +38,11 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 
 	}
 
+	get dragAndDropText(): string {
+		// needs to be overwritten in derived class
+		throw new Error("Not implemented!");
+	}
+
 	async refreshParent(): Promise<void> {
 		vscode.commands.executeCommand("databricksSecrets.refresh", false, this.parent);
 	}

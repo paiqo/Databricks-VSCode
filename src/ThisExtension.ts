@@ -21,9 +21,7 @@ export abstract class ThisExtension {
 	private static _sensitiveValueStore: SensitiveValueStore;
 	private static _sqlClusterId: string;
 
-	static get rootPath(): vscode.Uri {
-		return this._context.extensionUri;
-	}
+	public static ActiveConnection: iDatabricksConnection;
 
 	static get rootUri(): vscode.Uri {
 		return this._context.extensionUri;
@@ -43,8 +41,6 @@ export abstract class ThisExtension {
 		}
 		return this.ActiveConnection.displayName;
 	}
-
-	static ActiveConnection: iDatabricksConnection;
 
 	static get RefreshAfterUpDownload(): boolean {
 		return true;
@@ -269,12 +265,10 @@ export abstract class ThisExtension {
 
 		// only check if proxySupport is explicitly set to "off"
 		if (httpProxySupport.value == "off") {
-			this.log('Proxy support is disabled due to setting "http.proxySupport": "off"!');
 			return false;
 		}
 
 		if (httpProxySupport.value == "on") {
-			this.log('Proxy support is enabled due to setting "http.proxySupport": "on"!');
 			return true;
 		}
 

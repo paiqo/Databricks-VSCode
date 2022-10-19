@@ -132,8 +132,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 
 	// register DatabricksSecretTreeProvider
-	let databricksSecretTreeProvider = new DatabricksSecretTreeProvider();
-	vscode.window.registerTreeDataProvider('databricksSecrets', databricksSecretTreeProvider);
+	let databricksSecretTreeProvider = new DatabricksSecretTreeProvider(context);
+	//vscode.window.registerTreeDataProvider('databricksSecrets', databricksSecretTreeProvider);
 	vscode.commands.registerCommand('databricksSecrets.refresh', (showInfoMessage: boolean = true) => databricksSecretTreeProvider.refresh(showInfoMessage));
 	vscode.commands.registerCommand('databricksSecrets.addSecretScope', () => databricksSecretTreeProvider.addSecretScope());
 	vscode.commands.registerCommand('databricksSecretScope.delete', (scope: DatabricksSecretScope) => scope.delete());

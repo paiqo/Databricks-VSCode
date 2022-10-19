@@ -54,7 +54,7 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 
 	protected getIconPath(theme: string): vscode.Uri {
 		let itemType = (this.is_dir ? 'directory' : 'notebook');
-		return FSHelper.joinPathSync(ThisExtension.rootPath, 'resources', theme, 'workspace', itemType + '.png');
+		return FSHelper.joinPathSync(ThisExtension.rootUri, 'resources', theme, 'workspace', itemType + '.png');
 	}
 
 	readonly command = null;

@@ -54,6 +54,16 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 
 # Release Notes
 
+**v1.2.0:**
+- fixed an issue with `%run` and absolute paths ([#93][i93])
+- fixed an issue with `Files in Repos` ([#101][i101])
+- fixed an issues with CLI Connection Manager ([#99][i99])
+- fixed an issue when up-/downloading whole folders recursively in [Workspace Manager](#workspace-manager)
+- prepare to make extension work in the web
+  - reworked API connection to use generic [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) instead of Axios library
+  - added build config for web-extension
+  - removed all external dependencies
+
 **v1.1.4:**
 - added support for `dbutils.notebook.run` in Live-mode (via mounting `dbws:/...` in VSCode workspace)
 - fixed some issues with legacy DBFS and Workspace browser

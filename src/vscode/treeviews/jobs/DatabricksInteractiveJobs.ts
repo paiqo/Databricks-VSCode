@@ -28,7 +28,7 @@ export class DatabricksInteractiveJobs extends DatabricksJobTreeItem {
 	}
 
 	protected  getIconPath(theme: string): vscode.Uri {
-		return FSHelper.joinPathSync(ThisExtension.rootPath, 'resources', theme, 'workspace', 'directory' + '.png');
+		return FSHelper.joinPathSync(ThisExtension.rootUri, 'resources', theme, 'workspace', 'directory' + '.png');
 	}
 
 	readonly command = null;

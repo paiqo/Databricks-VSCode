@@ -20,7 +20,7 @@ export class DatabricksClusterJobClusters extends DatabricksClusterTreeItem {
 	}
 
 	private getIconPath(theme: string): vscode.Uri {
-		return FSHelper.joinPathSync(ThisExtension.rootPath, 'resources', theme, "workspace", "directory" + '.png');
+		return FSHelper.joinPathSync(ThisExtension.rootUri, 'resources', theme, "workspace", "directory" + '.png');
 	}
 
 	async getChildren(): Promise<DatabricksClusterTreeItem[]> {

@@ -30,7 +30,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 	readonly notebookType: KernelType;
 	readonly description: string = 'Execute code on a remote Databricks cluster';
 	readonly detail: string = 'Some more detils ...';
-	readonly supportedLanguages = []; // ["python", "sql", "r", "markdown", "scala"];
+	readonly supportedLanguages = ["python", "sql", "r", "markdown", "scala"];
 	readonly supportsExecutionOrder: boolean = true;
 
 	private _controller: vscode.NotebookController;
@@ -60,6 +60,8 @@ export class DatabricksKernel implements vscode.NotebookController {
 		this._controller.supportsExecutionOrder = this.supportsExecutionOrder;
 		this._controller.executeHandler = this.executeHandler.bind(this);
 		this._controller.dispose = this.disposeController.bind(this);
+		this._controller.updateNotebookAffinity = this.updateNotebookAffinity.bind(this);
+		this._controller.onDidChangeSelectedNotebooks(this._onDidChangeSelectedNotebooks, this, []);
 
 		ThisExtension.PushDisposable(this);
 	}
@@ -135,12 +137,13 @@ export class DatabricksKernel implements vscode.NotebookController {
 		// if we are working with a notebook from the Databricks Repos folder (works with dbws:/ and locally synced notebooks)
 		if (paths.includes("Repos")) {
 			ThisExtension.log("NotebookKernel: Setting up FilesInRepo support for " + notebookUri);
-			let driverPath: string = `/Workspace/${paths.slice(paths.indexOf("Repos"), paths.indexOf("Repos") + 3).join(FSHelper.SEPARATOR)}`
+			let driverRepoPath: string = `/Workspace/${paths.slice(paths.indexOf("Repos"), paths.indexOf("Repos") + 3).join(FSHelper.SEPARATOR)}`
+			let driverNotebookDirectory: string = `/Workspace${FSHelper.parent(notebookUri).path}`;
 			let context: ExecutionContext = this.getNotebookContext(notebookUri);
-			let commandText: string = `import sys \nsys.path.append('${driverPath}')`;
-			let command: ExecutionCommand = await DatabricksApiService.runCommand(context, commandText, "python");
+			let commandTexts: string[] = ["import sys", "import os", `sys.path.append('${driverRepoPath}')`, `os.chdir('${driverNotebookDirectory}')`];
+			let command: ExecutionCommand = await DatabricksApiService.runCommand(context, commandTexts.join("\n"), "python");
 			let result = await DatabricksApiService.getCommandResult(command, true, true);
-			ThisExtension.log(`NotebookKernel: Successfully set up FilesInRepo by running sys.path.append('${driverPath}')`)
+			ThisExtension.log(`NotebookKernel: Successfully set up FilesInRepo by running '${commandTexts[2]}' and '${commandTexts[3]}' on driver!`);
 		}
 	}
 
@@ -149,9 +152,18 @@ export class DatabricksKernel implements vscode.NotebookController {
 		return null;
 	}
 	interruptHandler?: (notebook: vscode.NotebookDocument) => void | Thenable<void>;
-	onDidChangeSelectedNotebooks: vscode.Event<{ readonly notebook: vscode.NotebookDocument; readonly selected: boolean; }>;
+	readonly onDidChangeSelectedNotebooks: vscode.Event<{ readonly notebook: vscode.NotebookDocument; readonly selected: boolean; }>;
+	private async _onDidChangeSelectedNotebooks(event: { notebook: vscode.NotebookDocument; selected: boolean }) {
+		// TODO: this could should help to make the Databricks Kernel more prominent for notebooks loaded via Databricks extension
+		if (event.notebook.uri.scheme == "dbws" || event.notebook.uri.toString().startsWith(ThisExtension.ActiveConnection.localSyncFolder.toString())) {
+			this._controller.updateNotebookAffinity(event.notebook, vscode.NotebookControllerAffinity.Preferred);
+		}
+	}
 	updateNotebookAffinity(notebook: vscode.NotebookDocument, affinity: vscode.NotebookControllerAffinity): void {
-		//throw new Error('Method not implemented.');
+
+		//let x = "updateNotebookAffinity";
+
+		//ThisExtension.log(x);
 	}
 
 
@@ -230,7 +242,25 @@ export class DatabricksKernel implements vscode.NotebookController {
 					return;
 				case "run":
 					let runFile: string = Helper.trimChar(commandText.substring(commandText.indexOf(' ') + 1), '"');
-					let runUri: vscode.Uri = vscode.Uri.joinPath(FSHelper.parent(cell.notebook.uri), runFile);
+
+					let runUri: vscode.Uri;
+					if (runFile.startsWith("./")) // relative path provided
+					{
+						runUri = await FSHelper.joinPath(FSHelper.parent(cell.notebook.uri), runFile);
+					}
+					else { // absolute path provided
+						switch (cell.notebook.uri.scheme) {
+							case "dbws":
+								runUri = vscode.Uri.file(runFile);
+								break;
+							case "file":
+								runUri = await FSHelper.joinPath(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ActiveConnection.localSyncSubfolders.Workspace, runFile);
+								break;
+							default:
+								throw new Error("%run is not supported for FileSystem scheme '" + runUri.scheme + "'!");
+						}
+					}
+
 					ThisExtension.log("Executing %run for '" + runUri + "' ...");
 					switch (runUri.scheme) {
 						case "dbws":
@@ -274,7 +304,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 					ThisExtension.log("Finished getting actual code for %run '" + runUri + "' ...");
 					break;
 			}
-			
+
 			let command = await DatabricksApiService.runCommand(context, commandText, language);
 			execution.token.onCancellationRequested(() => {
 				DatabricksApiService.cancelCommand(command);

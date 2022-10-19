@@ -53,7 +53,14 @@ export abstract class FSHelper {
 	}
 
 	static parent(uri: vscode.Uri): vscode.Uri {
-		return uri.with({ path: uri.path.split(this.SEPARATOR).slice(0, -1).join(this.SEPARATOR) });
+		let parentPaths = uri.path.split(this.SEPARATOR).slice(0, -1);
+		let parentPath: string = "/";
+
+		if(parentPaths.length > 1)
+		{
+			parentPath = parentPaths.join(this.SEPARATOR)
+		}
+		return uri.with({ path: parentPath });
 	}
 
 	static removeExtension(uri: vscode.Uri): vscode.Uri {

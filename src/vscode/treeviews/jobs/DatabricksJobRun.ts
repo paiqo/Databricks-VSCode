@@ -67,7 +67,7 @@ export class DatabricksJobRun extends DatabricksJobTreeItem {
 	protected getIconPath(theme: string): vscode.Uri {
 		let state: string = this.state;
 
-		return FSHelper.joinPathSync(ThisExtension.rootPath, 'resources', theme, state + '.png');
+		return FSHelper.joinPathSync(ThisExtension.rootUri, 'resources', theme, state + '.png');
 	}
 
 	readonly command = {

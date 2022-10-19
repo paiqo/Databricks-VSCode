@@ -6,6 +6,7 @@ import { DatabricksSecretTreeItem } from './DatabricksSecretTreeItem';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { iDatabricksSecretScope } from './iDatabricksSecretScope';
 import { DatabricksSecretScope } from './DatabricksSecretScope';
+import { DatabricksSecretDragAndDropController } from './DatabricksSecretDragAndDropController';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
@@ -13,7 +14,18 @@ export class DatabricksSecretTreeProvider implements vscode.TreeDataProvider<Dat
 	private _onDidChangeTreeData: vscode.EventEmitter<DatabricksSecretTreeItem | undefined> = new vscode.EventEmitter<DatabricksSecretTreeItem | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<DatabricksSecretTreeItem | undefined> = this._onDidChangeTreeData.event;
 
-	constructor() { }
+	constructor(context: vscode.ExtensionContext) {
+		const view = vscode.window.createTreeView('databricksSecrets', { treeDataProvider: this, showCollapseAll: true, canSelectMany: true, dragAndDropController: new DatabricksSecretDragAndDropController() });
+		context.subscriptions.push(view);
+
+		view.onDidChangeSelection((event) => this._onDidChangeSelection(event.selection));
+
+		//ThisExtension.TreeViewWorkspaces = this;
+	}
+
+	private async _onDidChangeSelection(items: readonly DatabricksSecretTreeItem[]): Promise<void>
+	{
+	}
 
 	refresh(showInfoMessage: boolean = false): void {
 		if (showInfoMessage) {

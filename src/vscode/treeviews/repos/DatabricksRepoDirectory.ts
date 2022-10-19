@@ -34,7 +34,7 @@ export class DatabricksRepoDirectory extends DatabricksRepoTreeItem {
 	}
 
 	protected getIconPath(theme: string): vscode.Uri {
-		return FSHelper.joinPathSync(ThisExtension.rootPath, 'resources', theme, 'repos', 'directory' + '.png');
+		return FSHelper.joinPathSync(ThisExtension.rootUri, 'resources', theme, 'repos', 'directory' + '.png');
 	}
 
 	public async getChildren(): Promise<DatabricksRepoTreeItem[]> {

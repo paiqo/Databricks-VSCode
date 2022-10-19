@@ -33,7 +33,7 @@ export class DatabricksSQLTreeItem extends vscode.TreeItem {
 	}
 
 	private getIconPath(theme: string): vscode.Uri {
-		return FSHelper.joinPathSync(ThisExtension.rootPath, 'resources', theme, 'sql',  this.itemType.toLowerCase() + '.png');
+		return FSHelper.joinPathSync(ThisExtension.rootUri, 'resources', theme, 'sql',  this.itemType.toLowerCase() + '.png');
 	}
 
 	private getCommand(): vscode.Command {

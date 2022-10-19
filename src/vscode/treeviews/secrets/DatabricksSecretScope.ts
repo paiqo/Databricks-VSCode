@@ -44,7 +44,7 @@ export class DatabricksSecretScope extends DatabricksSecretTreeItem {
 	}
 
 	private getIconPath(theme: string): vscode.Uri {
-		return FSHelper.joinPathSync(ThisExtension.rootPath, 'resources', theme, 'workspace', 'directory' + '.png');
+		return FSHelper.joinPathSync(ThisExtension.rootUri, 'resources', theme, 'workspace', 'directory' + '.png');
 	}
 
 	get Scope(): string {
@@ -65,6 +65,10 @@ export class DatabricksSecretScope extends DatabricksSecretTreeItem {
 		}
 
 		return secretItems;
+	}
+
+	get dragAndDropText(): string {
+		return `dbutils.secrets.list("${this.Scope}")`;
 	}
 
 	async add(): Promise<void> {
