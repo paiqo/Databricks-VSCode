@@ -384,7 +384,8 @@
 				{
 					"id": "DatabricksConnections",
 					"name": "Connections",
-					"type": "tree"
+					"type": "tree",
+					"initialSize": 25
 				},
 				{
 					"id": "databricksWorkspace",
