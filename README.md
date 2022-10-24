@@ -54,7 +54,9 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 
 # Release Notes
 
-**v1.2.0:**
+**v1.2.1:**
+- added `Restart Kernel` to Databricks notebooks
+- added details specs of cluster to Notebook Kernel selector
 - fixed an issue with `%run` and absolute paths ([#93](/../../issues/93))
 - fixed an issue with `Files in Repos` ([#101](/../../issues/101))
 - fixed an issues with CLI Connection Manager ([#99](/../../issues/99))
@@ -172,13 +174,13 @@ To configure multiple Databricks Connections/workspaces, you need to use the JSO
 		"databricks.connectionManager": "VSCode Settings",
 		"databricks.connections": [
 			{
-				"apiRootUrl": "https://westeurope.azuredatabricks.net",
+				"apiRootUrl": "https://adb-98765421987.65.azuredatabricks.net",
 				"displayName": "My DEV workspace",
 				"localSyncFolder": "c:\\Databricks\\dev",
-				"personalAccessToken": "dapi219e30212312311c6721a66ce879e"
+				"personalAccessToken": "dapi219e30212312311c672bbbbbbbbbb"
 			},
 			{
-				"apiRootUrl": "https://westeurope.azuredatabricks.net",
+				"apiRootUrl": "https://adb-123456789123.45.azuredatabricks.net",
 				"displayName": "My TEST workspace",
 				"localSyncFolder": "c:\\Databricks\\test",
 				"personalAccessToken": "dapi219e30212312311c672aaaaaaaaaa"
@@ -297,7 +299,7 @@ The File System Integration allows you to mount DBFS and the Databricks workspac
 ![SQL Browser](/images/SQLBrowser.jpg?raw=true "SQL Browser")
 
 The SQL Browser is similar to the Data tab in the Databricks Web UI. It shows you all object that exist in the Hive metastore. To use the SQL Browser you first need to have a running cluster as the Hive metastore can only be browsed via a cluster. By default, the first running cluster is selected for you automatically. However, you can also change the cluster you want to use in the [Cluster Manager](#cluster-manager) by right-clicking the cluster of your choice and clicking `Use for SQL Browser`.
-For large databases with a lot of tables, it can take quite some time to load all details so please be patient!
+For large databases with a lot of tables, it can take quite some time to load all details so please be patient! This is because once you expand a database, the definition of all its tables are queried one by one to get and show all relevant information in the SQL browser then.
 
 # Job Manager
 ![Job Manager](/images/JobManager.jpg?raw=true "Job Manager")

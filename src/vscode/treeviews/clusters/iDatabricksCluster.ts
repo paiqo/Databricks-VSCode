@@ -25,11 +25,11 @@ export interface iDatabricksCluster {
 	cluster_cores:	number;
 	custom_tags?: {
 		ResourceClass?: string
-	}
+	},
+	executors: any[]
 
 	/*
 	driver:	SparkNode
-	executors:	An array of SparkNode
 	spark_context_id	INT64
 	jdbc_port	INT32
 	spark_conf	SparkConfPair	

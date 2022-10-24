@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Extension to manage your Databricks workspace and ease local development",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -698,6 +698,13 @@
 				"command": "databricksRepo.delete",
 				"title": "Delete",
 				"icon": "$(remove-close)"
+			},
+			{
+				"command": "databricksKernel.restart",
+				"title": "Restart Spark Context",
+				"shortTitle": "Restart",
+				"icon": "$(debug-restart)",
+				"category": "Jupyter"
 			}
 		],
 		"menus": {
@@ -920,6 +927,11 @@
 					"group": "inline@99"
 				},
 				{
+					"command": "databricksSQL.refresh",
+					"when": "view == databricksSQL && viewItem == DATABASE",
+					"group": "inline"
+				},
+				{
 					"command": "databricksSQLTable.showDefinition",
 					"when": "view == databricksSQL && viewItem == TABLE",
 					"group": "inline"
@@ -938,6 +950,29 @@
 					"command": "databricksRepo.delete",
 					"when": "view == databricksRepos && viewItem == REPOSITORY",
 					"group": "inline@99"
+				}
+			],
+			"notebook/toolbar": [
+				{
+					"command": "databricksKernel.restart",
+					"title": "Restart Spark Context",
+					"group": "navigation/execute@1",
+					"when": "notebookKernel =~ /^paiqo.databricks-vscode\\// && notebookType == 'jupyter-notebook' && isWorkspaceTrusted"
+				}
+			],
+			"editor/title": [
+				{
+					"command": "databricksKernel.restart",
+					"title": "Restart Spark Context",
+					"group": "navigation@1",
+					"when": "notebookKernel =~ /^paiqo.databricks-vscode\\// && notebookType == 'jupyter-notebook' && isWorkspaceTrusted"
+				}
+			],
+			"interactive/toolbar": [
+				{
+					"command": "databricksKernel.restart",
+					"group": "navigation@1",
+					"when": "notebookKernel =~ /^paiqo.databricks-vscode\\// && isWorkspaceTrusted || isWorkspaceTrusted && !notebookKernel"
 				}
 			]
 		}

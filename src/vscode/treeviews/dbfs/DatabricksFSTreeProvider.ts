@@ -24,7 +24,7 @@ export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<Databri
 		return element;
 	}
 
-	getParent(element: DatabricksFSTreeItem): vscode.ProviderResult<DatabricksFSTreeItem> {
+	async getParent(element: DatabricksFSTreeItem): Promise<DatabricksFSTreeItem> {
 		return element.parent;
 	}
 

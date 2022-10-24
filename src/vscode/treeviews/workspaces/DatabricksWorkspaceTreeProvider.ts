@@ -26,7 +26,7 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 		return element;
 	}
 
-	getParent(element: DatabricksWorkspaceTreeItem): vscode.ProviderResult<DatabricksWorkspaceTreeItem> {
+	async getParent(element: DatabricksWorkspaceTreeItem): Promise<DatabricksWorkspaceTreeItem> {
 		return element.parent;
 	}
 

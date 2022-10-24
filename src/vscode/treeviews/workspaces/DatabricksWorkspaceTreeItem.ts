@@ -35,7 +35,7 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		this.init();
 	}
 
-	init(): void {
+	async init(): Promise<void> {
 		super.label = this.path.split('/').pop();
 
 		super.iconPath = {
@@ -113,6 +113,6 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	}
 
 	async refreshParent(): Promise<void> {
-		vscode.commands.executeCommand("databricksWorkspace.refresh", false, this.parent);
+		vscode.commands.executeCommand("databricksWorkspace.refresh", this.parent, false);
 	}
 }

@@ -40,7 +40,7 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		this.init();
 	}
 
-	init(): void {
+	async init(): Promise<void> {
 		// we can only run initialize for this class after all values had been set in the constructor
 		// but we must not run it as part of the call to super()
 		if (this._isInitialized) {
@@ -112,6 +112,6 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 	}
 
 	async refreshParent(): Promise<void> {
-		vscode.commands.executeCommand("databricksFS.refresh", false, this.parent);
+		vscode.commands.executeCommand("databricksFS.refresh", this.parent,false);
 	}
 }

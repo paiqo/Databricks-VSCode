@@ -17,15 +17,19 @@ export class DatabricksSQLTreeProvider implements vscode.TreeDataProvider<Databr
 
 	constructor() { }
 
-	refresh(showInfoMessage: boolean = false): void {
+	async refresh(showInfoMessage: boolean = false, item: DatabricksSQLTreeItem = null): Promise<void> {
 		if (showInfoMessage) {
 			Helper.showTemporaryInformationMessage('Refreshing SQL ...');
 		}
-		this._onDidChangeTreeData.fire(null);
+		this._onDidChangeTreeData.fire(item);
 	}
 
-	getTreeItem(element: DatabricksSQLTreeItem): vscode.TreeItem {
+	async getTreeItem(element: DatabricksSQLTreeItem): Promise<vscode.TreeItem> {
 		return element;
+	}
+
+	async getParent(element: DatabricksSQLTreeItem): Promise<DatabricksSQLTreeItem> {
+		return element.parent;
 	}
 
 	async getChildren(element?: DatabricksSQLTreeItem): Promise<DatabricksSQLTreeItem[]> {
@@ -50,7 +54,7 @@ export class DatabricksSQLTreeProvider implements vscode.TreeDataProvider<Databr
 
 				let databases: DatabricksSQLDatabase[] = [];
 				for (let db of result.results.data) {
-					databases.push(new DatabricksSQLDatabase(db[0], context));
+					databases.push(new DatabricksSQLDatabase(db[0], context, undefined));
 				}
 
 				return databases;

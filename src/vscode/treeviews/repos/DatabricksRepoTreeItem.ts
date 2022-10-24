@@ -32,6 +32,6 @@ export class DatabricksRepoTreeItem extends vscode.TreeItem {
 	}
 
 	async refreshParent(): Promise<void> {
-		vscode.commands.executeCommand("databricksRepos.refresh", false, this.parent);
+		vscode.commands.executeCommand("databricksRepos.refresh", this.parent, false);
 	}
 }

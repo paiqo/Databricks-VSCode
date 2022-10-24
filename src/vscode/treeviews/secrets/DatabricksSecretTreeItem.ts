@@ -44,6 +44,6 @@ export class DatabricksSecretTreeItem extends vscode.TreeItem {
 	}
 
 	async refreshParent(): Promise<void> {
-		vscode.commands.executeCommand("databricksSecrets.refresh", false, this.parent);
+		vscode.commands.executeCommand("databricksSecrets.refresh", this.parent, false);
 	}
 }

@@ -13,19 +13,19 @@ export class DatabricksConnectionTreeProvider implements vscode.TreeDataProvider
 
 	constructor() { }
 
-	refresh(showInfoMessage: boolean = false): void {
+	async refresh(showInfoMessage: boolean = false, item: DatabricksConnectionTreeItem = null): Promise<void> {
 		if (showInfoMessage) {
 			Helper.showTemporaryInformationMessage('Refreshing Connections ...');
 		}
 		ThisExtension.ConnectionManager.initialize();
-		this._onDidChangeTreeData.fire(null);
+		this._onDidChangeTreeData.fire(item);
 	}
 
-	getTreeItem(element: DatabricksConnectionTreeItem): vscode.TreeItem {
+	async getTreeItem(element: DatabricksConnectionTreeItem): Promise<vscode.TreeItem> {
 		return element;
 	}
 
-	getChildren(element?: DatabricksConnectionTreeItem): Thenable<DatabricksConnectionTreeItem[]> {
+	async getChildren(element?: DatabricksConnectionTreeItem): Promise<DatabricksConnectionTreeItem[]> {
 		let items: iDatabricksConnection[] = ThisExtension.ConnectionManager.Connections;
 
 		let envItems: DatabricksConnectionTreeItem[] = [];

@@ -19,18 +19,18 @@ export class DatabricksJobTreeProvider implements vscode.TreeDataProvider<Databr
 		while (true) {
 			await new Promise(resolve => setTimeout(resolve, timeoutSeconds * 1000));
 			
-			this.refresh(false);
+			this.refresh(false, undefined);
 		}
 	}
 
-	refresh(showInfoMessage: boolean = false): void {
+	async refresh(showInfoMessage: boolean = false, item: DatabricksJobTreeItem): Promise<void> {
 		if(showInfoMessage){
 			Helper.showTemporaryInformationMessage('Refreshing Jobs ...');
 		}
-		this._onDidChangeTreeData.fire(null);
+		this._onDidChangeTreeData.fire(item);
 	}
 
-	getTreeItem(element: DatabricksJobTreeItem): vscode.TreeItem {
+	async getTreeItem(element: DatabricksJobTreeItem): Promise<vscode.TreeItem> {
 		return element;
 	}
 

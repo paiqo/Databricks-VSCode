@@ -120,6 +120,6 @@ export class DatabricksJob extends DatabricksJobTreeItem {
 			vscode.window.showErrorMessage(`ERROR: ${error}`);
 		});
 
-		setTimeout(() => vscode.commands.executeCommand("databricksJobs.refresh", false), 2000);
+		setTimeout(() => vscode.commands.executeCommand("databricksJobs.refresh", undefined, false), 2000);
 	}
 }

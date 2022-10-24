@@ -319,7 +319,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 
 		this._isActive = true;
 
-		vscode.commands.executeCommand("databricksConnections.refresh", false);
+		vscode.commands.executeCommand("databricksConnections.refresh", undefined, false);
 	}
 
 	get WorkspaceSubFolder(): string {

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
+import { FSHelper } from '../../../helpers/FSHelper';
 import { Helper } from '../../../helpers/Helper';
 import { ThisExtension } from '../../../ThisExtension';
 import { DatabricksKernelManager } from '../../notebook/DatabricksKernelManager';
@@ -24,7 +25,7 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 		}
 	}
 
-	refresh(showInfoMessage: boolean = false, isAutoRefresh = false, item: DatabricksClusterTreeItem = null): void {
+	async refresh(showInfoMessage: boolean = false, isAutoRefresh = false, item: DatabricksClusterTreeItem = null): Promise<void> {
 		if (showInfoMessage && !isAutoRefresh) {
 			Helper.showTemporaryInformationMessage('Refreshing Clusters ...');
 		}
@@ -35,7 +36,7 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 		this._onDidChangeTreeData.fire(item);
 	}
 
-	getTreeItem(element: DatabricksClusterTreeItem): vscode.TreeItem {
+	async getTreeItem(element: DatabricksClusterTreeItem): Promise<vscode.TreeItem> {
 		return element;
 	}
 
@@ -74,7 +75,11 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 		}
 	}
 
-	add(): void {
-		vscode.window.showErrorMessage(`Not yet implemented!`);
+	async add(): Promise<void> {
+		let actConn = ThisExtension.ActiveConnection;
+		//https://adb-1232342536639.99.azuredatabricks.net/#create/cluster
+		let link: string = Helper.trimChar(FSHelper.joinPathSync(actConn.apiRootUrl, "#create/cluster").toString(), '/');
+		
+		await Helper.openLink(link);
 	}
 }

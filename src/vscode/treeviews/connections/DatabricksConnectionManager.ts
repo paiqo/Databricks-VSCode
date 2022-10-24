@@ -61,13 +61,13 @@ export abstract class DatabricksConnectionManager {
 			{
 				Helper.delay(100);
 
-				vscode.commands.executeCommand("databricksWorkspace.refresh", false);
-				vscode.commands.executeCommand("databricksClusters.refresh", false);
-				vscode.commands.executeCommand("databricksJobs.refresh", false);
-				vscode.commands.executeCommand("databricksFS.refresh", false);
-				vscode.commands.executeCommand("databricksSecrets.refresh", false);
-				vscode.commands.executeCommand("databricksSQL.refresh", false);
-				vscode.commands.executeCommand("databricksRepos.refresh", false);
+				vscode.commands.executeCommand("databricksWorkspace.refresh", undefined, false);
+				vscode.commands.executeCommand("databricksClusters.refresh", undefined, false);
+				vscode.commands.executeCommand("databricksJobs.refresh", undefined, false);
+				vscode.commands.executeCommand("databricksFS.refresh", undefined, false);
+				vscode.commands.executeCommand("databricksSecrets.refresh", undefined, false);
+				vscode.commands.executeCommand("databricksSQL.refresh", undefined, false);
+				vscode.commands.executeCommand("databricksRepos.refresh", undefined, false);
 			}
 		}
 	}

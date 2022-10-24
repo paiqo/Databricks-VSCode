@@ -28,7 +28,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 		this.init();
 	}
 
-	init(): void {
+	async init(): Promise<void> {
 		// we can only run initialize for this class after all values had been set in the constructor
 		// but we must not run it as part of the call to super()
 		if (this._isInitialized) {
@@ -124,17 +124,23 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 			for (let local of localContent) {
 				let localUri: vscode.Uri = await FSHelper.joinPath(this.localPath, local[0]);
 				let shownLocalFile = FSHelper.basename(localUri);
+				let origianalLocalFile = shownLocalFile;
 
 				if (local[1] == vscode.FileType.File) // remove extension
 				{
 					shownLocalFile = FSHelper.basename(FSHelper.removeExtension(localUri));
 				}
-				let localRelativePath = FSHelper.join(this.path, shownLocalFile);
+				let shownLocalRelativePath = FSHelper.join(this.path, shownLocalFile);
+				let originalLocalRelativePath = FSHelper.join(this.path, origianalLocalFile);
 
-				if (!onlinePaths.includes(localRelativePath)) {
+				if (!onlinePaths.includes(shownLocalRelativePath) && !onlinePaths.includes(originalLocalRelativePath)) {
 					let languageFileExtension: LanguageFileExtensionMapper = undefined;
 
 					if (local[1] == vscode.FileType.File) {
+						if(localUri.path.includes("/Repos/"))
+						{
+							// TODO: special case for Repos where also regular files are supported!
+						}
 						let ext = LanguageFileExtensionMapper.extensionFromFileName(FSHelper.basename(localUri));
 
 						if (LanguageFileExtensionMapper.supportedFileExtensions.includes(ext)
@@ -145,16 +151,16 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 							vscode.window.showWarningMessage("File " + localUri + " has no valid extension and will be ignored! Supported extensions can be confiugred using setting 'exportFormats'.");
 							continue;
 						}
-						localItems.push(new DatabricksWorkspaceNotebook(localRelativePath, -1, languageFileExtension, localUri, this));
+						localItems.push(new DatabricksWorkspaceNotebook(shownLocalRelativePath, -1, languageFileExtension, localUri, this));
 					}
 					else {
-						localItems.push(new DatabricksWorkspaceDirectory(localRelativePath, -1, localUri, this));
+						localItems.push(new DatabricksWorkspaceDirectory(shownLocalRelativePath, -1, localUri, this));
 					}
 				}
 				else {
 					for (let existingItem of onlineItems) {
-						if (existingItem.path == localRelativePath) {
-							(existingItem as DatabricksWorkspaceDirectory).localPath = localUri;
+						if (existingItem.path == shownLocalRelativePath) {
+							existingItem.localPath = localUri;
 							existingItem.init();
 							break;
 						}

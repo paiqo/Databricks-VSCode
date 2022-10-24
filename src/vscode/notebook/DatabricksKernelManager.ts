@@ -91,7 +91,7 @@ export abstract class DatabricksKernelManager {
 
 	static async createKernels(cluster: iDatabricksCluster, logMessages: boolean = true): Promise<void> {
 		if (!this.notebookKernelExists(cluster)) {
-			let notebookKernel: DatabricksKernel = new DatabricksKernel(cluster.cluster_id, cluster.cluster_name);
+			let notebookKernel: DatabricksKernel = new DatabricksKernel(cluster);
 			this.setKernel(this.getNotebookKernelName(cluster), notebookKernel);
 			if (logMessages) {
 				ThisExtension.log(`Notebook Kernel for Databricks cluster '${cluster.cluster_id}' created!`)
@@ -104,7 +104,7 @@ export abstract class DatabricksKernelManager {
 		}
 
 		if (!this.interactiveKernelExists(cluster)) {
-			let interactiveKernel: DatabricksKernel = new DatabricksKernel(cluster.cluster_id, cluster.cluster_name, "interactive");
+			let interactiveKernel: DatabricksKernel = new DatabricksKernel(cluster, "interactive");
 			this.setKernel(this.getInteractiveKernelName(cluster), interactiveKernel);
 			if (logMessages) {
 				ThisExtension.log(`Interactive Kernel for Databricks cluster '${cluster.cluster_id}' created!`)
@@ -143,10 +143,29 @@ export abstract class DatabricksKernelManager {
 		}
 	}
 
-	static async restartNotebookKernel(cluster: iDatabricksCluster): Promise<void> {
+	static async restartClusterKernel(cluster: iDatabricksCluster): Promise<void> {
 		let kernel: DatabricksKernel = this.getNotebookKernel(cluster)
 		if (kernel) {
 			kernel.restart();
 		}
+	}
+
+	static async restartNotebookKernel(notebook: { notebookEditor: { notebookUri: vscode.Uri } } | undefined | vscode.Uri): Promise<void> {
+		let notebookUri: vscode.Uri = undefined;
+
+		ThisExtension.setStatusBar("Restarting Kernel ...", true);
+
+		if (notebook instanceof vscode.Uri) {
+			notebookUri = notebook;
+		}
+		else if ((notebook as any).notebookEditor.notebookUri) {
+			notebookUri = (notebook as any).notebookEditor.notebookUri;
+		}
+
+		for (let kernel of this._kernels.values()) {
+			kernel.restart(notebookUri);
+		}
+
+		ThisExtension.setStatusBar("Kernel restarted!");
 	}
 }

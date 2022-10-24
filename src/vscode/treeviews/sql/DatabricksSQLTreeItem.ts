@@ -13,11 +13,13 @@ export class DatabricksSQLTreeItem extends vscode.TreeItem {
 	private _itemType: SQLItemType;
 	private _name: string;
 	private _sqlContext: ExecutionContext;
+	protected _parent: DatabricksSQLTreeItem;
 
 	constructor(
 		name: string,
 		itemType: SQLItemType,
 		sqlContext: ExecutionContext,
+		parent: DatabricksSQLTreeItem,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
 		super(name, collapsibleState);
@@ -25,6 +27,13 @@ export class DatabricksSQLTreeItem extends vscode.TreeItem {
 		this._name = name;
 		this._itemType = itemType;
 		this._sqlContext = sqlContext;
+		this._parent = parent;
+
+		this.init();
+	}
+
+	async init(): Promise<void> {
+		super.contextValue = this._contextValue;
 
 		super.iconPath = {
 			light: this.getIconPath("light"),
@@ -45,7 +54,15 @@ export class DatabricksSQLTreeItem extends vscode.TreeItem {
 		return undefined;
 	}
 
-	
+	// used in package.json to filter commands via viewItem == FOLDER
+	get _contextValue(): string {
+		return this.itemType;
+	}
+
+	public get parent(): DatabricksSQLTreeItem | undefined {
+		return this._parent;
+	}
+
 	async getChildren(): Promise<DatabricksSQLTreeItem[]> {
 		await vscode.window.showErrorMessage("getChildren is not implemented! Please overwrite in derived class!");
 		return undefined;
@@ -57,5 +74,13 @@ export class DatabricksSQLTreeItem extends vscode.TreeItem {
 
 	get sqlContext(): ExecutionContext {
 		return this._sqlContext;
+	}
+
+	async refresh(): Promise<void> {
+		vscode.commands.executeCommand("databricksSQL.refresh", this, false);
+	}
+
+	async refreshParent(): Promise<void> {
+		vscode.commands.executeCommand("databricksSQL.refresh", this.parent, false);
 	}
 }

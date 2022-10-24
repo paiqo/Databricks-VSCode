@@ -27,18 +27,18 @@ export class DatabricksSecretTreeProvider implements vscode.TreeDataProvider<Dat
 	{
 	}
 
-	refresh(showInfoMessage: boolean = false): void {
+	async refresh(showInfoMessage: boolean = false): Promise<void> {
 		if (showInfoMessage) {
 			Helper.showTemporaryInformationMessage('Refreshing Secrets ...');
 		}
 		this._onDidChangeTreeData.fire(null);
 	}
 
-	getTreeItem(element: DatabricksSecretTreeItem): vscode.TreeItem {
+	async getTreeItem(element: DatabricksSecretTreeItem): Promise<vscode.TreeItem> {
 		return element;
 	}
 
-	getParent(element: DatabricksSecretTreeItem): vscode.ProviderResult<DatabricksSecretTreeItem> {
+	async getParent(element: DatabricksSecretTreeItem): Promise<DatabricksSecretTreeItem> {
 		return element.parent;
 	}
 
@@ -69,6 +69,6 @@ export class DatabricksSecretTreeProvider implements vscode.TreeDataProvider<Dat
 
 		await DatabricksApiService.createSecretScopes(scopeName, managingPrincipal);
 
-		setTimeout(() => vscode.commands.executeCommand("databricksSecrets.refresh", false), 500);
+		setTimeout(() => vscode.commands.executeCommand("databricksSecrets.refresh", undefined, false), 500);
 	}
 }

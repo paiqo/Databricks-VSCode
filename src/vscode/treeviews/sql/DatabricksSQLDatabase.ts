@@ -13,9 +13,10 @@ export class DatabricksSQLDatabase extends DatabricksSQLTreeItem {
 	constructor(
 		name: string,
 		sqlContext: ExecutionContext,
+		parent: DatabricksSQLTreeItem,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
-		super(name, "DATABASE", sqlContext, collapsibleState);
+		super(name, "DATABASE", sqlContext, parent, collapsibleState);
 
 		this._databaseName = name;	
 	}
@@ -34,7 +35,7 @@ export class DatabricksSQLDatabase extends DatabricksSQLTreeItem {
 
 		let tables: DatabricksSQLTable[] = [];
 		for (let tbl of result.results.data) {
-			tables.push(await DatabricksSQLTable.CreateAsync(tbl[0], tbl[1], tbl[2], this.sqlContext));
+			tables.push(await DatabricksSQLTable.CreateAsync(tbl[0], tbl[1], tbl[2], this.sqlContext, this));
 		}
 		
 		return tables;

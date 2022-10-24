@@ -19,16 +19,20 @@ export class DatabricksSQLTable extends DatabricksSQLTreeItem {
 		tableDetails: iSQLTableDetails,
 		isTemporary: boolean,
 		sqlContext: ExecutionContext,
+		parent: DatabricksSQLTreeItem,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
-		super(tableDetails.name, "TABLE", sqlContext, collapsibleState);
+		super(tableDetails.name, "TABLE", sqlContext, parent, collapsibleState);
 
 		this._tableDetails = tableDetails;
 		this._tableName = this._tableDetails.name;
 		this._databaseName = this._tableDetails.databaseName;
 		this._isTemporary = isTemporary;
 
+		this.init();
+	}
 
+	async init(): Promise<void> {
 		super.description = this._description;
 		super.tooltip = this._tooltip;
 		super.contextValue = this._contextValue;
@@ -42,11 +46,12 @@ export class DatabricksSQLTable extends DatabricksSQLTreeItem {
 		databaseName: string,
 		tableName: string,
 		isTemporary: boolean,
-		sqlContext: ExecutionContext
+		sqlContext: ExecutionContext,
+		parent: DatabricksSQLTreeItem
 	): Promise<DatabricksSQLTable> {
 		let tableDetails = await DatabricksSQLTable.getTableDetailsFromDatabricks(databaseName, tableName, sqlContext);
 		
-		return new DatabricksSQLTable(tableDetails, isTemporary, sqlContext);
+		return new DatabricksSQLTable(tableDetails, isTemporary, sqlContext, parent);
 	}
 
 	readonly command = null;
@@ -83,16 +88,11 @@ export class DatabricksSQLTable extends DatabricksSQLTreeItem {
 		}
 	}
 
-	// used in package.json to filter commands via viewItem == FOLDER
-	get _contextValue(): string {
-		return 'TABLE';
-	}
-
 	async getChildren(): Promise<DatabricksSQLColumn[]> {
 		let columns: DatabricksSQLColumn[] = [];
 		for (const col of this._tableDetails.columns) {
 			let isPartitionedBy: boolean = this._tableDetails.partitioningColumns.includes(col);
-			columns.push(new DatabricksSQLColumn(col, isPartitionedBy, this.tableName, this.databaseName, this.sqlContext));
+			columns.push(new DatabricksSQLColumn(col, isPartitionedBy, this.tableName, this.databaseName, this.sqlContext, this));
 		}
 		
 		return columns;

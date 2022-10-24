@@ -192,6 +192,6 @@ export class DatabricksJobRun extends DatabricksJobTreeItem {
 			vscode.window.showErrorMessage(`ERROR: ${error}`);
 		});
 
-		setTimeout(() => vscode.commands.executeCommand("databricksJobs.refresh", false), 10000);
+		setTimeout(() => vscode.commands.executeCommand("databricksJobs.refresh", undefined, false), 10000);
 	}
 }

@@ -7,7 +7,7 @@ import { SQLItemType } from './_types';
 export class DatabricksSQLSelectCluster extends DatabricksSQLTreeItem {
 
 	constructor() {
-		super("Please select a cluster first!", undefined, undefined, vscode.TreeItemCollapsibleState.None);
+		super("Please select a cluster first!", undefined, undefined, undefined, vscode.TreeItemCollapsibleState.None);
 	}
 
 	get itemType(): SQLItemType {

@@ -17,17 +17,22 @@ export class DatabricksSQLColumn extends DatabricksSQLTreeItem {
 		isPartitionedBy: boolean,
 		tableName: string,
 		databaseName: string,
-		sqlContext: ExecutionContext
+		sqlContext: ExecutionContext,
+		parent: DatabricksSQLTreeItem
 	) {
-		super(columnDefinition.name, "COLUMN", sqlContext, vscode.TreeItemCollapsibleState.None);
+		super(columnDefinition.name, "COLUMN", sqlContext, parent, vscode.TreeItemCollapsibleState.None);
 
 		this._columnDefinition = columnDefinition;
 		this._isPartitionedBy = isPartitionedBy;
 		this._tableName = tableName;
 		this._databaseName = databaseName;
 
-		super.tooltip = this._tooltip;
+		this.init();
+	}
+
+	async init(): Promise<void> {
 		super.description = this._description;
+		super.tooltip = this._tooltip;
 		super.contextValue = this._contextValue;
 	}
 
@@ -60,11 +65,6 @@ export class DatabricksSQLColumn extends DatabricksSQLTreeItem {
 			description += " (PARTITIONED BY)";
 		}
 		return description;
-	}
-
-	// used in package.json to filter commands via viewItem == CANSTART
-	get _contextValue(): string {
-		return undefined;
 	}
 
 	async getChildren(): Promise<DatabricksSQLTreeItem[]> {

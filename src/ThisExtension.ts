@@ -130,7 +130,7 @@ export abstract class ThisExtension {
 		{
 			ThisExtension.log(`Using cluster with id '${value}' for SQL Browser!`);
 			this._sqlClusterId = value;
-			vscode.commands.executeCommand("databricksSQL.refresh", false);
+			vscode.commands.executeCommand("databricksSQL.refresh", undefined, false);
 		}
 	}
 

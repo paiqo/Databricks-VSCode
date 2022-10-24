@@ -170,7 +170,7 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 			vscode.window.showErrorMessage(`ERROR: ${error}`);
 		});
 
-		setTimeout(() => vscode.commands.executeCommand("databricksClusters.refresh", false), 1000);
+		setTimeout(() => vscode.commands.executeCommand("databricksClusters.refresh", undefined, false), 1000);
 	}
 
 	async stop(): Promise<void> {
@@ -187,7 +187,7 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 			kernel.disposeController();
 		}
 
-		setTimeout(() => vscode.commands.executeCommand("databricksClusters.refresh", false), 1000);
+		setTimeout(() => vscode.commands.executeCommand("databricksClusters.refresh", undefined, false), 1000);
 	}
 
 	async delete(): Promise<void> {
@@ -200,7 +200,7 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 
 		await DatabricksApiService.deleteCluster(this.cluster_id);
 
-		setTimeout(() => vscode.commands.executeCommand("databricksClusters.refresh", false), 1000);
+		setTimeout(() => vscode.commands.executeCommand("databricksClusters.refresh", undefined, false), 1000);
 	}
 
 	async showDefinition(): Promise<vscode.TextDocument> {
@@ -210,7 +210,7 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 	async useForSQL(): Promise<void> {
 		ThisExtension.SQLClusterID = this.cluster_id;
 
-		setTimeout(() => vscode.commands.executeCommand("databricksSQL.refresh", false), 1000);
+		setTimeout(() => vscode.commands.executeCommand("databricksSQL.refresh", undefined, false), 1000);
 	}
 
 	async createKernel(logMessages: boolean = true): Promise<void> {
@@ -218,6 +218,6 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 	}
 
 	async restartKernel(): Promise<void> {
-		DatabricksKernelManager.restartNotebookKernel(this.definition);
+		DatabricksKernelManager.restartClusterKernel(this.definition);
 	}
 }

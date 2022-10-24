@@ -5,6 +5,7 @@ import { ContextLanguage, ExecutionCommand, ExecutionContext } from '../../datab
 import { DatabricksApiService } from '../../databricksApi/databricksApiService';
 import { Helper } from '../../helpers/Helper';
 import { FSHelper } from '../../helpers/FSHelper';
+import { iDatabricksCluster } from '../treeviews/clusters/iDatabricksCluster';
 
 export type NotebookMagic =
 	"sql"
@@ -29,22 +30,21 @@ export class DatabricksKernel implements vscode.NotebookController {
 	public label: string;
 	readonly notebookType: KernelType;
 	readonly description: string = 'Execute code on a remote Databricks cluster';
-	readonly detail: string = 'Some more detils ...';
 	readonly supportedLanguages = ["python", "sql", "r", "markdown", "scala"];
 	readonly supportsExecutionOrder: boolean = true;
 
 	private _controller: vscode.NotebookController;
 	private _executionOrder: number;
-	private _clusterId: string;
 	private _language: ContextLanguage;
 	private _executionContexts: Map<string, ExecutionContext>;
+	private _cluster: iDatabricksCluster;
 
-	constructor(clusterId: string, clusterName: string, notebookType: KernelType = 'jupyter-notebook', language: ContextLanguage = "python") {
+	constructor(cluster: iDatabricksCluster, notebookType: KernelType = 'jupyter-notebook', language: ContextLanguage = "python") {
 		this.notebookType = notebookType;
-		this._clusterId = clusterId;
+		this._cluster = cluster;
 		this._language = language;
-		this.id = DatabricksKernel.getId(clusterId, notebookType);
-		this.label = DatabricksKernel.getLabel(clusterName);
+		this.id = DatabricksKernel.getId(cluster.cluster_id, notebookType);
+		this.label = DatabricksKernel.getLabel(cluster.cluster_name);
 
 		this._executionOrder = 0;
 		this._executionContexts = new Map<string, ExecutionContext>;
@@ -56,11 +56,11 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 		this._controller.supportedLanguages = this.supportedLanguages;
 		this._controller.description = "Databricks Cluster " + this.ClusterID;
-		//this._controller.detail = this.detail;
+		this._controller.detail = this.ClusterDetails;
 		this._controller.supportsExecutionOrder = this.supportsExecutionOrder;
 		this._controller.executeHandler = this.executeHandler.bind(this);
 		this._controller.dispose = this.disposeController.bind(this);
-		this._controller.updateNotebookAffinity = this.updateNotebookAffinity.bind(this);
+		//this._controller.updateNotebookAffinity = this.updateNotebookAffinity.bind(this);
 		this._controller.onDidChangeSelectedNotebooks(this._onDidChangeSelectedNotebooks, this, []);
 
 		ThisExtension.PushDisposable(this);
@@ -79,13 +79,42 @@ export class DatabricksKernel implements vscode.NotebookController {
 	}
 
 	get ClusterID(): string {
-		return this._clusterId;
+		return this._cluster.cluster_id;
+	}
+
+	get ClusterDetails(): string {
+		let details: string;
+		details = "DBR: " + this._cluster.spark_version + ", ";
+
+		details += "Head: " + this._cluster.driver_node_type_id;
+
+		if (this._cluster.num_workers != undefined) {
+			if(this._cluster.num_workers > 0)
+			{
+				details +=  " - " + this._cluster.num_workers + " Worker(s): " + this._cluster.node_type_id;
+			}
+			else
+			{
+				details += " (SingleNode)";
+			}
+		}
+		else if(this._cluster.autoscale)
+		{
+			details += " - " + this._cluster.executors.length + " (" + this._cluster.autoscale.min_workers + "-" + this._cluster.autoscale.max_workers + ")";
+			details += " Worker(s): " + this._cluster.node_type_id;
+		}
+
+		return details;
 	}
 
 	get Language(): ContextLanguage {
 		return this._language;
 	}
 
+	private get ClusterRuntime(): {major: number, minor: number} {
+		let tokens: string[] = this._cluster.spark_version.split("-")[0].split(".")
+		return { major: +tokens[0], minor: +tokens[1]}
+	}
 
 
 	async disposeController(): Promise<void> {
@@ -112,6 +141,8 @@ export class DatabricksKernel implements vscode.NotebookController {
 		}
 		else {
 			ThisExtension.log(`Restarting notebook kernel ${this.Controller.id} for notebook ${notebookUri.toString()} ...`);
+			let context: ExecutionContext = this.getNotebookContext(notebookUri);
+			await DatabricksApiService.removeExecutionContext(context);
 			this._executionContexts.delete(notebookUri.toString());
 		}
 	}
@@ -137,13 +168,27 @@ export class DatabricksKernel implements vscode.NotebookController {
 		// if we are working with a notebook from the Databricks Repos folder (works with dbws:/ and locally synced notebooks)
 		if (paths.includes("Repos")) {
 			ThisExtension.log("NotebookKernel: Setting up FilesInRepo support for " + notebookUri);
+			ThisExtension.setStatusBar("Initializing FilesInRepo ...");
 			let driverRepoPath: string = `/Workspace/${paths.slice(paths.indexOf("Repos"), paths.indexOf("Repos") + 3).join(FSHelper.SEPARATOR)}`
-			let driverNotebookDirectory: string = `/Workspace${FSHelper.parent(notebookUri).path}`;
+			let driverNotebookDirectory: string = `/Workspace/${paths.slice(paths.indexOf("Repos"), -1).join(FSHelper.SEPARATOR)}`
 			let context: ExecutionContext = this.getNotebookContext(notebookUri);
 			let commandTexts: string[] = ["import sys", "import os", `sys.path.append('${driverRepoPath}')`, `os.chdir('${driverNotebookDirectory}')`];
 			let command: ExecutionCommand = await DatabricksApiService.runCommand(context, commandTexts.join("\n"), "python");
 			let result = await DatabricksApiService.getCommandResult(command, true, true);
-			ThisExtension.log(`NotebookKernel: Successfully set up FilesInRepo by running '${commandTexts[2]}' and '${commandTexts[3]}' on driver!`);
+
+			if (result.results.resultType == "error") {
+				ThisExtension.log(result.results.summary);
+				ThisExtension.log(result.results.cause);
+				ThisExtension.setStatusBar("FilesInRepo failed!");
+
+				vscode.window.showErrorMessage("Could not setup Files in Repo for '" + notebookUri + "' on cluster '" + this.ClusterID + "'\nPlease check logs for details!");
+			}
+			else
+			{
+				ThisExtension.log(`NotebookKernel: Successfully set up FilesInRepo by running '${commandTexts[2]}' and '${commandTexts[3]}' on driver!`);
+				ThisExtension.setStatusBar("FilesInRepo initialized!");
+			}
+			
 		}
 	}
 
@@ -160,7 +205,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 		}
 	}
 	updateNotebookAffinity(notebook: vscode.NotebookDocument, affinity: vscode.NotebookControllerAffinity): void {
-
+		
 		//let x = "updateNotebookAffinity";
 
 		//ThisExtension.log(x);
@@ -174,7 +219,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 			ThisExtension.setStatusBar("Initializing Kernel ...", true);
 			execContext = await this.initializeExecutionContext()
 			this.setNotebookContext(_notebook.uri, execContext);
-			this.updateRepoContext(_notebook.uri);
+			await this.updateRepoContext(_notebook.uri);
 			ThisExtension.setStatusBar("Kernel initialized!");
 		}
 		for (let cell of cells) {
