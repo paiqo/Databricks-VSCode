@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Extension to manage your Databricks workspace and ease local development",
-	"version": "1.2.1",
+	"version": "1.2.3",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -58,6 +58,9 @@
 		"onView:databricksRepos",
 		"onFileSystem:dbfs",
 		"onFileSystem:dbws"
+	],
+	"extensionDependencies": [
+		"RandomFractalsInc.vscode-data-table"
 	],
 	"main": "./dist/node/extension.js",
 	"browser_NOT_WORKING_YET": "./dist/web/extension.js",
@@ -670,6 +673,11 @@
 				"icon": "$(remove-close)"
 			},
 			{
+				"command": "databricksSecret.insertCode",
+				"title": "Insert",
+				"icon": "$(code)"
+			},
+			{
 				"command": "databricksSQL.refresh",
 				"title": "Refresh",
 				"icon": "$(refresh)"
@@ -925,6 +933,11 @@
 					"command": "databricksSecret.delete",
 					"when": "view == databricksSecrets && viewItem == SECRET_DATABRICKS",
 					"group": "inline@99"
+				},
+				{
+					"command": "databricksSecret.insertCode",
+					"when": "view == databricksSecrets && viewItem =~ /^SECRET_.*/",
+					"group": "inline@90"
 				},
 				{
 					"command": "databricksSQL.refresh",

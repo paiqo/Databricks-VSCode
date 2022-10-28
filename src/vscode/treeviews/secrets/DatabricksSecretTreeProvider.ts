@@ -14,18 +14,29 @@ export class DatabricksSecretTreeProvider implements vscode.TreeDataProvider<Dat
 	private _onDidChangeTreeData: vscode.EventEmitter<DatabricksSecretTreeItem | undefined> = new vscode.EventEmitter<DatabricksSecretTreeItem | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<DatabricksSecretTreeItem | undefined> = this._onDidChangeTreeData.event;
 
+	private _treeView: vscode.TreeView<DatabricksSecretTreeItem>;
+
 	constructor(context: vscode.ExtensionContext) {
-		const view = vscode.window.createTreeView('databricksSecrets', { treeDataProvider: this, showCollapseAll: true, canSelectMany: true, dragAndDropController: new DatabricksSecretDragAndDropController() });
-		context.subscriptions.push(view);
+		const treeView = vscode.window.createTreeView('databricksSecrets', { 
+			treeDataProvider: this, 
+			showCollapseAll: true, 
+			canSelectMany: false, 
+			dragAndDropController: new DatabricksSecretDragAndDropController() });
+		context.subscriptions.push(treeView);
 
-		view.onDidChangeSelection((event) => this._onDidChangeSelection(event.selection));
+		treeView.onDidChangeSelection((event) => this._onDidChangeSelection(event.selection));
+		treeView.onDidExpandElement((event) => this._onDidExpandElement(event.element));
+		treeView.onDidCollapseElement((event) => this._onDidCollapseElement(event.element));
+		treeView.onDidChangeVisibility((event) => this._onDidChangeVisibility(event.visible));
 
+		this._treeView = treeView;
 		//ThisExtension.TreeViewWorkspaces = this;
 	}
 
-	private async _onDidChangeSelection(items: readonly DatabricksSecretTreeItem[]): Promise<void>
-	{
-	}
+	private async _onDidChangeSelection(items: readonly DatabricksSecretTreeItem[]): Promise<void> { }
+	private async _onDidExpandElement(item: DatabricksSecretTreeItem): Promise<void> { }
+	private async _onDidCollapseElement(item: DatabricksSecretTreeItem): Promise<void> { }
+	private async _onDidChangeVisibility(visible: boolean): Promise<void> { }
 
 	async refresh(showInfoMessage: boolean = false): Promise<void> {
 		if (showInfoMessage) {
@@ -34,7 +45,7 @@ export class DatabricksSecretTreeProvider implements vscode.TreeDataProvider<Dat
 		this._onDidChangeTreeData.fire(null);
 	}
 
-	async getTreeItem(element: DatabricksSecretTreeItem): Promise<vscode.TreeItem> {
+	async getTreeItem(element: DatabricksSecretTreeItem): Promise<DatabricksSecretTreeItem> {
 		return element;
 	}
 

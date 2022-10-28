@@ -6,9 +6,9 @@ import { AccessTokenSecure } from './_types';
 import { DatabricksConnectionManager } from './DatabricksConnectionManager';
 import { DatabricksConnectionTreeItem } from './DatabricksConnectionTreeItem';
 
-export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManager{
+export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManager {
 
-	private _settingScope: ConfigSettingSource;	
+	private _settingScope: ConfigSettingSource;
 
 	constructor() {
 		super();
@@ -30,8 +30,7 @@ export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManag
 		else {
 			this._lastActiveConnectionName = ThisExtension.getConfigurationSetting("databricks.lastActiveConnection", this._settingScope).value;
 
-			if(!this._lastActiveConnectionName)
-			{
+			if (!this._lastActiveConnectionName) {
 				ThisExtension.log("Setting 'databricks.lastActiveConnection' is not set - using first available connection instead!");
 				this._lastActiveConnectionName = this._connections[0].displayName;
 			}
@@ -67,45 +66,50 @@ export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManag
 
 		ThisExtension.log("Loading Connections from 'databricks.connections' ...");
 		let connections = ThisExtension.getConfigurationSetting<iDatabricksConnection[]>('databricks.connections', this._settingScope, true);
-		connections.value.forEach( x => x._source = "databricks.connections");
+		connections.value.forEach(x => x._source = "databricks.connections");
 		connections.value.forEach(x => DatabricksConnectionTreeItem.validate(x, false));
 
 		this._connections = this._connections.concat(connections.value);
 
-		ThisExtension.log("Loading Connection from 'databricks.default.*' ...");
-		let defaultConnection: iDatabricksConnection = {
-				"displayName": ThisExtension.getConfigurationSetting<string>('databricks.connection.default.displayName', this._settingScope).value,
-				"apiRootUrl": vscode.Uri.parse(ThisExtension.getConfigurationSetting<string>('databricks.connection.default.apiRootUrl', this._settingScope).value),
-				"localSyncFolder": vscode.Uri.file(ThisExtension.getConfigurationSetting<string>('databricks.connection.default.localSyncFolder', this._settingScope).value),
-				"localSyncSubfolders": ThisExtension.getConfigurationSetting<LocalSyncSubfolderConfiguration>('databricks.connection.default.localSyncSubfolders', this._settingScope).value,
-				"personalAccessToken": ThisExtension.getConfigurationSetting<string>('databricks.connection.default.personalAccessToken', this._settingScope).value,
-				"personalAccessTokenSecure": ThisExtension.getConfigurationSetting<AccessTokenSecure>('databricks.connection.default.personalAccessTokenSecure', this._settingScope).value,
-				"exportFormats": ThisExtension.getConfigurationSetting<ExportFormatsConfiguration>('databricks.connection.default.exportFormats', this._settingScope).value,
-				"useCodeCells": ThisExtension.getConfigurationSetting<boolean>('databricks.connection.default.useCodeCells', this._settingScope).value,
-				"_source": "databricks.default"
-			};
+		ThisExtension.log("Loading Connection from 'databricks.connection.default.*' ...");
+		try {
+			let defaultApiRootUrl = ThisExtension.getConfigurationSetting<string>('databricks.connection.default.apiRootUrl', this._settingScope);
+			if (defaultApiRootUrl.value) {
+				let defaultConnection: iDatabricksConnection = {
+					"displayName": ThisExtension.getConfigurationSetting<string>('databricks.connection.default.displayName', this._settingScope).value,
+					"apiRootUrl": vscode.Uri.parse(ThisExtension.getConfigurationSetting<string>('databricks.connection.default.apiRootUrl', this._settingScope).value),
+					"localSyncFolder": vscode.Uri.file(ThisExtension.getConfigurationSetting<string>('databricks.connection.default.localSyncFolder', this._settingScope).value),
+					"localSyncSubfolders": ThisExtension.getConfigurationSetting<LocalSyncSubfolderConfiguration>('databricks.connection.default.localSyncSubfolders', this._settingScope).value,
+					"personalAccessToken": ThisExtension.getConfigurationSetting<string>('databricks.connection.default.personalAccessToken', this._settingScope).value,
+					"personalAccessTokenSecure": ThisExtension.getConfigurationSetting<AccessTokenSecure>('databricks.connection.default.personalAccessTokenSecure', this._settingScope).value,
+					"exportFormats": ThisExtension.getConfigurationSetting<ExportFormatsConfiguration>('databricks.connection.default.exportFormats', this._settingScope).value,
+					"useCodeCells": ThisExtension.getConfigurationSetting<boolean>('databricks.connection.default.useCodeCells', this._settingScope).value,
+					"_source": "databricks.default"
+				};
 
-		if(DatabricksConnectionTreeItem.validate(defaultConnection, false))
-		{
-			defaultConnection._source = "databricks.default";
-			this._connections.push(defaultConnection);
+				if (DatabricksConnectionTreeItem.validate(defaultConnection, false)) {
+					defaultConnection._source = "databricks.default";
+					this._connections.push(defaultConnection);
+				}
+			}
 		}
-	}	
+		catch (error) {
+			let msg = "Could not load connection from 'databricks.connection.default.*' settings!";
+			ThisExtension.log("ERROR: " + msg);
+			vscode.window.showErrorMessage(msg);
+		}
+	}
 
 	updateConnection(updatedCon: iDatabricksConnection): void {
-		if(updatedCon._source == "databricks.default")
-		{
+		if (updatedCon._source == "databricks.default") {
 			ThisExtension.updateConfigurationSetting("databricks.connection.default.personalAccessToken", undefined, ThisExtension.SettingScope);
 			ThisExtension.updateConfigurationSetting("databricks.connection.default.personalAccessTokenSecure", updatedCon.personalAccessTokenSecure, ThisExtension.SettingScope);
 		}
-		else
-		{
+		else {
 			let configConnections = ThisExtension.getConfigurationSetting<iDatabricksConnection[]>("databricks.connections", ThisExtension.SettingScope);
 
-			for (let con of configConnections.value)
-			{
-				if(con.displayName == updatedCon.displayName)
-				{
+			for (let con of configConnections.value) {
+				if (con.displayName == updatedCon.displayName) {
 					con.personalAccessToken = undefined;
 					con.personalAccessTokenSecure = updatedCon.personalAccessTokenSecure;
 				}

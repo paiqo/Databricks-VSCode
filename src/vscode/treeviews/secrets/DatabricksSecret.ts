@@ -46,7 +46,7 @@ export class DatabricksSecret extends DatabricksSecretTreeItem {
 		return this._secret;
 	}
 
-	get dragAndDropText(): string {
+	get codeText(): string {
 		return `dbutils.secrets.get(scope="${this.scope}", key="${this.secret}")`;
 	}
 
@@ -72,4 +72,18 @@ export class DatabricksSecret extends DatabricksSecretTreeItem {
 			setTimeout(() => this.refreshParent(), 500);
 		}
 	}
+
+	async insertCode(item: DatabricksSecretTreeItem): Promise<void> {
+        const editor = vscode.window.activeTextEditor;
+        if (editor === undefined) {
+            return;
+        }
+
+        const start = editor.selection.start;
+        const end = editor.selection.end;
+        const range = new vscode.Range(start.line, start.character, end.line, end.character);
+        await editor.edit((editBuilder) => {
+            editBuilder.replace(range, item.codeText);
+        });
+    }
 }

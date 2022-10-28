@@ -54,9 +54,15 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 
 # Release Notes
 
-**v1.2.1:**
+**v1.2.3:**
+- Databricks Kernels are now moved to the top when opening a notebook from the local sync folder or via `dbws:/`
+- added `Insert` icons for Secrets and SecretScopes to easily add the code snippet to the current editor
+- fixed an issue with `%run`
+
+**v1.2.2:**
 - added `Restart Kernel` to Databricks notebooks
 - added details specs of cluster to Notebook Kernel selector
+- fixed an issue where the extension did not load when no default connection was specified
 - fixed an issue with `%run` and absolute paths ([#93](/../../issues/93))
 - fixed an issue with `Files in Repos` ([#101](/../../issues/101))
 - fixed an issues with CLI Connection Manager ([#99](/../../issues/99))
@@ -103,55 +109,6 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 - performance improvements when refreshing tree-views
 - improved logging and output of messages
 - use native VSCode icons instead of custom ones
-
-**v0.9.4:**
-- added support for VS Code setting `http.proxyStrictSSL` to optionally allow invalid certificates from the proxy. Can only be used in combination with `http.proxySupport = "on"`.
-- use VS Code native secret management instead of `KeyTar`
-- update Dev Dependencies to VS Code 1.66
-- fix minor issue with SQL Browser refresh
-- support for environment variables in `localSyncFolder`
-
-**v0.9.3:**
-- added `Copy Path` feature for Workspace and DBFS browser
-- added Folders for Repositories as in the Databricks Web UI
-
-**v0.9.2:**
-- Make use of Databricks [Jobs API v2.1](https://docs.databricks.com/dev-tools/api/latest/jobs.html)
-
-**v0.9.1:**
-- fix issue when opening `.ipynb` files/notebooks
-
-**v0.9.0:**
-- Added support for [Repos API](https://docs.databricks.com/dev-tools/api/latest/repos.html)
-- added new Repos tab
-- switching branches
-- deleteing a repo
-
-**v0.8.9:**
-- add support to list regular files from Git repositories. Up-/Download is not yet supported by the underlying API
-
-**v0.8.8:**
-- fix issues with Databricks running on GCP
-
-**v0.8.7:**
-- fix issue with repositories in workspace
-
-**v0.8.6:**
-- added support for Databricks CLI profiles
-  - use Databricks CLI profiles to manage connections
-  - support `DATABRICKS_CONFIG_FILE` for custom config file locations
-- further improvements to the SQL Data browser
-  - Show Definition
-  - Datatypes for columns including complex columns (array, struct, map)
-  - Table and column comments
-  - improved tooltips and desciption
-- improved tooltip for Connections
-- fixed an issue with upload of whole workspace folders
-- fixed an issue with Azure KeyVault secret scopes
-
-**v0.8.0:**
-- add SQL Data browser as in the Databricks UI
-- fixed an issue with Secrets - you can now add/delete secrets again
 
 # Outlook upcoming/planned features
 - Support for Drag&Drop of local files directly into the workspace
@@ -288,7 +245,7 @@ The cluster manager also distinguishes between regular user-created clusters and
 
 Using Databricks Notebook Kernels you can execute local code againt a running Databricks cluster. Simply open a `.ipynb` notebook and select the Databricks kernel of your choice. A new kernel will be added automatically for each Databricks cluster that is currently running. In case you need to restart the kernel, you can do so by right-clicking the underlying cluster in the [Cluster Manager](#cluster-manager) and select `Restart Databricks Kernel`.
 The execution of the first cell may take a bit longer as the remote execution context has to be set up before any commands can be executed. The notebook kernel supports the magics `%sql`, `%python`, `%r`, `%scala`, `%md` and also `%pip`. Depending on the output of the cell, the results are rendered accordingly - e.g. as text, as table or as image. Due to the limitations of the underlying APIs, the output is limited to one output type so you should avoid mixing `print(...)`, `display(df)` and `df.plot` as only one of them will be show.
-If you need richer output especially for tables, you can install additional Notebook Renderer Extensions. We recommend [vscode-data-table](https://github.com/RandomFractals/vscode-data-table). Unfortunately the author decided to unpublish the extension from the offical VSCode market place but it can still be downloaded the `.vsix` from the [Github Releases](https://github.com/RandomFractals/vscode-data-table/releases)
+For better visualization of tabluar results this extension includes a dependency to the extension [vscode-data-table](https://github.com/RandomFractals/vscode-data-table) which offers much more features than the standard visualizations.
 
 # File System Integration
 ![File System Integration](/images/FileSystemIntegration.jpg?raw=true "File System Integration")

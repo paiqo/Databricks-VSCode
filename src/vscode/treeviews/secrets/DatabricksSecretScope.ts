@@ -67,7 +67,7 @@ export class DatabricksSecretScope extends DatabricksSecretTreeItem {
 		return secretItems;
 	}
 
-	get dragAndDropText(): string {
+	get codeText(): string {
 		return `dbutils.secrets.list("${this.Scope}")`;
 	}
 

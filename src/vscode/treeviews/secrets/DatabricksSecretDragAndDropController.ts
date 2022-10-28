@@ -14,12 +14,8 @@ class DatabricksSecretObjectTransferItem extends vscode.DataTransferItem {
 		super(_nodes);
 	}
 
-	asObject(): readonly DatabricksSecretTreeItem[] {
-		return this._nodes;
-	}
-
 	asString(): Promise<string> {
-		return this.value[0].dragAndDropText;
+		return this.value[0].codeText;
 	}
 }
 
@@ -27,12 +23,13 @@ class DatabricksSecretObjectTransferItem extends vscode.DataTransferItem {
 export class DatabricksSecretDragAndDropController implements vscode.TreeDragAndDropController<DatabricksSecretTreeItem> {
 
 	dropMimeTypes: readonly string[] = ["application/vnd.code.tree.databrickssecrets", "text/uri-list"];
-	dragMimeTypes: readonly string[] = ["application/vnd.code.tree.databrickssecrets", "text/plain"];
+	dragMimeTypes: readonly string[] = ["application/vnd.code.tree.databrickssecrets", "text/plain", "codeeditors"];
 
 	public async handleDrag?(source: readonly DatabricksSecretTreeItem[], dataTransfer: vscode.DataTransfer, token: vscode.CancellationToken): Promise<void> {
-		dataTransfer.set("application/vnd.code.tree.databrickssecrets", new DatabricksSecretObjectTransferItem(source));
+		//dataTransfer.set("application/vnd.code.tree.databrickssecrets", new DatabricksSecretObjectTransferItem(source));
 		//dataTransfer.set("application/vnd.code.tree.databrickssecrets", new vscode.DataTransferItem(source));
-		dataTransfer.set("text/plain", new vscode.DataTransferItem(source[0].dragAndDropText));
+		dataTransfer.set("text/plain", new vscode.DataTransferItem(source));
+		dataTransfer.set("codeeditors", new vscode.DataTransferItem(source));
 	}
 
 	public async handleDrop?(target: DatabricksSecretTreeItem, dataTransfer: vscode.DataTransfer, token: vscode.CancellationToken): Promise<void> {

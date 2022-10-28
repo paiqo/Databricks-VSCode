@@ -144,6 +144,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksSecretScope.addSecret', (scope: DatabricksSecretScope) => scope.addSecret());
 	vscode.commands.registerCommand('databricksSecret.update', (secret: DatabricksSecret) => secret.update());
 	vscode.commands.registerCommand('databricksSecret.delete', (secret: DatabricksSecret) => secret.delete());
+	vscode.commands.registerCommand('databricksSecret.insertCode', (scope: DatabricksSecret) => scope.insertCode(scope));
 
 	// register DatabricksSQLTreeProvider
 	let databricksSQLTreeProvider = new DatabricksSQLTreeProvider();

@@ -60,12 +60,20 @@ export class DatabricksKernel implements vscode.NotebookController {
 		this._controller.supportsExecutionOrder = this.supportsExecutionOrder;
 		this._controller.executeHandler = this.executeHandler.bind(this);
 		this._controller.dispose = this.disposeController.bind(this);
-		//this._controller.updateNotebookAffinity = this.updateNotebookAffinity.bind(this);
-		this._controller.onDidChangeSelectedNotebooks(this._onDidChangeSelectedNotebooks, this, []);
+
+		vscode.workspace.onDidOpenNotebookDocument((event) => this._onDidOpenNotebookDocument(event));
 
 		ThisExtension.PushDisposable(this);
 	}
 
+	async _onDidOpenNotebookDocument(notebook: vscode.NotebookDocument) {
+		// set this controller as recommended Kernel for notebooks opened via dbws:/ file system or from or local sync folder
+		if (notebook.uri.scheme == "dbws" || notebook.uri.toString().startsWith(ThisExtension.ActiveConnection.localSyncFolder.toString())) {
+			this._controller.updateNotebookAffinity(notebook, vscode.NotebookControllerAffinity.Preferred);
+		}
+	}
+
+	// #region Cluster-properties
 	static getId(clusterId: string, kernelType: KernelType) {
 		return this.baseId + clusterId + "-" + kernelType;
 	}
@@ -89,17 +97,14 @@ export class DatabricksKernel implements vscode.NotebookController {
 		details += "Head: " + this._cluster.driver_node_type_id;
 
 		if (this._cluster.num_workers != undefined) {
-			if(this._cluster.num_workers > 0)
-			{
-				details +=  " - " + this._cluster.num_workers + " Worker(s): " + this._cluster.node_type_id;
+			if (this._cluster.num_workers > 0) {
+				details += " - " + this._cluster.num_workers + " Worker(s): " + this._cluster.node_type_id;
 			}
-			else
-			{
+			else {
 				details += " (SingleNode)";
 			}
 		}
-		else if(this._cluster.autoscale)
-		{
+		else if (this._cluster.autoscale) {
 			details += " - " + this._cluster.executors.length + " (" + this._cluster.autoscale.min_workers + "-" + this._cluster.autoscale.max_workers + ")";
 			details += " Worker(s): " + this._cluster.node_type_id;
 		}
@@ -111,11 +116,11 @@ export class DatabricksKernel implements vscode.NotebookController {
 		return this._language;
 	}
 
-	private get ClusterRuntime(): {major: number, minor: number} {
+	private get ClusterRuntime(): { major: number, minor: number } {
 		let tokens: string[] = this._cluster.spark_version.split("-")[0].split(".")
-		return { major: +tokens[0], minor: +tokens[1]}
+		return { major: +tokens[0], minor: +tokens[1] }
 	}
-
+	// #endregion
 
 	async disposeController(): Promise<void> {
 		for (let context of this._executionContexts.entries()) {
@@ -183,12 +188,11 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 				vscode.window.showErrorMessage("Could not setup Files in Repo for '" + notebookUri + "' on cluster '" + this.ClusterID + "'\nPlease check logs for details!");
 			}
-			else
-			{
+			else {
 				ThisExtension.log(`NotebookKernel: Successfully set up FilesInRepo by running '${commandTexts[2]}' and '${commandTexts[3]}' on driver!`);
 				ThisExtension.setStatusBar("FilesInRepo initialized!");
 			}
-			
+
 		}
 	}
 
@@ -198,18 +202,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 	}
 	interruptHandler?: (notebook: vscode.NotebookDocument) => void | Thenable<void>;
 	readonly onDidChangeSelectedNotebooks: vscode.Event<{ readonly notebook: vscode.NotebookDocument; readonly selected: boolean; }>;
-	private async _onDidChangeSelectedNotebooks(event: { notebook: vscode.NotebookDocument; selected: boolean }) {
-		// TODO: this could should help to make the Databricks Kernel more prominent for notebooks loaded via Databricks extension
-		if (event.notebook.uri.scheme == "dbws" || event.notebook.uri.toString().startsWith(ThisExtension.ActiveConnection.localSyncFolder.toString())) {
-			this._controller.updateNotebookAffinity(event.notebook, vscode.NotebookControllerAffinity.Preferred);
-		}
-	}
-	updateNotebookAffinity(notebook: vscode.NotebookDocument, affinity: vscode.NotebookControllerAffinity): void {
-		
-		//let x = "updateNotebookAffinity";
-
-		//ThisExtension.log(x);
-	}
+	updateNotebookAffinity(notebook: vscode.NotebookDocument, affinity: vscode.NotebookControllerAffinity): void { }
 
 
 
@@ -297,6 +290,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 						switch (cell.notebook.uri.scheme) {
 							case "dbws":
 								runUri = vscode.Uri.file(runFile);
+								runUri = runUri.with({ scheme: "dbws" })
 								break;
 							case "file":
 								runUri = await FSHelper.joinPath(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ActiveConnection.localSyncSubfolders.Workspace, runFile);
@@ -307,40 +301,61 @@ export class DatabricksKernel implements vscode.NotebookController {
 					}
 
 					ThisExtension.log("Executing %run for '" + runUri + "' ...");
-					switch (runUri.scheme) {
-						case "dbws":
-							// we cannot use vscode.workspace.fs here as we need the SOURCE file and not the ipynb file 
-							commandText = Buffer.from(await DatabricksApiService.downloadWorkspaceItem(runUri.path, "SOURCE")).toString();
-							break;
-						case "file":
-							// %run is not aware of filetypes/extensions/langauges so we need to check which ones actually exist locally
-							let allFiles = await vscode.workspace.fs.readDirectory(FSHelper.parent(runUri));
-							let relevantFiles = allFiles.filter(x => x[0].startsWith(FSHelper.basename(runUri)));
+					try {
 
-							if (relevantFiles.length == 1) {
-								runUri = vscode.Uri.joinPath(FSHelper.parent(runUri), relevantFiles[0][0]);
-								commandText = Buffer.from(await vscode.workspace.fs.readFile(runUri)).toString();
-
-								if (FSHelper.extension(runUri) == ".ipynb") {
-									let notebookJSON = JSON.parse(commandText);
-									let cells = notebookJSON["cells"];
-									cells = cells.filter(x => x["cell_type"] == "code"); // only take code cells
-
-									let commands: string[] = [];
-									for (let cell of cells) {
-										commands.push(cell["source"].join("\n"));
-									}
-
-									commandText = commands.join("\n");
+						switch (runUri.scheme) {
+							case "dbws":
+								if (!await FSHelper.pathExists(runUri)) {
+									throw vscode.FileSystemError.FileNotFound(runUri);
 								}
-							}
-							else {
-								throw vscode.FileSystemError.FileNotFound(runUri);
-							}
-							break;
-						default:
-							throw new Error("%run is not supported for FileSystem scheme '" + runUri.scheme + "'!");
+								// we cannot use vscode.workspace.fs here as we need the SOURCE file and not the ipynb file 
+								commandText = Buffer.from(await DatabricksApiService.downloadWorkspaceItem(runUri.path, "SOURCE")).toString();
+								break;
+
+							case "file":
+								// %run is not aware of filetypes/extensions/langauges so we need to check which ones actually exist locally
+								let allFiles = await vscode.workspace.fs.readDirectory(FSHelper.parent(runUri));
+								let relevantFiles = allFiles.filter(x => x[0].startsWith(FSHelper.basename(runUri)));
+
+								if (relevantFiles.length == 1) {
+									runUri = vscode.Uri.joinPath(FSHelper.parent(runUri), relevantFiles[0][0]);
+									commandText = Buffer.from(await vscode.workspace.fs.readFile(runUri)).toString();
+
+									if (FSHelper.extension(runUri) == ".ipynb") {
+										let notebookJSON = JSON.parse(commandText);
+										let cells = notebookJSON["cells"];
+										cells = cells.filter(x => x["cell_type"] == "code"); // only take code cells
+
+										let commands: string[] = [];
+										for (let cell of cells) {
+											commands.push(cell["source"].join("\n"));
+										}
+
+										commandText = commands.join("\n");
+									}
+								}
+								else {
+									throw vscode.FileSystemError.FileNotFound(runUri);
+								}
+								break;
+							default:
+								throw new Error("%run is not supported for FileSystem scheme '" + runUri.scheme + "'!");
+						}
 					}
+					catch (error) {
+						execution.appendOutput(new vscode.NotebookCellOutput([
+							vscode.NotebookCellOutputItem.text(error.name + ": " + error.message, 'text/html')
+						]));
+
+						execution.appendOutput(new vscode.NotebookCellOutput([
+							vscode.NotebookCellOutputItem.error(error),
+						]));
+						execution.end(false, Date.now());
+						return;
+					}
+
+
+
 					let outputRun: vscode.NotebookCellOutput = new vscode.NotebookCellOutput([
 						vscode.NotebookCellOutputItem.text(commandText, 'text/plain')
 					])
