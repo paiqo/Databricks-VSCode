@@ -56,7 +56,7 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 
 **v1.2.3:**
 - Databricks Kernels are now moved to the top when opening a notebook from the local sync folder or via `dbws:/`
-- added `Insert` icons for Secrets and SecretScopes to easily add the code snippet to the current editor
+- added `Insert` buttons for Secrets to easily add the code snippet to the current editor/notebook
 - fixed an issue with `%run`
 
 **v1.2.2:**
