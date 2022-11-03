@@ -12,10 +12,32 @@ export class DatabricksJobTreeProvider implements vscode.TreeDataProvider<Databr
 	private _onDidChangeTreeData: vscode.EventEmitter<DatabricksJobTreeItem | undefined> = new vscode.EventEmitter<DatabricksJobTreeItem | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<DatabricksJobTreeItem | undefined> = this._onDidChangeTreeData.event;
 
-	constructor() {	}
+	private _treeView: vscode.TreeView<DatabricksJobTreeItem>;
 
+	constructor(context: vscode.ExtensionContext) {
+		const treeView = vscode.window.createTreeView('databricksJobs', { 
+			treeDataProvider: this, 
+			showCollapseAll: true, 
+			canSelectMany: false
+			});
+		context.subscriptions.push(treeView);
+
+		treeView.onDidChangeSelection((event) => this._onDidChangeSelection(event.selection));
+		treeView.onDidExpandElement((event) => this._onDidExpandElement(event.element));
+		treeView.onDidCollapseElement((event) => this._onDidCollapseElement(event.element));
+		treeView.onDidChangeVisibility((event) => this._onDidChangeVisibility(event.visible));
+
+		this._treeView = treeView;
+
+		this.autoRefresh(30); // refresh every 30 seconds
+	}
+
+	private async _onDidChangeSelection(items: readonly DatabricksJobTreeItem[]): Promise<void> { }
+	private async _onDidExpandElement(item: DatabricksJobTreeItem): Promise<void> { }
+	private async _onDidCollapseElement(item: DatabricksJobTreeItem): Promise<void> { }
+	private async _onDidChangeVisibility(visible: boolean): Promise<void> { }
 	
-	async autoRefresh(timeoutSeconds: number = 10) {
+	async autoRefresh(timeoutSeconds: number) {
 		while (true) {
 			await new Promise(resolve => setTimeout(resolve, timeoutSeconds * 1000));
 			

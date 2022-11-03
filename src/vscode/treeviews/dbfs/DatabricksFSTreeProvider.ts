@@ -11,7 +11,33 @@ export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<Databri
 	private _onDidChangeTreeData: vscode.EventEmitter<DatabricksFSTreeItem | undefined> = new vscode.EventEmitter<DatabricksFSTreeItem | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<DatabricksFSTreeItem | undefined> = this._onDidChangeTreeData.event;
 
-	constructor() {	}
+	private _treeView: vscode.TreeView<DatabricksFSTreeItem>;
+
+	constructor(context: vscode.ExtensionContext) {
+		const treeView = vscode.window.createTreeView('databricksFS', { 
+			treeDataProvider: this, 
+			showCollapseAll: true, 
+			canSelectMany: false
+			});
+		context.subscriptions.push(treeView);
+
+		treeView.onDidChangeSelection((event) => this._onDidChangeSelection(event.selection));
+		treeView.onDidExpandElement((event) => this._onDidExpandElement(event.element));
+		treeView.onDidCollapseElement((event) => this._onDidCollapseElement(event.element));
+		treeView.onDidChangeVisibility((event) => this._onDidChangeVisibility(event.visible));
+
+		this._treeView = treeView;
+
+		if(ThisExtension.isVirtualWorkspace)
+		{
+			this._treeView.message = "DBFS Browser is disabled in Virtual Workspaces!";
+		}
+	}
+
+	private async _onDidChangeSelection(items: readonly DatabricksFSTreeItem[]): Promise<void> { }
+	private async _onDidExpandElement(item: DatabricksFSTreeItem): Promise<void> { }
+	private async _onDidCollapseElement(item: DatabricksFSTreeItem): Promise<void> { }
+	private async _onDidChangeVisibility(visible: boolean): Promise<void> { }
 
 	async refresh(showInfoMessage: boolean = false, item: DatabricksFSTreeItem = null): Promise<void> {
 		if(showInfoMessage){

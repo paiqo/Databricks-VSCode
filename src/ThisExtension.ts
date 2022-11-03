@@ -20,6 +20,7 @@ export abstract class ThisExtension {
 	private static _settingScope: ConfigSettingSource;
 	private static _sensitiveValueStore: SensitiveValueStore;
 	private static _sqlClusterId: string;
+	private static _isVirtualWorkspace: boolean = undefined;
 
 	public static ActiveConnection: iDatabricksConnection;
 
@@ -59,7 +60,7 @@ export abstract class ThisExtension {
 			this.log(`Loading VS Code extension '${context.extension.packageJSON.displayName}' (${context.extension.packageJSON.id}) version ${context.extension.packageJSON.version} ...`);
 			this.log(`If you experience issues please open a ticket at ${context.extension.packageJSON.qna}`);
 
-			this._context = context;			
+			this._context = context;
 
 			ThisExtension.readGlobalSettings();
 
@@ -84,7 +85,7 @@ export abstract class ThisExtension {
 	}
 
 	static dispose(): void {
-		
+
 	}
 
 	private static readGlobalSettings(): void {
@@ -126,8 +127,7 @@ export abstract class ThisExtension {
 	}
 
 	static set SQLClusterID(value: string) {
-		if(value != undefined)
-		{
+		if (value != undefined) {
 			ThisExtension.log(`Using cluster with id '${value}' for SQL Browser!`);
 			this._sqlClusterId = value;
 			vscode.commands.executeCommand("databricksSQL.refresh", undefined, false);
@@ -189,8 +189,8 @@ export abstract class ThisExtension {
 	}
 
 	static async getSecureSetting(setting: string): Promise<string> {
-		let value = this.secrets.get(setting); 
-	
+		let value = this.secrets.get(setting);
+
 		return value;
 	}
 
@@ -201,7 +201,7 @@ export abstract class ThisExtension {
 
 	static getConfigurationSetting<T = string>(setting: string, source?: ConfigSettingSource, allowDefaultValue: boolean = false): ConfigSetting<T> {
 		// usage: ThisExtension.getConfigurationSetting('databricks.connection.default.displayName')
-		
+
 		let value = vscode.workspace.getConfiguration().get(setting) as T;
 		let inspect = vscode.workspace.getConfiguration().inspect(setting);
 
@@ -235,6 +235,15 @@ export abstract class ThisExtension {
 			inspect: inspect,
 			source: source
 		};
+	}
+
+	static get isVirtualWorkspace(): boolean {
+		if (this._isVirtualWorkspace == undefined) {
+			// from https://github.com/microsoft/vscode/wiki/Virtual-Workspaces#detect-virtual-workspaces-in-code
+			this._isVirtualWorkspace = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.every(f => f.uri.scheme !== 'file')
+		}
+
+		return this._isVirtualWorkspace;
 	}
 
 	static async updateConfigurationSetting(setting: string, value: any, target: ConfigSettingSource = this._settingScope): Promise<void> {
@@ -284,43 +293,37 @@ export abstract class ThisExtension {
 				this.log('Strict Proxy SSL verification enabled due to setting "http.proxyStrictSSL": true !');
 			}
 		}
-		else
-		{
+		else {
 			this.log('Strict Proxy SSL verification disabled due to setting "http.proxyStrictSSL": false !');
 		}
 
 		return httpProxyStrictSSL.value;
 	}
 
-	static PushDisposable(item: any)
-	{
+	static PushDisposable(item: any) {
 		this.extensionContext.subscriptions.push(item);
 	}
 
-	static GetDisposable(id: string): vscode.Disposable
-	{
+	static GetDisposable(id: string): vscode.Disposable {
 		return this.extensionContext.subscriptions.find((x: any) => x.id == id)
 	}
 
-	static RemoveDisposable(id: string)
-	{
+	static RemoveDisposable(id: string) {
 		let item: vscode.Disposable = this.GetDisposable(id);
 
-		if(item)
-		{
+		if (item) {
 			item.dispose();
 		}
 	}
 
 	static DisposableExists(id: string): boolean {
-		if(this.GetDisposable(id))
-		{
+		if (this.GetDisposable(id)) {
 			return true;
 		}
 		return false;
 	}
 
-	
+
 
 	// #region StatusBar
 	static set StatusBar(value: vscode.StatusBarItem) {
@@ -332,15 +335,13 @@ export abstract class ThisExtension {
 	}
 
 	static setStatusBar(text: string, inProgress: boolean = false): void {
-		if(inProgress)
-		{
+		if (inProgress) {
 			this.StatusBar.text = "$(loading~spin) " + text;
 		}
-		else
-		{
+		else {
 			this.StatusBar.text = text;
 		}
-		
+
 	}
 	//#endregion
 }

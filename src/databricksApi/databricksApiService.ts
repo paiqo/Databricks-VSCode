@@ -39,26 +39,6 @@ export abstract class DatabricksApiService {
 			this._isInitialized = false;
 			let accessToken = await ThisExtension.ConnectionManager.getAccessToken(con);
 			this._apiBaseUrl = Helper.trimChar(con.apiRootUrl.toString(true), '/') + this.API_SUB_URL;
-			/*
-			const axios = require('axios');
-			const httpsAgent = require('https-agent');
-
-			// Set config defaults when creating the instance
-			this._apiService = axios.create({
-				httpsAgent: new httpsAgent({
-					rejectUnauthorized: ThisExtension.rejectUnauthorizedSSL
-				}),
-				
-				proxy: ThisExtension.useProxy
-			});
-			
-
-			// Alter defaults after instance has been created
-			
-			this._apiService.defaults.headers.common['Authorization'] = "Bearer " + accessToken;
-			this._apiService.defaults.headers.common['Content-Type'] = 'application/json';
-			this._apiService.defaults.headers.common['Accept'] = 'application/json';
-			*/
 
 			this._headers = {
 				"Authorization": 'Bearer ' + accessToken,
@@ -157,18 +137,18 @@ export abstract class DatabricksApiService {
 				ThisExtension.log("GET " + endpoint + " --> " + JSON.stringify(params));
 			}
 
-			let response: Response;
+			
 			try {
 				const config: RequestInit = {
 					method: "GET",
 					headers: this._headers,
 					agent: getProxyAgent()
 				};
-				response = await fetch(this.getFullUrl(endpoint, params), config);
+				let response: Response = await fetch(this.getFullUrl(endpoint, params), config);
 
 				let result;
 				if (returnType == "JSON") {
-					result = await response.json() as T
+					result = await response.json() as T;
 				}
 				else {
 					result = await response.text();
@@ -190,7 +170,6 @@ export abstract class DatabricksApiService {
 	private static async post<T = any>(endpoint: string, body: object, bodyType: "JSON" | "TEXT" = "JSON"): Promise<T> {
 		ThisExtension.log("POST " + endpoint + " --> " + JSON.stringify(body));
 
-		let response: Response;
 		try {
 			const config: RequestInit = {
 				method: "POST",
@@ -198,11 +177,11 @@ export abstract class DatabricksApiService {
 				body: bodyType == "JSON" ? JSON.stringify(body): body.toString(),
 				agent: getProxyAgent()
 			};
-			response = await fetch(this.getFullUrl(endpoint), config);
+			let response: Response = await fetch(this.getFullUrl(endpoint), config);
 
 			if(bodyType == "JSON")
 			{
-				let result: T = await response.json() as T
+				let result: T = await response.json() as T;
 
 				await this.logResponse(result);
 
@@ -219,7 +198,6 @@ export abstract class DatabricksApiService {
 	private static async patch<T = any>(endpoint: string, body: object): Promise<T> {
 		ThisExtension.log("PATCH " + endpoint + " --> " + JSON.stringify(body));
 
-		let response: Response;
 		try {
 			const config: RequestInit = {
 				method: "PATCH",
@@ -227,8 +205,8 @@ export abstract class DatabricksApiService {
 				body: JSON.stringify(body),
 				agent: getProxyAgent()
 			};
-			response = await fetch(this.getFullUrl(endpoint), config);
-			let result: T = await response.json() as T
+			let response: Response = await fetch(this.getFullUrl(endpoint), config);
+			let result: T = await response.json() as T;
 
 			await this.logResponse(result);
 
@@ -243,7 +221,6 @@ export abstract class DatabricksApiService {
 	private static async delete<T = any>(endpoint: string, body: object): Promise<T> {
 		ThisExtension.log("DELETE " + endpoint + " --> " + JSON.stringify(body));
 
-		let response: Response;
 		try {
 			const config: RequestInit = {
 				method: "DELETE",
@@ -251,8 +228,8 @@ export abstract class DatabricksApiService {
 				body: JSON.stringify(body),
 				agent: getProxyAgent()
 			};
-			response = await fetch(this.getFullUrl(endpoint), config);
-			let result: T = await response.json() as T
+			let response: Response = await fetch(this.getFullUrl(endpoint), config);
+			let result: T = await response.json() as T;
 
 			await this.logResponse(result);
 

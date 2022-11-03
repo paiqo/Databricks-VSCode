@@ -59,7 +59,7 @@ export abstract class DatabricksConnectionManager {
 
 			if(refreshComponents)
 			{
-				Helper.delay(100);
+				await Helper.delay(100);
 
 				vscode.commands.executeCommand("databricksWorkspace.refresh", undefined, false);
 				vscode.commands.executeCommand("databricksClusters.refresh", undefined, false);

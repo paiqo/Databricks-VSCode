@@ -144,8 +144,7 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 		let newInstance: DatabricksWorkspaceProviderItem = new DatabricksWorkspaceProviderItem();
 		if (source instanceof vscode.Uri) {
 			// VSCode always queries for some internal files on every filesystem ?!
-			if(FSHelper.isVSCodeInternalURI(source))
-			{
+			if (FSHelper.isVSCodeInternalURI(source)) {
 				return undefined;
 			}
 			newInstance.mapper = LanguageFileExtensionMapper.fromUri(source);
@@ -167,11 +166,14 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 
 export class DatabricksWorkspaceProvider implements vscode.FileSystemProvider {
 
+	constructor(context: vscode.ExtensionContext) {
+		context.subscriptions.push(vscode.workspace.registerFileSystemProvider('dbws', this, { isCaseSensitive: true }));
+	}
+
 	// --- manage file metadata
 	async stat(uri: vscode.Uri): Promise<DatabricksWorkspaceProviderItem> {
 		// VSCode always queries for some internal files on every filesystem ?!
-		if(FSHelper.isVSCodeInternalURI(uri))
-		{
+		if (FSHelper.isVSCodeInternalURI(uri)) {
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
 

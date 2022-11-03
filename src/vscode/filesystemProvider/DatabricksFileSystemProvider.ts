@@ -11,12 +11,15 @@ import { Helper } from '../../helpers/Helper';
 import { iDatabricksFSItem } from '../treeviews/dbfs/iDatabricksFSItem';
 
 export class DatabricksFileSystemProvider implements vscode.FileSystemProvider {
-	// --- manage file metadata
+	
+	constructor(context: vscode.ExtensionContext) {
+		context.subscriptions.push(vscode.workspace.registerFileSystemProvider('dbfs', this, { isCaseSensitive: true }));
+	}
 
+	// --- manage file metadata
 	async stat(uri: vscode.Uri): Promise<vscode.FileStat> {
 		// VSCode always queries for some internal files on every filesystem ?!
-		if(FSHelper.isVSCodeInternalURI(uri))
-		{
+		if (FSHelper.isVSCodeInternalURI(uri)) {
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
 
@@ -46,8 +49,7 @@ export class DatabricksFileSystemProvider implements vscode.FileSystemProvider {
 
 	async readFile(uri: vscode.Uri): Promise<Uint8Array> {
 		// VSCode always queries for some internal files on every filesystem ?!
-		if(FSHelper.isVSCodeInternalURI(uri))
-		{
+		if (FSHelper.isVSCodeInternalURI(uri)) {
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
 

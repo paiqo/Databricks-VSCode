@@ -15,7 +15,28 @@ export class DatabricksSQLTreeProvider implements vscode.TreeDataProvider<Databr
 	private _onDidChangeTreeData: vscode.EventEmitter<DatabricksSQLTreeItem | undefined> = new vscode.EventEmitter<DatabricksSQLTreeItem | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<DatabricksSQLTreeItem | undefined> = this._onDidChangeTreeData.event;
 
-	constructor() { }
+	private _treeView: vscode.TreeView<DatabricksSQLTreeItem>;
+
+	constructor(context: vscode.ExtensionContext) {
+		const treeView = vscode.window.createTreeView('databricksSQL', { 
+			treeDataProvider: this, 
+			showCollapseAll: true, 
+			canSelectMany: false
+			});
+		context.subscriptions.push(treeView);
+
+		treeView.onDidChangeSelection((event) => this._onDidChangeSelection(event.selection));
+		treeView.onDidExpandElement((event) => this._onDidExpandElement(event.element));
+		treeView.onDidCollapseElement((event) => this._onDidCollapseElement(event.element));
+		treeView.onDidChangeVisibility((event) => this._onDidChangeVisibility(event.visible));
+
+		this._treeView = treeView;
+	}
+
+	private async _onDidChangeSelection(items: readonly DatabricksSQLTreeItem[]): Promise<void> { }
+	private async _onDidExpandElement(item: DatabricksSQLTreeItem): Promise<void> { }
+	private async _onDidCollapseElement(item: DatabricksSQLTreeItem): Promise<void> { }
+	private async _onDidChangeVisibility(visible: boolean): Promise<void> { }
 
 	async refresh(showInfoMessage: boolean = false, item: DatabricksSQLTreeItem = null): Promise<void> {
 		if (showInfoMessage) {

@@ -9,13 +9,16 @@ import { Helper } from './Helper';
 export abstract class FSHelper {
 	static SEPARATOR: string = '/';
 
-	static async addToWorkspace(uri: vscode.Uri, name: string): Promise<void> {
+	static async addToWorkspace(uri: vscode.Uri, name: string, showMessage: boolean = true): Promise<void> {
 		if (!vscode.workspace.workspaceFolders) {
 			vscode.window.showErrorMessage("Please save your current session as a VSCode workspace first to use this feature!");
 		}
 		else {
 			// add at the end of the workspace
-			vscode.window.showWarningMessage("This feature is still experimental!");
+			if(showMessage)
+			{
+				vscode.window.showWarningMessage("This feature is still experimental!");
+			}
 			vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders.length, 0, { uri: uri, name: name });
 
 			vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", uri);

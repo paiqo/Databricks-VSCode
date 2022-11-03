@@ -12,8 +12,28 @@ export class DatabricksRepoTreeProvider implements vscode.TreeDataProvider<Datab
 	private _onDidChangeTreeData: vscode.EventEmitter<DatabricksRepoTreeItem | undefined> = new vscode.EventEmitter<DatabricksRepoTreeItem | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<DatabricksRepoTreeItem | undefined> = this._onDidChangeTreeData.event;
 
-	constructor() {	}
+	private _treeView: vscode.TreeView<DatabricksRepoTreeItem>;
 
+	constructor(context: vscode.ExtensionContext) {
+		const treeView = vscode.window.createTreeView('databricksRepos', { 
+			treeDataProvider: this, 
+			showCollapseAll: true, 
+			canSelectMany: false
+			});
+		context.subscriptions.push(treeView);
+
+		treeView.onDidChangeSelection((event) => this._onDidChangeSelection(event.selection));
+		treeView.onDidExpandElement((event) => this._onDidExpandElement(event.element));
+		treeView.onDidCollapseElement((event) => this._onDidCollapseElement(event.element));
+		treeView.onDidChangeVisibility((event) => this._onDidChangeVisibility(event.visible));
+
+		this._treeView = treeView;
+	}
+
+	private async _onDidChangeSelection(items: readonly DatabricksRepoTreeItem[]): Promise<void> { }
+	private async _onDidExpandElement(item: DatabricksRepoTreeItem): Promise<void> { }
+	private async _onDidCollapseElement(item: DatabricksRepoTreeItem): Promise<void> { }
+	private async _onDidChangeVisibility(visible: boolean): Promise<void> { }
 	
 	async autoRefresh(timeoutSeconds: number = 10) {
 		while (true) {

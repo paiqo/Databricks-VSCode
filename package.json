@@ -62,6 +62,12 @@
 	"extensionDependencies": [
 		"RandomFractalsInc.vscode-data-table"
 	],
+	"capabilities": {
+		"virtualWorkspaces": {
+			"supported": "limited",
+			"description": "In virtual workspaces, Workspace and DBFS browsers are not supported. Please use `dbfs:/` and `dbws:/` mount points instead."
+    }
+	},
 	"main": "./dist/node/extension.js",
 	"browser_NOT_WORKING_YET": "./dist/web/extension.js",
 	"contributes": {
@@ -465,7 +471,7 @@
 			},
 			{
 				"command": "databricksWorkspace.addToWorkspace",
-				"title": "Add Databricks to VSCode workspace",
+				"title": "Add Databricks Workspace to VSCode workspace",
 				"icon": "$(symbol-class)"
 			},
 			{

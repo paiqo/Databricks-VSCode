@@ -1,9 +1,7 @@
 import * as vscode from 'vscode';
 
 import { ThisExtension } from '../../ThisExtension';
-import { ContextLanguage, ExecutionContext } from '../../databricksApi/_types';
 import { DatabricksApiService } from '../../databricksApi/databricksApiService';
-import { Helper } from '../../helpers/Helper';
 import { iDatabricksCluster } from '../treeviews/clusters/iDatabricksCluster';
 import { DatabricksKernel } from './DatabricksKernel';
 
