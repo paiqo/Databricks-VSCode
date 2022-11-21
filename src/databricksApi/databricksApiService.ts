@@ -37,18 +37,18 @@ export abstract class DatabricksApiService {
 			ThisExtension.log("Initializing Databricks API Service ...");
 
 			this._isInitialized = false;
-			let accessToken = await ThisExtension.ConnectionManager.getAccessToken(con);
-			this._apiBaseUrl = Helper.trimChar(con.apiRootUrl.toString(true), '/') + this.API_SUB_URL;
+			let headers = await ThisExtension.ConnectionManager.getAuthorizationHeaders(con);
+			this._apiBaseUrl = Helper.trimChar(con.apiRootUrl.with({ path: '', query: '', fragment: '' }).toString(true), '/') + this.API_SUB_URL;
 
 			this._headers = {
-				"Authorization": 'Bearer ' + accessToken,
+				...headers,
 				"Content-Type": 'application/json',
 				"Accept": 'application/json'
 			}
 
 			ThisExtension.log(`Testing new Databricks API (${con.apiRootUrl}) settings ...`);
 			this._connectionTestRunning = true;
-			let workspaceList = await this.listWorkspaceItems("/");
+			let workspaceList = await this.testConnection()
 			this._connectionTestRunning = false;
 			if (workspaceList && workspaceList.length > 0) {
 				ThisExtension.log("Databricks API Service initialized!");
@@ -57,7 +57,7 @@ export abstract class DatabricksApiService {
 			else {
 				ThisExtension.log(JSON.stringify(workspaceList));
 				vscode.window.showErrorMessage(`Could not initialize Databricks API for URL ${con.apiRootUrl}!`);
-				throw new Error(`Invalid Configuration for Databricks REST API: Cannot access '${con.apiRootUrl}' with token '${accessToken}'!`);
+				throw new Error(`Invalid Configuration for Databricks REST API: Cannot access '${con.apiRootUrl}' with headers '${headers.toString()}'!`);
 			}
 		} catch (error) {
 			this._connectionTestRunning = false;
@@ -137,7 +137,6 @@ export abstract class DatabricksApiService {
 				ThisExtension.log("GET " + endpoint + " --> " + JSON.stringify(params));
 			}
 
-			
 			try {
 				const config: RequestInit = {
 					method: "GET",
@@ -174,13 +173,12 @@ export abstract class DatabricksApiService {
 			const config: RequestInit = {
 				method: "POST",
 				headers: this._headers,
-				body: bodyType == "JSON" ? JSON.stringify(body): body.toString(),
+				body: bodyType == "JSON" ? JSON.stringify(body) : body.toString(),
 				agent: getProxyAgent()
 			};
 			let response: Response = await fetch(this.getFullUrl(endpoint), config);
 
-			if(bodyType == "JSON")
-			{
+			if (bodyType == "JSON") {
 				let result: T = await response.json() as T;
 
 				await this.logResponse(result);
@@ -250,6 +248,15 @@ export abstract class DatabricksApiService {
 	- list-APIs return a sorted array or an empty array
 	- paginated APIs return all pages
 	*/
+
+	static async testConnection(): Promise<string> {
+		let endpoint = '2.0/workspace/list';
+		let body = { path: "/" };
+
+		let response: string = await this.get<string>(endpoint, body, true, "TEXT");
+
+		return response;
+	}
 	//#region Workspace API
 	static async listWorkspaceItems(path: string): Promise<iDatabricksWorkspaceItem[]> {
 		let endpoint = '2.0/workspace/list';
@@ -260,7 +267,7 @@ export abstract class DatabricksApiService {
 		if (!response) {
 			return undefined
 		}
-		
+
 		let items: iDatabricksWorkspaceItem[] = response.objects as iDatabricksWorkspaceItem[];
 
 		if (!items) {
@@ -516,6 +523,20 @@ export abstract class DatabricksApiService {
 		let response = await this.post(endpoint, body);
 	}
 
+	static async pinCluster(cluster_id: string): Promise<void> {
+		let endpoint = '2.0/clusters/pin';
+		let body = { cluster_id: cluster_id };
+
+		let response = await this.post(endpoint, body);
+	}
+
+	static async unpinCluster(cluster_id: string): Promise<void> {
+		let endpoint = '2.0/clusters/unpin';
+		let body = { cluster_id: cluster_id };
+
+		let response = await this.post(endpoint, body);
+	}
+
 	static async listRuntimeVersions(path: string): Promise<iDatabricksRuntimeVersion[]> {
 		let endpoint = '2.0/clusters/spark-versions';
 
@@ -540,16 +561,16 @@ export abstract class DatabricksApiService {
 	static async listJobs(limit: number = 20, offset: number = 0, expandTask: boolean = true): Promise<iDatabricksJob[]> {
 		let endpoint = this.JOB_API_VERSION + '/jobs/list';
 		let body = {
-				limit: limit,
-				offset: offset,
-				expand_tasks: expandTask
-			};
+			limit: limit,
+			offset: offset,
+			expand_tasks: expandTask
+		};
 
 		let response: iDatabricksApiJobsListResponse;
 
 		let jobs: iDatabricksJob[] = [];
 		do {
-			
+
 			response = await this.get<iDatabricksApiJobsListResponse>(endpoint, body);
 
 			if (!response) {
@@ -583,13 +604,13 @@ export abstract class DatabricksApiService {
 		let endpoint = this.JOB_API_VERSION + '/jobs/runs/list';
 		const max_runs_per_call: number = 25;
 		let body = {
-				job_id: job_id,
-				active_only: active_only,
-				completed_only: completed_only,
-				offset: 0,
-				limit: limit > max_runs_per_call ? max_runs_per_call : limit,
-				expand_tasks: expandTasks
-			};
+			job_id: job_id,
+			active_only: active_only,
+			completed_only: completed_only,
+			offset: 0,
+			limit: limit > max_runs_per_call ? max_runs_per_call : limit,
+			expand_tasks: expandTasks
+		};
 
 		let response: iDatabricksApiJobsRunsListResponse;
 
@@ -663,9 +684,9 @@ export abstract class DatabricksApiService {
 
 		let items: iDatabricksFSItem[] = response.files as iDatabricksFSItem[];
 
-			if (!items) {
-				return [];
-			}
+		if (!items) {
+			return [];
+		}
 
 		Helper.sortArrayByProperty(items, "path");
 		return items;
@@ -836,8 +857,7 @@ export abstract class DatabricksApiService {
 
 		let response: iDatabricksApiSecretsScopesListResponse = await this.get<iDatabricksApiSecretsScopesListResponse>(endpoint);
 
-		if(!response)
-		{
+		if (!response) {
 			return undefined;
 		}
 
@@ -877,8 +897,7 @@ export abstract class DatabricksApiService {
 
 		let response: iDatabricksApiSecretsListResponse = await this.get<iDatabricksApiSecretsListResponse>(endpoint, body);
 
-		if(!response)
-		{
+		if (!response) {
 			return undefined;
 		}
 

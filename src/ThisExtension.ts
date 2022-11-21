@@ -7,6 +7,8 @@ import { DatabricksConnectionManagerVSCode } from './vscode/treeviews/connection
 import { SensitiveValueStore } from './vscode/treeviews/connections/_types';
 import { DatabricksConnectionManagerCLI } from './vscode/treeviews/connections/DatabricksConnectionManagerCLI';
 import { DatabricksKernel } from './vscode/notebook/DatabricksKernel';
+import { DatabricksConnectionManagerWeb } from './vscode/treeviews/connections/DatabricksConnectionManagerWeb';
+import { DatabricksConnectionManagerAzure } from './vscode/treeviews/connections/DatabricksConnectionManagerAzure';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -53,9 +55,6 @@ export abstract class ThisExtension {
 
 	static async initialize(context: vscode.ExtensionContext): Promise<boolean> {
 		try {
-			this._logger = vscode.window.createOutputChannel(context.extension.id);
-			this.log("Logger initialized!");
-
 			this._extension = context.extension;
 			this.log(`Loading VS Code extension '${context.extension.packageJSON.displayName}' (${context.extension.packageJSON.id}) version ${context.extension.packageJSON.version} ...`);
 			this.log(`If you experience issues please open a ticket at ${context.extension.packageJSON.qna}`);
@@ -64,16 +63,25 @@ export abstract class ThisExtension {
 
 			ThisExtension.readGlobalSettings();
 
-			let connectionManager = this.getConfigurationSetting("databricks.connectionManager");
-			switch (connectionManager.value) {
-				case "VSCode Settings":
-					this._connectionManager = new DatabricksConnectionManagerVSCode();
-					break;
-				case "Databricks CLI Profiles":
-					this._connectionManager = new DatabricksConnectionManagerCLI();
-					break;
-				default:
-					this.log("'" + connectionManager + "' is not a valid value for config setting 'databricks.connectionManager!");
+			if (ThisExtension.isVirtualWorkspace) {
+				// in a virtual workspace we dont have access to the credential manager required for VSCode Settings nor to the Databrick CLI config file
+				this._connectionManager = new DatabricksConnectionManagerWeb();
+			}
+			else {
+				let connectionManager = this.getConfigurationSetting("databricks.connectionManager");
+				switch (connectionManager.value) {
+					case "VSCode Settings":
+						this._connectionManager = new DatabricksConnectionManagerVSCode();
+						break;
+					case "Databricks CLI Profiles":
+						this._connectionManager = new DatabricksConnectionManagerCLI();
+						break;
+					case "Azure":
+						this._connectionManager = new DatabricksConnectionManagerAzure();
+						break;
+					default:
+						this.log("'" + connectionManager + "' is not a valid value for config setting 'databricks.connectionManager!");
+				}
 			}
 
 			await this.ConnectionManager.initialize();
@@ -323,7 +331,15 @@ export abstract class ThisExtension {
 		return false;
 	}
 
+	// #region Logger
+	static set Logger(value: vscode.OutputChannel) {
+		this._logger = value;
+	}
 
+	static get Logger(): vscode.OutputChannel {
+		return this._logger;
+	}
+	//#endregion
 
 	// #region StatusBar
 	static set StatusBar(value: vscode.StatusBarItem) {

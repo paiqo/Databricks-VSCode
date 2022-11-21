@@ -7,6 +7,7 @@ import { DatabricksApiService } from '../../../databricksApi/databricksApiServic
 import { iDatabricksSecretScope } from './iDatabricksSecretScope';
 import { DatabricksSecretScope } from './DatabricksSecretScope';
 import { DatabricksSecretDragAndDropController } from './DatabricksSecretDragAndDropController';
+import { ThisExtension } from '../../../ThisExtension';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
@@ -38,11 +39,11 @@ export class DatabricksSecretTreeProvider implements vscode.TreeDataProvider<Dat
 	private async _onDidCollapseElement(item: DatabricksSecretTreeItem): Promise<void> { }
 	private async _onDidChangeVisibility(visible: boolean): Promise<void> { }
 
-	async refresh(showInfoMessage: boolean = false): Promise<void> {
+	async refresh(showInfoMessage: boolean = false, item: DatabricksSecretTreeItem = null): Promise<void> {
 		if (showInfoMessage) {
 			Helper.showTemporaryInformationMessage('Refreshing Secrets ...');
 		}
-		this._onDidChangeTreeData.fire(null);
+		this._onDidChangeTreeData.fire(item);
 	}
 
 	async getTreeItem(element: DatabricksSecretTreeItem): Promise<DatabricksSecretTreeItem> {
@@ -75,11 +76,21 @@ export class DatabricksSecretTreeProvider implements vscode.TreeDataProvider<Dat
 	}
 
 	async addSecretScope(): Promise<void> {
-		let scopeName = await Helper.showInputBox("<name of scope>", "The name of the secret scope to create");
+		let scopeName = await Helper.showInputBox("<name of scope>", "The name of the secret scope to create", true);
+		if(!scopeName) // abort on ESC or empty value
+		{
+			ThisExtension.log("Adding new secret scope: No secret name provided -> Aborting!")
+			return;
+		}
 		let managingPrincipal = await Helper.showQuickPick(["users"], "Which group/user is allowed to manage the secret scope");
+		if(managingPrincipal == undefined) // abort on ESC
+		{
+			ThisExtension.log("Adding new secret scope: ESC pressed -> Aborting!")
+			return;
+		}
 
 		await DatabricksApiService.createSecretScopes(scopeName, managingPrincipal);
 
-		setTimeout(() => vscode.commands.executeCommand("databricksSecrets.refresh", undefined, false), 500);
+		setTimeout(() => this.refresh(), 500);
 	}
 }

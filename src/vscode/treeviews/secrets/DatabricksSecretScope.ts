@@ -71,18 +71,8 @@ export class DatabricksSecretScope extends DatabricksSecretTreeItem {
 		return `dbutils.secrets.list("${this.Scope}")`;
 	}
 
-	async add(): Promise<void> {
-		let scopeName = await Helper.showInputBox("<name of scope>", "The name of the secret scope to create");
-		let managingPrincipal = await Helper.showQuickPick(["users"], "Which group/user is allowed to manage the secret scope");
-
-		await DatabricksApiService.createSecretScopes(scopeName, managingPrincipal);
-
-		setTimeout(() => this.refreshParent(), 500);
-	}
-
 	async delete(): Promise<void> {
-		let confirm: string = await Helper.showInputBox("", "Confirm deletion by typeing the Scope name '" + this.Scope + "' again.");
-
+		let confirm: string = await Helper.showInputBox("", "Confirm deletion by typeing the Scope name '" + this.Scope + "' again.", true);
 		if (!confirm) {
 			ThisExtension.log("Deletion of secret scope '" + this.Scope + "' aborted!")
 			return;
@@ -96,8 +86,18 @@ export class DatabricksSecretScope extends DatabricksSecretTreeItem {
 	}
 
 	async addSecret(): Promise<void> {
-		let secretName = await Helper.showInputBox("<name of secret>", "The name of the secret to create");
-		let value = await Helper.showInputBox("<value for '" + secretName + "'>", "The value for the secret '" + secretName + "'");
+		let secretName = await Helper.showInputBox("<name of secret>", "The name of the secret to create", true);
+		if(!secretName) // abort on ESC or empty value
+		{
+			ThisExtension.log("Adding new secret: No secret name provided -> Aborting!")
+			return;
+		}
+		let value = await Helper.showInputBox("<value for '" + secretName + "'>", "The value for the secret '" + secretName + "'", true);
+		if(value == undefined) // abort on ESC
+		{
+			ThisExtension.log("Adding new secret: ESC pressed -> Aborting!")
+			return;
+		}
 
 		await DatabricksApiService.setSecret(this.Scope, secretName, value);
 

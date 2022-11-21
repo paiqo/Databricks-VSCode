@@ -13,13 +13,16 @@ export abstract class DatabricksConnectionManager {
 	protected _initialized: boolean;
 
 	abstract initialize(): Promise<void>;
-	abstract loadConnections(): void;
+	abstract loadConnections(): Promise<void>;
 
 	abstract updateConnection(updatedCon: iDatabricksConnection): void;
 
-	async getAccessToken(con: iDatabricksConnection): Promise<string>
-	{
+	async getPersonalAccessToken(con: iDatabricksConnection): Promise<string> {
 		return con.personalAccessToken;
+	}
+
+	async getAuthorizationHeaders(con: iDatabricksConnection): Promise<object> {
+		return { "Authorization": 'Bearer ' + await this.getPersonalAccessToken(con) };
 	}
 
 	public get Connections(): iDatabricksConnection[] {
@@ -33,7 +36,7 @@ export abstract class DatabricksConnectionManager {
 	}
 
 	get LastActiveConnection(): iDatabricksConnection {
-		return this.Connections.find( (x) => x.displayName == this.LastActiveConnectionName);
+		return this.Connections.find((x) => x.displayName == this.LastActiveConnectionName);
 	}
 
 	async activateConnection(con: iDatabricksConnection, refreshComponents: boolean = false): Promise<void> {
@@ -43,10 +46,10 @@ export abstract class DatabricksConnectionManager {
 		await ThisExtension.updateConfigurationSetting("databricks.lastActiveConnection", con.displayName);
 
 		if (await DatabricksApiService.initialize(con)) {
-			
+
 			if (con.useCodeCells) {
 				let codeCellsCurrentValue = ThisExtension.getConfigurationSetting(Helper.JupyterCodeCellsSettingName).value;
-				if(!codeCellsCurrentValue.includes(Helper.DatabricksCommandTagRegEx)) // Databricks tag was not yet added
+				if (!codeCellsCurrentValue.includes(Helper.DatabricksCommandTagRegEx)) // Databricks tag was not yet added
 				{
 					await ThisExtension.updateConfigurationSetting(Helper.JupyterCodeCellsSettingName, "^(" + Helper.DatabricksCommandTagRegEx + "|" + codeCellsCurrentValue.slice(2));
 				}
@@ -57,8 +60,7 @@ export abstract class DatabricksConnectionManager {
 
 			ThisExtension.SQLClusterID = undefined;
 
-			if(refreshComponents)
-			{
+			if (refreshComponents) {
 				await Helper.delay(100);
 
 				vscode.commands.executeCommand("databricksWorkspace.refresh", undefined, false);
@@ -73,30 +75,29 @@ export abstract class DatabricksConnectionManager {
 	}
 
 	SubfolderConfiguration(con: iDatabricksConnection = undefined): LocalSyncSubfolderConfiguration {
-		if(!con)
-		{
+		if (!con) {
 			con = this.LastActiveConnection;
 		}
 
 		let dbfs: string = "DBFS";
 		try {
 			dbfs = con.localSyncSubfolders.DBFS;
-		} catch (error) {}
+		} catch (error) { }
 
 		let workspace: string = "Workspace";
 		try {
 			workspace = con.localSyncSubfolders.Workspace;
-		} catch (error) {}
+		} catch (error) { }
 
 		let clusters: string = "Clusters";
 		try {
 			clusters = con.localSyncSubfolders.Clusters;
-		} catch (error) {}
+		} catch (error) { }
 
 		let jobs: string = "Jobs";
 		try {
 			jobs = con.localSyncSubfolders.Jobs;
-		} catch (error) {}
+		} catch (error) { }
 
 		return {
 			"Clusters": clusters,

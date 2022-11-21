@@ -119,7 +119,7 @@ export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManag
 		}
 	}
 
-	async getAccessToken(con: iDatabricksConnection): Promise<string> {
+	async getPersonalAccessToken(con: iDatabricksConnection): Promise<string> {
 		let accessToken: string = con.personalAccessToken;
 		const secureTokenName: string = con.displayName + "-API-Token";
 		const secureTokenStore = ThisExtension.SensitiveValueStore;

@@ -36,13 +36,15 @@ export abstract class Helper {
 	static async showInputBox(
 		defaultValue: string,
 		toolTip: string,
+		ignoreFocusOut: boolean,
 		valueSelection: [number, number] = undefined,
-	): Promise<string> {
+	): Promise<string | undefined> {
 		const result = await vscode.window.showInputBox({
 			value: defaultValue,
 			valueSelection: valueSelection,
 			placeHolder: toolTip,
-			prompt: toolTip
+			prompt: toolTip,
+			ignoreFocusOut: ignoreFocusOut
 			/*,
 			validateInput: text => {
 				window.showInformationMessage(`Validating: ${text}`);

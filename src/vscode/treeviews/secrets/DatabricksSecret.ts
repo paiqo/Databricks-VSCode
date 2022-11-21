@@ -51,8 +51,12 @@ export class DatabricksSecret extends DatabricksSecretTreeItem {
 	}
 
 	async update(): Promise<void> {
-		let newValue = await Helper.showInputBox("<new value for the '" + this.secret + "'>", "The new value for the secret '" + this.secret + "'");
-
+		let newValue = await Helper.showInputBox("<new value for the '" + this.secret + "'>", "The new value for the secret '" + this.secret + "'", true);
+		if(newValue == undefined) // abort on ESC
+		{
+			ThisExtension.log("Updating secret: ESC pressed -> Aborting!")
+			return;
+		}
 		await DatabricksApiService.setSecret(this.scope, this.secret, newValue);
 
 		setTimeout(() => this.refreshParent(), 500);
@@ -66,11 +70,8 @@ export class DatabricksSecret extends DatabricksSecretTreeItem {
 			return;
 		}
 
-		if (!confirm || confirm == "yes") {
-			await DatabricksApiService.deleteSecret(this.scope, this.secret);
-
-			setTimeout(() => this.refreshParent(), 500);
-		}
+		await DatabricksApiService.deleteSecret(this.scope, this.secret);
+		setTimeout(() => this.refreshParent(), 500);
 	}
 
 	async insertCode(item: DatabricksSecretTreeItem): Promise<void> {

@@ -27,12 +27,11 @@ export class DatabricksClusterJobClusters extends DatabricksClusterTreeItem {
 		let clusters: iDatabricksCluster[] = await DatabricksApiService.listClusters();
 		let items: DatabricksClusterTreeItem[] = [];
 
-		
-			for (let cluster of clusters) {
-				if (["JOB"].includes(cluster.cluster_source)) {
-					items.push(new DatabricksCluster(cluster));
-				}
+		for (let cluster of clusters) {
+			if (["JOB"].includes(cluster.cluster_source)) {
+				items.push(new DatabricksCluster(cluster));
 			}
+		}
 
 		return items;
 	}

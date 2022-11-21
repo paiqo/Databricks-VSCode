@@ -36,6 +36,9 @@ import { DatabricksSQLTreeItem } from './vscode/treeviews/sql/DatabricksSQLTreeI
 
 export async function activate(context: vscode.ExtensionContext) {
 
+	ThisExtension.Logger = vscode.window.createOutputChannel(context.extension.id);
+	ThisExtension.log("Logger initialized!");
+
 	ThisExtension.StatusBar = vscode.window.createStatusBarItem("databricks-vscode", vscode.StatusBarAlignment.Right);
 	ThisExtension.StatusBar.show();
 	ThisExtension.setStatusBar("Initializing ...", true);
@@ -60,14 +63,17 @@ export async function activate(context: vscode.ExtensionContext) {
 	let databricksConnectionTreeProvider = new DatabricksConnectionTreeProvider();
 	vscode.window.registerTreeDataProvider('DatabricksConnections', databricksConnectionTreeProvider);
 	vscode.commands.registerCommand('databricksConnections.refresh', (item: DatabricksConnectionTreeItem, showInfoMessage: boolean = true) => databricksConnectionTreeProvider.refresh(showInfoMessage, item));
-	vscode.commands.registerCommand('DatabricksConnections.add', () => databricksConnectionTreeProvider.add());
-
+	if (ThisExtension.isVirtualWorkspace) {
+		vscode.commands.registerCommand('DatabricksConnections.add', () => databricksConnectionTreeProvider.add());
+	}
+	else {
+		vscode.commands.registerCommand('DatabricksConnections.settings', () => databricksConnectionTreeProvider.openSettings());
+	}
 	vscode.commands.registerCommand('DatabricksConnectionItem.activate', (connection: DatabricksConnectionTreeItem) => connection.activate());
 
 
 	// register DatabricksWorkspaceTreeProvider
-	if(!ThisExtension.isVirtualWorkspace)
-	{
+	if (!ThisExtension.isVirtualWorkspace) {
 		let databricksWorkspaceTreeProvider = new DatabricksWorkspaceTreeProvider(context);
 		//vscode.window.registerTreeDataProvider('databricksWorkspace', databricksWorkspaceTreeProvider);
 		vscode.commands.registerCommand('databricksWorkspace.refresh', (item: DatabricksWorkspaceTreeItem, showInfoMessage: boolean = true) => databricksWorkspaceTreeProvider.refresh(showInfoMessage, item));
@@ -87,8 +93,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		FSHelper.addToWorkspace(vscode.Uri.parse('dbws:/'), "Databricks - Workspace", showMessage);
 	});
 
-	if(ThisExtension.isVirtualWorkspace)
-	{	
+	if (ThisExtension.isVirtualWorkspace) {
 		// in a virtual workspace we always want to add the DBWS mount to the workspace
 		vscode.commands.executeCommand('databricksWorkspace.addToWorkspace', false);
 	}
@@ -104,6 +109,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksClusterItem.stop', (cluster: DatabricksCluster) => cluster.stop());
 	vscode.commands.registerCommand('databricksClusterItem.showDefinition', (cluster: DatabricksCluster) => cluster.showDefinition());
 	vscode.commands.registerCommand('databricksClusterItem.delete', (cluster: DatabricksCluster) => cluster.delete());
+	vscode.commands.registerCommand('databricksClusterItem.pin', (cluster: DatabricksCluster) => cluster.pin());
+	vscode.commands.registerCommand('databricksClusterItem.unpin', (cluster: DatabricksCluster) => cluster.unpin());
 	vscode.commands.registerCommand('databricksClusterItem.useForSQL', (cluster: DatabricksCluster) => cluster.useForSQL());
 	vscode.commands.registerCommand('databricksClusterItem.createKernel', (cluster: DatabricksCluster) => cluster.createKernel());
 	vscode.commands.registerCommand('databricksClusterItem.restartKernel', (cluster: DatabricksCluster) => cluster.restartKernel());
@@ -122,8 +129,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 
 	// register DatabricksFSTreeProvider
-	if(!ThisExtension.isVirtualWorkspace)
-	{
+	if (!ThisExtension.isVirtualWorkspace) {
 		let databricksFSTreeProvider = new DatabricksFSTreeProvider(context);
 		//vscode.window.registerTreeDataProvider('databricksFS', databricksFSTreeProvider);
 		vscode.commands.registerCommand('databricksFS.refresh', (item: DatabricksFSDirectory = null, showInfoMessage: boolean = true) => databricksFSTreeProvider.refresh(showInfoMessage, item));
@@ -144,8 +150,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		FSHelper.addToWorkspace(vscode.Uri.parse('dbfs:/'), "Databricks - DBFS", showMessage);
 	});
 
-	if(ThisExtension.isVirtualWorkspace)
-	{	
+	if (ThisExtension.isVirtualWorkspace) {
 		// in a virtual workspace we always want to add the DBWS mount to the workspace
 		vscode.commands.executeCommand('databricksFS.addToWorkspace', false);
 	}

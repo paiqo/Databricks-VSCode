@@ -74,7 +74,7 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 
 	// used in package.json to filter commands via viewItem == ACTIVE
 	get _contextValue(): string {
-		let states: string[] = [];
+		let states: string[] = ["SHOW_DEFINITION"];
 
 		if (['RUNNING', 'ERROR', 'UNKNOWN', 'PENDING'].includes(this.state)) {
 			states.push("STARTED");
@@ -88,6 +88,20 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 		}
 		else {
 			states.push("NOKERNEL");
+		}
+
+		if (this.definition.pinned_by_user_name) {
+			states.push("PINNED");
+		}
+		else {
+			states.push("NOT_PINNED");
+		}
+
+		if (this.definition.cluster_source == "JOB") {
+			states.push("JOB");
+		}
+		else {
+			states.push("MANUAL");
 		}
 
 		// use , as separator to allow to check for ,<value>, in package.json when condition
@@ -191,14 +205,37 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 	}
 
 	async delete(): Promise<void> {
-		let confirm: string = await Helper.showInputBox("", "Confirm deletion by typeing the Cluster name '" + this.name + "' again.");
-
+		let confirm: string = await Helper.showInputBox("", "Confirm deletion by typeing the Cluster name '" + this.name + "' again.", true);
 		if (!confirm || confirm != this.name) {
 			ThisExtension.log("Deletion of Cluster '" + this.name + "' aborted!")
 			return;
 		}
 
 		await DatabricksApiService.deleteCluster(this.cluster_id);
+
+		setTimeout(() => vscode.commands.executeCommand("databricksClusters.refresh", undefined, false), 1000);
+	}
+
+	async pin(): Promise<void> {
+		let response = DatabricksApiService.pinCluster(this.cluster_id);
+
+		response.then((response) => {
+			Helper.showTemporaryInformationMessage(`Pinning cluster ${this.label} (${this.cluster_id}) ...`);
+		}, (error) => {
+			vscode.window.showErrorMessage(`ERROR: ${error}`);
+		});
+
+		setTimeout(() => vscode.commands.executeCommand("databricksClusters.refresh", undefined, false), 1000);
+	}
+
+	async unpin(): Promise<void> {
+		let response = DatabricksApiService.unpinCluster(this.cluster_id);
+
+		response.then((response) => {
+			Helper.showTemporaryInformationMessage(`Unpinning cluster ${this.label} (${this.cluster_id}) ...`);
+		}, (error) => {
+			vscode.window.showErrorMessage(`ERROR: ${error}`);
+		});
 
 		setTimeout(() => vscode.commands.executeCommand("databricksClusters.refresh", undefined, false), 1000);
 	}

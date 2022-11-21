@@ -1,14 +1,16 @@
-export type CloudProvider = 
-	"Azure" 
-| 	"AWS" 
-|	"GCP"
-;
+export type CloudProvider =
+	"Azure"
+	| "AWS"
+	| "GCP"
+	;
 
-export type ConnectionSource = 
-	"databricks.connections" 
-| 	"databricks.default" 
-|	"CLI-profile"
-;
+export type ConnectionSource =
+	"databricks.connections"
+	| "databricks.default"
+	| "CLI-profile"
+	| "ManuallyAdded"
+	| "Azure"
+	;
 
 export interface AccessTokenSecure {
 	keyTarSettingName: string | undefined;
@@ -28,4 +30,58 @@ export type SensitiveValueStore =
 	// (Experimental!) Databricks Personal Access Token is stored in an external Config file. 
 	// This is useful to manage all your PATs in one place and also easily share them.
 	| "ExternalConfigFile"
-;
+	;
+
+export interface AzureSubscription {
+	displayName: string;
+	id: string;
+	state: string;
+	subscriptionId: string;
+	tenantId: string;
+}
+export interface AzureSubscriptionListRepsonse {
+	count: {
+		type: string,
+		value: number
+	};
+	value: AzureSubscription[];
+}
+
+export interface AzureResource {
+	id: string;
+	location: string;
+	name: string;
+	sku: {
+		name: string;
+		tier: string;
+	};
+	tags: object;
+	properties: {
+		managedResourceGroupId: string;
+		parameters: object;
+		provisioningState: string;
+		uiDefinitionUri: string;
+		authorizations: {
+			principalId: string;
+			roleDefinitionId: string;
+		}[];
+		createdBy: {
+			oid: string;
+			puid: string;
+			applicationId: string;
+		};
+		updatedBy: {
+			oid: string;
+			puid: string;
+			applicationId: string;
+		};
+		createdDateTime: Date;
+		workspaceId: string;
+		workspaceUrl: string;
+	}
+}
+
+export interface AzureResourceListRepsonse {
+	nextLink: string;
+	value: AzureResource[];
+}

@@ -17,7 +17,8 @@ export class DatabricksConnectionTreeProvider implements vscode.TreeDataProvider
 		if (showInfoMessage) {
 			Helper.showTemporaryInformationMessage('Refreshing Connections ...');
 		}
-		ThisExtension.ConnectionManager.initialize();
+		//await ThisExtension.ConnectionManager.initialize();
+		await ThisExtension.initialize(ThisExtension.extensionContext);
 		this._onDidChangeTreeData.fire(item);
 	}
 
@@ -54,6 +55,10 @@ export class DatabricksConnectionTreeProvider implements vscode.TreeDataProvider
 	}
 
 	async add(): Promise<void> {
+		await ThisExtension.ConnectionManager.initialize();
+	}
+
+	async openSettings(): Promise<void> {
 		vscode.commands.executeCommand( 'workbench.action.openSettings', 'Databricks' );
 		return;
 	}

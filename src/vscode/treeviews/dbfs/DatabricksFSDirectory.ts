@@ -175,14 +175,16 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 	}
 
 	async addDirectory(): Promise<void> {
-		let newName = await Helper.showInputBox("<new directory>", "Name of the new Directory");
+		let newName = await Helper.showInputBox("<new directory>", "Name of the new Directory", true);
+		if (!newName) {
+			ThisExtension.log("Adding DBFS directory aborted!");
+			return;
+		}
 
-		if (newName) {
-			vscode.workspace.fs.createDirectory(vscode.Uri.joinPath(this.dbfsUri, newName));
+		vscode.workspace.fs.createDirectory(vscode.Uri.joinPath(this.dbfsUri, newName));
 
-			if (ThisExtension.RefreshAfterUpDownload) {
-				setTimeout(() => this.refreshParent(), 500);
-			}
+		if (ThisExtension.RefreshAfterUpDownload) {
+			setTimeout(() => this.refreshParent(), 500);
 		}
 	}
 
@@ -197,8 +199,7 @@ export class DatabricksFSDirectory extends DatabricksFSTreeItem {
 	}
 
 	async delete(): Promise<void> {
-		let confirm: string = await Helper.showInputBox("", "Confirm deletion by typeing the directory name '" + this.label + "' again.");
-
+		let confirm: string = await Helper.showInputBox("", "Confirm deletion by typeing the directory name '" + this.label + "' again.", true);
 		if (!confirm) {
 			ThisExtension.log("Deletion of DBFS directory '" + this.label + "' aborted!")
 			return;

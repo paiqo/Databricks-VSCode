@@ -192,9 +192,24 @@ export class DatabricksKernel implements vscode.NotebookController {
 				ThisExtension.log(`NotebookKernel: Successfully set up FilesInRepo by running '${commandTexts[2]}' and '${commandTexts[3]}' on driver!`);
 				ThisExtension.setStatusBar("FilesInRepo initialized!");
 			}
-
 		}
 	}
+
+	async createSqlDfVariable(sqlCommand: string, context: ExecutionContext): Promise<void> {
+		let languages: Map<ContextLanguage, string> = new Map<ContextLanguage, string>();
+
+		languages.set("python", '_sqldf = spark.sql("""' + sqlCommand + '""")');
+		// currently _sqldf is only supported for PySpark
+		//languages.set("scala", 'val _sqldf = spark.sql("' + sqlCommand + '")');
+		//languages.set("r", '_sqldf <- sql("' +  sqlCommand + '")');
+
+		for (let language of languages.entries()) {
+			ThisExtension.log("_sqldf command for " + language[0] + ": " + language[1]);
+			let command = await DatabricksApiService.runCommand(context, language[1], language[0]);
+			let result = await DatabricksApiService.getCommandResult(command, true, true);
+		}
+	}
+
 
 	createNotebookCellExecution(cell: vscode.NotebookCell): vscode.NotebookCellExecution {
 		//throw new Error('Method not implemented.');
@@ -203,8 +218,6 @@ export class DatabricksKernel implements vscode.NotebookController {
 	interruptHandler?: (notebook: vscode.NotebookDocument) => void | Thenable<void>;
 	readonly onDidChangeSelectedNotebooks: vscode.Event<{ readonly notebook: vscode.NotebookDocument; readonly selected: boolean; }>;
 	updateNotebookAffinity(notebook: vscode.NotebookDocument, affinity: vscode.NotebookControllerAffinity): void { }
-
-
 
 	async executeHandler(cells: vscode.NotebookCell[], _notebook: vscode.NotebookDocument, _controller: vscode.NotebookController): Promise<void> {
 		let execContext: ExecutionContext = this.getNotebookContext(_notebook.uri);
@@ -354,8 +367,6 @@ export class DatabricksKernel implements vscode.NotebookController {
 						return;
 					}
 
-
-
 					let outputRun: vscode.NotebookCellOutput = new vscode.NotebookCellOutput([
 						vscode.NotebookCellOutputItem.text(commandText, 'text/plain')
 					])
@@ -414,6 +425,11 @@ export class DatabricksKernel implements vscode.NotebookController {
 				])
 				output.metadata = { row_count: data.length, truncated: result.results.truncated };
 				execution.appendOutput(output);
+
+				if(language == "sql")
+				{
+					await this.createSqlDfVariable(commandText, context);
+				}
 			}
 			else if (result.results.resultType == "text") {
 				let cellOutput = new vscode.NotebookCellOutput([]);

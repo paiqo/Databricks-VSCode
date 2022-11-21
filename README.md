@@ -54,6 +54,19 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 
 # Release Notes
 
+**v1.3.0:**
+- added new Connection Manager to load Databricks workspaces directly from your Azure Account
+- added support for [`_sqldf` in Python/PySpark](https://docs.databricks.com/notebooks/notebooks-use.html#implicit-sql-df)
+- reworked API connection test
+
+**v1.2.5:**
+- fixed parsing of `apiRootUrl` when reading from the config (only taking schema+authority now)
+
+**v1.2.4:**
+- added `Pin` and `Unpin` to [Cluster Manager](#cluster-manager)
+- minor fixes [Cluster Manager](#cluster-manager)
+- improved input via textboxes
+
 **v1.2.3:**
 - Databricks Kernels are now moved to the top when opening a notebook from the local sync folder or via `dbws:/`
 - added `Insert` buttons for Secrets to easily add the code snippet to the current editor/notebook

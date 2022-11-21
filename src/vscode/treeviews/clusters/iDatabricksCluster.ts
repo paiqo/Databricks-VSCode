@@ -26,7 +26,8 @@ export interface iDatabricksCluster {
 	custom_tags?: {
 		ResourceClass?: string
 	},
-	executors: any[]
+	executors: any[],
+	pinned_by_user_name?: string
 
 	/*
 	driver:	SparkNode

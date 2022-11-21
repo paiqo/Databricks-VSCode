@@ -241,19 +241,18 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		else {
 			if (typeof (con.apiRootUrl) == "string") {
 				try {
-
 					let uri: vscode.Uri = vscode.Uri.parse(con.apiRootUrl);
 					con.apiRootUrl = uri;
 				}
-
 				catch (error) {
 					msg = 'Configuration ' + con.displayName + ': Property "apiRootUrl" is not a valid URL! Please check your user and/or workspace settings!';
 					ThisExtension.log(msg);
 					vscode.window.showErrorMessage(msg);
+					return false;
 				}
 			}
 		}
-		if (!this.propertyIsValid(con.personalAccessToken) && !this.propertyIsValid(con.personalAccessTokenSecure)) {
+		if (!this.propertyIsValid(con.personalAccessToken) && !this.propertyIsValid(con.personalAccessTokenSecure) && !this.propertyIsValid(con.azureResourceId)) {
 			if (showMessage) {
 				msg = 'Configuration ' + con.displayName + ': Property "personalAccessToken" or "personalAccessTokenSecure" is not valid! Please check your user and/or workspace settings!';
 				ThisExtension.log(msg);

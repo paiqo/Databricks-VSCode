@@ -19,7 +19,7 @@ export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager 
 		await this.loadConnections();
 
 		if (this._connections.length == 0) {
-			let msg: string = "No connections have been configured yet! Please add a connection via the VSCode Settings -> Databricks before proceeding!";
+			let msg: string = "No connections have been configured yet! Please add a connection via the Databricks CLI config file before proceeding!";
 			ThisExtension.log(msg);
 			vscode.window.showErrorMessage(msg);
 		}
@@ -122,23 +122,7 @@ export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager 
 		} catch (e) {
 			ThisExtension.log(e);
 		}
-		/*
-				let connection: iDatabricksConnection = {
-					displayName: "Env Variables",
-					apiRootUrl: apiUrl,
-					personalAccessToken: personalAccessToken,
-					localSyncFolder: ""
-				}
-		
-				if(DatabricksConnectionTreeItem.validate(defaultConnection, false))
-				{
-					defaultConnection._source = "databricks.default";
-					this._connections.push(defaultConnection);
-				}
-				*/
 	}
 
-	updateConnection(updatedCon: iDatabricksConnection): void {
-
-	}
+	updateConnection(updatedCon: iDatabricksConnection): void {	}
 }
