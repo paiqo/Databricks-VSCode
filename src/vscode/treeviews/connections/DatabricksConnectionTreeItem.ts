@@ -20,6 +20,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		keyTarSettingName: string,
 		databricksCLIProfileName: string
 	};
+	_azureResourceId: string;
 
 	_source: ConnectionSource;
 	_secureTokenName: string = this.displayName + "-API-Token";
@@ -32,6 +33,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		this._displayName = definition.displayName;
 		this._personalAccessToken = definition.personalAccessToken;
 		this._personalAccessTokenSecure = definition.personalAccessTokenSecure;
+		this._azureResourceId = definition.azureResourceId;
 		this._apiRootUrl = definition.apiRootUrl;
 		this._localSyncFolder = FSHelper.resolvePath(definition.localSyncFolder);
 		this._localSyncSubfolders = definition.localSyncSubfolders;
@@ -114,6 +116,14 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		return this._personalAccessToken;
 	}
 
+	get personalAccessTokenSecure(): AccessTokenSecure {
+		return this._personalAccessTokenSecure;
+	}
+
+	get azureResourceId(): string {
+		return this._azureResourceId;
+	}
+
 	get localSyncFolder(): vscode.Uri {
 		return this._localSyncFolder;
 	}
@@ -141,10 +151,6 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 
 	set useCodeCells(value: boolean) {
 		this._useCodeCells = value;
-	}
-
-	get personalAccessTokenSecure(): AccessTokenSecure {
-		return this._personalAccessTokenSecure;
 	}
 
 	get source(): ConnectionSource {
