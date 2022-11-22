@@ -80,7 +80,7 @@ export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager 
 						displayName: Helper.getFirstRegexGroup(/\[([^\]]*)\]/gm, line),
 						personalAccessToken: undefined, // mandatory in CLI config
 						apiRootUrl: undefined, // mandatory in CLI config
-						localSyncFolder: await FSHelper.joinPath(FSHelper.getUserDir(), "DatabricksSync", Helper.getFirstRegexGroup(/\[([^\]]*)\]/gm, line)),
+						localSyncFolder: await FSHelper.joinPath(FSHelper.getUserDir(), "Databricks-VSCode", Helper.getFirstRegexGroup(/\[([^\]]*)\]/gm, line)),
 						_source: "CLI-profile"
 					};
 				}

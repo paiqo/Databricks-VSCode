@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as os from 'os'
 
 import { ThisExtension } from '../../../ThisExtension';
 import { iDatabricksConnection } from './iDatabricksConnection';
@@ -103,7 +102,7 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 						apiRootUrl: vscode.Uri.parse("https://" + workspace.properties.workspaceUrl),
 						displayName: workspace.name,
 						azureResourceId: workspace.id,
-						localSyncFolder: await FSHelper.joinPath(vscode.Uri.file(os.homedir()), "Databricks-VSCode", workspace.name)
+						localSyncFolder: await FSHelper.joinPath(FSHelper.getUserDir(), "Databricks-VSCode", workspace.name)
 					};
 
 					if (DatabricksConnectionTreeItem.validate(newConnection, false)) {
