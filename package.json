@@ -66,7 +66,7 @@
 		"virtualWorkspaces": {
 			"supported": "limited",
 			"description": "In virtual workspaces, Workspace and DBFS browsers are not supported. Please use `dbfs:/` and `dbws:/` mount points instead."
-    }
+		}
 	},
 	"main": "./dist/node/extension.js",
 	"browser": "./dist/web/extension.js",
@@ -1038,23 +1038,24 @@
 		"test": "vscode-test-web --extensionDevelopmentPath=. --extensionTestsPath=dist/web/extension.js"
 	},
 	"devDependencies": {
+		"@azure/identity": "^3.1.1",
+		"@azure/identity-vscode": "^1.0.0",
 		"@types/glob": "^7.2.0",
 		"@types/mocha": "^9.1.1",
 		"@types/node": "^16.11.7",
 		"@types/rimraf": "^2.0.5",
 		"@types/vscode": "^1.68.0",
 		"@vscode/test-web": "*",
-		"@azure/identity": "^3.1.1",
-		"@azure/identity-vscode": "^1.0.0",
 		"eslint": "^8.19.0",
 		"glob": "^8.0.3",
 		"mocha": "^10.0.0",
+		"native-ext-loader": "^2.3.0",
 		"node-fetch": "^3.2.10",
 		"process": "^0.11.10",
 		"ts-loader": "^9.3.1",
 		"typescript": "^4.7.4",
 		"webpack": "^5.74.0",
 		"webpack-cli": "^4.10.0",
-		"native-ext-loader": "^2.3.0"
+		"path-browserify": "^1.0.1"
 	}
 }

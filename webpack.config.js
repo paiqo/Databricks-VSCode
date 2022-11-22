@@ -80,7 +80,9 @@ const nodeConfig = {
         extensions: ['.ts', '.js'],
         alias: {
             '@env': path.join(__dirname, './src/env/node')
-        }
+        },
+        fallback:
+            { "path": require.resolve("path-browserify") }
     },
     module: {
         rules: [
