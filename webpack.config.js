@@ -25,7 +25,9 @@ const webConfig = /** @type WebpackConfig */ {
         extensions: [".ts", ".js"], // support ts-files and js-files
         alias: {
             '@env': path.join(__dirname, './src/env/web')
-        }
+        },
+        fallback:
+            { "path": require.resolve("path-browserify") }
     },
     module: {
         rules: [
@@ -80,9 +82,7 @@ const nodeConfig = {
         extensions: ['.ts', '.js'],
         alias: {
             '@env': path.join(__dirname, './src/env/node')
-        },
-        fallback:
-            { "path": require.resolve("path-browserify") }
+        }
     },
     module: {
         rules: [
