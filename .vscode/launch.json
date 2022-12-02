@@ -16,11 +16,8 @@
             ],
             "preLaunchTask": "npm: watch",
             "skipFiles": [
-                "<node_internals>/**/*.js",
-                "main.js",
-                "extension.bundle.js",
-                "extensionHostProcess.js",
-                "${workspaceFolder}/node_modules/**/*.js"
+                "<node_internals>/**",
+                "${workspaceFolder}/node_modules/**"
             ]
         },
         {
@@ -37,10 +34,7 @@
             ],
             "preLaunchTask": "npm: watch",
             "skipFiles": [
-                "<node_internals>/**/*.js",
-                "main.js",
-                "extension.bundle.js",
-                "extensionHostProcess.js",
+                "<node_internals>/**",
                 "${workspaceFolder}/node_modules/**/*.js"
             ]
         },
@@ -54,12 +48,8 @@
                 "${workspaceFolder}/dist/**/*.js"
             ],
             "skipFiles": [
-                "<node_internals>/**/*.js",
-                "${workspaceFolder}/node_modules/**/*.js",
-                "main.js",
-                "extension.bundle.js",
-                "extensionHostProcess.js",
-                "${workspaceFolder}/node_modules/**/*.js"
+                "<node_internals>/**",
+                "${workspaceFolder}/node_modules/**"
             ]
         }
     ]

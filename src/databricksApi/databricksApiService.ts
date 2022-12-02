@@ -126,7 +126,7 @@ export abstract class DatabricksApiService {
 	- provide a dynamic return type using <T> - default is any
 	- by default, the value returned is response.json() as T
 	- the result is logged using this.logResponse
-	- if the api call raises an exception, we log the exception andreturn undefined
+	- if the api call raises an exception, we log the exception and return undefined
 	*/
 	private static async get<T = any>(endpoint: string, params: object = null, log: boolean = true, returnType: "JSON" | "TEXT" = "JSON"): Promise<T> {
 		if (!this._isInitialized && !this._connectionTestRunning) {
@@ -144,6 +144,12 @@ export abstract class DatabricksApiService {
 					agent: getProxyAgent()
 				};
 				let response: Response = await fetch(this.getFullUrl(endpoint, params), config);
+
+				if(!response.ok)
+				{
+					ThisExtension.log(`GET ${endpoint} failed! ERROR: " (${response.status}) ${response.statusText}`);
+					throw new Error(response.statusText);
+				}
 
 				let result;
 				if (returnType == "JSON") {

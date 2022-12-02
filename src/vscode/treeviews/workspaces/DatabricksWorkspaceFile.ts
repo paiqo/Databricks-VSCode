@@ -24,6 +24,8 @@ export class DatabricksWorkspaceFile extends DatabricksWorkspaceTreeItem {
 	}
 
 	async init(): Promise<void> {
+		super.init();
+
 		// we can only run initialize for this class after all values had been set in the constructor
 		// but we must not run it as part of the call to super()
 		if(this._isInitialized)

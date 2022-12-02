@@ -39,7 +39,7 @@ export class DatabricksSecretTreeProvider implements vscode.TreeDataProvider<Dat
 	private async _onDidCollapseElement(item: DatabricksSecretTreeItem): Promise<void> { }
 	private async _onDidChangeVisibility(visible: boolean): Promise<void> { }
 
-	async refresh(showInfoMessage: boolean = false, item: DatabricksSecretTreeItem = null): Promise<void> {
+	async refresh(item: DatabricksSecretTreeItem = null, showInfoMessage: boolean = false): Promise<void> {
 		if (showInfoMessage) {
 			Helper.showTemporaryInformationMessage('Refreshing Secrets ...');
 		}

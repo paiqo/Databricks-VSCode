@@ -30,7 +30,7 @@ export abstract class FSHelper {
 			if (typeof (uri) == "string") {
 				uri = vscode.Uri.file(uri);
 			}
-			await vscode.workspace.fs.stat(uri);
+			let stats = await vscode.workspace.fs.stat(uri);
 			return true;
 		} catch {
 			return false;

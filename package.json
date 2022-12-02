@@ -376,6 +376,31 @@
 						"type": "string",
 						"description": "(Optional) The displayName of the Connection that was used in the last session.",
 						"scope": "window"
+					},
+					"databricks.azure.tenantId": {
+						"type": "string",
+						"description": "(Optional) To connect to Azure Databricks Workspaces outside of your home-tenant.",
+						"scope": "window"
+					},
+					"databricks.azure.subscriptionIds": {
+						"type": "array",
+						"description": "(Optional) A list of Azure Subscription IDs (GUIDs) from which the Databricks Workspaces are loaded. If not specified, all accessible subscriptions are searched.",
+						"scope": "window",
+						"items": {
+							"type": "string",
+							"description": "An Azure Subscription ID (GUID).",
+							"examples": ["30373b46-5f05-1234-9876-d5560532fc32"]
+						}
+					},
+					"databricks.azure.resourceIds": {
+						"type": "array",
+						"description": "(Optional) A list of Azure Resource IDs to load directly without browsing the tenant first.",
+						"scope": "window",
+						"items": {
+							"type": "string",
+							"description": "An Azure Resource ID (GUID).",
+							"examples": ["/subscriptions/30373b46-5f05-1234-9876-d5560532fc32/resourceGroups/MyResourceGroup/providers/Microsoft.Databricks/workspaces/MyDatabricksWorkspace"]
+						}
 					}
 				}
 			}

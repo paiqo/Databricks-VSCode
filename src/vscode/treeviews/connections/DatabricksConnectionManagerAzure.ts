@@ -10,6 +10,9 @@ import { FSHelper } from '../../../helpers/FSHelper';
 
 export class DatabricksConnectionManagerAzure extends DatabricksConnectionManager {
 
+	private _managementSession: vscode.AuthenticationSession;
+	private _databricksSession: vscode.AuthenticationSession;
+
 	constructor() {
 		super();
 		this._initialized = false;
@@ -46,7 +49,24 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 		}
 	}
 
-	private async getAADAccessToken(resource: string): Promise<string> {
+
+	private async getAADAccessToken(scopes: string[], tenantId?: string): Promise<vscode.AuthenticationSession> {
+		//https://www.eliostruyf.com/microsoft-authentication-provider-visual-studio-code/
+
+		if(!scopes.includes("offline_access")) {
+			scopes.push("offline_access") // Required for the refresh token.
+		}
+
+		if (tenantId) {
+			scopes.push("VSCODE_TENANT:" + tenantId);
+		}
+
+		let session: vscode.AuthenticationSession = await vscode.authentication.getSession("microsoft", scopes, { createIfNone: true });
+
+		return session;
+	}
+
+	private async getAADAccessToken_OLD(resource: string): Promise<string> {
 		// https://github.com/microsoft/vscode-azure-account/blob/main/sample/src/extension.ts
 
 		const { useIdentityPlugin, VisualStudioCodeCredential, DefaultAzureCredential } = require("@azure/identity");
@@ -73,10 +93,12 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 		try {
 			this._connections = [];
 
-			let accessToken = await this.getAADAccessToken("https://management.core.windows.net/");
+			let tenantId = ThisExtension.getConfigurationSetting("databricks.azure.tenantId").value;
+
+			this._managementSession = await this.getAADAccessToken(["https://management.core.windows.net//.default", "email"], tenantId);
 
 			let azureHeaders = {
-				"Authorization": 'Bearer ' + accessToken,
+				"Authorization": 'Bearer ' + this._managementSession.accessToken,
 				"Content-Type": 'application/json',
 				"Accept": 'application/json'
 			}
@@ -122,9 +144,12 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 	updateConnection(updatedCon: iDatabricksConnection): void { }
 
 	async getAuthorizationHeaders(con: iDatabricksConnection): Promise<object> {
+		let tenantId = ThisExtension.getConfigurationSetting("databricks.azure.tenantId").value;
+
+		this._databricksSession = await this.getAADAccessToken(["2ff814a6-3304-4ab8-85cb-cd0e6f879c1d/.default"], tenantId);
 		return {
 			"X-Databricks-Azure-Workspace-Resource-Id": con.azureResourceId,
-			"Authorization": "Bearer " + await this.getAADAccessToken("2ff814a6-3304-4ab8-85cb-cd0e6f879c1d")
+			"Authorization": "Bearer " + this._databricksSession.accessToken
 		};
 	}
 }

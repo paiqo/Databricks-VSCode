@@ -13,13 +13,14 @@ export class DatabricksConnectionTreeProvider implements vscode.TreeDataProvider
 
 	constructor() { }
 
-	async refresh(showInfoMessage: boolean = false, item: DatabricksConnectionTreeItem = null): Promise<void> {
+	async refresh(item: DatabricksConnectionTreeItem = null, showInfoMessage: boolean = false): Promise<void> {
 		if (showInfoMessage) {
 			Helper.showTemporaryInformationMessage('Refreshing Connections ...');
 		}
 		//await ThisExtension.ConnectionManager.initialize();
 		await ThisExtension.initialize(ThisExtension.extensionContext);
-		this._onDidChangeTreeData.fire(item);
+		// we always refresh the whole tree-View!
+		this._onDidChangeTreeData.fire(undefined);
 	}
 
 	async getTreeItem(element: DatabricksConnectionTreeItem): Promise<vscode.TreeItem> {
@@ -51,10 +52,11 @@ export class DatabricksConnectionTreeProvider implements vscode.TreeDataProvider
 				vscode.window.showErrorMessage(`ERROR: Connection '${item.displayName}' is not valid!`);
 			}
 		}
-		return Promise.resolve(envItems);
+		return envItems;
 	}
 
 	async add(): Promise<void> {
+		// [Add] is only displayed for Manual Connection Manager which asks for credentials during initialize()
 		await ThisExtension.ConnectionManager.initialize();
 	}
 

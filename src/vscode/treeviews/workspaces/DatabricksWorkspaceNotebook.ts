@@ -40,6 +40,8 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 	}
 
 	async init(): Promise<void> {
+		super.init();
+
 		// we can only run initialize for this class after all values had been set in the constructor
 		// but we must not run it as part of the call to super()
 		if(this._isInitialized)
@@ -164,7 +166,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 		return DatabricksWorkspaceNotebook.fromInterface(item, parent);
 	}
 
-	async download(): Promise<vscode.Uri> {
+	async download(refreshParent: boolean = false): Promise<vscode.Uri> {
 		try {
 			let localPath: vscode.Uri;
 			//vscode.window.showInformationMessage(`Download of item ${this._path}) started ...`);
@@ -182,7 +184,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 
 			Helper.showTemporaryInformationMessage(`Download of item ${FSHelper.basename(localPath)} finished!`);
 
-			if (ThisExtension.RefreshAfterUpDownload) {
+			if (ThisExtension.RefreshAfterUpDownload && refreshParent) {
 				setTimeout(() => this.refreshParent(), 500);
 			}
 

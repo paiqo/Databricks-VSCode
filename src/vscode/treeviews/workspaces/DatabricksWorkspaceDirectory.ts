@@ -29,6 +29,8 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 	}
 
 	async init(): Promise<void> {
+		super.init();
+
 		// we can only run initialize for this class after all values had been set in the constructor
 		// but we must not run it as part of the call to super()
 		if (this._isInitialized) {
@@ -175,34 +177,39 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 		return allItems;
 	}
 
-	async download(): Promise<void> {
+	async download(refreshParent: boolean = true): Promise<void> {
+		if(!this.localPath) // if we try to download a subfolder of a folder that has not yet been synced this.localPath is not populated!
+		{
+			this.localPath = vscode.Uri.joinPath(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.SubfolderConfiguration().Workspace, this.path);
+		}
 		FSHelper.ensureFolder(this.localPath);
 		let items: DatabricksWorkspaceTreeItem[] = await this.getChildren() as DatabricksWorkspaceTreeItem[];
 
 		for (let item of items) {
-
 			if (item.onlinePathExists) // we can only download items that exist online
 			{
 				switch (item.object_type) {
 					case "NOTEBOOK":
-						let nb = DatabricksWorkspaceNotebook.fromInterface(item);
+						let nb = DatabricksWorkspaceNotebook.fromInterface(item, this);
 
 						nb.localPath = await FSHelper.joinPath(this.localPath, nb.label + nb.localFileExtension);
-						await nb.download();
+						await nb.download(false);
 						break;
 					case "DIRECTORY":
 					case "REPO":
-						let dir = DatabricksWorkspaceDirectory.fromInterface(item);
+						let dir = DatabricksWorkspaceDirectory.fromInterface(item, this);
 
 						dir.localPath = await FSHelper.joinPath(this.localPath, dir.label.toString());
-						await dir.download();
+						await dir.download(false);
 
 						break;
 				}
 			}
 		}
 
-		setTimeout(() => this.refreshParent(), 500);
+		if (ThisExtension.RefreshAfterUpDownload && refreshParent) {
+			setTimeout(() => this.refreshParent(), 500);
+		}
 	}
 
 	async upload(): Promise<void> {

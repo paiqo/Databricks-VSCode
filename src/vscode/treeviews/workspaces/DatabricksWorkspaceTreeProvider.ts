@@ -41,10 +41,11 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 	private async _onDidCollapseElement(item: DatabricksWorkspaceTreeItem): Promise<void> { }
 	private async _onDidChangeVisibility(visible: boolean): Promise<void> { }
 
-	async refresh(showInfoMessage: boolean = false, item: DatabricksWorkspaceTreeItem = null): Promise<void> {
+	async refresh(item: DatabricksWorkspaceTreeItem = null, showInfoMessage: boolean = false): Promise<void> {
 		if (showInfoMessage) {
 			Helper.showTemporaryInformationMessage('Refreshing Workspace ...');
 		}
+
 		this._onDidChangeTreeData.fire(item);
 	}
 

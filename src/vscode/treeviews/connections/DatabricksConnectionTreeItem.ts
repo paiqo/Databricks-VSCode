@@ -62,7 +62,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 	private get _tooltip(): string {
 		return `Host: ${this.apiRootUrl}\n` +
 			`CloudProvider: ${this.cloudProvider}\n` +
-			`LocalSyncFolder: ${this.localSyncFolder}\n` +
+			`LocalSyncFolder: ${this.localSyncFolder.fsPath}\n` +
 			`LocalSyncSubFolders: ${JSON.stringify(this.localSyncSubfolders)}\n` +
 			`ExportFormats: ${JSON.stringify(this.exportFormats)}\n` +
 			`UseCodeCells: ${this.useCodeCells}\n` +
