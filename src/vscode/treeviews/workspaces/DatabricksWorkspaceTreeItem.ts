@@ -37,15 +37,6 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	}
 
 	async init(): Promise<void> {
-		if(!this.localPath)
-		{
-			let localPathProbe: vscode.Uri = await FSHelper.joinPath(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.SubfolderConfiguration().Workspace, this.path);
-			if(await FSHelper.pathExists(localPathProbe))
-			{
-				this.localPath = localPathProbe;
-			}
-		}
-
 		super.label = this.path.split('/').pop();
 
 		super.iconPath = {

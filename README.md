@@ -32,6 +32,7 @@ The extensions can be downloaded from the official Visual Studio Code extension 
   - Supports Azure Databricks, Databricks on AWS and Dtabricks on GCP
   - control how notebooks are downloaded (Jupyter notebook, source code, ...)
   - various other settings
+  - Load Databricks directly from your Azure Account
 - [SQL / Data Browser](#sql-browser)
   - Browse availabl SQL objects from the Databricks metastore
   - databases, tables and views, columns, ...
@@ -53,6 +54,10 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 - Integration for CI/CD using [DatabricksPS](https://www.powershellgallery.com/packages/DatabricksPS) PowerShell module
 
 # Release Notes
+
+**v1.3.1:**
+- Changed [Azure Connection Manager](#setup-and-configuration-azure-connection-manager) to use VSCode authentication instead of Azure Account Extension
+- fixed issue with downloading workspace folders
 
 **v1.3.0:**
 - added new Connection Manager to load Databricks workspaces directly from your Azure Account
@@ -228,7 +233,14 @@ The Azure Connection Manager allows you to use your Azure Active Directory (AAD)
 - loading Connections directly from your Azure Resources
 - Use AAD authentication when using the DAtabricks API. No Personal Access Token (PAT) is needed!
 
-To activate the Azure Connection Manager, simply set the VSCode setting `databricks.connectionManager` to `Azure` and refresh your connections. No additional configurations need to be done. Currently all other connection settings like `localSyncFolder`, `exportFormats`, etc. cannot currently be controlled and are set to their defaults.
+To activate the Azure Connection Manager, simply set the VSCode setting `databricks.connectionManager` to `Azure` and refresh your connections. No additional configurations need to be done. Currently most other connection settings like `useCodeCells`, `exportFormats`, etc. cannot currently be controlled and are set to their defaults.
+
+The following Azure-specific settings exist and can be set in the workspace settings:
+- `databricks.azure.tenantId`
+- `databricks.azure.subscriptionIds`
+- `databricks.azure.workspaces`
+
+They are documented via VSCode settings documentation.
 
 # Connection Manager
 ![Connection Manager](/images/ConnectionManager.jpg?raw=true "Connection Manager")

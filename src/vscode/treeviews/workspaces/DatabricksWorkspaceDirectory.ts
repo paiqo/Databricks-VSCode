@@ -120,6 +120,15 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 		let onlinePaths: string[] = onlineItems.map((x) => (x as iDatabricksWorkspaceItem).path);
 
 		let localItems: DatabricksWorkspaceTreeItem[] = [];
+		if(!this.localPathExists)
+		{
+			// check again for the local path as it might have been created since this Directory object was created
+			let localPathProbe: vscode.Uri = await FSHelper.joinPath(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.SubfolderConfiguration().Workspace, this.path);
+			if(await FSHelper.pathExists(localPathProbe))
+			{
+				this.localPath = localPathProbe;
+			}
+		}
 		if (this.localPathExists) {
 			let localContent: [string, vscode.FileType][] = await vscode.workspace.fs.readDirectory(this.localPath);
 
