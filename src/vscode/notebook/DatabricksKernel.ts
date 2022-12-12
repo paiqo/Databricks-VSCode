@@ -428,7 +428,8 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 				if(language == "sql")
 				{
-					await this.createSqlDfVariable(commandText, context);
+					// we do not await this async function as we do not want to make the execution of this cell unecessarily longer
+					this.createSqlDfVariable(commandText, context);
 				}
 			}
 			else if (result.results.resultType == "text") {
