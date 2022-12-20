@@ -86,14 +86,17 @@
 						"enum": [
 							"VSCode Settings",
 							"Databricks CLI Profiles",
-							"Azure"
+							"Azure",
+							"ManualInput"
 						],
 						"default": "VSCode Settings",
 						"enumDescriptions": [
 							"All connection information is stored securely in the VSCode Settings (user or workspace).",
-							"Connection information is read from the Databricks CLI config file. Databricks CLI has to be configured upfront! Also supports the environment varialbe 'DATABRICKS_CONFIG_FILE'."
+							"Connection information is read from the Databricks CLI config file. Databricks CLI has to be configured upfront! Also supports the environment varialbe 'DATABRICKS_CONFIG_FILE'.",
+							"Connection information is loaded from Azure. All Azure Databricks workspaces that you have access to will show up atuomatically in the connection list.",
+							"You are prompted for connection information once you interact with the extension."
 						],
-						"description": "Defines how connection information is managed and stored",
+						"description": "Defines how connection information is managed and stored.",
 						"scope": "window"
 					},
 					"databricks.sensitiveValueStore": {

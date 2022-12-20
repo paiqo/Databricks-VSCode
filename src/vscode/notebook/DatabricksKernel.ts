@@ -69,7 +69,11 @@ export class DatabricksKernel implements vscode.NotebookController {
 	async _onDidOpenNotebookDocument(notebook: vscode.NotebookDocument) {
 		// set this controller as recommended Kernel for notebooks opened via dbws:/ file system or from or local sync folder
 		if (notebook.uri.scheme == "dbws" || notebook.uri.toString().startsWith(ThisExtension.ActiveConnection.localSyncFolder.toString())) {
-			this._controller.updateNotebookAffinity(notebook, vscode.NotebookControllerAffinity.Preferred);
+			this.Controller.updateNotebookAffinity(notebook, vscode.NotebookControllerAffinity.Preferred);
+		}
+
+		if(notebook.uri.scheme == "vscode-interactive")
+		{
 		}
 	}
 
@@ -219,13 +223,13 @@ export class DatabricksKernel implements vscode.NotebookController {
 	readonly onDidChangeSelectedNotebooks: vscode.Event<{ readonly notebook: vscode.NotebookDocument; readonly selected: boolean; }>;
 	updateNotebookAffinity(notebook: vscode.NotebookDocument, affinity: vscode.NotebookControllerAffinity): void { }
 
-	async executeHandler(cells: vscode.NotebookCell[], _notebook: vscode.NotebookDocument, _controller: vscode.NotebookController): Promise<void> {
-		let execContext: ExecutionContext = this.getNotebookContext(_notebook.uri);
+	async executeHandler(cells: vscode.NotebookCell[], notebook: vscode.NotebookDocument, controller: vscode.NotebookController): Promise<void> {
+		let execContext: ExecutionContext = this.getNotebookContext(notebook.uri);
 		if (!execContext) {
 			ThisExtension.setStatusBar("Initializing Kernel ...", true);
 			execContext = await this.initializeExecutionContext()
-			this.setNotebookContext(_notebook.uri, execContext);
-			await this.updateRepoContext(_notebook.uri);
+			this.setNotebookContext(notebook.uri, execContext);
+			await this.updateRepoContext(notebook.uri);
 			ThisExtension.setStatusBar("Kernel initialized!");
 		}
 		for (let cell of cells) {

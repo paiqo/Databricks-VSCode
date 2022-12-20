@@ -231,7 +231,9 @@ You can also change the following other settings:
 # Setup and Configuration (Azure Connection Manager)
 The Azure Connection Manager allows you to use your Azure Active Directory (AAD) account to interact with Databricks. This includes:
 - loading Connections directly from your Azure Resources
-- Use AAD authentication when using the DAtabricks API. No Personal Access Token (PAT) is needed!
+- Use AAD authentication when using the Databricks API. No Personal Access Token (PAT) is needed!
+
+VSCode will prompt you to use your Microsoft Account two times. The first time is to get a list of all available Azure Databricks workspaces that you have access to and then a second time to establish a connection to the selected/active workspace. Whenever you switch connection/workspace, you may get prompted again!
 
 To activate the Azure Connection Manager, simply set the VSCode setting `databricks.connectionManager` to `Azure` and refresh your connections. No additional configurations need to be done. Currently most other connection settings like `useCodeCells`, `exportFormats`, etc. cannot currently be controlled and are set to their defaults.
 

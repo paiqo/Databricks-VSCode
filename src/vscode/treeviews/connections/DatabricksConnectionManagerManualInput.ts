@@ -8,7 +8,7 @@ import { DatabricksConnectionManager } from './DatabricksConnectionManager';
 import { DatabricksConnectionTreeItem } from './DatabricksConnectionTreeItem';
 
 
-export class DatabricksConnectionManagerWeb extends DatabricksConnectionManager {
+export class DatabricksConnectionManagerManualInput extends DatabricksConnectionManager {
 
 	constructor() {
 		super();
@@ -16,7 +16,7 @@ export class DatabricksConnectionManagerWeb extends DatabricksConnectionManager 
 	}
 
 	async initialize(): Promise<void> {
-		ThisExtension.log("Initializing ConnectionManager Web ...");
+		ThisExtension.log("Initializing ConnectionManager ManualInput ...");
 		await this.loadConnections();
 
 		if (this._connections.length == 0) {
