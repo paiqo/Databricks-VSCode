@@ -25,7 +25,6 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 
 	constructor() {
 		super();
-		this._initialized = false;
 	}
 
 	get TenantId(): string {
@@ -50,6 +49,7 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 
 	async initialize(): Promise<void> {
 		ThisExtension.log("Initializing ConnectionManager Azure ...");
+		this._initialized = false;
 
 		this._tenantId = ThisExtension.getConfigurationSetting("databricks.azure.tenantId").value;
 		this._subscriptionsIds = ThisExtension.getConfigurationSetting<string[]>("databricks.azure.subscriptionIds").value;
@@ -74,7 +74,7 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 				ThisExtension.updateConfigurationSetting("databricks.lastActiveConnection", this._lastActiveConnectionName);
 				this._initialized = true;
 
-				await this.activateConnection(this.LastActiveConnection, false);
+				await this.activateConnection(this.LastActiveConnection, true);
 
 			} catch (error) {
 				let msg = "Could not activate Connection '" + this._lastActiveConnectionName + "'!";
@@ -108,7 +108,9 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 		try {
 			this._connections = [];
 
+			ThisExtension.setStatusBar("Getting Azure Management Token ...", true);
 			this._managementSession = await this.getAADAccessToken(["https://management.core.windows.net//.default", "email"], this.TenantId);
+			ThisExtension.setStatusBar("Got Azure Management Token!", true);
 
 			let azureHeaders = {
 				"Authorization": 'Bearer ' + this._managementSession.accessToken,
@@ -126,15 +128,18 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 			if (this.Workspaces.length == 0) {
 				this.Workspaces = [];
 				if (this.SubscriptionIDs.length == 0) {
+					ThisExtension.log("Getting list of Azure Subscriptions ...");
+					ThisExtension.setStatusBar("Getting Azure Subscriptions ...", true);
 					response = await fetch("https://management.azure.com/subscriptions?api-version=2020-01-01", config);
+					
+					if (response.ok) {
+						let subscriptions: AzureSubscriptionListRepsonse = await response.json() as AzureSubscriptionListRepsonse;
+						ThisExtension.setStatusBar("Got " + subscriptions.count + " Azure Subscriptions!", false);
+						ThisExtension.log("Read " + subscriptions.count + " available Azure Subscriptions: " + JSON.stringify(subscriptions));
 
-					if(response.ok)
-					{
-					let subscriptions: AzureSubscriptionListRepsonse = await response.json() as AzureSubscriptionListRepsonse;
-					this.SubscriptionIDs = subscriptions.value.map((x) => x.subscriptionId);
+						this.SubscriptionIDs = subscriptions.value.map((x) => x.subscriptionId);
 					}
-					else
-					{
+					else {
 						ThisExtension.log("Could not load Azure subscriptions!\n" + await response.text());
 						vscode.window.showErrorMessage("Could not load Azure subscriptions!");
 					}
@@ -142,14 +147,22 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 
 				for (let subscriptionID of this.SubscriptionIDs) {
 					ThisExtension.log("Checking subscription '" + subscriptionID + "' for Databricks workspaces ...");
+					ThisExtension.setStatusBar("Checking Subscription " + subscriptionID + " ...", true);
 					response = await fetch(`https://management.azure.com/subscriptions/${subscriptionID}/providers/Microsoft.Databricks/workspaces?api-version=2018-04-01`, config);
 					if (response.ok) {
 						let azureWorkspaces = await response.json() as AzureResourceListRepsonse
+						ThisExtension.setStatusBar("Got " + azureWorkspaces.value.length + " Databricks Workspaces!", false);
+						ThisExtension.log("Read " + azureWorkspaces.value.length + " available Databricks Workspaces: " + JSON.stringify(azureWorkspaces));
+
 						for (let workspace of azureWorkspaces.value) {
+							let syncFolder: string = undefined;
+							if (!ThisExtension.isInBrowser) {
+								syncFolder = (await FSHelper.joinPath(FSHelper.getUserDir(), "Databricks-VSCode", workspace.name)).toString();
+							}
 							this.Workspaces.push({
 								resourceId: workspace.id,
 								displayName: workspace.name,
-								localSyncFolder: (await FSHelper.joinPath(FSHelper.getUserDir(), "Databricks-VSCode", workspace.name)).toString()
+								localSyncFolder: syncFolder
 							})
 						}
 					}
@@ -163,28 +176,31 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 			for (let workspace of this.Workspaces) {
 				response = await fetch(`https://management.azure.com/${workspace.resourceId}?api-version=2018-04-01`, config);
 
-				if(response.ok)
-				{
-				let azureWorkspace = await response.json() as AzureResource
+				if (response.ok) {
+					let azureWorkspace = await response.json() as AzureResource
+					ThisExtension.log("Adding Databricks Workspaces: " + JSON.stringify(azureWorkspace));
 
-				let newConnection: iDatabricksConnection = {
-					_source: "Azure",
-					apiRootUrl: vscode.Uri.parse("https://" + azureWorkspace.properties.workspaceUrl),
-					displayName: workspace.displayName ?? azureWorkspace.name,
-					azureResourceId: azureWorkspace.id,
-					localSyncFolder: vscode.Uri.file(workspace.localSyncFolder)
-				};
+					let syncFolder: vscode.Uri = undefined;
+					if (workspace.localSyncFolder) {
+						syncFolder = vscode.Uri.file(workspace.localSyncFolder);
+					}
+					let newConnection: iDatabricksConnection = {
+						_source: "Azure",
+						apiRootUrl: vscode.Uri.parse("https://" + azureWorkspace.properties.workspaceUrl),
+						displayName: workspace.displayName ?? azureWorkspace.name,
+						azureResourceId: azureWorkspace.id,
+						localSyncFolder: syncFolder
+					};
 
-				if (DatabricksConnectionTreeItem.validate(newConnection, false)) {
-					ThisExtension.log("New Connection found: " + newConnection.displayName + " (" + newConnection.azureResourceId + ")");
-					this._connections.push(newConnection);
+					if (DatabricksConnectionTreeItem.validate(newConnection, false)) {
+						ThisExtension.log("New Connection found: " + newConnection.displayName + " (" + newConnection.azureResourceId + ")");
+						this._connections.push(newConnection);
+					}
+					else {
+						ThisExtension.log("Could not load all necessary information from Azure Databricks Workspace '" + newConnection.displayName + "' (" + newConnection.azureResourceId + ")!");
+					}
 				}
 				else {
-					ThisExtension.log("Could not load all necessary information from Azure Databricks Workspace '" + newConnection.displayName + "' (" + newConnection.azureResourceId + ")!");
-				}
-				}
-				else
-				{
 					ThisExtension.log("Could not load Databricks Workspace '" + workspace.resourceId + "'!\n" + await response.text());
 					vscode.window.showErrorMessage("Could not load Databricks Workspace '" + workspace.resourceId + "'!");
 				}
@@ -199,7 +215,9 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 	async getAuthorizationHeaders(con: iDatabricksConnection): Promise<object> {
 		let tenantId = ThisExtension.getConfigurationSetting("databricks.azure.tenantId").value;
 
+		ThisExtension.log("Getting Databricks AAD Toekn ...");
 		this._databricksSession = await this.getAADAccessToken(["2ff814a6-3304-4ab8-85cb-cd0e6f879c1d/.default"], tenantId);
+		ThisExtension.log("Got Databricks AAD Toekn!");
 		return {
 			"X-Databricks-Azure-Workspace-Resource-Id": con.azureResourceId,
 			"Authorization": "Bearer " + this._databricksSession.accessToken

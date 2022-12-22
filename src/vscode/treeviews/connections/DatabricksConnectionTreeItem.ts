@@ -267,7 +267,7 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 			return false;
 		}
 		if (!this.propertyIsValid(con.localSyncFolder)) {
-			if(!ThisExtension.isVirtualWorkspace)
+			if(!ThisExtension.isInBrowser)
 			{
 				if (showMessage) {
 					msg = 'Configuration ' + con.displayName + ': Property "localSyncFolder" is not valid! Please check your user and/or workspace settings!';

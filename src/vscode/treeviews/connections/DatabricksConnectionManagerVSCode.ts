@@ -12,14 +12,13 @@ export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManag
 
 	constructor() {
 		super();
-		this._initialized = false;
-		this._settingScope = ThisExtension.SettingScope;
-
-		//this.initialize();
 	}
 
 	async initialize(): Promise<void> {
 		ThisExtension.log("Initializing ConnectionManager VSCode ...");
+		this._initialized = false;
+		this._settingScope = ThisExtension.SettingScope;
+
 		await this.loadConnections();
 
 		if (this._connections.length == 0) {
@@ -39,7 +38,7 @@ export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManag
 				ThisExtension.updateConfigurationSetting("databricks.lastActiveConnection", this._lastActiveConnectionName, this._settingScope);
 				this._initialized = true;
 
-				await this.activateConnection(this.LastActiveConnection, false);
+				await this.activateConnection(this.LastActiveConnection, true);
 
 			} catch (error) {
 				let msg = "Could not activate Connection '" + this._lastActiveConnectionName + "'!";

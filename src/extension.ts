@@ -34,11 +34,19 @@ import { FSHelper } from './helpers/FSHelper';
 import { DatabricksKernelManager } from './vscode/notebook/DatabricksKernelManager';
 import { DatabricksSQLTreeItem } from './vscode/treeviews/sql/DatabricksSQLTreeItem';
 import { DatabricksSecretTreeItem } from './vscode/treeviews/secrets/DatabricksSecretTreeItem';
+import { Helper } from './helpers/Helper';
 
 export async function activate(context: vscode.ExtensionContext) {
 
 	ThisExtension.Logger = vscode.window.createOutputChannel(context.extension.id);
 	ThisExtension.log("Logger initialized!");
+
+	if(ThisExtension.isInBrowser)
+	{
+		let msg: string = "As the Databricks API does not supporting CORS, this is currently not working!";
+		vscode.window.showWarningMessage(msg);
+		ThisExtension.log(msg);
+	}
 
 	ThisExtension.StatusBar = vscode.window.createStatusBarItem("databricks-vscode", vscode.StatusBarAlignment.Right);
 	ThisExtension.StatusBar.show();
@@ -64,7 +72,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	let databricksConnectionTreeProvider = new DatabricksConnectionTreeProvider();
 	vscode.window.registerTreeDataProvider('DatabricksConnections', databricksConnectionTreeProvider);
 	vscode.commands.registerCommand('databricksConnections.refresh', (item: DatabricksConnectionTreeItem, showInfoMessage: boolean = true) => databricksConnectionTreeProvider.refresh(item, showInfoMessage));
-	if (ThisExtension.isVirtualWorkspace) {
+	if (ThisExtension.isInBrowser) {
 		vscode.commands.registerCommand('DatabricksConnections.add', () => databricksConnectionTreeProvider.add());
 	}
 	else {
@@ -74,7 +82,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 
 	// register DatabricksWorkspaceTreeProvider
-	if (!ThisExtension.isVirtualWorkspace) {
+	if (!ThisExtension.isInBrowser) {
 		let databricksWorkspaceTreeProvider = new DatabricksWorkspaceTreeProvider(context);
 		//vscode.window.registerTreeDataProvider('databricksWorkspace', databricksWorkspaceTreeProvider);
 		vscode.commands.registerCommand('databricksWorkspace.refresh', (item: DatabricksWorkspaceTreeItem, showInfoMessage: boolean = true) => databricksWorkspaceTreeProvider.refresh(item, showInfoMessage));
@@ -94,7 +102,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		FSHelper.addToWorkspace(vscode.Uri.parse('dbws:/'), "Databricks - Workspace", showMessage);
 	});
 
-	if (ThisExtension.isVirtualWorkspace) {
+	if (ThisExtension.isInBrowser) {
 		// in a virtual workspace we always want to add the DBWS mount to the workspace
 		vscode.commands.executeCommand('databricksWorkspace.addToWorkspace', false);
 	}
@@ -130,7 +138,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 
 	// register DatabricksFSTreeProvider
-	if (!ThisExtension.isVirtualWorkspace) {
+	if (!ThisExtension.isInBrowser) {
 		let databricksFSTreeProvider = new DatabricksFSTreeProvider(context);
 		//vscode.window.registerTreeDataProvider('databricksFS', databricksFSTreeProvider);
 		vscode.commands.registerCommand('databricksFS.refresh', (item: DatabricksFSDirectory = null, showInfoMessage: boolean = true) => databricksFSTreeProvider.refresh(showInfoMessage, item));
@@ -151,7 +159,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		FSHelper.addToWorkspace(vscode.Uri.parse('dbfs:/'), "Databricks - DBFS", showMessage);
 	});
 
-	if (ThisExtension.isVirtualWorkspace) {
+	if (ThisExtension.isInBrowser) {
 		// in a virtual workspace we always want to add the DBWS mount to the workspace
 		vscode.commands.executeCommand('databricksFS.addToWorkspace', false);
 	}

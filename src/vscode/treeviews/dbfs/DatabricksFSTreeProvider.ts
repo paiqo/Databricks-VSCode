@@ -28,7 +28,7 @@ export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<Databri
 
 		this._treeView = treeView;
 
-		if(ThisExtension.isVirtualWorkspace)
+		if(ThisExtension.isInBrowser)
 		{
 			this._treeView.message = "DBFS Browser is disabled in Virtual Workspaces!";
 		}

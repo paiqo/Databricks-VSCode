@@ -45,6 +45,8 @@ export abstract class DatabricksConnectionManager {
 		ThisExtension.ActiveConnection = con;
 		await ThisExtension.updateConfigurationSetting("databricks.lastActiveConnection", con.displayName);
 
+		ThisExtension.SQLClusterID = undefined;
+
 		if (await DatabricksApiService.initialize(con)) {
 
 			if (con.useCodeCells) {
@@ -57,8 +59,6 @@ export abstract class DatabricksConnectionManager {
 			else {
 				await ThisExtension.updateConfigurationSetting(Helper.JupyterCodeCellsSettingName, undefined);
 			}
-
-			ThisExtension.SQLClusterID = undefined;
 
 			if (refreshComponents) {
 				await Helper.delay(100);

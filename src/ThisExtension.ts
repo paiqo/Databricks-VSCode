@@ -54,11 +54,10 @@ export abstract class ThisExtension {
 
 	static async initialize(context: vscode.ExtensionContext): Promise<boolean> {
 		try {
+			this._context = context;
 			this._extension = context.extension;
 			this.log(`Loading VS Code extension '${context.extension.packageJSON.displayName}' (${context.extension.packageJSON.id}) version ${context.extension.packageJSON.version} ...`);
 			this.log(`If you experience issues please open a ticket at ${context.extension.packageJSON.qna}`);
-
-			this._context = context;
 
 			ThisExtension.readGlobalSettings();
 
@@ -242,13 +241,17 @@ export abstract class ThisExtension {
 		};
 	}
 
-	static get isVirtualWorkspace(): boolean {
+	static get isInBrowser_OLD(): boolean {
 		if (this._isVirtualWorkspace == undefined) {
 			// from https://github.com/microsoft/vscode/wiki/Virtual-Workspaces#detect-virtual-workspaces-in-code
 			this._isVirtualWorkspace = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.every(f => f.uri.scheme !== 'file')
 		}
 
 		return this._isVirtualWorkspace;
+	}
+
+	static get isInBrowser(): boolean {
+		return process.hasOwnProperty("browser") && process["browser"];
 	}
 
 	static async updateConfigurationSetting(setting: string, value: any, target: ConfigSettingSource = this._settingScope): Promise<void> {
@@ -354,7 +357,6 @@ export abstract class ThisExtension {
 		else {
 			this.StatusBar.text = text;
 		}
-
 	}
 	//#endregion
 }

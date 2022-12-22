@@ -30,7 +30,7 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 
 		this._treeView = treeView;
 
-		if(ThisExtension.isVirtualWorkspace)
+		if(ThisExtension.isInBrowser)
 		{
 			this._treeView.message = "Workspace Browser is disabled in Virtual Workspaces!";
 		}
