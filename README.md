@@ -1,4 +1,10 @@
 # VSCode Extension for Databricks
+[![Version](
+https://vsmarketplacebadges.dev/version/paiqo.databricks-vscode.svg?color=blue&style=?style=for-the-badge&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
+[![Installs](https://vsmarketplacebadges.dev/installs/paiqo.databricks-vscode.svg?color=yellow)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
+[![Downloads](https://vsmarketplacebadges.dev/downloads/paiqo.databricks-vscode.svg?color=yellow)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
+[![Ratings](https://vsmarketplacebadges.dev/rating/paiqo.databricks-vscode.svg?color=green)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
+
 ![Databricks-VSCode](/images/Databricks-VSCode.jpg?raw=true "Databricks-VSCode")
 
 This is a Visual Studio Code extension that allows you to work with Databricks locally from VSCode in an efficient way, having everything you need integrated into VS Code - see [Features](#features). It allows you to manage and execute your notebooks, start/stop clusters, execute jobs and much more!
