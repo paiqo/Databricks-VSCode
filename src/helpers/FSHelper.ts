@@ -108,6 +108,10 @@ export abstract class FSHelper {
 	}
 
 	static resolvePath(path: string | vscode.Uri): vscode.Uri {
+		if(!path)
+		{
+			return undefined;
+		}
 		let uri: vscode.Uri;
 
 		if (typeof (path) == "string") {

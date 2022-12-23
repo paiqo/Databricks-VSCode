@@ -106,4 +106,13 @@ export abstract class DatabricksConnectionManager {
 			"Workspace": workspace
 		};
 	}
+
+	async manageLastActiveConnection(): Promise<void> {
+		this._lastActiveConnectionName = ThisExtension.getConfigurationSetting("databricks.lastActiveConnection", ThisExtension.SettingScope).value;
+
+		if (!this._lastActiveConnectionName || !this._connections.some((x) => x.displayName == this._lastActiveConnectionName)) {
+			ThisExtension.log("Setting 'databricks.lastActiveConnection' is not set - using first available connection instead!");
+			this._lastActiveConnectionName = this._connections[0].displayName;
+		}
+	}
 }

@@ -26,12 +26,8 @@ export class DatabricksConnectionManagerManualInput extends DatabricksConnection
 			vscode.window.showErrorMessage(msg);
 		}
 		else {
-			this._lastActiveConnectionName = ThisExtension.getConfigurationSetting("databricks.lastActiveConnection", ThisExtension.SettingScope).value;
-
-			if (!this._lastActiveConnectionName || !this._connections.some((x) => x.displayName == this._lastActiveConnectionName)) {
-				ThisExtension.log("Setting 'databricks.lastActiveConnection' is not set - using first available connection instead!");
-				this._lastActiveConnectionName = this._connections[0].displayName;
-			}
+			await super.manageLastActiveConnection();
+			
 			try {
 				ThisExtension.log("Setting 'databricks.lastActiveConnection' to '" + this._lastActiveConnectionName + "' ...");
 				ThisExtension.updateConfigurationSetting("databricks.lastActiveConnection", this._lastActiveConnectionName);

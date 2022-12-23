@@ -63,12 +63,8 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 			vscode.window.showErrorMessage(msg);
 		}
 		else {
-			this._lastActiveConnectionName = ThisExtension.getConfigurationSetting("databricks.lastActiveConnection", ThisExtension.SettingScope).value;
-
-			if (!this._lastActiveConnectionName || !this._connections.some((x) => x.displayName == this._lastActiveConnectionName)) {
-				ThisExtension.log("Setting 'databricks.lastActiveConnection' is not set - using first available connection instead!");
-				this._lastActiveConnectionName = this._connections[0].displayName;
-			}
+			await super.manageLastActiveConnection();
+			
 			try {
 				ThisExtension.log("Setting 'databricks.lastActiveConnection' to '" + this._lastActiveConnectionName + "' ...");
 				ThisExtension.updateConfigurationSetting("databricks.lastActiveConnection", this._lastActiveConnectionName);
@@ -215,9 +211,9 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 	async getAuthorizationHeaders(con: iDatabricksConnection): Promise<object> {
 		let tenantId = ThisExtension.getConfigurationSetting("databricks.azure.tenantId").value;
 
-		ThisExtension.log("Getting Databricks AAD Toekn ...");
+		ThisExtension.log("Getting Databricks AAD Token ...");
 		this._databricksSession = await this.getAADAccessToken(["2ff814a6-3304-4ab8-85cb-cd0e6f879c1d/.default"], tenantId);
-		ThisExtension.log("Got Databricks AAD Toekn!");
+		ThisExtension.log("Got Databricks AAD Token!");
 		return {
 			"X-Databricks-Azure-Workspace-Resource-Id": con.azureResourceId,
 			"Authorization": "Bearer " + this._databricksSession.accessToken

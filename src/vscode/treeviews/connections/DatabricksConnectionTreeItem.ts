@@ -60,10 +60,19 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 
 	//tooltip = this._tooltip;
 	private get _tooltip(): string {
+		let localSync: string = "";
+		if(this.localSyncFolder)
+		{
+			localSync += `LocalSyncFolder: ${this.localSyncFolder.fsPath}\n`;
+		}
+		if(this.localSyncSubfolders)
+		{
+			localSync += `LocalSyncSubFolders: ${JSON.stringify(this.localSyncSubfolders)}\n`;
+		}
+
 		return `Host: ${this.apiRootUrl}\n` +
 			`CloudProvider: ${this.cloudProvider}\n` +
-			`LocalSyncFolder: ${this.localSyncFolder.fsPath}\n` +
-			`LocalSyncSubFolders: ${JSON.stringify(this.localSyncSubfolders)}\n` +
+			localSync +
 			`ExportFormats: ${JSON.stringify(this.exportFormats)}\n` +
 			`UseCodeCells: ${this.useCodeCells}\n` +
 			`Source: ${this.source}`;
@@ -72,8 +81,11 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 	// description is show next to the label
 	//description = this._description;
 	private get _description(): string {
-		//return "";
-		return this.localSyncFolder.fsPath;
+		if(this.localSyncFolder)
+		{
+			return this.localSyncFolder.fsPath;
+		}
+		return this.apiRootUrl.toString();
 	}
 
 	// used in package.json to filter commands via viewItem == ACTIVE

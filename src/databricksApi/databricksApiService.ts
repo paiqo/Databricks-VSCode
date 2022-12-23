@@ -57,7 +57,7 @@ export abstract class DatabricksApiService {
 			else {
 				ThisExtension.log(JSON.stringify(workspaceList));
 				vscode.window.showErrorMessage(`Could not initialize Databricks API for URL ${con.apiRootUrl}!`);
-				throw new Error(`Invalid Configuration for Databricks REST API: Cannot access '${con.apiRootUrl}' with headers '${headers.toString()}'!`);
+				throw new Error(`Invalid Configuration for Databricks REST API: Cannot access '${con.apiRootUrl}' with headers '${JSON.stringify(headers)}'!`);
 			}
 		} catch (error) {
 			this._connectionTestRunning = false;
