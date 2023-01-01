@@ -64,7 +64,7 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 		}
 		else {
 			await super.manageLastActiveConnection();
-			
+
 			try {
 				ThisExtension.log("Setting 'databricks.lastActiveConnection' to '" + this._lastActiveConnectionName + "' ...");
 				ThisExtension.updateConfigurationSetting("databricks.lastActiveConnection", this._lastActiveConnectionName);
@@ -97,6 +97,11 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 	}
 
 	async loadConnections(): Promise<void> {
+		// TODO: We do not want to load connections from Azure over and over again - NOT YET WORKING
+		if(this._connections && this._connections.length > 0)
+		{
+			return;
+		}
 		// 1. Connect to azure
 		// 2. List available workspaces
 		// 3. add a new entry for each workspace
@@ -127,7 +132,7 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 					ThisExtension.log("Getting list of Azure Subscriptions ...");
 					ThisExtension.setStatusBar("Getting Azure Subscriptions ...", true);
 					response = await fetch("https://management.azure.com/subscriptions?api-version=2020-01-01", config);
-					
+
 					if (response.ok) {
 						let subscriptions: AzureSubscriptionListRepsonse = await response.json() as AzureSubscriptionListRepsonse;
 						ThisExtension.setStatusBar("Got " + subscriptions.count + " Azure Subscriptions!", false);
@@ -153,7 +158,7 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 						for (let workspace of azureWorkspaces.value) {
 							let syncFolder: string = undefined;
 							if (!ThisExtension.isInBrowser) {
-								syncFolder = (await FSHelper.joinPath(FSHelper.getUserDir(), "Databricks-VSCode", workspace.name)).toString();
+								syncFolder = (await FSHelper.joinPath(FSHelper.getUserDir(), "Databricks-VSCode", workspace.name)).fsPath;
 							}
 							this.Workspaces.push({
 								resourceId: workspace.id,

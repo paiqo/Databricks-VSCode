@@ -68,15 +68,12 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 		else {
 			let workspaceRootFolder = vscode.Uri.joinPath(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.SubfolderConfiguration().Workspace);
 			
-			// if the workspace folder does not yet exist we create it and return an empty array (as nothing can exist below it yet);
+			// if the workspace folder does not yet exist we create it
 			if (!await FSHelper.pathExists(workspaceRootFolder)) {
 				FSHelper.ensureFolder(workspaceRootFolder);
-				//vscode.window.showWarningMessage("With release v5.0.0 the sub-folder 'Workspace' was added for synced Workspace items. This supports better integratino with CI/CD and DatabricksPS PowerShell module. Please move your local files manually to '" + workspaceRootFolder + "' or sync them again! This message will only show up once!");
-				return Promise.resolve([]);
 			}
-			else {
-				return new DatabricksWorkspaceDirectory("/", 0, workspaceRootFolder).getChildren();
-			}
+			
+			return new DatabricksWorkspaceDirectory("/", 0, workspaceRootFolder).getChildren();
 		}
 	}
 
