@@ -168,7 +168,7 @@
 					},
 					"databricks.connection.default.apiRootUrl": {
 						"type": "string",
-						"description": "(Mandatory) Root URL of the Databricks API. Azure: https://westeurope.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com",
+						"description": "(Mandatory) Root URL of the Databricks API. Azure: https://westeurope.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com. Please do not provide any path or querystring like `?o=123456`",
 						"scope": "window",
 						"examples": [
 							"https://westeurope.azuredatabricks.net",

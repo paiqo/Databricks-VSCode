@@ -223,7 +223,7 @@ You can also change the following other settings:
 
 |CLI setting|VSCode setting|format|descrption|
 |-----------|--------------|------|----------|
-|host|apiRootUrl|text|mandatory by Databricks CLI|
+|host|apiRootUrl|text/URL|mandatory by Databricks CLI|
 |token|personalAccessToken|text|mandatory by Databricks CLI|
 |localSyncFolder|localSyncFolder|text|optional, defaults to `<user home directory>/Databricks-VSCode/<profile name>`|
 |localSyncSubFolders|localSyncSubfolders|JSON|optional, defaults to VSCode default|
@@ -345,7 +345,7 @@ Using the Repo Manager you can interact with the Repos API which allows you to a
 
 **Q:** What can I do if none of the tabs/browsers is showing anything?
 
-**A:** This is very likely an issue with the connection. Depending on the [Connection Manager](#connection-manager), please make sure that all relevant fields, especially `apiRootUrl` and `personalAccessToken` are set correctly. If you are sure th values are correct, please check the logs in the output window and filter for `paiqo.databricks-vscode` to see the log outputs for this extension.
+**A:** This is very likely an issue with the connection. Depending on the [Connection Manager](#connection-manager), please make sure that all relevant fields, especially `apiRootUrl` and `personalAccessToken` are set correctly. If you are sure the values are correct, please check the logs in the output window and filter for `paiqo.databricks-vscode` to see the log outputs for this extension.
 
 **Q:** My Personal Access Token (PAT) changed, how can I update my connection?
 

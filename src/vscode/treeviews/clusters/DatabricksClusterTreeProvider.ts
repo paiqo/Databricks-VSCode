@@ -101,7 +101,7 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 	async add(): Promise<void> {
 		let actConn = ThisExtension.ActiveConnection;
 		//https://adb-1232342536639.99.azuredatabricks.net/#create/cluster
-		let link: string = Helper.trimChar(FSHelper.joinPathSync(actConn.apiRootUrl, "#create/cluster").toString(), '/');
+		let link: string = actConn.apiRootUrl.toString(true) + "#create/cluster";
 		
 		await Helper.openLink(link);
 	}
