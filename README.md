@@ -20,6 +20,7 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 - [Cluster Manager](#cluster-manager)
   - Start/stop clusters
   - Script cluster definition as JSON
+  - Open in OS File Explorer
 - [Notebook Kernel](#notebook-kernel)
   - Execute local code against a running Databricks cluster
   - interactive cell-by-cell execution as in Databricks web UI
@@ -57,8 +58,12 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 
 # Release Notes
 
+**v1.4.0:**
+- fixed an issue with the `Create cluster` link
+- added `Open Explorer` action to locally synced workspace items in [Workspace Manager](#workspace-manager)
+
 **v1.3.1:**
-- Changed [Azure Connection Manager](#setup-and-configuration-azure-connection-manager) to use VSCode authentication instead of Azure Account Extension
+- changed [Azure Connection Manager](#setup-and-configuration-azure-connection-manager) to use VSCode authentication instead of Azure Account Extension
 - fixed issue with downloading workspace folders
 
 **v1.3.0:**

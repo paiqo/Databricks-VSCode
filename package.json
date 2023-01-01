@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Extension to manage your Databricks workspace and ease local development",
-	"version": "1.3.2",
+	"version": "1.4.0",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -548,6 +548,10 @@
 				"title": "Copy Path"
 			},
 			{
+				"command": "databricksWorkspaceItem.openExplorer",
+				"title": "Open Explorer"
+			},
+			{
 				"command": "databricksClusters.refresh",
 				"title": "Refresh",
 				"icon": "$(refresh)"
@@ -898,6 +902,10 @@
 				{
 					"command": "databricksWorkspaceItem.copyPath",
 					"when": "view == databricksWorkspace"
+				},
+				{
+					"command": "databricksWorkspaceItem.openExplorer",
+					"when": "view == databricksWorkspace && viewItem =~ /.*,OPENEXPLORER,.*/"
 				},
 				{
 					"command": "databricksClusterItem.start",

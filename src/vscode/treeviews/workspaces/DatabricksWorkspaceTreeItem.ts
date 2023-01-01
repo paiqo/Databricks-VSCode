@@ -4,6 +4,7 @@ import { WorkspaceItemType } from './_types';
 import { iDatabricksWorkspaceItem } from './iDatabricksworkspaceItem';
 import { ThisExtension } from '../../../ThisExtension';
 import { FSHelper } from '../../../helpers/FSHelper';
+import { Helper } from '../../../helpers/Helper';
 
 export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDatabricksWorkspaceItem {
 	protected _path: string;
@@ -109,8 +110,13 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		return this._onlinePathExists;
 	}
 
-	public CopyPathToClipboard(): void {
+	public copyPathToClipboard(): void {
 		vscode.env.clipboard.writeText(this.path);
+	}
+
+	public openExplorer(): void {
+		vscode.commands.executeCommand("revealFileInOS", this.localPath);
+		Helper.showTemporaryInformationMessage("Not yet supported!");
 	}
 
 	async refreshParent(): Promise<void> {

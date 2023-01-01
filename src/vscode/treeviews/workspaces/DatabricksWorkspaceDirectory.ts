@@ -65,6 +65,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 
 		if (this.localPathExists) {
 			states.push("UPLOAD");
+			states.push("OPENEXPLORER");
 		}
 		if (this.onlinePathExists) {
 			states.push("DOWNLOAD")
