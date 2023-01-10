@@ -91,7 +91,7 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 			scopes.push("VSCODE_TENANT:" + tenantId);
 		}
 
-		let session: vscode.AuthenticationSession = await vscode.authentication.getSession("microsoft", scopes, { createIfNone: true });
+		let session: vscode.AuthenticationSession = await vscode.authentication.getSession("microsoft", scopes);
 
 		return session;
 	}

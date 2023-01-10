@@ -258,6 +258,7 @@ The extension supports various connection managers and the list can be easily ex
 - [VSCode Settings](#setup-and-configuration-vscode-connection-manager)
 - [Databricks CLI](#setup-and-configuration-databricks-cli-connection-manager)
 - [Azure](#setup-and-configuration-azure-connection-manager)
+- `Manual` where you are simply prompted to enter connection information at the start of your session.
 
 You can specify the one to use by setting the VSCode setting `databricks.connectionManager`.
 Once the extension loads, you will see your list in the Connections view and icons indicating which one is currently active (the green one). To change the Connection, simply click the `[Activate]` button next to an inactive Connection. All other views will update automatically.

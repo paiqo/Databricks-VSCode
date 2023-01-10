@@ -56,7 +56,7 @@ export class DatabricksRepoRepository extends DatabricksRepoTreeItem {
 
 	// description is show next to the label
 	get _description(): string {
-		return `${this.definition.url} (${this.definition.branch})`;
+		return `(${this.definition.branch}) ${this.definition.url}`;
 	}
 
 	// used in package.json to filter commands via viewItem == CANSTART
