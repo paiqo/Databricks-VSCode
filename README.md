@@ -300,10 +300,10 @@ Notebook Kernels also support other features like [Files in Repo](https://docs.d
 Whenever a notebook is opened from either the local sync folder or via the [Virtual File System](#file-system-integration) using `dbws:/` URI, the Databricks notebook kernels are the preferred ones and should appear at the top of the list when you select a kernel.
 
 ## Execution Modes
-We distinbuish between Live-execution and Offline-execution. In Live-execution mode, files are opened directly from Databricks by mounting the Databricks Workspace into your VSCode Workspace using `dbws:/` URI scheme. In this mode there is no intermediate local copy but you work directly against the Databricks Workspace. Everything you run must already exist online in the Databricks Workspace.
+We distinguish between Live-execution and Offline-execution. In Live-execution mode, files are opened directly from Databricks by mounting the Databricks Workspace into your VSCode Workspace using `dbws:/` URI scheme. In this mode there is no intermediate local copy but you work directly against the Databricks Workspace. Everything you run must already exist online in the Databricks Workspace.
 
-This is slightly different in Offline-execution, especially when it comes to `%run` which will run the code from your local file!
-Commands like `dbutils.notebook.run()` always use the code thats currently online so if you have changed the refernced notebook locally, you have to upload it first!
+This is slightly different in Offline-execution where all files you want to work with need to be synced locally first using the [Workspace Manager](#workspace-manager). This is especially important when it comes `%run` which behaves slightly differntly compared to Live-execution mode. `%run` in Offline-execution runs the code from your local file instead of the code that exists in Dtabricks online!
+Other commands like `dbutils.notebook.run()` always use the code thats currently online so if you have changed the refernced notebook locally, you have to upload it first. This is simply because we cannot easily replicate the behavior of `dbutils.notebook.run()` locally!
 
 # File System Integration
 ![File System Integration](/images/FileSystemIntegration.jpg?raw=true "File System Integration")
