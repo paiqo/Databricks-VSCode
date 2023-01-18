@@ -198,7 +198,7 @@ Each filetype can either be exported as raw/source file (.scala, .py, .sql, .r) 
 If you prefer raw/source files (e.g. for better Git integration), you may also consider using [Code Cells](https://code.visualstudio.com/docs/python/jupyter-support-py#_jupyter-code-cells) be setting ```"useCodeCells" = true``` for your corresponding connection. Please be aware that this does currently not work properly with the [Notebook Kernel](#notebook-kernel)!
 
 All these settings can either be configured on a global/user or on a workspace level. The recommendation is to use workspace configurations and then to include the localSyncFolders into your workspace for easy access to your notebooks and sync to GIT.
-Using a workspace configuration also allows you separate differnt Databricks Connections completely.
+Using a workspace configuration also allows you to separate different Databricks Connections completely - e.g. for different projects.
 
 **NOTE: Changing any of the connection settings only take effect once the connection is activated! If you make changes to your current connection, you need to activate another connection temporary and then the original one again! Alternatively, a restart of VSCode also works.**
 
