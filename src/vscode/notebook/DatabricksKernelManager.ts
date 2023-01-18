@@ -13,7 +13,7 @@ export abstract class DatabricksKernelManager {
 	private static _kernels: Map<string, DatabricksKernel> = new Map<string, DatabricksKernel>();
 
 	static async initialize(): Promise<void> {
-		this.refresh();
+		this.refresh(false);
 		this.autoRefresh(30);
 	}
 

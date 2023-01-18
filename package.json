@@ -23,6 +23,9 @@
 	"engines": {
 		"vscode": "^1.68.0"
 	},
+	"extensionDependencies": [
+		"RandomFractalsInc.vscode-data-table"
+	],
 	"galleryBanner": {
 		"color": "#0ea5ff",
 		"theme": "dark"
@@ -59,7 +62,6 @@
 		"onFileSystem:dbfs",
 		"onFileSystem:dbws"
 	],
-	
 	"capabilities": {
 		"virtualWorkspaces": {
 			"supported": "limited",
@@ -168,13 +170,12 @@
 					},
 					"databricks.connection.default.apiRootUrl": {
 						"type": "string",
-						"description": "(Mandatory) Root URL of the Databricks API. Azure: https://westeurope.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com. Please do not provide any path or querystring like `?o=123456`",
+						"description": "(Mandatory) Root URL of the Databricks API. Azure: https://adb-12345678901234.19.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com. Please do not provide any path or querystring like `?o=123456`",
 						"scope": "window",
 						"examples": [
-							"https://westeurope.azuredatabricks.net",
+							"https://adb-12345678901234.19.azuredatabricks.net/",
 							"https://abc-12345-xaz.cloud.databricks.com"
-						],
-						"format": "hostname"
+						]
 					},
 					"databricks.connection.default.personalAccessToken": {
 						"type": "string",
@@ -302,8 +303,11 @@
 								},
 								"apiRootUrl": {
 									"type": "string",
-									"default": "https://westeurope.azuredatabricks.net",
-									"description": "Root URL of the Databricks API. Azure: https://westeurope.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com"
+									"description": "(Mandatory) Root URL of the Databricks API. Azure: https://adb-12345678901234.19.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com. Please do not provide any path or querystring like `?o=123456`",
+									"examples": [
+										"https://adb-12345678901234.19.azuredatabricks.net/",
+										"https://abc-12345-xaz.cloud.databricks.com"
+									]
 								},
 								"personalAccessToken": {
 									"type": "string",

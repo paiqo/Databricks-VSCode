@@ -247,7 +247,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 			let lines = cmd.split('\n');
 			magicText = lines[0].split(" ")[0].slice(1).trim();
 			commandText = lines.slice(1).join('\n');
-			if (["python", "sql", "scala", "r"].includes(magicText)) {
+			if (["python", "sql", "scala", "r", "md"].includes(magicText)) {
 				language = magicText as ContextLanguage;
 			}
 			else {

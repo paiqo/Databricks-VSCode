@@ -60,6 +60,7 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 
 **v1.4.0:**
 - fixed an issue with the `Create cluster` link
+- rework [Azure Connection Manager](#setup-and-configuration-azure-connection-manager) so it automatically uses existing crednetials without prompt
 - added `Open Explorer` action to locally synced workspace items in [Workspace Manager](#workspace-manager)
 
 **v1.3.1:**
