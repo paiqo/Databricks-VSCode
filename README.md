@@ -1,6 +1,5 @@
 # VSCode Extension for Databricks
-[![Version](
-https://vsmarketplacebadges.dev/version/paiqo.databricks-vscode.svg?color=blue&style=?style=for-the-badge&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
+[![Version](https://vsmarketplacebadges.dev/version/paiqo.databricks-vscode.svg?color=blue&style=?style=for-the-badge&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
 [![Installs](https://vsmarketplacebadges.dev/installs/paiqo.databricks-vscode.svg?color=yellow)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
 [![Downloads](https://vsmarketplacebadges.dev/downloads/paiqo.databricks-vscode.svg?color=yellow)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
 [![Ratings](https://vsmarketplacebadges.dev/rating/paiqo.databricks-vscode.svg?color=green)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
@@ -57,6 +56,10 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 - Integration for CI/CD using [DatabricksPS](https://www.powershellgallery.com/packages/DatabricksPS) PowerShell module
 
 # Release Notes
+
+**v1.4.1:**
+- fixed issue where the creation of `_sqldf` was also done for non-select statements resulting in duplicate exeuction of e.g. `INSERT` statements
+
 
 **v1.4.0:**
 - fixed an issue with the `Create cluster` link

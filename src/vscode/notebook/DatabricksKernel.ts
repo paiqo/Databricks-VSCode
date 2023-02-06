@@ -72,8 +72,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 			this.Controller.updateNotebookAffinity(notebook, vscode.NotebookControllerAffinity.Preferred);
 		}
 
-		if(notebook.uri.scheme == "vscode-interactive")
-		{
+		if (notebook.uri.scheme == "vscode-interactive") {
 		}
 	}
 
@@ -200,6 +199,17 @@ export class DatabricksKernel implements vscode.NotebookController {
 	}
 
 	async createSqlDfVariable(sqlCommand: string, context: ExecutionContext): Promise<void> {
+		// to create the _sqldf variable, we basically just execute the original SQL command again via PySpark
+		// which only makes sense if it is a SELECT statement that returns a tabular result
+		let sqlCmdClean = sqlCommand.trim().toUpperCase()
+		if (!sqlCmdClean.startsWith("SELECT")
+			&& !(sqlCmdClean.match(/WITH.*\)\s*SELECT/gms))
+			&& !sqlCmdClean.startsWith("SHOW")
+			&& !sqlCmdClean.startsWith("DESCRIBE")
+		) {
+			ThisExtension.log("_sqldf cannot be created for non-SELECT statements!");
+			return;
+		}
 		let languages: Map<ContextLanguage, string> = new Map<ContextLanguage, string>();
 
 		languages.set("python", '_sqldf = spark.sql("""' + sqlCommand + '""")');
@@ -424,14 +434,14 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 				let output: vscode.NotebookCellOutput = new vscode.NotebookCellOutput([
 					vscode.NotebookCellOutputItem.text(html, 'text/html'),
+					vscode.NotebookCellOutputItem.json(data, 'text/x-json'), // to be used by proper JSON/table renderers
 					vscode.NotebookCellOutputItem.json(data, 'application/json'), // to be used by proper JSON/table renderers
 					vscode.NotebookCellOutputItem.json(result.results, 'application/databricks-table') // the original result from databricks including schema and datatypes for more advanced renderers
 				])
 				output.metadata = { row_count: data.length, truncated: result.results.truncated };
 				execution.appendOutput(output);
 
-				if(language == "sql")
-				{
+				if (language == "sql") {
 					// we do not await this async function as we do not want to make the execution of this cell unecessarily longer
 					this.createSqlDfVariable(commandText, context);
 				}

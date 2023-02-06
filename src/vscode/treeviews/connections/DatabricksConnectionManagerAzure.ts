@@ -55,6 +55,8 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 		this._subscriptionsIds = ThisExtension.getConfigurationSetting<string[]>("databricks.azure.subscriptionIds").value;
 		this._workspaces = ThisExtension.getConfigurationSetting<AzureConfig[]>("databricks.azure.workspaces").value;
 
+		vscode.authentication.onDidChangeSessions((event) => DatabricksConnectionManagerAzure._onDidChangeSessions(event));
+
 		await this.loadConnections();
 
 		if (this._connections.length == 0) {
@@ -78,6 +80,11 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 				vscode.window.showErrorMessage(msg);
 			}
 		}
+	}
+
+	private static async _onDidChangeSessions(event: vscode.AuthenticationSessionsChangeEvent)
+	{
+		vscode.window.showWarningMessage("Session Changed! " + event.provider.id);
 	}
 
 	private async getAADAccessToken(scopes: string[], tenantId?: string): Promise<vscode.AuthenticationSession> {
