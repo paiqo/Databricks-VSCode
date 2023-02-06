@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Extension to manage your Databricks workspace and ease local development",
-	"version": "1.4.0",
+	"version": "1.4.1",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -51,7 +51,7 @@
 		"notebookKernelJupyterNotebook"
 	],
 	"activationEvents": [
-		"onView:DatabricksConnections",
+		"onView:databricksConnections",
 		"onView:databricksWorkspace",
 		"onView:databricksClusters",
 		"onView:databricksJobs",
@@ -433,7 +433,7 @@
 		"views": {
 			"databricks": [
 				{
-					"id": "DatabricksConnections",
+					"id": "databricksConnections",
 					"name": "Connections",
 					"type": "tree",
 					"initialSize": 25
@@ -484,19 +484,19 @@
 				"icon": "$(refresh)"
 			},
 			{
-				"command": "DatabricksConnections.add",
+				"command": "databricksConnections.add",
 				"title": "Add",
 				"icon": "$(add)",
 				"enablement": "virtualWorkspace"
 			},
 			{
-				"command": "DatabricksConnections.settings",
+				"command": "databricksConnections.settings",
 				"title": "Settings",
 				"icon": "$(gear)",
 				"enablement": "!virtualWorkspace"
 			},
 			{
-				"command": "DatabricksConnectionItem.activate",
+				"command": "databricksConnectionItem.activate",
 				"title": "Activate",
 				"icon": {
 					"light": "resources/light/connected.png",
@@ -788,17 +788,17 @@
 			"view/title": [
 				{
 					"command": "databricksConnections.refresh",
-					"when": "view == DatabricksConnections",
+					"when": "view == databricksConnections",
 					"group": "navigation"
 				},
 				{
-					"command": "DatabricksConnections.add",
-					"when": "view == DatabricksConnections && virtualWorkspace",
+					"command": "databricksConnections.add",
+					"when": "view == databricksConnections && virtualWorkspace",
 					"group": "navigation"
 				},
 				{
-					"command": "DatabricksConnections.settings",
-					"when": "view == DatabricksConnections && !virtualWorkspace",
+					"command": "databricksConnections.settings",
+					"when": "view == databricksConnections && !virtualWorkspace",
 					"group": "navigation"
 				},
 				{
@@ -879,8 +879,8 @@
 			],
 			"view/item/context": [
 				{
-					"command": "DatabricksConnectionItem.activate",
-					"when": "view == DatabricksConnections && viewItem == INACTIVE",
+					"command": "databricksConnectionItem.activate",
+					"when": "view == databricksConnections && viewItem == INACTIVE",
 					"group": "inline"
 				},
 				{

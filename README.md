@@ -59,7 +59,7 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 
 **v1.4.1:**
 - fixed issue where the creation of `_sqldf` was also done for non-select statements resulting in duplicate exeuction of e.g. `INSERT` statements
-
+- performance improvement when switching between Azure Databricks Connections
 
 **v1.4.0:**
 - fixed an issue with the `Create cluster` link

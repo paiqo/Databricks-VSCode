@@ -70,15 +70,15 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// register DatabricksConnectionTreeProvider
 	let databricksConnectionTreeProvider = new DatabricksConnectionTreeProvider();
-	vscode.window.registerTreeDataProvider('DatabricksConnections', databricksConnectionTreeProvider);
+	vscode.window.registerTreeDataProvider('databricksConnections', databricksConnectionTreeProvider);
 	vscode.commands.registerCommand('databricksConnections.refresh', (item: DatabricksConnectionTreeItem, showInfoMessage: boolean = true) => databricksConnectionTreeProvider.refresh(item, showInfoMessage));
 	if (ThisExtension.isInBrowser) {
-		vscode.commands.registerCommand('DatabricksConnections.add', () => databricksConnectionTreeProvider.add());
+		vscode.commands.registerCommand('databricksConnections.add', () => databricksConnectionTreeProvider.add());
 	}
 	else {
-		vscode.commands.registerCommand('DatabricksConnections.settings', () => databricksConnectionTreeProvider.openSettings());
+		vscode.commands.registerCommand('databricksConnections.settings', () => databricksConnectionTreeProvider.openSettings());
 	}
-	vscode.commands.registerCommand('DatabricksConnectionItem.activate', (connection: DatabricksConnectionTreeItem) => connection.activate());
+	vscode.commands.registerCommand('databricksConnectionItem.activate', (connection: DatabricksConnectionTreeItem) => connection.activate());
 
 
 	// register DatabricksWorkspaceTreeProvider

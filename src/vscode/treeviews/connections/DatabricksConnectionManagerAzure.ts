@@ -23,6 +23,8 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 	private _subscriptionsIds: string[];
 	private _workspaces: AzureConfig[];
 
+	private static _azureConnections: iDatabricksConnection[];;
+
 	constructor() {
 		super();
 	}
@@ -104,9 +106,11 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 	}
 
 	async loadConnections(): Promise<void> {
-		// TODO: We do not want to load connections from Azure over and over again - NOT YET WORKING
-		if(this._connections && this._connections.length > 0)
+		// to improve switching between Azure Databricks workspaces, we cache the connections once they were loaded
+		// to add a newly added Azure Databricks workspace, VSCode needds to be restarted!
+		if(DatabricksConnectionManagerAzure._azureConnections && DatabricksConnectionManagerAzure._azureConnections.length > 0)
 		{
+			this._connections = DatabricksConnectionManagerAzure._azureConnections;
 			return;
 		}
 		// 1. Connect to azure
@@ -142,8 +146,8 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 
 					if (response.ok) {
 						let subscriptions: AzureSubscriptionListRepsonse = await response.json() as AzureSubscriptionListRepsonse;
-						ThisExtension.setStatusBar("Got " + subscriptions.count + " Azure Subscriptions!", false);
-						ThisExtension.log("Read " + subscriptions.count + " available Azure Subscriptions: " + JSON.stringify(subscriptions));
+						ThisExtension.setStatusBar("Got " + subscriptions.count.value + " Azure Subscriptions!", false);
+						ThisExtension.log("Read " + subscriptions.count.value + " available Azure Subscriptions: " + JSON.stringify(subscriptions));
 
 						this.SubscriptionIDs = subscriptions.value.map((x) => x.subscriptionId);
 					}
@@ -213,6 +217,8 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 					vscode.window.showErrorMessage("Could not load Databricks Workspace '" + workspace.resourceId + "'!");
 				}
 			}
+
+			DatabricksConnectionManagerAzure._azureConnections = this._connections;
 		} catch (e) {
 			ThisExtension.log(e);
 		}
