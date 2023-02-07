@@ -24,6 +24,7 @@ The extensions can be downloaded from the official Visual Studio Code extension 
   - Execute local code against a running Databricks cluster
   - interactive cell-by-cell execution as in Databricks web UI
   - rich output and visualization of results
+  - support for [Widgets](#widgets)
 - [File System Integration](#file-system-integration)
   - integrate DBFS and Databricks Workspace/notebooks next to your local file system
   - easy drag&drop between local, DBFS and also workspace/notebooks!
@@ -56,6 +57,9 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 - Integration for CI/CD using [DatabricksPS](https://www.powershellgallery.com/packages/DatabricksPS) PowerShell module
 
 # Release Notes
+
+**v1.5.0:**
+- added support for [Widgets](#widgets) when running Notebooks
 
 **v1.4.1:**
 - fixed issue where the creation of `_sqldf` was also done for non-select statements resulting in duplicate exeuction of e.g. `INSERT` statements
@@ -308,6 +312,14 @@ We distinguish between Live-execution and Offline-execution. In Live-execution m
 
 This is slightly different in Offline-execution where all files you want to work with need to be synced locally first using the [Workspace Manager](#workspace-manager). This is especially important when it comes `%run` which behaves slightly differntly compared to Live-execution mode. `%run` in Offline-execution runs the code from your local file instead of the code that exists in Dtabricks online!
 Other commands like `dbutils.notebook.run()` always use the code thats currently online so if you have changed the refernced notebook locally, you have to upload it first. This is simply because we cannot easily replicate the behavior of `dbutils.notebook.run()` locally!
+
+## Widgets
+The extension can also handle classic Databricks Widgets created using `dbutils.widgets.xxx()`. However, there are some limitations that might work slightly different than in the Databricks UI:
+- creation and querying of widgets must happen in separate cells
+- the cell that creates the widget must be executed before the cell that gets the value form the widget `dbutils.widgets.get("myWidget")`
+- to display the options in VSCode, the expression has to be evaluated which can take some time, even for simple expressions
+
+You can also update the values of all already loaded widgets at once using the `Update Widgets` button in the notebook toolbar.
 
 # File System Integration
 ![File System Integration](/images/FileSystemIntegration.jpg?raw=true "File System Integration")

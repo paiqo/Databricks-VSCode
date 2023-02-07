@@ -14,7 +14,7 @@ export abstract class DatabricksKernelManager {
 
 	static async initialize(): Promise<void> {
 		this.refresh(false);
-		this.autoRefresh(30);
+		this.autoRefresh(300);
 	}
 
 	static async refresh(showInfoMessage: boolean = false): Promise<void> {
@@ -165,5 +165,20 @@ export abstract class DatabricksKernelManager {
 		}
 
 		ThisExtension.setStatusBar("Kernel restarted!");
+	}
+
+	static async updateWidgets(notebook: { notebookEditor: { notebookUri: vscode.Uri } } | undefined | vscode.Uri): Promise<void> {
+		let notebookUri: vscode.Uri = undefined;
+
+		if (notebook instanceof vscode.Uri) {
+			notebookUri = notebook;
+		}
+		else if ((notebook as any).notebookEditor.notebookUri) {
+			notebookUri = (notebook as any).notebookEditor.notebookUri;
+		}
+
+		for (let kernel of this._kernels.values()) {
+			kernel.updateWidgets(notebookUri);
+		}
 	}
 }

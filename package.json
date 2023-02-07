@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
 	"description": "Extension to manage your Databricks workspace and ease local development",
-	"version": "1.4.1",
+	"version": "1.5.0",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -782,7 +782,15 @@
 				"shortTitle": "Restart",
 				"icon": "$(debug-restart)",
 				"category": "Jupyter"
+			},
+			{
+				"command": "databricksKernel.updateWidgets",
+				"title": "Update Widgets",
+				"shortTitle": "Widgets",
+				"icon": "$(settings)",
+				"category": "Jupyter"
 			}
+			
 		],
 		"menus": {
 			"view/title": [
@@ -1056,7 +1064,11 @@
 			"notebook/toolbar": [
 				{
 					"command": "databricksKernel.restart",
-					"title": "Restart Spark Context",
+					"group": "navigation/execute@1",
+					"when": "notebookKernel =~ /^paiqo.databricks-vscode\\// && notebookType == 'jupyter-notebook' && isWorkspaceTrusted"
+				},
+				{
+					"command": "databricksKernel.updateWidgets",
 					"group": "navigation/execute@1",
 					"when": "notebookKernel =~ /^paiqo.databricks-vscode\\// && notebookType == 'jupyter-notebook' && isWorkspaceTrusted"
 				}
@@ -1064,7 +1076,6 @@
 			"editor/title": [
 				{
 					"command": "databricksKernel.restart",
-					"title": "Restart Spark Context",
 					"group": "navigation@1",
 					"when": "notebookKernel =~ /^paiqo.databricks-vscode\\// && notebookType == 'jupyter-notebook' && isWorkspaceTrusted"
 				}

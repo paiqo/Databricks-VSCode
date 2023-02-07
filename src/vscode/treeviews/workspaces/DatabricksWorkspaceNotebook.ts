@@ -8,7 +8,6 @@ import { Helper } from '../../../helpers/Helper';
 import { LanguageFileExtensionMapper } from './LanguageFileExtensionMapper';
 import { DatabricksWorkspaceTreeItem } from './DatabricksWorkspaceTreeItem';
 import { FSHelper } from '../../../helpers/FSHelper';
-import { Stats } from 'fs';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html

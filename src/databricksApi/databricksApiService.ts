@@ -455,8 +455,9 @@ export abstract class DatabricksApiService {
 		return response;
 	}
 
-	static async getCommandResult(command: ExecutionCommand, awaitCompletion: boolean = true, rawOutput: boolean = false): Promise<iDatabricksApiCommandsStatusResponse> {
+	static async getCommandResult(command: ExecutionCommand, awaitCompletion: boolean = true): Promise<iDatabricksApiCommandsStatusResponse> {
 		let apiResults: iDatabricksApiCommandsStatusResponse = null;
+		await Helper.wait(300); // the first time we only wait 300ms to get the status, because the command might be finished already
 		do {
 			if (apiResults != null) { await Helper.wait(1000); }
 

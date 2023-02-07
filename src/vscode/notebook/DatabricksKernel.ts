@@ -6,6 +6,9 @@ import { DatabricksApiService } from '../../databricksApi/databricksApiService';
 import { Helper } from '../../helpers/Helper';
 import { FSHelper } from '../../helpers/FSHelper';
 import { iDatabricksCluster } from '../treeviews/clusters/iDatabricksCluster';
+import { DatabricksWidget } from './Widgets/DatabricksWidget';
+import { DatabricksTextWidget } from './Widgets/DatabricksTextWidget';
+import { DatabricksSelectorWidget } from './Widgets/DatabricksSelectorWidget';
 
 export type NotebookMagic =
 	"sql"
@@ -37,7 +40,9 @@ export class DatabricksKernel implements vscode.NotebookController {
 	private _executionOrder: number;
 	private _language: ContextLanguage;
 	private _executionContexts: Map<string, ExecutionContext>;
+	private _widgets: Map<string, DatabricksWidget>;
 	private _cluster: iDatabricksCluster;
+
 
 	constructor(cluster: iDatabricksCluster, notebookType: KernelType = 'jupyter-notebook', language: ContextLanguage = "python") {
 		this.notebookType = notebookType;
@@ -48,6 +53,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 		this._executionOrder = 0;
 		this._executionContexts = new Map<string, ExecutionContext>;
+		this._widgets = new Map<string, DatabricksWidget>;
 
 		ThisExtension.log("Creating new " + this.notebookType + " kernel '" + this.id + "'");
 		this._controller = vscode.notebooks.createNotebookController(this.id,
@@ -141,6 +147,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 	}
 
 	async restart(notebookUri: vscode.Uri = undefined): Promise<void> {
+		this._widgets = new Map<string, DatabricksWidget>();
 		if (notebookUri == undefined) {
 			ThisExtension.log(`Restarting notebook kernel ${this.Controller.id} ...`)
 			// we simply remove the current execution context and close it on the Cluster
@@ -152,6 +159,12 @@ export class DatabricksKernel implements vscode.NotebookController {
 			let context: ExecutionContext = this.getNotebookContext(notebookUri);
 			await DatabricksApiService.removeExecutionContext(context);
 			this._executionContexts.delete(notebookUri.toString());
+		}
+	}
+
+	async updateWidgets(notebookUri: vscode.Uri = undefined): Promise<void> {
+		for(let widget of this._widgets.values()) {
+			await widget.promptForInput(this.getNotebookContext(notebookUri));
 		}
 	}
 
@@ -171,6 +184,13 @@ export class DatabricksKernel implements vscode.NotebookController {
 		return undefined;
 	}
 
+	setWidget(name: string, widget: DatabricksWidget): void {
+		this._widgets.set(name, widget);
+	}
+	getWidget(name: string): DatabricksWidget {
+		return this._widgets.get(name);
+	}
+
 	async updateRepoContext(notebookUri: vscode.Uri): Promise<void> {
 		let paths: string[] = notebookUri.path.split(FSHelper.SEPARATOR);
 		// if we are working with a notebook from the Databricks Repos folder (works with dbws:/ and locally synced notebooks)
@@ -182,7 +202,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 			let context: ExecutionContext = this.getNotebookContext(notebookUri);
 			let commandTexts: string[] = ["import sys", "import os", `sys.path.append('${driverRepoPath}')`, `os.chdir('${driverNotebookDirectory}')`];
 			let command: ExecutionCommand = await DatabricksApiService.runCommand(context, commandTexts.join("\n"), "python");
-			let result = await DatabricksApiService.getCommandResult(command, true, true);
+			let result = await DatabricksApiService.getCommandResult(command, true);
 
 			if (result.results.resultType == "error") {
 				ThisExtension.log(result.results.summary);
@@ -212,7 +232,8 @@ export class DatabricksKernel implements vscode.NotebookController {
 		}
 		let languages: Map<ContextLanguage, string> = new Map<ContextLanguage, string>();
 
-		languages.set("python", '_sqldf = spark.sql("""' + sqlCommand + '""")');
+		// wrap a sub-select around the original SQL command to make sure we can use it in a FROM clause
+		languages.set("python", '_sqldf = spark.sql("""SELECT * FROM (' + sqlCommand + ')""")');
 		// currently _sqldf is only supported for PySpark
 		//languages.set("scala", 'val _sqldf = spark.sql("' + sqlCommand + '")');
 		//languages.set("r", '_sqldf <- sql("' +  sqlCommand + '")');
@@ -220,10 +241,9 @@ export class DatabricksKernel implements vscode.NotebookController {
 		for (let language of languages.entries()) {
 			ThisExtension.log("_sqldf command for " + language[0] + ": " + language[1]);
 			let command = await DatabricksApiService.runCommand(context, language[1], language[0]);
-			let result = await DatabricksApiService.getCommandResult(command, true, true);
+			let result = await DatabricksApiService.getCommandResult(command, true);
 		}
 	}
-
 
 	createNotebookCellExecution(cell: vscode.NotebookCell): vscode.NotebookCellExecution {
 		//throw new Error('Method not implemented.');
@@ -248,7 +268,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 		}
 	}
 
-	private parseCommand(cell: vscode.NotebookCell): [ContextLanguage, string, NotebookMagic] {
+	private async parseCommand(cell: vscode.NotebookCell, executionContext: ExecutionContext): Promise<[ContextLanguage, string, NotebookMagic]> {
 		let cmd: string = cell.document.getText();
 		let magicText: string = undefined;
 		let commandText: string = cmd;
@@ -270,10 +290,56 @@ export class DatabricksKernel implements vscode.NotebookController {
 		// we need to convert relative paths to a full path as our Kernel does not have a path itself so relative paths would not work
 		commandText = commandText.replace(/dbutils\.notebook\.run\((["'])\./gm, "dbutils.notebook.run($1" + FSHelper.parent(cell.notebook.uri).path);
 
+		commandText = await this.resolveWidgets(commandText, executionContext, language);
+
 		return [language, commandText, magicText as NotebookMagic];
 	}
 
-	private async _doExecution(cell: vscode.NotebookCell, context: ExecutionContext): Promise<void> {
+	private async resolveWidgets(commandText: string, context: ExecutionContext, language: ContextLanguage, force: boolean = false): Promise<string> {
+		/*
+		- get calls to dbutils.widgets.get
+		- check if value already exists in _widgets
+			- if not, prompt user for value
+			- if yes, use existing value
+		- replace dbutils.widgets.get with the static value from the widget
+
+		*/
+		// shortcut if dbutils.widgets is not used
+		if(!commandText.includes("dbutils.widgets."))
+		{
+			return commandText;
+		}
+		
+		let textWidgets: DatabricksTextWidget[] = DatabricksTextWidget.loadFromCommandText(commandText, language);
+
+		for(let textWidget of textWidgets) {
+			if(!this._widgets.has(textWidget.name) || force)
+			{
+				await textWidget.promptForInput();
+				this.setWidget(textWidget.name, textWidget);
+			}
+		}
+
+		let selectorWidgets: DatabricksSelectorWidget[] = DatabricksSelectorWidget.loadFromCommandText(commandText, language);
+
+		for(let selectorWidget of selectorWidgets) {
+			if(!this._widgets.has(selectorWidget.name) || force)
+			{
+				await selectorWidget.promptForInput(context);
+				this.setWidget(selectorWidget.name, selectorWidget);
+			}
+		}
+		
+		// for already know widgets, we replace the call to dbutils.widgets.get with the static value
+		for(let widget of this._widgets.values())
+		{
+			commandText = await widget.replaceInCommandText(commandText);
+		}
+		
+		return commandText;
+	}
+
+	private async _doExecution(cell: vscode.NotebookCell, executionContext: ExecutionContext): Promise<void> {
 		const execution = this.Controller.createNotebookCellExecution(cell);
 		execution.executionOrder = ++this._executionOrder;
 		execution.start(Date.now());
@@ -285,7 +351,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 			let language: ContextLanguage = null;
 			let magic: NotebookMagic = null;
 
-			[language, commandText, magic] = this.parseCommand(cell);
+			[language, commandText, magic] = await this.parseCommand(cell, executionContext);
 
 			ThisExtension.log("Executing " + language + ":\n" + commandText);
 
@@ -329,7 +395,6 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 					ThisExtension.log("Executing %run for '" + runUri + "' ...");
 					try {
-
 						switch (runUri.scheme) {
 							case "dbws":
 								if (!await FSHelper.pathExists(runUri)) {
@@ -390,7 +455,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 					break;
 			}
 
-			let command = await DatabricksApiService.runCommand(context, commandText, language);
+			let command = await DatabricksApiService.runCommand(executionContext, commandText, language);
 			execution.token.onCancellationRequested(() => {
 				DatabricksApiService.cancelCommand(command);
 
@@ -402,7 +467,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 				return;
 			});
 
-			let result = await DatabricksApiService.getCommandResult(command, true, true);
+			let result = await DatabricksApiService.getCommandResult(command, true);
 
 			if (result.results.resultType == "table") {
 				let data: Array<any> = [];
@@ -443,7 +508,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 				if (language == "sql") {
 					// we do not await this async function as we do not want to make the execution of this cell unecessarily longer
-					this.createSqlDfVariable(commandText, context);
+					this.createSqlDfVariable(commandText, executionContext);
 				}
 			}
 			else if (result.results.resultType == "text") {

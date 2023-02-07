@@ -65,6 +65,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksKernel.restart',
 		(notebook: { notebookEditor: { notebookUri: vscode.Uri } } | undefined | vscode.Uri) => DatabricksKernelManager.restartNotebookKernel(notebook)
 	);
+	vscode.commands.registerCommand('databricksKernel.updateWidgets',
+		(notebook: { notebookEditor: { notebookUri: vscode.Uri } } | undefined | vscode.Uri) => DatabricksKernelManager.updateWidgets(notebook)
+	);
 	ThisExtension.setStatusBar("Kernels initialized!");
 
 

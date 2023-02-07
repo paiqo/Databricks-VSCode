@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
+
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
-import { FSHelper } from '../../../helpers/FSHelper';
 import { Helper } from '../../../helpers/Helper';
 import { ThisExtension } from '../../../ThisExtension';
 import { DatabricksKernelManager } from '../../notebook/DatabricksKernelManager';
