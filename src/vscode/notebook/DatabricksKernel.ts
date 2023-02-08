@@ -134,6 +134,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 	async disposeController(): Promise<void> {
 		for (let context of this._executionContexts.entries()) {
 			try {
+				ThisExtension.log("Disposing notebook controller - Removing execution context " + context[0] + " ...");
 				await DatabricksApiService.removeExecutionContext(context[1]);
 			}
 			catch (e) { };
