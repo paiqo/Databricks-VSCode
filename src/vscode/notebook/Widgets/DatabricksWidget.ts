@@ -1,4 +1,6 @@
 
+import * as vscode from 'vscode';
+
 import { ContextLanguage, ExecutionContext } from "../../../databricksApi/_types";
 
 export type WidgetType =
@@ -8,13 +10,12 @@ export type WidgetType =
 	| "multiselect"
 	;
 
-export abstract class DatabricksWidget<T = string | string[]> {
+export abstract class DatabricksWidget<T = string | string[]> implements vscode.QuickPickItem {
 	language: ContextLanguage;
 	type: WidgetType;
 	name: string;
 	defaultValue?: string;
-	label?: string;
-	
+	label: string;
 
 	lastInput: T;
 
@@ -29,7 +30,7 @@ export abstract class DatabricksWidget<T = string | string[]> {
 	static loadFromCommandText(commandText: string, language: ContextLanguage): DatabricksWidget[] {
 		throw new Error("Not implemented");
 	};
-	abstract promptForInput(context?: ExecutionContext): Promise<T>;
+	abstract promptForInput(executionContext?: ExecutionContext, useCached?: boolean): Promise<T>;
 
 	abstract getInput(executionContext: ExecutionContext, force?: boolean): Promise<T>;
 
@@ -37,8 +38,16 @@ export abstract class DatabricksWidget<T = string | string[]> {
 
 	async replaceInCommandText(commandText: string): Promise<string> {
 		let regex = new RegExp("dbutils\\.widgets\\.get\\s*\\([\"']{1}" + this.name + "[\"']\\)");
-		
+
 		return commandText.replace(regex, (await this.getCommandTextValue()) as string);
+	}
+
+	get description(): string {
+		let currentValue: any = this.lastInput;
+		if (currentValue === undefined) {
+			currentValue = this.defaultValue;
+		}
+		return "Current: " + currentValue;
 	}
 }
 

@@ -29,15 +29,15 @@ export class DatabricksSelectorWidget extends DatabricksWidget<string[]> {
 		return widgets;
 	}
 
-	async promptForInput(context: ExecutionContext): Promise<string[]> {
-		let choices = await this.evaluateChoices(context);
+	async promptForInput(context: ExecutionContext, useCached: boolean = false): Promise<string[]> {
+		let choices = await this.evaluateChoices(context, useCached);
 
 		let currentValue: any = this.lastInput;
 		if (currentValue === undefined) {
 			currentValue = this.defaultValue;
 		}
 
-		let options: vscode.QuickPickOptions = { title: this.label, ignoreFocusOut: true, placeHolder: "Current: " + currentValue};
+		let options: vscode.QuickPickOptions = { title: this.label, ignoreFocusOut: true, placeHolder: "Current: " + currentValue };
 
 		let input: string[] = undefined;
 		switch (this.type) {
@@ -56,39 +56,40 @@ export class DatabricksSelectorWidget extends DatabricksWidget<string[]> {
 				break;
 		}
 
-		if(input)
-		{
+		if (input) {
 			this.lastInput = input;
 		}
-		else
-		{
+		else {
 			this.lastInput = currentValue;
 		}
 		return this.lastInput;
 	}
 
-	async evaluateChoices(executionContext: ExecutionContext): Promise<string[]> {
-		let query: string = "";
-		switch (this.language) {
-			case "python":
-				query = "display(sc.parallelize(" + this.choicesRaw + ").map(lambda x:(x,)).toDF())";
-				break;
-			case "scala":
-				query = "display(spark.sparkContext.parallelize(" + this.choicesRaw + ").map(x => (x,)).toDF())";
-				break;
-			case "r":
-				query = "display(data.frame(" + this.choicesRaw + ", stringsAsFactors = FALSE))";
-				break;
-			case "sql":
-				query = "select * from (" + this.choicesRaw + ") as t";
-				break;
-			default:
-				throw new Error("Language not supported");
-		}
-		let cmd = await DatabricksApiService.runCommand(executionContext, query, this.language);
-		let result = await DatabricksApiService.getCommandResult(cmd, true);
+	async evaluateChoices(executionContext: ExecutionContext, useCached: boolean = false): Promise<string[]> {
+		if (!this.choices || !useCached) {
+			let query: string = "";
+			switch (this.language) {
+				case "python":
+					query = "display(sc.parallelize(" + this.choicesRaw + ").map(lambda x:(x,)).toDF())";
+					break;
+				case "scala":
+					query = "display(spark.sparkContext.parallelize(" + this.choicesRaw + ").map(x => (x,)).toDF())";
+					break;
+				case "r":
+					query = "display(data.frame(" + this.choicesRaw + ", stringsAsFactors = FALSE))";
+					break;
+				case "sql":
+					query = "select * from (" + this.choicesRaw + ") as t";
+					break;
+				default:
+					throw new Error("Language not supported");
+			}
+			let cmd = await DatabricksApiService.runCommand(executionContext, query, this.language);
+			let result = await DatabricksApiService.getCommandResult(cmd, true);
 
-		return result.results.data.map(x => x[0]);
+			this.choices = result.results.data.map(x => x[0]);
+		}
+		return this.choices;
 	}
 
 	async getInput(executionContext: ExecutionContext, force: boolean = false): Promise<string[]> {

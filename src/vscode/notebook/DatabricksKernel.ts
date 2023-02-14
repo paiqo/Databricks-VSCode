@@ -82,6 +82,29 @@ export class DatabricksKernel implements vscode.NotebookController {
 		}
 	}
 
+	createNotebookCellExecution(cell: vscode.NotebookCell): vscode.NotebookCellExecution {
+		//throw new Error('Method not implemented.');
+		return null;
+	}
+	interruptHandler?: (notebook: vscode.NotebookDocument) => void | Thenable<void>;
+	readonly onDidChangeSelectedNotebooks: vscode.Event<{ readonly notebook: vscode.NotebookDocument; readonly selected: boolean; }>;
+	updateNotebookAffinity(notebook: vscode.NotebookDocument, affinity: vscode.NotebookControllerAffinity): void { }
+
+	async executeHandler(cells: vscode.NotebookCell[], notebook: vscode.NotebookDocument, controller: vscode.NotebookController): Promise<void> {
+		let execContext: ExecutionContext = this.getNotebookContext(notebook.uri);
+		if (!execContext) {
+			ThisExtension.setStatusBar("Initializing Kernel ...", true);
+			execContext = await this.initializeExecutionContext()
+			this.setNotebookContext(notebook.uri, execContext);
+			await this.updateRepoContext(notebook.uri);
+			ThisExtension.setStatusBar("Kernel initialized!");
+		}
+		for (let cell of cells) {
+			await this._doExecution(cell, execContext);
+			await Helper.wait(10); // Force some delay before executing/queueing the next cell
+		}
+	}
+
 	// #region Cluster-properties
 	static getId(clusterId: string, kernelType: KernelType) {
 		return this.baseId + clusterId + "-" + kernelType;
@@ -164,8 +187,15 @@ export class DatabricksKernel implements vscode.NotebookController {
 	}
 
 	async updateWidgets(notebookUri: vscode.Uri = undefined): Promise<void> {
-		for(let widget of this._widgets.values()) {
-			await widget.promptForInput(this.getNotebookContext(notebookUri));
+		if (this._widgets && this._widgets.size > 0) {
+			let options: vscode.QuickPickOptions = { canPickMany: true, ignoreFocusOut: true, placeHolder: "Select widgets to update" };
+			let widgetsToUpdate: DatabricksWidget[] = await vscode.window.showQuickPick<DatabricksWidget>([...this._widgets.values()], options) as any as DatabricksWidget[];
+			for (let widget of widgetsToUpdate) {
+				await widget.promptForInput(this.getNotebookContext(notebookUri), true);
+			}
+		}
+		else {
+			vscode.window.showInformationMessage("No widgets found! Please execute the code to create them first!");
 		}
 	}
 
@@ -246,28 +276,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 		}
 	}
 
-	createNotebookCellExecution(cell: vscode.NotebookCell): vscode.NotebookCellExecution {
-		//throw new Error('Method not implemented.');
-		return null;
-	}
-	interruptHandler?: (notebook: vscode.NotebookDocument) => void | Thenable<void>;
-	readonly onDidChangeSelectedNotebooks: vscode.Event<{ readonly notebook: vscode.NotebookDocument; readonly selected: boolean; }>;
-	updateNotebookAffinity(notebook: vscode.NotebookDocument, affinity: vscode.NotebookControllerAffinity): void { }
 
-	async executeHandler(cells: vscode.NotebookCell[], notebook: vscode.NotebookDocument, controller: vscode.NotebookController): Promise<void> {
-		let execContext: ExecutionContext = this.getNotebookContext(notebook.uri);
-		if (!execContext) {
-			ThisExtension.setStatusBar("Initializing Kernel ...", true);
-			execContext = await this.initializeExecutionContext()
-			this.setNotebookContext(notebook.uri, execContext);
-			await this.updateRepoContext(notebook.uri);
-			ThisExtension.setStatusBar("Kernel initialized!");
-		}
-		for (let cell of cells) {
-			await this._doExecution(cell, execContext);
-			await Helper.wait(10); // Force some delay before executing/queueing the next cell
-		}
-	}
 
 	private async parseCommand(cell: vscode.NotebookCell, executionContext: ExecutionContext): Promise<[ContextLanguage, string, NotebookMagic]> {
 		let cmd: string = cell.document.getText();
@@ -306,16 +315,14 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 		*/
 		// shortcut if dbutils.widgets is not used
-		if(!commandText.includes("dbutils.widgets."))
-		{
+		if (!commandText.includes("dbutils.widgets.")) {
 			return commandText;
 		}
-		
+
 		let textWidgets: DatabricksTextWidget[] = DatabricksTextWidget.loadFromCommandText(commandText, language);
 
-		for(let textWidget of textWidgets) {
-			if(!this._widgets.has(textWidget.name) || force)
-			{
+		for (let textWidget of textWidgets) {
+			if (!this._widgets.has(textWidget.name) || force) {
 				await textWidget.promptForInput();
 				this.setWidget(textWidget.name, textWidget);
 			}
@@ -323,20 +330,18 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 		let selectorWidgets: DatabricksSelectorWidget[] = DatabricksSelectorWidget.loadFromCommandText(commandText, language);
 
-		for(let selectorWidget of selectorWidgets) {
-			if(!this._widgets.has(selectorWidget.name) || force)
-			{
+		for (let selectorWidget of selectorWidgets) {
+			if (!this._widgets.has(selectorWidget.name) || force) {
 				await selectorWidget.promptForInput(context);
 				this.setWidget(selectorWidget.name, selectorWidget);
 			}
 		}
-		
+
 		// for already know widgets, we replace the call to dbutils.widgets.get with the static value
-		for(let widget of this._widgets.values())
-		{
+		for (let widget of this._widgets.values()) {
 			commandText = await widget.replaceInCommandText(commandText);
 		}
-		
+
 		return commandText;
 	}
 

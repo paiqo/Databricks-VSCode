@@ -1,5 +1,3 @@
-import * as vscode from 'vscode';
-
 import { ContextLanguage, ExecutionContext } from "../../../databricksApi/_types";
 import { Helper } from "../../../helpers/Helper";
 import { DatabricksWidget } from './DatabricksWidget';
@@ -32,39 +30,34 @@ export class DatabricksTextWidget extends DatabricksWidget<string> {
 		}
 		let input = await Helper.showInputBox(currentValue, this.label, true);
 
-		if(input)
-		{
+		if (input) {
 			this.lastInput = input;
 		}
-		else
-		{
+		else {
 			this.lastInput = currentValue;
 		}
 		return this.lastInput;
 	}
 
 	async getInput(executionContext?: ExecutionContext, force: boolean = false): Promise<string> {
-		if(this.lastInput && !force)
-		{
+		if (this.lastInput && !force) {
 			return this.lastInput as string;
 		}
 		return this.promptForInput();
 	}
 
-	getCommandTextValue(): string
-	{
-		switch(this.language)
-		{
+	getCommandTextValue(): string {
+		switch (this.language) {
 			case "r":
 			case "sql":
 				return "'" + this.lastInput + "'";
 
 			case "python":
-			case "scala":	
+			case "scala":
 				return '"""' + this.lastInput + '"""';
 
 			default:
-				return '"' + this.lastInput + '"'; 
+				return '"' + this.lastInput + '"';
 		}
 	}
 }

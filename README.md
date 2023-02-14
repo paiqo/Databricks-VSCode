@@ -318,8 +318,15 @@ The extension can also handle classic Databricks Widgets created using `dbutils.
 - creation and querying of widgets must happen in separate cells
 - the cell that creates the widget must be executed before the cell that gets the value form the widget `dbutils.widgets.get("myWidget")`
 - to display the options in VSCode, the expression has to be evaluated which can take some time, even for simple expressions
+- widgets that are commented out might still get evaluated
+
+To mitigate those limitations, we highly recommend to:
+- put all code that creates widgets into a single cell at the beginning of your notebook
+- put all code that reads the widgets into a separate cell
 
 You can also update the values of all already loaded widgets at once using the `Update Widgets` button in the notebook toolbar.
+
+
 
 # File System Integration
 ![File System Integration](/images/FileSystemIntegration.jpg?raw=true "File System Integration")
