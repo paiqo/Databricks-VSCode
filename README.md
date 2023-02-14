@@ -236,7 +236,6 @@ To mitigate those limitations, we highly recommend to:
 
 You can also update the values of all already loaded widgets at once using the `Update Widgets` button in the notebook toolbar. If you simply update the widgets, they will not be re-evaluated (in case they are dynamic)! To re-evaluated them, you need to run the cell(s) where the widget(s) are created again.
 
-
 # File System Integration
 ![File System Integration](/images/FileSystemIntegration.jpg?raw=true "File System Integration")
 

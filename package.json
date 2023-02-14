@@ -1,8 +1,8 @@
 {
 	"name": "databricks-vscode",
 	"displayName": "Databricks VSCode",
-	"description": "Extension to manage your Databricks workspace and ease local development",
-	"version": "1.5.0",
+	"description": "Run notebooks cell-by-cell, browse and edit your Databricks Workspace, DBFS, Clusters, Jobs, Secrets, Repos and SQL. Supports Azure Databricks, Databricks on AWS and Databricks on GCP.",
+	"version": "1.5.1",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -47,18 +47,9 @@
 		"AWS",
 		"GCP",
 		"data",
-		"notebookKernelInteractive",
 		"notebookKernelJupyterNotebook"
 	],
 	"activationEvents": [
-		"onView:databricksConnections",
-		"onView:databricksWorkspace",
-		"onView:databricksClusters",
-		"onView:databricksJobs",
-		"onView:databricksFS",
-		"onView:databricksSecrets",
-		"onView:databricksSql",
-		"onView:databricksRepos",
 		"onFileSystem:dbfs",
 		"onFileSystem:dbws"
 	],

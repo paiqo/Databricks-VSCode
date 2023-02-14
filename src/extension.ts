@@ -34,7 +34,6 @@ import { FSHelper } from './helpers/FSHelper';
 import { DatabricksKernelManager } from './vscode/notebook/DatabricksKernelManager';
 import { DatabricksSQLTreeItem } from './vscode/treeviews/sql/DatabricksSQLTreeItem';
 import { DatabricksSecretTreeItem } from './vscode/treeviews/secrets/DatabricksSecretTreeItem';
-import { Helper } from './helpers/Helper';
 
 export async function activate(context: vscode.ExtensionContext) {
 
