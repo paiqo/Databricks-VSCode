@@ -1,8 +1,8 @@
 {
 	"name": "databricks-vscode",
-	"displayName": "Databricks VSCode",
+	"displayName": "Databricks Power Tools",
 	"description": "Run notebooks cell-by-cell, browse and edit your Databricks Workspace, DBFS, Clusters, Jobs, Secrets, Repos and SQL. Supports Azure Databricks, Databricks on AWS and Databricks on GCP.",
-	"version": "1.5.1",
+	"version": "1.9.0",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -78,7 +78,8 @@
 							"VSCode Settings",
 							"Databricks CLI Profiles",
 							"Azure",
-							"ManualInput"
+							"Databricks Extension",
+							"Manual Input"
 						],
 						"default": "VSCode Settings",
 						"enumDescriptions": [
@@ -415,19 +416,20 @@
 		"viewsContainers": {
 			"activitybar": [
 				{
-					"id": "databricks",
+					"id": "databricksBar",
 					"title": "Databricks",
-					"icon": "resources/databricks_sidebar.png"
+					"icon": "resources/databricks_sidebar_orig.svg"
 				}
 			]
 		},
 		"views": {
-			"databricks": [
+			"databricksBar": [
 				{
 					"id": "databricksConnections",
 					"name": "Connections",
 					"type": "tree",
-					"initialSize": 25
+					"initialSize": 25,
+					"when": "!paiqo.databricks.hideConnectionManager"
 				},
 				{
 					"id": "databricksWorkspace",
@@ -468,6 +470,12 @@
 				}
 			]
 		},
+		"viewsWelcome": [
+			{
+				"view": "databricksSQL",
+				"contents": "Please select a cluster first"
+			}
+		],
 		"commands": [
 			{
 				"command": "databricksConnections.refresh",
@@ -602,7 +610,14 @@
 				"icon": {
 					"light": "resources/light/stop.png",
 					"dark": "resources/dark/stop.png"
-				}
+				},
+				"enablement": "paiqo.databricks.connectionManager != 'Databricks Extension'"
+			},
+			{
+				"command": "databricksClusterItem.attachCluster",
+				"title": "Attach cluster",
+				"icon": "$(plug)",
+				"enablement": "paiqo.databricks.connectionManager == 'Databricks Extension'"
 			},
 			{
 				"command": "databricksClusterItem.createKernel",
@@ -942,7 +957,12 @@
 				},
 				{
 					"command": "databricksClusterItem.useForSQL",
-					"when": "view == databricksClusters && viewItem =~ /.*,STARTED,.*/ && viewItem =~ /.*,MANUAL,.*/"
+					"when": "view == databricksClusters && viewItem =~ /.*,STARTED,.*/ && viewItem =~ /.*,MANUAL,.*/ && paiqo.databricks.connectionManager != 'Databricks Extension'"
+				},
+				{
+					"command": "databricksClusterItem.attachCluster",
+					"when": "view == databricksClusters && viewItem =~ /.*,MANUAL,.*/ && paiqo.databricks.connectionManager == 'Databricks Extension'",
+					"group": "inline"
 				},
 				{
 					"command": "databricksClusterItem.createKernel",

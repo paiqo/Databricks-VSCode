@@ -69,7 +69,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	);
 	ThisExtension.setStatusBar("Kernels initialized!");
 
-
 	// register DatabricksConnectionTreeProvider
 	let databricksConnectionTreeProvider = new DatabricksConnectionTreeProvider();
 	vscode.window.registerTreeDataProvider('databricksConnections', databricksConnectionTreeProvider);
@@ -81,7 +80,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('databricksConnections.settings', () => databricksConnectionTreeProvider.openSettings());
 	}
 	vscode.commands.registerCommand('databricksConnectionItem.activate', (connection: DatabricksConnectionTreeItem) => connection.activate());
-
 
 	// register DatabricksWorkspaceTreeProvider
 	if (!ThisExtension.isInBrowser) {
@@ -126,6 +124,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksClusterItem.useForSQL', (cluster: DatabricksCluster) => cluster.useForSQL());
 	vscode.commands.registerCommand('databricksClusterItem.createKernel', (cluster: DatabricksCluster) => cluster.createKernel());
 	vscode.commands.registerCommand('databricksClusterItem.restartKernel', (cluster: DatabricksCluster) => cluster.restartKernel());
+
+	// set cluster for Databricks Extension
+	vscode.commands.registerCommand('databricksClusterItem.attachCluster', (cluster: DatabricksCluster) => cluster.attachCluster());
 
 
 	// register DatabricksJobsTreeProvider

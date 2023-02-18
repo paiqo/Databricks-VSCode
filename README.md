@@ -169,6 +169,10 @@ The following Azure-specific settings exist and can be set in the workspace sett
 
 They are documented via VSCode settings documentation.
 
+# Setup and Configuration (Databricks Extension Connection Manager)
+This connection manager leverages the [official Databricks extensions](https://marketplace.visualstudio.com/items?itemName=databricks.databricks) to establish a connection with your Databricks workspace. It only supports a single connection hence the actual Connection Manager tab will be hidden for this connection manager.
+It also derives the cluster automatically from the Databricks extensions to source the [SQL Browser](#sql-browser) but also allows you to change it directly from the [Cluster Manager](#cluster-manager) using the `Attach cluster` command.  
+
 # Connection Manager
 ![Connection Manager](/images/ConnectionManager.jpg?raw=true "Connection Manager")
 
@@ -176,6 +180,7 @@ The extension supports various connection managers and the list can be easily ex
 - [VSCode Settings](#setup-and-configuration-vscode-connection-manager)
 - [Databricks CLI](#setup-and-configuration-databricks-cli-connection-manager)
 - [Azure](#setup-and-configuration-azure-connection-manager)
+- [Databricks Extensions](#setup-and-configuration-databricks-extensions-connection-manager)
 - `Manual` where you are simply prompted to enter connection information at the start of your session.
 
 You can specify the one to use by setting the VSCode setting `databricks.connectionManager`.

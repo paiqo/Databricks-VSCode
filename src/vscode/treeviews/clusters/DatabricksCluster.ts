@@ -250,6 +250,14 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 		setTimeout(() => vscode.commands.executeCommand("databricksSQL.refresh", undefined, false), 1000);
 	}
 
+	// set cluster for Databricks extension
+	async attachCluster(): Promise<void> {
+		vscode.commands.executeCommand("databricks.connection.attachCluster", this.cluster_id);
+		ThisExtension.SQLClusterID = this.cluster_id;
+
+		setTimeout(() => vscode.commands.executeCommand("databricksSQL.refresh", undefined, false), 1000);
+	}
+
 	async createKernel(logMessages: boolean = true): Promise<void> {
 		DatabricksKernelManager.createKernels(this.definition, logMessages);
 	}

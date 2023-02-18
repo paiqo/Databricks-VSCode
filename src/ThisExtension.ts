@@ -4,10 +4,11 @@ import { WorkspaceItemLanguage } from './vscode/treeviews/workspaces/_types';
 import { DatabricksConnectionManager } from './vscode/treeviews/connections/DatabricksConnectionManager';
 import { iDatabricksConnection } from './vscode/treeviews/connections/iDatabricksConnection';
 import { DatabricksConnectionManagerVSCode } from './vscode/treeviews/connections/DatabricksConnectionManagerVSCode';
-import { SensitiveValueStore } from './vscode/treeviews/connections/_types';
+import { ConnectionManager, ConnectionSource, SensitiveValueStore } from './vscode/treeviews/connections/_types';
 import { DatabricksConnectionManagerCLI } from './vscode/treeviews/connections/DatabricksConnectionManagerCLI';
 import { DatabricksConnectionManagerManualInput } from './vscode/treeviews/connections/DatabricksConnectionManagerManualInput';
 import { DatabricksConnectionManagerAzure } from './vscode/treeviews/connections/DatabricksConnectionManagerAzure';
+import { DatabricksConnectionManagerDatabricks } from './vscode/treeviews/connections/DatabricksConnectionManagerDatabricks';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -17,6 +18,7 @@ export abstract class ThisExtension {
 	private static _statusBar: vscode.StatusBarItem;
 	private static _isValidated: boolean = false;
 	private static _logger: vscode.OutputChannel;
+	private static _connectionManagerText: ConnectionManager;
 	private static _connectionManager: DatabricksConnectionManager;
 	private static _settingScope: ConfigSettingSource;
 	private static _sensitiveValueStore: SensitiveValueStore;
@@ -61,7 +63,7 @@ export abstract class ThisExtension {
 
 			ThisExtension.readGlobalSettings();
 
-			let connectionManager = this.getConfigurationSetting<string>("databricks.connectionManager", this.SettingScope, true);
+			let connectionManager = this.getConfigurationSetting<ConnectionManager>("databricks.connectionManager", this.SettingScope, true);
 			switch (connectionManager.value) {
 				case "VSCode Settings":
 					this._connectionManager = new DatabricksConnectionManagerVSCode();
@@ -72,13 +74,29 @@ export abstract class ThisExtension {
 				case "Azure":
 					this._connectionManager = new DatabricksConnectionManagerAzure();
 					break;
-				case "ManualInput":
+				case "Databricks Extension":
+					this._connectionManager = new DatabricksConnectionManagerDatabricks();
+					// we hide the Connections Tab as we load all information from the Databricks Extension
+					vscode.commands.executeCommand(
+						"setContext",
+						"paiqo.databricks.hideConnectionManager",
+						true
+					);
+					break;
+				case "Manual Input":
 					this._connectionManager = new DatabricksConnectionManagerManualInput();
 					break;
 				default:
 					this.log("'" + connectionManager + "' is not a valid value for config setting 'databricks.connectionManager!");
-		
+
 			}
+			this._connectionManagerText = connectionManager.value as ConnectionManager;
+
+			vscode.commands.executeCommand(
+						"setContext",
+						"paiqo.databricks.connectionManager",
+						this._connectionManagerText
+					);
 
 			await this.ConnectionManager.initialize();
 
@@ -124,6 +142,10 @@ export abstract class ThisExtension {
 
 	static get ConnectionManager(): DatabricksConnectionManager {
 		return this._connectionManager;
+	}
+
+	static get ConnectionManagerText(): ConnectionManager {
+		return this._connectionManagerText;
 	}
 
 	static get SQLClusterID(): string {
