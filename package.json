@@ -68,24 +68,27 @@
 	"contributes": {
 		"configuration": [
 			{
-				"name": "Databricks",
+				"name": "paiqo.databricks-vscode",
 				"type": "object",
-				"title": "Databricks",
+				"title": "Databricks Power Tools",
 				"properties": {
 					"databricks.connectionManager": {
 						"type": "string",
 						"enum": [
+							"Default",
 							"VSCode Settings",
 							"Databricks CLI Profiles",
 							"Azure",
 							"Databricks Extension",
 							"Manual Input"
 						],
-						"default": "VSCode Settings",
+						"default": "Default",
 						"enumDescriptions": [
+							"The best matching connection manager is selected automatically.",
 							"All connection information is stored securely in the VSCode Settings (user or workspace).",
 							"Connection information is read from the Databricks CLI config file. Databricks CLI has to be configured upfront! Also supports the environment varialbe 'DATABRICKS_CONFIG_FILE'.",
 							"Connection information is loaded from Azure. All Azure Databricks workspaces that you have access to will show up atuomatically in the connection list.",
+							"A single connection that is managed by the Databricks Extensions",
 							"You are prompted for connection information once you interact with the extension."
 						],
 						"description": "Defines how connection information is managed and stored.",
@@ -95,16 +98,14 @@
 						"type": "string",
 						"enum": [
 							"VSCodeSettings",
-							"SystemKeyChain",
-							"ExternalConfigFile"
+							"SystemKeyChain"
 						],
 						"default": "SystemKeyChain",
 						"enumDescriptions": [
 							"Databricks Personal Access Token is stored in the VSCode Settings as plain text! There is a potential risk that the PAT gets checked in to source control systems like git!",
-							"Databricks Personal Access Token is securely stored in the System Key Chain. Easy Copying/Sharing connections with other users is not possible this way. VSCode only stores a reference to the the Systems KeyChain entry.",
-							"(Experimental!) Databricks Personal Access Token is stored in an external Config file. This is useful to manage all your PATs in one place and also easily share them."
+							"Databricks Personal Access Token is securely stored in the System Key Chain. Easy Copying/Sharing connections with other users is not possible this way. VSCode only stores a reference to the the Systems KeyChain entry."
 						],
-						"description": "Defines the default how the VSCode extension for Databricks stores sensitive values like the Databricks Personal Access Token (PAT). Only releveant if the VSCode Connection Manager is used!",
+						"markdownDescription": "(`VSCode Settings`) Defines the default how the VSCode extension for Databricks stores sensitive values like the Databricks Personal Access Token (PAT). Only releveant if the VSCode Connection Manager is used!",
 						"scope": "window"
 					},
 					"databricks.connection.default.exportFormats": {
@@ -115,7 +116,7 @@
 							"SQL": ".sql",
 							"R": ".r"
 						},
-						"description": "(Optional) The different file extension used when downloading notebooks from Databricks.",
+						"markdownDescription": "(`VSCode Settings`, Optional) The different file extension used when downloading notebooks from Databricks.",
 						"scope": "window",
 						"properties": {
 							"Scala": {
@@ -152,7 +153,7 @@
 					},
 					"databricks.connection.default.displayName": {
 						"type": "string",
-						"description": "(Mandatory) Name shown in the Connection list of the Databricks VSCode extension. Must be unique across all VSCode workspaces to avoid conflicts!",
+						"markdownDescription": "(`VSCode Settings`, Mandatory) Name shown in the Connection list of the Databricks VSCode extension. Must be unique across all VSCode workspaces to avoid conflicts!",
 						"scope": "window",
 						"examples": [
 							"my Connection",
@@ -162,7 +163,7 @@
 					},
 					"databricks.connection.default.apiRootUrl": {
 						"type": "string",
-						"description": "(Mandatory) Root URL of the Databricks API. Azure: https://adb-12345678901234.19.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com. Please do not provide any path or querystring like `?o=123456`",
+						"markdownDescription": "(`VSCode Settings`, Mandatory) Root URL of the Databricks API. Azure: https://adb-12345678901234.19.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com. Please do not provide any path or querystring like `?o=123456`",
 						"scope": "window",
 						"examples": [
 							"https://adb-12345678901234.19.azuredatabricks.net/",
@@ -171,7 +172,7 @@
 					},
 					"databricks.connection.default.personalAccessToken": {
 						"type": "string",
-						"description": "(Mandatory) The Personal Access Token (PAT) used to access the Databricks API.",
+						"markdownDescription": "(`VSCode Settings`, Mandatory) The Personal Access Token (PAT) used to access the Databricks API.",
 						"scope": "window",
 						"examples": [
 							"dapi0123456789abcdef0123456789abcdef"
@@ -179,7 +180,7 @@
 					},
 					"databricks.connection.default.personalAccessTokenSecure": {
 						"type": "object",
-						"description": "(Optional) Reference to a secure store for the Personal Access Token.",
+						"markdownDescription": "(`VSCode Settings`, Optional) Reference to a secure store for the Personal Access Token.",
 						"scope": "window",
 						"maxProperties": 1,
 						"properties": {
@@ -197,7 +198,7 @@
 					},
 					"databricks.connection.default.localSyncFolder": {
 						"type": "string",
-						"description": "(Mandatory) A local path where files (notebooks) that are downloaded from Databricks should be stored. This folder can then be integrated in your GIT repository. \nExamples: \nWindows - C:\\mySyncFolder \nLinux/Unix - /home/myUser/mySyncFolder \nmacOS - myUser/mySyncFolder  (Please do not use leading / on macOS!)",
+						"markdownDescription": "(`VSCode Settings`, Mandatory) A local path where files (notebooks) that are downloaded from Databricks should be stored. This folder can then be integrated in your GIT repository. \nExamples: \nWindows - C:\\mySyncFolder \nLinux/Unix - /home/myUser/mySyncFolder \nmacOS - myUser/mySyncFolder  (Please do not use leading / on macOS!)",
 						"scope": "window",
 						"examples": [
 							"Windows: C:\\mySyncFolder",
@@ -213,7 +214,7 @@
 							"DBFS": "DBFS",
 							"Jobs": "Jobs"
 						},
-						"description": "(Optional) Can be used to specify different sub-paths for the items that can be downloaded from Databricks.",
+						"markdownDescription": "(`VSCode Settings`, Optional) Can be used to specify different sub-paths for the items that can be downloaded from Databricks.",
 						"scope": "window",
 						"properties": {
 							"Workspace": {
@@ -236,13 +237,13 @@
 					},
 					"databricks.connection.default.useCodeCells": {
 						"type": "boolean",
-						"description": "If true, Code Cell tags (# %%) will be added when downloading raw source files.",
+						"markdownDescription": "(`VSCode Settings`, Optional) If true, Code Cell tags (# %%) will be added when downloading raw source files.",
 						"scope": "window",
 						"default": true
 					},
 					"databricks.connections": {
 						"type": "array",
-						"description": "An array of objects where each object represents a Databricks Connection containing the same settings as defined for databricks.connection.default.* ",
+						"makrdownDescription": "(`VSCode Settings`) An array of objects where each object represents a Databricks Connection containing the same settings as defined for databricks.connection.default.* ",
 						"items": {
 							"type": "object",
 							"properties": {
@@ -365,17 +366,17 @@
 					},
 					"databricks.lastActiveConnection": {
 						"type": "string",
-						"description": "(Optional) The displayName of the Connection that was used in the last session.",
+						"description": "The displayName of the Connection that was used in the last session.",
 						"scope": "window"
 					},
 					"databricks.azure.tenantId": {
 						"type": "string",
-						"description": "(Optional) To connect to Azure Databricks Workspaces outside of your home-tenant.",
+						"markdownDescription": "(`Azure`, Optional) To connect to Azure Databricks Workspaces outside of your home-tenant.",
 						"scope": "window"
 					},
 					"databricks.azure.subscriptionIds": {
 						"type": "array",
-						"description": "(Optional) A list of Azure Subscription IDs (GUIDs) from which the Databricks Workspaces are loaded. If not specified, all accessible subscriptions are searched.",
+						"markdownDescription": "(`Azure`, Optional) A list of Azure Subscription IDs (GUIDs) from which the Databricks Workspaces are loaded. If not specified, all accessible subscriptions are searched.",
 						"scope": "window",
 						"items": {
 							"type": "string",
@@ -387,7 +388,7 @@
 					},
 					"databricks.azure.workspaces": {
 						"type": "array",
-						"description": "(Optional) A list of Azure Resource IDs to load directly without browsing the tenant first.",
+						"markdownDescription": "(`Azure`, Optional) A list of Azure Resource IDs to load directly without browsing the tenant first.",
 						"scope": "window",
 						"items": {
 							"type": "object",

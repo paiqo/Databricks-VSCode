@@ -5,7 +5,8 @@ export type CloudProvider =
 ;
 
 export type ConnectionManager =
-	"VSCode Settings"
+	"Default"
+|	"VSCode Settings"
 |	"Databricks CLI Profiles"
 |	"Azure"
 |	"Databricks Extension"

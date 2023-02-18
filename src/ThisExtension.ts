@@ -63,8 +63,28 @@ export abstract class ThisExtension {
 
 			ThisExtension.readGlobalSettings();
 
+			this._connectionManagerText = undefined;
 			let connectionManager = this.getConfigurationSetting<ConnectionManager>("databricks.connectionManager", this.SettingScope, true);
-			switch (connectionManager.value) {
+			let conManager: ConnectionManager = connectionManager.value;
+
+			// handle default
+			if (conManager == "Default") {
+				ThisExtension.log("Default connection manager selected. Trying to find the best connection manager ...")
+				if (vscode.extensions.getExtension("databricks.databricks123")) {
+					ThisExtension.log("Databricks Extension found. Using it as connection manager ...");
+					conManager = "Databricks Extension";
+				}
+				else
+				{
+					ThisExtension.log("Databricks Extension not found. Using VSCode Settings as connection manager ...");
+					conManager = "VSCode Settings";
+					// should open workspace settings with a filter but the filter is not yet working
+					vscode.commands.executeCommand("workbench.action.openWorkspaceSettings", ThisExtension.configuration.id);
+				}
+			}
+
+			switch (conManager) {
+
 				case "VSCode Settings":
 					this._connectionManager = new DatabricksConnectionManagerVSCode();
 					break;
@@ -90,13 +110,15 @@ export abstract class ThisExtension {
 					this.log("'" + connectionManager + "' is not a valid value for config setting 'databricks.connectionManager!");
 
 			}
-			this._connectionManagerText = connectionManager.value as ConnectionManager;
+			if (!this._connectionManagerText) {
+				this._connectionManagerText = connectionManager.value as ConnectionManager;
+			}
 
 			vscode.commands.executeCommand(
-						"setContext",
-						"paiqo.databricks.connectionManager",
-						this._connectionManagerText
-					);
+				"setContext",
+				"paiqo.databricks.connectionManager",
+				this._connectionManagerText
+			);
 
 			await this.ConnectionManager.initialize();
 
