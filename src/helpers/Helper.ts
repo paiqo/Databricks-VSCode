@@ -73,8 +73,7 @@ export abstract class Helper {
 		try {
 			// three '/' in the beginning indicate a local path
 			// however, there are issues if this.localFilePath also starts with a '/' so we do a replace in this special case
-			if(typeof(path) == "string")
-			{
+			if (typeof (path) == "string") {
 				path = vscode.Uri.parse(("file:///" + path).replace('////', '///'));
 			}
 			await vscode.workspace.fs.stat(path);
@@ -100,8 +99,7 @@ export abstract class Helper {
 	static getToken(text: string, separator: string, token: number): string {
 		let parts: string[] = text.split(separator);
 
-		if(token < 0)
-		{
+		if (token < 0) {
 			return parts.slice(token)[0];
 		}
 		return parts[token];
@@ -110,8 +108,7 @@ export abstract class Helper {
 	// not working!
 	static runAsyncFunction<T>(func: Function, args: any = undefined): T {
 		return (async function () {
-			if(args == undefined)
-			{
+			if (args == undefined) {
 				return func()
 			}
 			return func(args);
@@ -127,7 +124,7 @@ export abstract class Helper {
 		}
 		return immediatelyResolvedPromise as unknown as T;
 	}
-	
+
 
 	static ensureLocalFolder(path: string, pathIsFile: boolean = false): void {
 		let folder: vscode.Uri = vscode.Uri.file(path);
@@ -196,7 +193,7 @@ export abstract class Helper {
 		vscode.commands.executeCommand("vscode.diff", filePath1, filePath2, "Online <-> Local", options);
 	}
 
-	
+
 
 	static openLink(link: string): void {
 		vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(link));
@@ -261,13 +258,12 @@ export abstract class Helper {
 		var mDisplay = m > 0 ? `${m.toString().length > 1 ? `${m}` : `0${m}`}` : '00';
 		var sDisplay = s > 0 ? `${s.toString().length > 1 ? `${s}` : `0${s}`}` : '00';
 
-		return `${hDisplay}:${mDisplay}:${sDisplay}`; 
+		return `${hDisplay}:${mDisplay}:${sDisplay}`;
 	}
 
 	static getFirstRegexGroup(regexp: RegExp, text: string): string {
 		const array = [...text.matchAll(regexp)];
-		if(array.length >= 1)
-		{
+		if (array.length >= 1) {
 			return array[0][1];
 		}
 		return null;
@@ -275,5 +271,49 @@ export abstract class Helper {
 
 	static parseBoolean(value: string): boolean {
 		return value === 'false' || value === 'undefined' || value === 'null' || value === '0' ? false : !!value;
+	}
+
+	static async waitForPromise<T>(promise: Promise<T>, timeout: number): Promise<T | null> {
+		// Set a timer that will resolve with null
+		return new Promise<T | null>((resolve, reject) => {
+			const timer = setTimeout(() => resolve(null), timeout);
+			promise
+				.then((result) => {
+					// When the promise resolves, make sure to clear the timer or
+					// the timer may stick around causing tests to wait
+					clearTimeout(timer);
+					resolve(result);
+				})
+				.catch((e) => {
+					clearTimeout(timer);
+					reject(e);
+				});
+		});
+	}
+
+	static async waitForCondition(
+		condition: () => Promise<boolean>,
+		timeout: number,
+		interval: number
+	): Promise<boolean> {
+		// Set a timer that will resolve with null
+		return new Promise<boolean>((resolve) => {
+			let finish: (result: boolean) => void;
+			const timer = setTimeout(() => finish(false), timeout);
+			const intervalId = setInterval(() => {
+				condition()
+					.then((r) => {
+						if (r) {
+							finish(true);
+						}
+					})
+					.catch((_e) => finish(false));
+			}, interval);
+			finish = (result: boolean) => {
+				clearTimeout(timer);
+				clearInterval(intervalId);
+				resolve(result);
+			};
+		});
 	}
 }

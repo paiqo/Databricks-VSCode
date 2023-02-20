@@ -5,7 +5,7 @@
   - new connection manager [Databricks Extensions](README.md/#setup-and-configuration-databricks-extension-connection-manager)
   - derive cluster for [SQL Browser](README.md/#sql-browser)
   - change cluster using [Cluster Manager](README.md/#cluster-manager)
-
+  - added File System `wsfs:/` to replace `dbws:/` in the future (currently both are still supported)
 **v1.5.0:**
 - added support for [Widgets](README.md/#widgets) when running Notebooks
 

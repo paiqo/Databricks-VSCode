@@ -167,6 +167,8 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 export class DatabricksWorkspaceProvider implements vscode.FileSystemProvider {
 
 	constructor(context: vscode.ExtensionContext) {
+		context.subscriptions.push(vscode.workspace.registerFileSystemProvider('wsfs', this, { isCaseSensitive: true }));
+		// legacy, to be removed in the future
 		context.subscriptions.push(vscode.workspace.registerFileSystemProvider('dbws', this, { isCaseSensitive: true }));
 	}
 

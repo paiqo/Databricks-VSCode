@@ -8,12 +8,13 @@ import { DatabricksApiService } from '../../databricksApi/databricksApiService';
 import { iDatabricksApiDbfsReadResponse } from '../../databricksApi/_types';
 import { FSHelper } from '../../helpers/FSHelper';
 import { Helper } from '../../helpers/Helper';
+import { ThisExtension } from '../../ThisExtension';
 import { iDatabricksFSItem } from '../treeviews/dbfs/iDatabricksFSItem';
 
 export class DatabricksFileSystemProvider implements vscode.FileSystemProvider {
 	
 	constructor(context: vscode.ExtensionContext) {
-		context.subscriptions.push(vscode.workspace.registerFileSystemProvider('dbfs', this, { isCaseSensitive: true }));
+		context.subscriptions.push(vscode.workspace.registerFileSystemProvider(ThisExtension.DBFS_SCHEME, this, { isCaseSensitive: true }));
 	}
 
 	// --- manage file metadata

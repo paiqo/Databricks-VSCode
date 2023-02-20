@@ -13,6 +13,11 @@ import { DatabricksConnectionManagerDatabricks } from './vscode/treeviews/connec
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
 
+	static readonly DBFS_SCHEME = "dbfs";
+	static readonly WORKSPACE_SCHEME = "wsfs";
+	static readonly WORKSPACE_SCHEME_LEGACY = "dbws";
+
+
 	private static _context: vscode.ExtensionContext;
 	private static _extension: vscode.Extension<any>;
 	private static _statusBar: vscode.StatusBarItem;

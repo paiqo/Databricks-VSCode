@@ -51,12 +51,13 @@
 	],
 	"activationEvents": [
 		"onFileSystem:dbfs",
-		"onFileSystem:dbws"
+		"onFileSystem:dbws",
+		"onFileSystem:wsfs"
 	],
 	"capabilities": {
 		"virtualWorkspaces": {
 			"supported": "limited",
-			"description": "In virtual workspaces, Workspace and DBFS browsers are not supported. Please use `dbfs:/` and `dbws:/` mount points instead."
+			"description": "In virtual workspaces, Workspace and DBFS browsers are not supported. Please use `dbfs:/` and `wsfs:/` mount points instead."
 		},
 		"untrustedWorkspaces": {
 			"supported": "limited",

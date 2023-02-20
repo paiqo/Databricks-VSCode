@@ -220,10 +220,10 @@ For better visualization of tabluar results this extension includes a dependency
 
 Notebook Kernels also support other features like [Files in Repo](https://docs.databricks.com/_static/notebooks/files-in-repos.html) to build libraries within your repo, [_sqldf](https://docs.databricks.com/notebooks/notebooks-use.html#explore-sql-cell-results-in-python-notebooks-natively-using-python) to expose results of SQL cells to Python/Pyspark, `%run` to run other notebooks inline with the current notebook and also [dbutils.notebook.run()](https://docs.databricks.com/dev-tools/databricks-utils.html#notebook-utility-dbutilsnotebook).
 
-Whenever a notebook is opened from either the local sync folder or via the [Virtual File System](#file-system-integration) using `dbws:/` URI, the Databricks notebook kernels are the preferred ones and should appear at the top of the list when you select a kernel.
+Whenever a notebook is opened from either the local sync folder or via the [Virtual File System](#file-system-integration) using `wsfs:/` URI, the Databricks notebook kernels are the preferred ones and should appear at the top of the list when you select a kernel.
 
 ## Execution Modes
-We distinguish between Live-execution and Offline-execution. In Live-execution mode, files are opened directly from Databricks by mounting the Databricks Workspace into your VSCode Workspace using `dbws:/` URI scheme. In this mode there is no intermediate local copy but you work directly against the Databricks Workspace. Everything you run must already exist online in the Databricks Workspace.
+We distinguish between Live-execution and Offline-execution. In Live-execution mode, files are opened directly from Databricks by mounting the Databricks Workspace into your VSCode Workspace using `wsfs:/` URI scheme. In this mode there is no intermediate local copy but you work directly against the Databricks Workspace. Everything you run must already exist online in the Databricks Workspace.
 
 This is slightly different in Offline-execution where all files you want to work with need to be synced locally first using the [Workspace Manager](#workspace-manager). This is especially important when it comes `%run` which behaves slightly differntly compared to Live-execution mode. `%run` in Offline-execution runs the code from your local file instead of the code that exists in Dtabricks online!
 Other commands like `dbutils.notebook.run()` always use the code thats currently online so if you have changed the refernced notebook locally, you have to upload it first. This is simply because we cannot easily replicate the behavior of `dbutils.notebook.run()` locally!
@@ -250,7 +250,8 @@ You want to upload a local notebook to the Databricks workspace? Simply drag&dro
 You want to download a file from DBFS? Simply drag&drop it!
 
 There are two virtual file systems that come with this extension:
-- `dbws:/` to access your notebook from the DAtabricks workspace
+- `wsfs:/` to access your notebook from the DAtabricks workspace
+- `dbws:/` (LEGACY) - to be replaced by `wsfs:/` in the long term
 - `dbfs:/` to access files on the Databricks File System (DBFS) - similar to the [DBFS Browser](#dbfs-browser)
 
 # SQL Browser

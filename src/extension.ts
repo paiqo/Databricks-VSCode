@@ -100,11 +100,11 @@ export async function activate(context: vscode.ExtensionContext) {
 	// Workspace File System Provider
 	const workspaceProvider = new DatabricksWorkspaceProvider(context);
 	vscode.commands.registerCommand('databricksWorkspace.addToWorkspace', (showMessage: boolean) => {
-		FSHelper.addToWorkspace(vscode.Uri.parse('dbws:/'), "Databricks - Workspace", showMessage);
+		FSHelper.addToWorkspace(vscode.Uri.parse(ThisExtension.WORKSPACE_SCHEME +':/'), "Databricks - Workspace", showMessage);
 	});
 
 	if (ThisExtension.isInBrowser) {
-		// in a virtual workspace we always want to add the DBWS mount to the workspace
+		// in a virtual workspace we always want to add the WSFS/DBWS mount to the workspace
 		vscode.commands.executeCommand('databricksWorkspace.addToWorkspace', false);
 	}
 
@@ -160,11 +160,11 @@ export async function activate(context: vscode.ExtensionContext) {
 	// DBFS File System Provider
 	const dbfsProvider = new DatabricksFileSystemProvider(context);
 	vscode.commands.registerCommand('databricksFS.addToWorkspace', (showMessage: boolean) => {
-		FSHelper.addToWorkspace(vscode.Uri.parse('dbfs:/'), "Databricks - DBFS", showMessage);
+		FSHelper.addToWorkspace(vscode.Uri.parse(ThisExtension.DBFS_SCHEME + ':/'), "Databricks - DBFS", showMessage);
 	});
 
 	if (ThisExtension.isInBrowser) {
-		// in a virtual workspace we always want to add the DBWS mount to the workspace
+		// in a virtual workspace we always want to add the DBFS mount to the workspace
 		vscode.commands.executeCommand('databricksFS.addToWorkspace', false);
 	}
 
