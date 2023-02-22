@@ -75,12 +75,11 @@ export abstract class ThisExtension {
 			// handle default
 			if (conManager == "Default") {
 				ThisExtension.log("Default connection manager selected. Trying to find the best connection manager ...")
-				if (vscode.extensions.getExtension("databricks.databricks123")) {
+				if (vscode.extensions.getExtension("databricks.databricks")) {
 					ThisExtension.log("Databricks Extension found. Using it as connection manager ...");
 					conManager = "Databricks Extension";
 				}
-				else
-				{
+				else {
 					ThisExtension.log("Databricks Extension not found. Using VSCode Settings as connection manager ...");
 					conManager = "VSCode Settings";
 					// should open workspace settings with a filter but the filter is not yet working
@@ -101,12 +100,6 @@ export abstract class ThisExtension {
 					break;
 				case "Databricks Extension":
 					this._connectionManager = new DatabricksConnectionManagerDatabricks();
-					// we hide the Connections Tab as we load all information from the Databricks Extension
-					vscode.commands.executeCommand(
-						"setContext",
-						"paiqo.databricks.hideConnectionManager",
-						true
-					);
 					break;
 				case "Manual Input":
 					this._connectionManager = new DatabricksConnectionManagerManualInput();
@@ -119,13 +112,9 @@ export abstract class ThisExtension {
 				this._connectionManagerText = connectionManager.value as ConnectionManager;
 			}
 
-			vscode.commands.executeCommand(
-				"setContext",
-				"paiqo.databricks.connectionManager",
-				this._connectionManagerText
-			);
-
 			await this.ConnectionManager.initialize();
+
+			await this.setContext();
 
 			return true;
 		} catch (error) {
@@ -135,6 +124,27 @@ export abstract class ThisExtension {
 
 	static dispose(): void {
 
+	}
+
+	private static async setContext(): Promise<void> {
+		// we hide the Connections Tab as we load all information from the Databricks Extension
+		await vscode.commands.executeCommand(
+			"setContext",
+			"paiqo.databricks.hideConnectionManager",
+			ThisExtension._connectionManagerText == "Databricks Extension"
+		);
+
+		await vscode.commands.executeCommand(
+			"setContext",
+			"paiqo.databricks.connectionManager",
+			this._connectionManagerText
+		);
+
+		await vscode.commands.executeCommand(
+			"setContext",
+			"paiqo.databricks.isInBrowser",
+			this.isInBrowser
+		);
 	}
 
 	private static readGlobalSettings(): void {
@@ -300,7 +310,8 @@ export abstract class ThisExtension {
 	}
 
 	static get isInBrowser(): boolean {
-		return process.hasOwnProperty("browser") && process["browser"];
+		return vscode.env.uiKind === vscode.UIKind.Web;
+		//return process.hasOwnProperty("browser") && process["browser"];
 	}
 
 	static async updateConfigurationSetting(setting: string, value: any, target: ConfigSettingSource = this._settingScope): Promise<void> {

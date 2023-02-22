@@ -74,7 +74,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 	async _onDidOpenNotebookDocument(notebook: vscode.NotebookDocument) {
 		// set this controller as recommended Kernel for notebooks opened via dbws:/, wsfs:/ file system or from or local sync folder
-		if (notebook.uri.scheme == "dbws" || notebook.uri.scheme == "wsfs" || notebook.uri.toString().startsWith(ThisExtension.ActiveConnection.localSyncFolder.toString())) {
+		if (notebook.uri.scheme == ThisExtension.WORKSPACE_SCHEME_LEGACY || notebook.uri.scheme == ThisExtension.WORKSPACE_SCHEME || notebook.uri.toString().startsWith(ThisExtension.ActiveConnection.localSyncFolder.toString())) {
 			this.Controller.updateNotebookAffinity(notebook, vscode.NotebookControllerAffinity.Preferred);
 		}
 
@@ -387,10 +387,10 @@ export class DatabricksKernel implements vscode.NotebookController {
 					}
 					else { // absolute path provided
 						switch (cell.notebook.uri.scheme) {
-							case "dbws": // legacy
-							case "wsfs":
+							case ThisExtension.WORKSPACE_SCHEME_LEGACY: // legacy
+							case ThisExtension.WORKSPACE_SCHEME:
 								runUri = vscode.Uri.file(runFile);
-								runUri = runUri.with({ scheme: "wsfs" })
+								runUri = runUri.with({ scheme: ThisExtension.WORKSPACE_SCHEME })
 								break;
 							case "file":
 								runUri = await FSHelper.joinPath(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ActiveConnection.localSyncSubfolders.Workspace, runFile);
@@ -403,8 +403,8 @@ export class DatabricksKernel implements vscode.NotebookController {
 					ThisExtension.log("Executing %run for '" + runUri + "' ...");
 					try {
 						switch (runUri.scheme) {
-							case "dbws": // legacy
-							case "wsfs":
+							case ThisExtension.WORKSPACE_SCHEME_LEGACY: // legacy
+							case ThisExtension.WORKSPACE_SCHEME:
 								if (!await FSHelper.pathExists(runUri)) {
 									throw vscode.FileSystemError.FileNotFound(runUri);
 								}

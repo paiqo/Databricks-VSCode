@@ -40,11 +40,7 @@ export abstract class DatabricksApiService {
 			let headers = await ThisExtension.ConnectionManager.getAuthorizationHeaders(con);
 			this._apiBaseUrl = Helper.trimChar(con.apiRootUrl.with({ path: '', query: '', fragment: '' }).toString(true), '/') + this.API_SUB_URL;
 
-			this._headers = {
-				...headers,
-				"Content-Type": 'application/json',
-				"Accept": 'application/json'
-			}
+			this.updateHeaders(headers);
 
 			ThisExtension.log(`Testing new Databricks API (${con.apiRootUrl}) settings ...`);
 			this._connectionTestRunning = true;
@@ -70,6 +66,14 @@ export abstract class DatabricksApiService {
 
 	public static get isInitialized(): boolean {
 		return DatabricksApiService._isInitialized;
+	}
+
+	public static updateHeaders(authorizationHeaders: any): void {
+		this._headers = {
+				...authorizationHeaders,
+				"Content-Type": 'application/json',
+				"Accept": 'application/json'
+			}
 	}
 	//#endregion
 

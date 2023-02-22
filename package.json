@@ -437,7 +437,7 @@
 					"id": "databricksWorkspace",
 					"name": "Workspace",
 					"type": "tree",
-					"when": "!virtualWorkspace"
+					"when": "!virtualWorkspace && !paiqo.databricks.isInBrowser"
 				},
 				{
 					"id": "databricksClusters",
@@ -453,7 +453,7 @@
 					"id": "databricksFS",
 					"name": "DBFS",
 					"type": "tree",
-					"when": "!virtualWorkspace"
+					"when": "!virtualWorkspace && !paiqo.databricks.isInBrowser"
 				},
 				{
 					"id": "databricksSecrets",
