@@ -48,7 +48,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 		this.notebookType = notebookType;
 		this._cluster = cluster;
 		this._language = language;
-		this.id = DatabricksKernel.getId(cluster.cluster_id, notebookType);
+		this.id = DatabricksKernel.getId(this.KernelID, notebookType);
 		this.label = DatabricksKernel.getLabel(cluster.cluster_name);
 
 		this._executionOrder = 0;
@@ -106,8 +106,8 @@ export class DatabricksKernel implements vscode.NotebookController {
 	}
 
 	// #region Cluster-properties
-	static getId(clusterId: string, kernelType: KernelType) {
-		return this.baseId + clusterId + "-" + kernelType;
+	static getId(kernelId: string, kernelType: KernelType) {
+		return kernelId + "-" + kernelType;
 	}
 
 	static getLabel(clusterName: string) {
@@ -116,6 +116,10 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 	get Controller(): vscode.NotebookController {
 		return this._controller;
+	}
+
+	get KernelID(): string {
+		return this._cluster.kernel_id ?? this._cluster.cluster_id;
 	}
 
 	get ClusterID(): string {

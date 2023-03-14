@@ -1,4 +1,4 @@
-# VSCode Extension for Databricks
+# Databricks Power Tools for VSCode
 [![Version](https://vsmarketplacebadges.dev/version/paiqo.databricks-vscode.svg?color=blue&style=?style=for-the-badge&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
 [![Installs](https://vsmarketplacebadges.dev/installs/paiqo.databricks-vscode.svg?color=yellow)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
 [![Downloads](https://vsmarketplacebadges.dev/downloads/paiqo.databricks-vscode.svg?color=yellow)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
@@ -6,7 +6,7 @@
 
 ![Databricks-VSCode](/images/Databricks-VSCode.jpg?raw=true "Databricks-VSCode")
 
-This is a Visual Studio Code extension that allows you to work with Databricks locally from VSCode in an efficient way, having everything you need integrated into VS Code - see [Features](#features). It allows you to manage and execute your notebooks, start/stop clusters, execute jobs and much more!
+This is a Visual Studio Code extension that allows you to work with Databricks locally from VSCode in an efficient way, having everything you need integrated into VS Code - see [Features](#features). It allows you to execute your notebooks, start/stop clusters, execute jobs and much more!
 
 The extensions can be downloaded from the official Visual Studio Code extension gallery: [Databricks VSCode](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
 
@@ -36,6 +36,7 @@ The extensions can be downloaded from the official Visual Studio Code extension 
   - control how notebooks are downloaded (Jupyter notebook, source code, ...)
   - various other settings
   - Load Databricks directly from your Azure Account
+  - Leverage connections configured by the official Databricks VSCode extension
 - [SQL / Data Browser](#sql-browser)
   - Browse availabl SQL objects from the Databricks metastore
   - databases, tables and views, columns, ...
@@ -65,11 +66,14 @@ Alternatively it can also be downloaded the `.vsix` directly  from the VS Code m
 
 Preview-Versions might also be available via github [Releases](https://github.com/paiqo/Databricks-VSCode/releases) from this repository.
 
-# Setup and Configuration (VSCode Connection Manager)
+# Setup and Configuration
 The configuration happens directly via VS Code by simply [opening the settings](https://code.visualstudio.com/docs/getstarted/settings#_creating-user-and-workspace-settings)
 Then either search for "Databricks" or expand Extensions -> Databricks.
-The settings themselves are very well described and it should be easy for you to populate them. Also, not all of them are mandatory! Some of the optional settings are experimental or still work in progress.
-To configure multiple Databricks Connections/workspaces, you need to use the JSON editor and add them to `databricks.connections`:
+The most important setting to start with is definitly `databricks.connectionManager` as it defines how you manage your connections. There are a couple of differnt options which are described further down below.
+All the settings themselves are very well described and it should be easy for you to populate them. Also, not all of them are mandatory, and depend a lot on the connection manager that you have chosen.Some of the optional settings are experimental or still work in progress.
+
+# Setup and Configuration (VSCode Connection Manager)
+Using `VSCode Settings` as your connection manager allows you to define and manage your connections directly from within VSCode via regular VSCode settings. It is recommended to use workspace settings over user settings here as it might get confusing otherwise. The default connection can be configured directly via the settings UI using the `databricks.connection.default.*` settings. To configure multiple Databricks Connections/workspaces, you need to use the JSON editor and add them to `databricks.connections`:
 
 ``` json
 		...
@@ -171,7 +175,7 @@ They are documented via VSCode settings documentation.
 
 # Setup and Configuration (Databricks Extension Connection Manager)
 This connection manager leverages the [official Databricks extensions](https://marketplace.visualstudio.com/items?itemName=databricks.databricks) to establish a connection with your Databricks workspace. It only supports a single connection hence the actual Connection Manager tab will be hidden for this connection manager.
-It also derives the cluster automatically from the Databricks extensions to source the [SQL Browser](#sql-browser) but also allows you to change it directly from the [Cluster Manager](#cluster-manager) using the `Attach cluster` command.  
+It also derives the cluster automatically from the Databricks extensions to source the [SQL Browser](#sql-browser) but also allows you to change it directly from the [Cluster Manager](#cluster-manager) using the `Attach cluster` command from the context menu!  
 
 # Connection Manager
 ![Connection Manager](/images/ConnectionManager.jpg?raw=true "Connection Manager")

@@ -10,7 +10,7 @@ export type ConnectionManager =
 |	"Databricks CLI Profiles"
 |	"Azure"
 |	"Databricks Extension"
-|	"Manual Input"
+|	"Manual"
 ;
 
 export type ConnectionSource =

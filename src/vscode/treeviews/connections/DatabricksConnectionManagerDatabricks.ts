@@ -3,6 +3,8 @@ import * as vscode from 'vscode';
 import { ThisExtension } from '../../../ThisExtension';
 import { iDatabricksConnection } from './iDatabricksConnection';
 import { DatabricksConnectionManager } from './DatabricksConnectionManager';
+import { DatabricksKernelManager } from '../../notebook/DatabricksKernelManager';
+import { iDatabricksCluster } from '../clusters/iDatabricksCluster';
 
 export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionManager {
 
@@ -33,8 +35,12 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 
 				await this.activateConnection(this.LastActiveConnection, true);
 
-				ThisExtension.SQLClusterID = this._databricksConnectionManager.cluster.id;
+				let cluster = this._databricksConnectionManager.cluster.details as iDatabricksCluster;
+				ThisExtension.SQLClusterID = cluster.cluster_id;
+				cluster.cluster_name = "Extension (Generic)";
+				cluster.kernel_id = "databricks_extension_generic";
 
+				DatabricksKernelManager.createKernels(cluster);
 			} catch (error) {
 				let msg = "Could not activate Connection '" + this._lastActiveConnectionName + "'!";
 				ThisExtension.log(msg);

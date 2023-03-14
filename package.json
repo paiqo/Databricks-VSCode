@@ -81,7 +81,7 @@
 							"Databricks CLI Profiles",
 							"Azure",
 							"Databricks Extension",
-							"Manual Input"
+							"Manual"
 						],
 						"default": "Default",
 						"enumDescriptions": [
@@ -418,14 +418,14 @@
 		"viewsContainers": {
 			"activitybar": [
 				{
-					"id": "databricksBar",
-					"title": "Databricks",
-					"icon": "resources/databricks_sidebar_orig.svg"
+					"id": "databricksPowerTools",
+					"title": "Databricks Power Tools",
+					"icon": "resources/databricks_sidebar.png"
 				}
 			]
 		},
 		"views": {
-			"databricksBar": [
+			"databricksPowerTools": [
 				{
 					"id": "databricksConnections",
 					"name": "Connections",
@@ -482,23 +482,27 @@
 			{
 				"command": "databricksConnections.refresh",
 				"title": "Refresh",
+				"category": "Databricks Power Tools",
 				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksConnections.add",
 				"title": "Add",
+				"category": "Databricks Power Tools",
 				"icon": "$(add)",
 				"enablement": "virtualWorkspace"
 			},
 			{
 				"command": "databricksConnections.settings",
 				"title": "Settings",
+				"category": "Databricks Power Tools",
 				"icon": "$(gear)",
 				"enablement": "!virtualWorkspace"
 			},
 			{
 				"command": "databricksConnectionItem.activate",
 				"title": "Activate",
+				"category": "Databricks Power Tools",
 				"icon": {
 					"light": "resources/light/connected.png",
 					"dark": "resources/dark/connected.png"
@@ -507,72 +511,87 @@
 			{
 				"command": "databricksWorkspace.refresh",
 				"title": "Refresh",
+				"category": "Databricks Power Tools",
 				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksWorkspace.download",
 				"title": "Download",
+				"category": "Databricks Power Tools",
 				"icon": "$(cloud-download)"
 			},
 			{
 				"command": "databricksWorkspace.upload",
 				"title": "Upload",
+				"category": "Databricks Power Tools",
 				"icon": "$(cloud-upload)"
 			},
 			{
 				"command": "databricksWorkspace.addToWorkspace",
 				"title": "Add Databricks Workspace to VSCode workspace",
+				"category": "Databricks Power Tools",
 				"icon": "$(symbol-class)"
 			},
 			{
 				"command": "databricksWorkspaceItem.click",
-				"title": "Open File"
+				"title": "Open File",
+				"category": "Databricks Power Tools"
 			},
 			{
 				"command": "databricksWorkspaceItem.download",
 				"title": "Download",
+				"category": "Databricks Power Tools",
 				"icon": "$(cloud-download)"
 			},
 			{
 				"command": "databricksWorkspaceItem.upload",
 				"title": "Upload",
+				"category": "Databricks Power Tools",
 				"icon": "$(cloud-upload)"
 			},
 			{
 				"command": "databricksWorkspaceItem.compare",
 				"title": "Compare",
+				"category": "Databricks Power Tools",
 				"icon": "$(compare-changes)"
 			},
 			{
 				"command": "databricksWorkspaceItem.delete",
 				"title": "Delete",
+				"category": "Databricks Power Tools",
 				"icon": "$(remove-close)"
 			},
 			{
 				"command": "databricksWorkspaceItem.copyPath",
-				"title": "Copy Path"
+				"title": "Copy Path",
+				"category": "Databricks Power Tools"
 			},
 			{
 				"command": "databricksWorkspaceItem.openExplorer",
-				"title": "Open Explorer"
+				"title": "Open Explorer",
+				"category": "Databricks Power Tools"
 			},
 			{
 				"command": "databricksClusters.refresh",
 				"title": "Refresh",
+				"category": "Databricks Power Tools",
 				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksClusters.add",
 				"title": "Add",
+				"category": "Databricks Power Tools",
 				"icon": "$(add)"
 			},
 			{
 				"command": "databricksClusterItem.click",
-				"title": "Open File"
+				"title": "Open File",
+				"category": "Databricks Power Tools"
 			},
 			{
 				"command": "databricksClusterItem.start",
 				"title": "Start",
+				"category": "Databricks Power Tools",
 				"icon": {
 					"light": "resources/light/start.png",
 					"dark": "resources/dark/start.png"
@@ -581,6 +600,7 @@
 			{
 				"command": "databricksClusterItem.stop",
 				"title": "Stop",
+				"category": "Databricks Power Tools",
 				"icon": {
 					"light": "resources/light/stop.png",
 					"dark": "resources/dark/stop.png"
@@ -589,26 +609,31 @@
 			{
 				"command": "databricksClusterItem.showDefinition",
 				"title": "JSON Definition",
+				"category": "Databricks Power Tools",
 				"icon": "$(json)"
 			},
 			{
 				"command": "databricksClusterItem.delete",
 				"title": "Delete",
+				"category": "Databricks Power Tools",
 				"icon": "$(remove-close)"
 			},
 			{
 				"command": "databricksClusterItem.pin",
 				"title": "Pin",
+				"category": "Databricks Power Tools",
 				"icon": "$(pin)"
 			},
 			{
 				"command": "databricksClusterItem.unpin",
 				"title": "Unpin",
+				"category": "Databricks Power Tools",
 				"icon": "$(pinned)"
 			},
 			{
 				"command": "databricksClusterItem.useForSQL",
 				"title": "Use for SQL Browser",
+				"category": "Databricks Power Tools",
 				"icon": {
 					"light": "resources/light/stop.png",
 					"dark": "resources/dark/stop.png"
@@ -618,36 +643,43 @@
 			{
 				"command": "databricksClusterItem.attachCluster",
 				"title": "Attach cluster",
+				"category": "Databricks Power Tools",
 				"icon": "$(plug)",
 				"enablement": "paiqo.databricks.connectionManager == 'Databricks Extension'"
 			},
 			{
 				"command": "databricksClusterItem.createKernel",
 				"title": "Create Databricks Cluster Kernel",
-				"shortTitle": "Create Databricks Kernel"
+				"shortTitle": "Create Databricks Kernel",
+				"category": "Databricks Power Tools"
 			},
 			{
 				"command": "databricksClusterItem.restartKernel",
 				"title": "Restart Databricks Cluster Kernel",
-				"shortTitle": "Restart Databricks Kernel"
+				"shortTitle": "Restart Databricks Kernel",
+				"category": "Databricks Power Tools"
 			},
 			{
 				"command": "databricksJobs.refresh",
 				"title": "Refresh",
+				"category": "Databricks Power Tools",
 				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksJobItem.showDefinition",
 				"title": "JSON Definition",
+				"category": "Databricks Power Tools",
 				"icon": "$(json)"
 			},
 			{
 				"command": "databricksJobItem.click",
-				"title": "Open File"
+				"title": "Open File",
+				"category": "Databricks Power Tools"
 			},
 			{
 				"command": "databricksJobItem.start",
 				"title": "Start",
+				"category": "Databricks Power Tools",
 				"icon": {
 					"light": "resources/light/start.png",
 					"dark": "resources/dark/start.png"
@@ -656,6 +688,7 @@
 			{
 				"command": "databricksJobItem.stop",
 				"title": "Stop",
+				"category": "Databricks Power Tools",
 				"icon": {
 					"light": "resources/light/stop.png",
 					"dark": "resources/dark/stop.png"
@@ -664,124 +697,149 @@
 			{
 				"command": "databricksJobItem.openBrowser",
 				"title": "Open Browser",
+				"category": "Databricks Power Tools",
 				"icon": "$(globe)"
 			},
 			{
 				"command": "databricksFS.addToWorkspace",
 				"title": "Add DBFS to VSCode workspace",
+				"category": "Databricks Power Tools",
 				"icon": "$(symbol-class)"
 			},
 			{
 				"command": "databricksFS.refresh",
 				"title": "Refresh",
+				"category": "Databricks Power Tools",
 				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksFS.addFile",
 				"title": "Add",
+				"category": "Databricks Power Tools",
 				"icon": "$(new-file)"
 			},
 			{
 				"command": "databricksFS.addDirectory",
 				"title": "Add",
+				"category": "Databricks Power Tools",
 				"icon": "$(file-directory-create)"
 			},
 			{
 				"command": "databricksFSItem.download",
 				"title": "Download",
+				"category": "Databricks Power Tools",
 				"icon": "$(cloud-download)"
 			},
 			{
 				"command": "databricksFSItem.upload",
 				"title": "Upload",
+				"category": "Databricks Power Tools",
 				"icon": "$(cloud-upload)"
 			},
 			{
 				"command": "databricksFSItem.click",
-				"title": "Preview File"
+				"title": "Preview File",
+				"category": "Databricks Power Tools"
 			},
 			{
 				"command": "databricksFSItem.addFile",
 				"title": "Add",
+				"category": "Databricks Power Tools",
 				"icon": "$(new-file)"
 			},
 			{
 				"command": "databricksFSItem.addDirectory",
 				"title": "Add Directory",
+				"category": "Databricks Power Tools",
 				"icon": "$(file-directory-create)"
 			},
 			{
 				"command": "databricksFSItem.delete",
 				"title": "Delete",
+				"category": "Databricks Power Tools",
 				"icon": "$(remove-close)"
 			},
 			{
 				"command": "databricksFSItem.copyPath",
-				"title": "Copy Path"
+				"title": "Copy Path",
+				"category": "Databricks Power Tools"
 			},
 			{
 				"command": "databricksSecrets.refresh",
 				"title": "Refresh",
+				"category": "Databricks Power Tools",
 				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksSecrets.addSecretScope",
 				"title": "Add Secret Scope",
+				"category": "Databricks Power Tools",
 				"icon": "$(add)"
 			},
 			{
 				"command": "databricksSecretScope.delete",
 				"title": "Delete",
+				"category": "Databricks Power Tools",
 				"icon": "$(remove-close)"
 			},
 			{
 				"command": "databricksSecretScope.addSecret",
 				"title": "Add Secret",
+				"category": "Databricks Power Tools",
 				"icon": "$(add)"
 			},
 			{
 				"command": "databricksSecret.update",
 				"title": "Update",
+				"category": "Databricks Power Tools",
 				"icon": "$(pencil)"
 			},
 			{
 				"command": "databricksSecret.delete",
 				"title": "Delete",
+				"category": "Databricks Power Tools",
 				"icon": "$(remove-close)"
 			},
 			{
 				"command": "databricksSecret.insertCode",
 				"title": "Insert",
+				"category": "Databricks Power Tools",
 				"icon": "$(code)"
 			},
 			{
 				"command": "databricksSQL.refresh",
 				"title": "Refresh",
+				"category": "Databricks Power Tools",
 				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksSQLTable.showDefinition",
 				"title": "Show Definition",
+				"category": "Databricks Power Tools",
 				"icon": "$(json)"
 			},
 			{
 				"command": "databricksRepos.refresh",
 				"title": "Refresh",
+				"category": "Databricks Power Tools",
 				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksRepo.pull",
 				"title": "Pull",
+				"category": "Databricks Power Tools",
 				"icon": "$(repo-pull)"
 			},
 			{
 				"command": "databricksRepo.checkOut",
 				"title": "Check-Out",
+				"category": "Databricks Power Tools",
 				"icon": "$(repo-clone)"
 			},
 			{
 				"command": "databricksRepo.delete",
 				"title": "Delete",
+				"category": "Databricks Power Tools",
 				"icon": "$(remove-close)"
 			},
 			{

@@ -101,7 +101,7 @@ export abstract class ThisExtension {
 				case "Databricks Extension":
 					this._connectionManager = new DatabricksConnectionManagerDatabricks();
 					break;
-				case "Manual Input":
+				case "Manual":
 					this._connectionManager = new DatabricksConnectionManagerManualInput();
 					break;
 				default:
