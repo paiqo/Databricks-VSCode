@@ -9,6 +9,7 @@ import { iDatabricksCluster } from '../clusters/iDatabricksCluster';
 export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionManager {
 
 	private _databricksConnectionManager: any;
+	private _apiClient: any;
 
 	constructor() {
 		super();
@@ -66,15 +67,13 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 			this._databricksConnectionManager = connectionManager;;
 
 			let workspaceManager = connectionManager.workspaceClient;
-			let apiClient = workspaceManager.apiClient;
-			let host = await apiClient.host;
-			let token = apiClient.config.token;
+			this._apiClient = workspaceManager.apiClient;
+			let host = await this._apiClient.host;
 
 			let localSyncfolder = connectionManager.syncDestinationMapper?.localUri;
 
 			this._connections.push({
 				"apiRootUrl": vscode.Uri.parse(host), 
-				"personalAccessToken": token, 
 				"displayName": "Databricks Extension",
 				"localSyncFolder": localSyncfolder.uri,
 				"exportFormats": {
@@ -85,14 +84,18 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 				},
 				"useCodeCells": false,
 				"_source": "DatabricksExtension"
-				})
-
-			let i = 0;
-			
+				})			
 		} catch (e) {
 			ThisExtension.log(e);
 		}
 	}
 
 	updateConnection(updatedCon: iDatabricksConnection): void { }
+
+	async getAuthorizationHeaders(con: iDatabricksConnection): Promise<object> {
+		const headers: Record<string, string> = {};
+		await this._apiClient.config.authenticate(headers);
+
+		return headers
+	}
 }

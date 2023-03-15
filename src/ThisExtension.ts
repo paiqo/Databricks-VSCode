@@ -85,6 +85,8 @@ export abstract class ThisExtension {
 					// should open workspace settings with a filter but the filter is not yet working
 					vscode.commands.executeCommand("workbench.action.openWorkspaceSettings", ThisExtension.configuration.id);
 				}
+
+				this._connectionManagerText = conManager;
 			}
 
 			switch (conManager) {
@@ -108,9 +110,8 @@ export abstract class ThisExtension {
 					this.log("'" + connectionManager + "' is not a valid value for config setting 'databricks.connectionManager!");
 
 			}
-			if (!this._connectionManagerText) {
-				this._connectionManagerText = connectionManager.value as ConnectionManager;
-			}
+
+			this._connectionManagerText = conManager
 
 			await this.ConnectionManager.initialize();
 
@@ -131,7 +132,7 @@ export abstract class ThisExtension {
 		await vscode.commands.executeCommand(
 			"setContext",
 			"paiqo.databricks.hideConnectionManager",
-			ThisExtension._connectionManagerText == "Databricks Extension"
+			this._connectionManagerText == "Databricks Extension"
 		);
 
 		await vscode.commands.executeCommand(
