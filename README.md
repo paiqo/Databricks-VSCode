@@ -226,6 +226,8 @@ Notebook Kernels also support other features like [Files in Repo](https://docs.d
 
 Whenever a notebook is opened from either the local sync folder or via the [Virtual File System](#file-system-integration) using `wsfs:/` URI, the Databricks notebook kernels are the preferred ones and should appear at the top of the list when you select a kernel.
 
+If you are using the [Databricks Extension Connection Manager](#setup-and-configuration-databricks-extension-connection-manager) we will also create a generic notebook kernel for you which used the configured cluster.
+
 ## Execution Modes
 We distinguish between Live-execution and Offline-execution. In Live-execution mode, files are opened directly from Databricks by mounting the Databricks Workspace into your VSCode Workspace using `wsfs:/` URI scheme. In this mode there is no intermediate local copy but you work directly against the Databricks Workspace. Everything you run must already exist online in the Databricks Workspace.
 

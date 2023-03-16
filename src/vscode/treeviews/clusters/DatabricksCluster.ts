@@ -116,11 +116,6 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 		return FSHelper.joinPathSync(ThisExtension.rootUri, 'resources', theme, state + '.png');
 	}
 
-	readonly command = {
-		command: 'databricksClusterItem.click', title: "Open File", arguments: [this]
-	};
-
-
 	get definition(): iDatabricksCluster {
 		return this._definition;
 	}
