@@ -15,6 +15,12 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 		super();
 	}
 
+	// TODO
+	/* 
+	there is also an event that fires when the Databricks Extension config is changed
+	in that case we should also re-initialize the connection manager
+	*/
+
 	async initialize(): Promise<void> {
 		ThisExtension.log("Initializing ConnectionManager Databricks Extension ...");
 		this._initialized = false;
@@ -57,6 +63,10 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 			const databricksExtension: vscode.Extension<any> = vscode.extensions.getExtension("databricks.databricks");
 			if (!databricksExtension) {
 				vscode.window.showErrorMessage("Please install the Databricks extension ('databricks.databricks') first!");
+				// TODO
+				/*
+				You can trigger the installation using the workbench.extensions.installExtension command (see https://code.visualstudio.com/api/references/commands).
+				*/
 				return;
 			}
 
