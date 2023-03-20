@@ -1,16 +1,27 @@
 export type CloudProvider =
 	"Azure"
-	| "AWS"
-	| "GCP"
-	;
+| 	"AWS"
+| 	"GCP"
+;
+
+export type ConnectionManager =
+	"Default"
+|	"VSCode Settings"
+|	"Databricks CLI Profiles"
+|	"Azure"
+|	"Databricks Extension"
+|	"Manual"
+;
 
 export type ConnectionSource =
 	"databricks.connections"
-	| "databricks.default"
-	| "CLI-profile"
-	| "ManuallyAdded"
-	| "Azure"
-	;
+| 	"databricks.default"
+| 	"CLI-profile"
+| 	"ManuallyAdded"
+| 	"Azure"
+| 	"DatabricksExtension"
+;
+
 
 export interface AccessTokenSecure {
 	keyTarSettingName: string | undefined;

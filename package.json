@@ -1,8 +1,8 @@
 {
 	"name": "databricks-vscode",
-	"displayName": "Databricks VSCode",
+	"displayName": "Databricks Power Tools",
 	"description": "Run notebooks cell-by-cell, browse and edit your Databricks Workspace, DBFS, Clusters, Jobs, Secrets, Repos and SQL. Supports Azure Databricks, Databricks on AWS and Databricks on GCP.",
-	"version": "1.5.1",
+	"version": "2.0.0",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -34,6 +34,7 @@
 		"Azure",
 		"Notebooks",
 		"Data Science",
+		"Machine Learning",
 		"Other"
 	],
 	"keywords": [
@@ -51,12 +52,13 @@
 	],
 	"activationEvents": [
 		"onFileSystem:dbfs",
-		"onFileSystem:dbws"
+		"onFileSystem:dbws",
+		"onFileSystem:wsfs"
 	],
 	"capabilities": {
 		"virtualWorkspaces": {
 			"supported": "limited",
-			"description": "In virtual workspaces, Workspace and DBFS browsers are not supported. Please use `dbfs:/` and `dbws:/` mount points instead."
+			"description": "In virtual workspaces, Workspace and DBFS browsers are not supported. Please use `dbfs:/` and `wsfs:/` mount points instead."
 		},
 		"untrustedWorkspaces": {
 			"supported": "limited",
@@ -68,23 +70,27 @@
 	"contributes": {
 		"configuration": [
 			{
-				"name": "Databricks",
+				"name": "paiqo.databricks-vscode",
 				"type": "object",
-				"title": "Databricks",
+				"title": "Databricks Power Tools",
 				"properties": {
 					"databricks.connectionManager": {
 						"type": "string",
 						"enum": [
+							"Default",
 							"VSCode Settings",
 							"Databricks CLI Profiles",
 							"Azure",
-							"ManualInput"
+							"Databricks Extension",
+							"Manual"
 						],
-						"default": "VSCode Settings",
+						"default": "Default",
 						"enumDescriptions": [
+							"The best matching connection manager is selected automatically.",
 							"All connection information is stored securely in the VSCode Settings (user or workspace).",
 							"Connection information is read from the Databricks CLI config file. Databricks CLI has to be configured upfront! Also supports the environment varialbe 'DATABRICKS_CONFIG_FILE'.",
 							"Connection information is loaded from Azure. All Azure Databricks workspaces that you have access to will show up atuomatically in the connection list.",
+							"A single connection that is managed by the Databricks Extensions",
 							"You are prompted for connection information once you interact with the extension."
 						],
 						"description": "Defines how connection information is managed and stored.",
@@ -94,16 +100,14 @@
 						"type": "string",
 						"enum": [
 							"VSCodeSettings",
-							"SystemKeyChain",
-							"ExternalConfigFile"
+							"SystemKeyChain"
 						],
 						"default": "SystemKeyChain",
 						"enumDescriptions": [
 							"Databricks Personal Access Token is stored in the VSCode Settings as plain text! There is a potential risk that the PAT gets checked in to source control systems like git!",
-							"Databricks Personal Access Token is securely stored in the System Key Chain. Easy Copying/Sharing connections with other users is not possible this way. VSCode only stores a reference to the the Systems KeyChain entry.",
-							"(Experimental!) Databricks Personal Access Token is stored in an external Config file. This is useful to manage all your PATs in one place and also easily share them."
+							"Databricks Personal Access Token is securely stored in the System Key Chain. Easy Copying/Sharing connections with other users is not possible this way. VSCode only stores a reference to the the Systems KeyChain entry."
 						],
-						"description": "Defines the default how the VSCode extension for Databricks stores sensitive values like the Databricks Personal Access Token (PAT). Only releveant if the VSCode Connection Manager is used!",
+						"markdownDescription": "(`VSCode Settings`) Defines the default how the VSCode extension for Databricks stores sensitive values like the Databricks Personal Access Token (PAT). Only releveant if the VSCode Connection Manager is used!",
 						"scope": "window"
 					},
 					"databricks.connection.default.exportFormats": {
@@ -114,7 +118,7 @@
 							"SQL": ".sql",
 							"R": ".r"
 						},
-						"description": "(Optional) The different file extension used when downloading notebooks from Databricks.",
+						"markdownDescription": "(`VSCode Settings`, Optional) The different file extension used when downloading notebooks from Databricks.",
 						"scope": "window",
 						"properties": {
 							"Scala": {
@@ -151,7 +155,7 @@
 					},
 					"databricks.connection.default.displayName": {
 						"type": "string",
-						"description": "(Mandatory) Name shown in the Connection list of the Databricks VSCode extension. Must be unique across all VSCode workspaces to avoid conflicts!",
+						"markdownDescription": "(`VSCode Settings`, Mandatory) Name shown in the Connection list of the Databricks VSCode extension. Must be unique across all VSCode workspaces to avoid conflicts!",
 						"scope": "window",
 						"examples": [
 							"my Connection",
@@ -161,7 +165,7 @@
 					},
 					"databricks.connection.default.apiRootUrl": {
 						"type": "string",
-						"description": "(Mandatory) Root URL of the Databricks API. Azure: https://adb-12345678901234.19.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com. Please do not provide any path or querystring like `?o=123456`",
+						"markdownDescription": "(`VSCode Settings`, Mandatory) Root URL of the Databricks API. Azure: https://adb-12345678901234.19.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com. Please do not provide any path or querystring like `?o=123456`",
 						"scope": "window",
 						"examples": [
 							"https://adb-12345678901234.19.azuredatabricks.net/",
@@ -170,7 +174,7 @@
 					},
 					"databricks.connection.default.personalAccessToken": {
 						"type": "string",
-						"description": "(Mandatory) The Personal Access Token (PAT) used to access the Databricks API.",
+						"markdownDescription": "(`VSCode Settings`, Mandatory) The Personal Access Token (PAT) used to access the Databricks API.",
 						"scope": "window",
 						"examples": [
 							"dapi0123456789abcdef0123456789abcdef"
@@ -178,7 +182,7 @@
 					},
 					"databricks.connection.default.personalAccessTokenSecure": {
 						"type": "object",
-						"description": "(Optional) Reference to a secure store for the Personal Access Token.",
+						"markdownDescription": "(`VSCode Settings`, Optional) Reference to a secure store for the Personal Access Token.",
 						"scope": "window",
 						"maxProperties": 1,
 						"properties": {
@@ -196,7 +200,7 @@
 					},
 					"databricks.connection.default.localSyncFolder": {
 						"type": "string",
-						"description": "(Mandatory) A local path where files (notebooks) that are downloaded from Databricks should be stored. This folder can then be integrated in your GIT repository. \nExamples: \nWindows - C:\\mySyncFolder \nLinux/Unix - /home/myUser/mySyncFolder \nmacOS - myUser/mySyncFolder  (Please do not use leading / on macOS!)",
+						"markdownDescription": "(`VSCode Settings`, Mandatory) A local path where files (notebooks) that are downloaded from Databricks should be stored. This folder can then be integrated in your GIT repository. \nExamples: \nWindows - C:\\mySyncFolder \nLinux/Unix - /home/myUser/mySyncFolder \nmacOS - myUser/mySyncFolder  (Please do not use leading / on macOS!)",
 						"scope": "window",
 						"examples": [
 							"Windows: C:\\mySyncFolder",
@@ -212,7 +216,7 @@
 							"DBFS": "DBFS",
 							"Jobs": "Jobs"
 						},
-						"description": "(Optional) Can be used to specify different sub-paths for the items that can be downloaded from Databricks.",
+						"markdownDescription": "(`VSCode Settings`, Optional) Can be used to specify different sub-paths for the items that can be downloaded from Databricks.",
 						"scope": "window",
 						"properties": {
 							"Workspace": {
@@ -235,13 +239,13 @@
 					},
 					"databricks.connection.default.useCodeCells": {
 						"type": "boolean",
-						"description": "If true, Code Cell tags (# %%) will be added when downloading raw source files.",
+						"markdownDescription": "(`VSCode Settings`, Optional) If true, Code Cell tags (# %%) will be added when downloading raw source files.",
 						"scope": "window",
 						"default": true
 					},
 					"databricks.connections": {
 						"type": "array",
-						"description": "An array of objects where each object represents a Databricks Connection containing the same settings as defined for databricks.connection.default.* ",
+						"makrdownDescription": "(`VSCode Settings`) An array of objects where each object represents a Databricks Connection containing the same settings as defined for databricks.connection.default.* ",
 						"items": {
 							"type": "object",
 							"properties": {
@@ -364,17 +368,17 @@
 					},
 					"databricks.lastActiveConnection": {
 						"type": "string",
-						"description": "(Optional) The displayName of the Connection that was used in the last session.",
+						"description": "The displayName of the Connection that was used in the last session.",
 						"scope": "window"
 					},
 					"databricks.azure.tenantId": {
 						"type": "string",
-						"description": "(Optional) To connect to Azure Databricks Workspaces outside of your home-tenant.",
+						"markdownDescription": "(`Azure`, Optional) To connect to Azure Databricks Workspaces outside of your home-tenant.",
 						"scope": "window"
 					},
 					"databricks.azure.subscriptionIds": {
 						"type": "array",
-						"description": "(Optional) A list of Azure Subscription IDs (GUIDs) from which the Databricks Workspaces are loaded. If not specified, all accessible subscriptions are searched.",
+						"markdownDescription": "(`Azure`, Optional) A list of Azure Subscription IDs (GUIDs) from which the Databricks Workspaces are loaded. If not specified, all accessible subscriptions are searched.",
 						"scope": "window",
 						"items": {
 							"type": "string",
@@ -386,7 +390,7 @@
 					},
 					"databricks.azure.workspaces": {
 						"type": "array",
-						"description": "(Optional) A list of Azure Resource IDs to load directly without browsing the tenant first.",
+						"markdownDescription": "(`Azure`, Optional) A list of Azure Resource IDs to load directly without browsing the tenant first.",
 						"scope": "window",
 						"items": {
 							"type": "object",
@@ -415,25 +419,26 @@
 		"viewsContainers": {
 			"activitybar": [
 				{
-					"id": "databricks",
-					"title": "Databricks",
+					"id": "databricksPowerTools",
+					"title": "Databricks Power Tools",
 					"icon": "resources/databricks_sidebar.png"
 				}
 			]
 		},
 		"views": {
-			"databricks": [
+			"databricksPowerTools": [
 				{
 					"id": "databricksConnections",
 					"name": "Connections",
 					"type": "tree",
-					"initialSize": 25
+					"initialSize": 25,
+					"when": "!paiqo.databricks.hideConnectionManager"
 				},
 				{
 					"id": "databricksWorkspace",
 					"name": "Workspace",
 					"type": "tree",
-					"when": "!virtualWorkspace"
+					"when": "!virtualWorkspace && !paiqo.databricks.isInBrowser"
 				},
 				{
 					"id": "databricksClusters",
@@ -449,7 +454,7 @@
 					"id": "databricksFS",
 					"name": "DBFS",
 					"type": "tree",
-					"when": "!virtualWorkspace"
+					"when": "!virtualWorkspace && !paiqo.databricks.isInBrowser"
 				},
 				{
 					"id": "databricksSecrets",
@@ -468,27 +473,37 @@
 				}
 			]
 		},
+		"viewsWelcome": [
+			{
+				"view": "databricksSQL",
+				"contents": "Please select a cluster first"
+			}
+		],
 		"commands": [
 			{
 				"command": "databricksConnections.refresh",
 				"title": "Refresh",
+				"category": "Databricks Power Tools",
 				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksConnections.add",
 				"title": "Add",
+				"category": "Databricks Power Tools",
 				"icon": "$(add)",
 				"enablement": "virtualWorkspace"
 			},
 			{
 				"command": "databricksConnections.settings",
 				"title": "Settings",
+				"category": "Databricks Power Tools",
 				"icon": "$(gear)",
 				"enablement": "!virtualWorkspace"
 			},
 			{
 				"command": "databricksConnectionItem.activate",
 				"title": "Activate",
+				"category": "Databricks Power Tools",
 				"icon": {
 					"light": "resources/light/connected.png",
 					"dark": "resources/dark/connected.png"
@@ -497,72 +512,87 @@
 			{
 				"command": "databricksWorkspace.refresh",
 				"title": "Refresh",
+				"category": "Databricks Power Tools",
 				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksWorkspace.download",
 				"title": "Download",
+				"category": "Databricks Power Tools",
 				"icon": "$(cloud-download)"
 			},
 			{
 				"command": "databricksWorkspace.upload",
 				"title": "Upload",
+				"category": "Databricks Power Tools",
 				"icon": "$(cloud-upload)"
 			},
 			{
 				"command": "databricksWorkspace.addToWorkspace",
 				"title": "Add Databricks Workspace to VSCode workspace",
+				"category": "Databricks Power Tools",
 				"icon": "$(symbol-class)"
 			},
 			{
 				"command": "databricksWorkspaceItem.click",
-				"title": "Open File"
+				"title": "Open File",
+				"category": "Databricks Power Tools"
 			},
 			{
 				"command": "databricksWorkspaceItem.download",
 				"title": "Download",
+				"category": "Databricks Power Tools",
 				"icon": "$(cloud-download)"
 			},
 			{
 				"command": "databricksWorkspaceItem.upload",
 				"title": "Upload",
+				"category": "Databricks Power Tools",
 				"icon": "$(cloud-upload)"
 			},
 			{
 				"command": "databricksWorkspaceItem.compare",
 				"title": "Compare",
+				"category": "Databricks Power Tools",
 				"icon": "$(compare-changes)"
 			},
 			{
 				"command": "databricksWorkspaceItem.delete",
 				"title": "Delete",
+				"category": "Databricks Power Tools",
 				"icon": "$(remove-close)"
 			},
 			{
 				"command": "databricksWorkspaceItem.copyPath",
-				"title": "Copy Path"
+				"title": "Copy Path",
+				"category": "Databricks Power Tools"
 			},
 			{
 				"command": "databricksWorkspaceItem.openExplorer",
-				"title": "Open Explorer"
+				"title": "Open Explorer",
+				"category": "Databricks Power Tools"
 			},
 			{
 				"command": "databricksClusters.refresh",
 				"title": "Refresh",
+				"category": "Databricks Power Tools",
 				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksClusters.add",
 				"title": "Add",
+				"category": "Databricks Power Tools",
 				"icon": "$(add)"
 			},
 			{
 				"command": "databricksClusterItem.click",
-				"title": "Open File"
+				"title": "Open File",
+				"category": "Databricks Power Tools"
 			},
 			{
 				"command": "databricksClusterItem.start",
 				"title": "Start",
+				"category": "Databricks Power Tools",
 				"icon": {
 					"light": "resources/light/start.png",
 					"dark": "resources/dark/start.png"
@@ -571,6 +601,7 @@
 			{
 				"command": "databricksClusterItem.stop",
 				"title": "Stop",
+				"category": "Databricks Power Tools",
 				"icon": {
 					"light": "resources/light/stop.png",
 					"dark": "resources/dark/stop.png"
@@ -579,58 +610,77 @@
 			{
 				"command": "databricksClusterItem.showDefinition",
 				"title": "JSON Definition",
+				"category": "Databricks Power Tools",
 				"icon": "$(json)"
 			},
 			{
 				"command": "databricksClusterItem.delete",
 				"title": "Delete",
+				"category": "Databricks Power Tools",
 				"icon": "$(remove-close)"
 			},
 			{
 				"command": "databricksClusterItem.pin",
 				"title": "Pin",
+				"category": "Databricks Power Tools",
 				"icon": "$(pin)"
 			},
 			{
 				"command": "databricksClusterItem.unpin",
 				"title": "Unpin",
+				"category": "Databricks Power Tools",
 				"icon": "$(pinned)"
 			},
 			{
 				"command": "databricksClusterItem.useForSQL",
 				"title": "Use for SQL Browser",
+				"category": "Databricks Power Tools",
 				"icon": {
 					"light": "resources/light/stop.png",
 					"dark": "resources/dark/stop.png"
-				}
+				},
+				"enablement": "paiqo.databricks.connectionManager != 'Databricks Extension'"
+			},
+			{
+				"command": "databricksClusterItem.attachCluster",
+				"title": "Attach cluster",
+				"category": "Databricks Power Tools",
+				"icon": "$(plug)",
+				"enablement": "paiqo.databricks.connectionManager == 'Databricks Extension'"
 			},
 			{
 				"command": "databricksClusterItem.createKernel",
 				"title": "Create Databricks Cluster Kernel",
-				"shortTitle": "Create Databricks Kernel"
+				"shortTitle": "Create Databricks Kernel",
+				"category": "Databricks Power Tools"
 			},
 			{
 				"command": "databricksClusterItem.restartKernel",
 				"title": "Restart Databricks Cluster Kernel",
-				"shortTitle": "Restart Databricks Kernel"
+				"shortTitle": "Restart Databricks Kernel",
+				"category": "Databricks Power Tools"
 			},
 			{
 				"command": "databricksJobs.refresh",
 				"title": "Refresh",
+				"category": "Databricks Power Tools",
 				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksJobItem.showDefinition",
 				"title": "JSON Definition",
+				"category": "Databricks Power Tools",
 				"icon": "$(json)"
 			},
 			{
 				"command": "databricksJobItem.click",
-				"title": "Open File"
+				"title": "Open File",
+				"category": "Databricks Power Tools"
 			},
 			{
 				"command": "databricksJobItem.start",
 				"title": "Start",
+				"category": "Databricks Power Tools",
 				"icon": {
 					"light": "resources/light/start.png",
 					"dark": "resources/dark/start.png"
@@ -639,6 +689,7 @@
 			{
 				"command": "databricksJobItem.stop",
 				"title": "Stop",
+				"category": "Databricks Power Tools",
 				"icon": {
 					"light": "resources/light/stop.png",
 					"dark": "resources/dark/stop.png"
@@ -647,124 +698,149 @@
 			{
 				"command": "databricksJobItem.openBrowser",
 				"title": "Open Browser",
+				"category": "Databricks Power Tools",
 				"icon": "$(globe)"
 			},
 			{
 				"command": "databricksFS.addToWorkspace",
 				"title": "Add DBFS to VSCode workspace",
+				"category": "Databricks Power Tools",
 				"icon": "$(symbol-class)"
 			},
 			{
 				"command": "databricksFS.refresh",
 				"title": "Refresh",
+				"category": "Databricks Power Tools",
 				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksFS.addFile",
 				"title": "Add",
+				"category": "Databricks Power Tools",
 				"icon": "$(new-file)"
 			},
 			{
 				"command": "databricksFS.addDirectory",
 				"title": "Add",
+				"category": "Databricks Power Tools",
 				"icon": "$(file-directory-create)"
 			},
 			{
 				"command": "databricksFSItem.download",
 				"title": "Download",
+				"category": "Databricks Power Tools",
 				"icon": "$(cloud-download)"
 			},
 			{
 				"command": "databricksFSItem.upload",
 				"title": "Upload",
+				"category": "Databricks Power Tools",
 				"icon": "$(cloud-upload)"
 			},
 			{
 				"command": "databricksFSItem.click",
-				"title": "Preview File"
+				"title": "Preview File",
+				"category": "Databricks Power Tools"
 			},
 			{
 				"command": "databricksFSItem.addFile",
 				"title": "Add",
+				"category": "Databricks Power Tools",
 				"icon": "$(new-file)"
 			},
 			{
 				"command": "databricksFSItem.addDirectory",
 				"title": "Add Directory",
+				"category": "Databricks Power Tools",
 				"icon": "$(file-directory-create)"
 			},
 			{
 				"command": "databricksFSItem.delete",
 				"title": "Delete",
+				"category": "Databricks Power Tools",
 				"icon": "$(remove-close)"
 			},
 			{
 				"command": "databricksFSItem.copyPath",
-				"title": "Copy Path"
+				"title": "Copy Path",
+				"category": "Databricks Power Tools"
 			},
 			{
 				"command": "databricksSecrets.refresh",
 				"title": "Refresh",
+				"category": "Databricks Power Tools",
 				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksSecrets.addSecretScope",
 				"title": "Add Secret Scope",
+				"category": "Databricks Power Tools",
 				"icon": "$(add)"
 			},
 			{
 				"command": "databricksSecretScope.delete",
 				"title": "Delete",
+				"category": "Databricks Power Tools",
 				"icon": "$(remove-close)"
 			},
 			{
 				"command": "databricksSecretScope.addSecret",
 				"title": "Add Secret",
+				"category": "Databricks Power Tools",
 				"icon": "$(add)"
 			},
 			{
 				"command": "databricksSecret.update",
 				"title": "Update",
+				"category": "Databricks Power Tools",
 				"icon": "$(pencil)"
 			},
 			{
 				"command": "databricksSecret.delete",
 				"title": "Delete",
+				"category": "Databricks Power Tools",
 				"icon": "$(remove-close)"
 			},
 			{
 				"command": "databricksSecret.insertCode",
 				"title": "Insert",
+				"category": "Databricks Power Tools",
 				"icon": "$(code)"
 			},
 			{
 				"command": "databricksSQL.refresh",
 				"title": "Refresh",
+				"category": "Databricks Power Tools",
 				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksSQLTable.showDefinition",
 				"title": "Show Definition",
+				"category": "Databricks Power Tools",
 				"icon": "$(json)"
 			},
 			{
 				"command": "databricksRepos.refresh",
 				"title": "Refresh",
+				"category": "Databricks Power Tools",
 				"icon": "$(refresh)"
 			},
 			{
 				"command": "databricksRepo.pull",
 				"title": "Pull",
+				"category": "Databricks Power Tools",
 				"icon": "$(repo-pull)"
 			},
 			{
 				"command": "databricksRepo.checkOut",
 				"title": "Check-Out",
+				"category": "Databricks Power Tools",
 				"icon": "$(repo-clone)"
 			},
 			{
 				"command": "databricksRepo.delete",
 				"title": "Delete",
+				"category": "Databricks Power Tools",
 				"icon": "$(remove-close)"
 			},
 			{
@@ -942,7 +1018,12 @@
 				},
 				{
 					"command": "databricksClusterItem.useForSQL",
-					"when": "view == databricksClusters && viewItem =~ /.*,STARTED,.*/ && viewItem =~ /.*,MANUAL,.*/"
+					"when": "view == databricksClusters && viewItem =~ /.*,STARTED,.*/ && viewItem =~ /.*,MANUAL,.*/ && paiqo.databricks.connectionManager != 'Databricks Extension'"
+				},
+				{
+					"command": "databricksClusterItem.attachCluster",
+					"when": "view == databricksClusters && viewItem =~ /.*,MANUAL,.*/ && paiqo.databricks.connectionManager == 'Databricks Extension'",
+					"group": "inline"
 				},
 				{
 					"command": "databricksClusterItem.createKernel",
@@ -1094,7 +1175,7 @@
 		"@types/node": "^16.11.7",
 		"@types/rimraf": "^2.0.5",
 		"@types/vscode": "^1.68.0",
-		"@vscode/vsce": "^2.15.0",
+		"@vscode/vsce": "^2.18.0",
 		"@vscode/test-web": "*",
 		"eslint": "^8.19.0",
 		"glob": "^8.0.3",
@@ -1105,7 +1186,7 @@
 		"process": "^0.11.10",
 		"ts-loader": "^9.3.1",
 		"typescript": "^4.7.4",
-		"webpack": "^5.74.0",
+		"webpack": "^5.76.0",
 		"webpack-cli": "^4.10.0"
 	}
 }

@@ -55,7 +55,10 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 
 		this._isActive = false;
 
-		this.manageSecureToken();
+		if(this._source != "DatabricksExtension")
+		{
+			this.manageSecureToken();
+		}
 	}
 
 	//tooltip = this._tooltip;
@@ -296,7 +299,6 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 					let uri: vscode.Uri = vscode.Uri.file(con.localSyncFolder);
 					con.localSyncFolder = uri;
 				}
-
 				catch
 				{
 					msg = 'Configuration ' + con.displayName + ': Property "localSyncFolder" is not a valid path! Please check your user and/or workspace settings!';
@@ -317,18 +319,21 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		// check defaultvalues, etc.
 		if (!this.propertyIsValid(con.exportFormats)) {
 			let defaultFromExtension = ThisExtension.configuration.packageJSON.contributes.configuration[0].properties["databricks.connection.default.exportFormats"].default;
-			con.exportFormats = defaultFromExtension;
 			msg = 'Configuration ' + con.displayName + ': Property "exportFormats" was not provided - using the default value!';
 			ThisExtension.log(msg);
 			//vscode.window.showWarningMessage(msg);
+
+			con.exportFormats = defaultFromExtension;
 		}
 		if (con.useCodeCells == undefined) { // this.propertyIsValid does not work for booleans !!!
 			// get the default from the config of this extension
 			let defaultFromExtension = ThisExtension.configuration.packageJSON.contributes.configuration[0].properties["databricks.connection.default.useCodeCells"].default;
-			con.useCodeCells = defaultFromExtension;
 			msg = 'Configuration ' + con.displayName + ': Property "useCodeCells" was not provided - using the default value "' + defaultFromExtension + '"!';
 			ThisExtension.log(msg);
 			//vscode.window.showWarningMessage(msg);
+
+			con.useCodeCells = defaultFromExtension;
+			
 		}
 
 		return true;

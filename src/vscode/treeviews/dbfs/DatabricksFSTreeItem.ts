@@ -95,7 +95,7 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 	}
 
 	get dbfsUri(): vscode.Uri {
-		return vscode.Uri.parse("dbfs:" + this.path);
+		return vscode.Uri.parse(ThisExtension.DBFS_SCHEME + ":" + this.path);
 	}
 
 	public static fromInterface(item: iDatabricksFSItem, parent: DatabricksFSDirectory): DatabricksFSTreeItem {

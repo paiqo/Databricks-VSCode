@@ -7,6 +7,7 @@ import { DatabricksApiService } from '../../databricksApi/databricksApiService';
 
 import { iDatabricksWorkspaceItem } from '../treeviews/workspaces/iDatabricksworkspaceItem';
 import { Helper } from '../../helpers/Helper';
+import { ThisExtension } from '../../ThisExtension';
 
 export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabricksWorkspaceItem {
 	// vscode.FileStat properties, basically all are read-only
@@ -167,7 +168,9 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 export class DatabricksWorkspaceProvider implements vscode.FileSystemProvider {
 
 	constructor(context: vscode.ExtensionContext) {
-		context.subscriptions.push(vscode.workspace.registerFileSystemProvider('dbws', this, { isCaseSensitive: true }));
+		context.subscriptions.push(vscode.workspace.registerFileSystemProvider(ThisExtension.WORKSPACE_SCHEME, this, { isCaseSensitive: true }));
+		// legacy, to be removed in the future
+		context.subscriptions.push(vscode.workspace.registerFileSystemProvider(ThisExtension.WORKSPACE_SCHEME_LEGACY, this, { isCaseSensitive: true }));
 	}
 
 	// --- manage file metadata

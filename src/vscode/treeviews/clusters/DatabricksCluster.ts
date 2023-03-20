@@ -116,11 +116,6 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 		return FSHelper.joinPathSync(ThisExtension.rootUri, 'resources', theme, state + '.png');
 	}
 
-	readonly command = {
-		command: 'databricksClusterItem.click', title: "Open File", arguments: [this]
-	};
-
-
 	get definition(): iDatabricksCluster {
 		return this._definition;
 	}
@@ -245,6 +240,14 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 	}
 
 	async useForSQL(): Promise<void> {
+		ThisExtension.SQLClusterID = this.cluster_id;
+
+		setTimeout(() => vscode.commands.executeCommand("databricksSQL.refresh", undefined, false), 1000);
+	}
+
+	// set cluster for Databricks extension
+	async attachCluster(): Promise<void> {
+		vscode.commands.executeCommand("databricks.connection.attachCluster", this.cluster_id);
 		ThisExtension.SQLClusterID = this.cluster_id;
 
 		setTimeout(() => vscode.commands.executeCommand("databricksSQL.refresh", undefined, false), 1000);

@@ -1,6 +1,8 @@
 import { ClusterState, ClusterSource } from './_types';
 
 export interface iDatabricksCluster {
+	kernel_id?: 		string; // to overwrite the id of the kernel thats being created
+	
 	cluster_id:			string;
 	cluster_name:		string;
 	state:				ClusterState;

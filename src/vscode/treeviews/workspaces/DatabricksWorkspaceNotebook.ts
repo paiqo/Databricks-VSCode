@@ -241,7 +241,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 	}
 
 	async compare(): Promise<void> {
-		let onlineFileTempPath: vscode.Uri = vscode.Uri.parse("dbws:" + this.path);
+		let onlineFileTempPath: vscode.Uri = vscode.Uri.parse(ThisExtension.WORKSPACE_SCHEME + ":" + this.path);
 
 		Helper.showDiff(onlineFileTempPath, this.localPath);
 	}

@@ -5,7 +5,6 @@ import { Helper } from '../../../helpers/Helper';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { ThisExtension } from '../../../ThisExtension';
 import { DatabricksSQLDatabase } from './DatabricksSQLDatabase';
-import { DatabricksSQLSelectCluster } from './DatabricksSQLSelectCluster';
 import { DatabricksSQLTreeItem } from './DatabricksSQLTreeItem';
 import { iDatabricksApiCommandsStatusResponse } from '../../../databricksApi/_types';
 
@@ -59,7 +58,7 @@ export class DatabricksSQLTreeProvider implements vscode.TreeDataProvider<Databr
 		}
 
 		if (!ThisExtension.SQLClusterID) {
-			return [new DatabricksSQLSelectCluster()];
+			return [];
 		}
 
 		if (element != null && element != undefined) {

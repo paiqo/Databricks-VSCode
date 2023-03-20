@@ -58,7 +58,7 @@ export abstract class DatabricksKernelManager {
 	}
 
 	static getNotebookKernelName(cluster: iDatabricksCluster): string {
-		return cluster.cluster_id + DatabricksKernelManager.NotebookKernelSuffix;
+		return (cluster.kernel_id ?? cluster.cluster_id) + DatabricksKernelManager.NotebookKernelSuffix;
 	}
 
 	static getNotebookKernel(cluster: iDatabricksCluster): DatabricksKernel {

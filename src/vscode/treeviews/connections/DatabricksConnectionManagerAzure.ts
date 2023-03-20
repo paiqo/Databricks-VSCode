@@ -7,6 +7,7 @@ import { DatabricksConnectionTreeItem } from './DatabricksConnectionTreeItem';
 import { fetch, getProxyAgent, RequestInit, Response } from '@env/fetch';
 import { AzureResourceListRepsonse, AzureResource, AzureSubscriptionListRepsonse } from './_types';
 import { FSHelper } from '../../../helpers/FSHelper';
+import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 
 
 interface AzureConfig {
@@ -87,6 +88,9 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 	private static async _onDidChangeSessions(event: vscode.AuthenticationSessionsChangeEvent)
 	{
 		vscode.window.showWarningMessage("Session Changed! " + event.provider.id);
+
+		let headers = await ThisExtension.ConnectionManager.getAuthorizationHeaders(ThisExtension.ActiveConnection);
+		DatabricksApiService.updateHeaders(headers);
 	}
 
 	private async getAADAccessToken(scopes: string[], tenantId?: string): Promise<vscode.AuthenticationSession> {

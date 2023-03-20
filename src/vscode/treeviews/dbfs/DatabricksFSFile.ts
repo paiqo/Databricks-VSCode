@@ -222,6 +222,6 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 	}
 
 	async compare(): Promise<void> {
-		Helper.showDiff(vscode.Uri.parse("dbfs:/" + this.path), this.localPath);
+		Helper.showDiff(vscode.Uri.parse(ThisExtension.DBFS_SCHEME + ":/" + this.path), this.localPath);
 	}
 }

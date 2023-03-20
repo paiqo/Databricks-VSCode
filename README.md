@@ -1,4 +1,4 @@
-# VSCode Extension for Databricks
+# Databricks Power Tools for VSCode
 [![Version](https://vsmarketplacebadges.dev/version/paiqo.databricks-vscode.svg?color=blue&style=?style=for-the-badge&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
 [![Installs](https://vsmarketplacebadges.dev/installs/paiqo.databricks-vscode.svg?color=yellow)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
 [![Downloads](https://vsmarketplacebadges.dev/downloads/paiqo.databricks-vscode.svg?color=yellow)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
@@ -6,7 +6,7 @@
 
 ![Databricks-VSCode](/images/Databricks-VSCode.jpg?raw=true "Databricks-VSCode")
 
-This is a Visual Studio Code extension that allows you to work with Databricks locally from VSCode in an efficient way, having everything you need integrated into VS Code - see [Features](#features). It allows you to manage and execute your notebooks, start/stop clusters, execute jobs and much more!
+This is a Visual Studio Code extension that allows you to work with Databricks locally from VSCode in an efficient way, having everything you need integrated into VS Code - see [Features](#features). It allows you to execute your notebooks, start/stop clusters, execute jobs and much more!
 
 The extensions can be downloaded from the official Visual Studio Code extension gallery: [Databricks VSCode](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
 
@@ -36,6 +36,7 @@ The extensions can be downloaded from the official Visual Studio Code extension 
   - control how notebooks are downloaded (Jupyter notebook, source code, ...)
   - various other settings
   - Load Databricks directly from your Azure Account
+  - Leverage connections configured by the official Databricks VSCode extension
 - [SQL / Data Browser](#sql-browser)
   - Browse availabl SQL objects from the Databricks metastore
   - databases, tables and views, columns, ...
@@ -65,11 +66,14 @@ Alternatively it can also be downloaded the `.vsix` directly  from the VS Code m
 
 Preview-Versions might also be available via github [Releases](https://github.com/paiqo/Databricks-VSCode/releases) from this repository.
 
-# Setup and Configuration (VSCode Connection Manager)
+# Setup and Configuration
 The configuration happens directly via VS Code by simply [opening the settings](https://code.visualstudio.com/docs/getstarted/settings#_creating-user-and-workspace-settings)
 Then either search for "Databricks" or expand Extensions -> Databricks.
-The settings themselves are very well described and it should be easy for you to populate them. Also, not all of them are mandatory! Some of the optional settings are experimental or still work in progress.
-To configure multiple Databricks Connections/workspaces, you need to use the JSON editor and add them to `databricks.connections`:
+The most important setting to start with is definitly `databricks.connectionManager` as it defines how you manage your connections. There are a couple of differnt options which are described further down below.
+All the settings themselves are very well described and it should be easy for you to populate them. Also, not all of them are mandatory, and depend a lot on the connection manager that you have chosen.Some of the optional settings are experimental or still work in progress.
+
+# Setup and Configuration (VSCode Connection Manager)
+Using `VSCode Settings` as your connection manager allows you to define and manage your connections directly from within VSCode via regular VSCode settings. It is recommended to use workspace settings over user settings here as it might get confusing otherwise. The default connection can be configured directly via the settings UI using the `databricks.connection.default.*` settings. To configure multiple Databricks Connections/workspaces, you need to use the JSON editor and add them to `databricks.connections`:
 
 ``` json
 		...
@@ -169,6 +173,10 @@ The following Azure-specific settings exist and can be set in the workspace sett
 
 They are documented via VSCode settings documentation.
 
+# Setup and Configuration (Databricks Extension Connection Manager)
+This connection manager leverages the [official Databricks extensions](https://marketplace.visualstudio.com/items?itemName=databricks.databricks) to establish a connection with your Databricks workspace. It only supports a single connection hence the actual Connection Manager tab will be hidden for this connection manager.
+It also derives the cluster automatically from the Databricks extensions to source the [SQL Browser](#sql-browser) but also allows you to change it directly from the [Cluster Manager](#cluster-manager) using the `Attach cluster` command from the context menu!  
+
 # Connection Manager
 ![Connection Manager](/images/ConnectionManager.jpg?raw=true "Connection Manager")
 
@@ -176,6 +184,7 @@ The extension supports various connection managers and the list can be easily ex
 - [VSCode Settings](#setup-and-configuration-vscode-connection-manager)
 - [Databricks CLI](#setup-and-configuration-databricks-cli-connection-manager)
 - [Azure](#setup-and-configuration-azure-connection-manager)
+- [Databricks Extensions](#setup-and-configuration-databricks-extensions-connection-manager)
 - `Manual` where you are simply prompted to enter connection information at the start of your session.
 
 You can specify the one to use by setting the VSCode setting `databricks.connectionManager`.
@@ -215,10 +224,12 @@ For better visualization of tabluar results this extension includes a dependency
 
 Notebook Kernels also support other features like [Files in Repo](https://docs.databricks.com/_static/notebooks/files-in-repos.html) to build libraries within your repo, [_sqldf](https://docs.databricks.com/notebooks/notebooks-use.html#explore-sql-cell-results-in-python-notebooks-natively-using-python) to expose results of SQL cells to Python/Pyspark, `%run` to run other notebooks inline with the current notebook and also [dbutils.notebook.run()](https://docs.databricks.com/dev-tools/databricks-utils.html#notebook-utility-dbutilsnotebook).
 
-Whenever a notebook is opened from either the local sync folder or via the [Virtual File System](#file-system-integration) using `dbws:/` URI, the Databricks notebook kernels are the preferred ones and should appear at the top of the list when you select a kernel.
+Whenever a notebook is opened from either the local sync folder or via the [Virtual File System](#file-system-integration) using `wsfs:/` URI, the Databricks notebook kernels are the preferred ones and should appear at the top of the list when you select a kernel.
+
+If you are using the [Databricks Extension Connection Manager](#setup-and-configuration-databricks-extension-connection-manager) we will also create a generic notebook kernel for you which used the configured cluster.
 
 ## Execution Modes
-We distinguish between Live-execution and Offline-execution. In Live-execution mode, files are opened directly from Databricks by mounting the Databricks Workspace into your VSCode Workspace using `dbws:/` URI scheme. In this mode there is no intermediate local copy but you work directly against the Databricks Workspace. Everything you run must already exist online in the Databricks Workspace.
+We distinguish between Live-execution and Offline-execution. In Live-execution mode, files are opened directly from Databricks by mounting the Databricks Workspace into your VSCode Workspace using `wsfs:/` URI scheme. In this mode there is no intermediate local copy but you work directly against the Databricks Workspace. Everything you run must already exist online in the Databricks Workspace.
 
 This is slightly different in Offline-execution where all files you want to work with need to be synced locally first using the [Workspace Manager](#workspace-manager). This is especially important when it comes `%run` which behaves slightly differntly compared to Live-execution mode. `%run` in Offline-execution runs the code from your local file instead of the code that exists in Dtabricks online!
 Other commands like `dbutils.notebook.run()` always use the code thats currently online so if you have changed the refernced notebook locally, you have to upload it first. This is simply because we cannot easily replicate the behavior of `dbutils.notebook.run()` locally!
@@ -245,7 +256,8 @@ You want to upload a local notebook to the Databricks workspace? Simply drag&dro
 You want to download a file from DBFS? Simply drag&drop it!
 
 There are two virtual file systems that come with this extension:
-- `dbws:/` to access your notebook from the DAtabricks workspace
+- `wsfs:/` to access your notebook from the DAtabricks workspace
+- `dbws:/` (LEGACY) - to be replaced by `wsfs:/` in the long term
 - `dbfs:/` to access files on the Databricks File System (DBFS) - similar to the [DBFS Browser](#dbfs-browser)
 
 # SQL Browser
