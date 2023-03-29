@@ -28,7 +28,7 @@ export abstract class ThisExtension {
 	private static _settingScope: ConfigSettingSource;
 	private static _sensitiveValueStore: SensitiveValueStore;
 	private static _sqlClusterId: string;
-	private static _isVirtualWorkspace: boolean = undefined;
+	private static _isInBrowser: boolean = undefined;
 
 	public static ActiveConnection: iDatabricksConnection;
 
@@ -248,6 +248,11 @@ export abstract class ThisExtension {
 		}
 	}
 
+	static get IsDevelopmentMode(): boolean {
+		return this._context.extensionMode == vscode.ExtensionMode.Development;
+	}
+
+
 	static get configuration(): vscode.Extension<any> {
 		return this._extension;
 	}
@@ -301,18 +306,12 @@ export abstract class ThisExtension {
 		};
 	}
 
-	static get isInBrowser_OLD(): boolean {
-		if (this._isVirtualWorkspace == undefined) {
-			// from https://github.com/microsoft/vscode/wiki/Virtual-Workspaces#detect-virtual-workspaces-in-code
-			this._isVirtualWorkspace = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.every(f => f.uri.scheme !== 'file')
-		}
-
-		return this._isVirtualWorkspace;
-	}
-
 	static get isInBrowser(): boolean {
-		return vscode.env.uiKind === vscode.UIKind.Web;
-		//return process.hasOwnProperty("browser") && process["browser"];
+		if (this._isInBrowser == undefined) {
+		// some features are disabled if we are in the browser - this seems to work for all cases I found so far
+		this._isInBrowser = vscode.env.uiKind === vscode.UIKind.Web || process.hasOwnProperty("browser") && process["browser"];
+		}
+		return this._isInBrowser
 	}
 
 	static async updateConfigurationSetting(setting: string, value: any, target: ConfigSettingSource = this._settingScope): Promise<void> {

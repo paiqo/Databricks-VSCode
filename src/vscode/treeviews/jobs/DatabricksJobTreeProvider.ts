@@ -70,7 +70,7 @@ export class DatabricksJobTreeProvider implements vscode.TreeDataProvider<Databr
 			let allItems: DatabricksJobTreeItem[] = [];
 			allItems.push(new DatabricksInteractiveJobs());
 			
-			let jobs = await this.getJobs();
+			let jobs: DatabricksJob[] = await this.getJobs();
 			//this.getJobs().then(x => allItems.concat(x));
 			return Promise.resolve(allItems.concat(jobs));
 		}

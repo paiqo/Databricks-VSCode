@@ -18,11 +18,11 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 	private _treeView: vscode.TreeView<DatabricksClusterTreeItem>;
 
 	constructor(context: vscode.ExtensionContext) {
-		const treeView = vscode.window.createTreeView('databricksClusters', { 
-			treeDataProvider: this, 
-			showCollapseAll: true, 
+		const treeView = vscode.window.createTreeView('databricksClusters', {
+			treeDataProvider: this,
+			showCollapseAll: true,
 			canSelectMany: false
-			});
+		});
 		context.subscriptions.push(treeView);
 
 		treeView.onDidChangeSelection((event) => this._onDidChangeSelection(event.selection));
@@ -52,8 +52,7 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 		if (showInfoMessage && !isAutoRefresh) {
 			Helper.showTemporaryInformationMessage('Refreshing Clusters ...');
 		}
-		if (!isAutoRefresh)
-		{
+		if (!isAutoRefresh) {
 			DatabricksKernelManager.refresh(false);
 		}
 		this._onDidChangeTreeData.fire(item);
@@ -75,23 +74,25 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 			let clusters: iDatabricksCluster[] = await DatabricksApiService.listClusters();
 			let items: DatabricksClusterTreeItem[] = [];
 
-			let job_clusters_found: boolean = false;
-			for (let cluster of clusters) {
-				if (["API", "UI"].includes(cluster.cluster_source)) {
-					items.push(new DatabricksCluster(cluster));
+			if (clusters != undefined) {
+				let job_clusters_found: boolean = false;
+				for (let cluster of clusters) {
+					if (["API", "UI"].includes(cluster.cluster_source)) {
+						items.push(new DatabricksCluster(cluster));
 
-					if (cluster.state == "RUNNING" && ThisExtension.SQLClusterID == undefined) {
-						ThisExtension.log(`Running cluster "${cluster.cluster_name}"(${cluster.cluster_id}) found! It will be used for SQL Browser!`);
-						ThisExtension.SQLClusterID = cluster.cluster_id;
+						if (cluster.state == "RUNNING" && ThisExtension.SQLClusterID == undefined) {
+							ThisExtension.log(`Running cluster "${cluster.cluster_name}"(${cluster.cluster_id}) found! It will be used for SQL Browser!`);
+							ThisExtension.SQLClusterID = cluster.cluster_id;
+						}
+					}
+					if (["JOB"].includes(cluster.cluster_source)) {
+						job_clusters_found = true;
 					}
 				}
-				if (["JOB"].includes(cluster.cluster_source)) {
-					job_clusters_found = true;
-				}
-			}
 
-			if (job_clusters_found) {
-				items.push(new DatabricksClusterJobClusters());
+				if (job_clusters_found) {
+					items.push(new DatabricksClusterJobClusters());
+				}
 			}
 
 			return items;
@@ -102,7 +103,7 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 		let actConn = ThisExtension.ActiveConnection;
 		//https://adb-1232342536639.99.azuredatabricks.net/#create/cluster
 		let link: string = actConn.apiRootUrl.toString(true) + "#create/cluster";
-		
+
 		await Helper.openLink(link);
 	}
 }

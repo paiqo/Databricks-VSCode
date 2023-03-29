@@ -70,10 +70,10 @@ export abstract class DatabricksApiService {
 
 	public static updateHeaders(authorizationHeaders: any): void {
 		this._headers = {
-				...authorizationHeaders,
-				"Content-Type": 'application/json',
-				"Accept": 'application/json'
-			}
+			...authorizationHeaders,
+			//"Content-Type": 'application/json', // does not work with CORS ! https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_request_header
+			"Accept": 'application/json'
+		}
 	}
 	//#endregion
 
@@ -92,18 +92,27 @@ export abstract class DatabricksApiService {
 	}
 
 	private static async logResponse(response: any): Promise<void> {
-		ThisExtension.log("Response: " + JSON.stringify(response));
+		let jsonResponse = JSON.stringify(response)
+
+		// when developing, we show the full output
+		if (ThisExtension.IsDevelopmentMode) {
+			ThisExtension.log("Response: " + jsonResponse);
+		}
+		else {
+			ThisExtension.log("Response: " + jsonResponse.substring(0, 200) + " ...");
+		}
 	}
 
 	private static async handleApiException(error: Error, showErrorMessage: boolean = false, raise: boolean = false): Promise<void> {
-		ThisExtension.log("ERROR: " + error.name);
-		ThisExtension.log("ERROR: " + error.message);
-		if (error.stack) {
+		ThisExtension.log("ERROR: " + error.name + " - " + error.message);
+
+		// only print the stack trace when developing
+		if (error.stack && ThisExtension.IsDevelopmentMode) {
 			ThisExtension.log("ERROR: " + error.stack);
 		}
 
 		if (showErrorMessage) {
-			vscode.window.showErrorMessage(error.message);
+			vscode.window.showErrorMessage(error.name + " - " + error.message);
 		}
 
 		if (raise) {
@@ -149,8 +158,7 @@ export abstract class DatabricksApiService {
 				};
 				let response: Response = await fetch(this.getFullUrl(endpoint, params), config);
 
-				if(!response.ok)
-				{
+				if (!response.ok) {
 					ThisExtension.log(`GET ${endpoint} failed! ERROR: " (${response.status}) ${response.statusText}`);
 					throw new Error(response.statusText);
 				}

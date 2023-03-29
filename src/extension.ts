@@ -42,7 +42,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	if(ThisExtension.isInBrowser)
 	{
-		let msg: string = "As the Databricks API does not supporting CORS, this is currently not working!";
+		let msg: string = "As the Databricks API does not yet fully support CORS, running as a web extension is still quite limited!";
 		vscode.window.showWarningMessage(msg);
 		ThisExtension.log(msg);
 	}
