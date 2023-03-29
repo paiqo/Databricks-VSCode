@@ -1,11 +1,13 @@
 import * as vscode from 'vscode';
 
+import { Helper } from '../../../helpers/Helper';
+import { FSHelper } from '../../../helpers/FSHelper';
+import { Buffer } from '@env/buffer';
+
 import { ExportFormatsConfiguration, ThisExtension, LocalSyncSubfolderConfiguration } from '../../../ThisExtension';
 import { iDatabricksConnection } from './iDatabricksConnection';
 import { DatabricksConnectionManager } from './DatabricksConnectionManager';
 import { DatabricksConnectionTreeItem } from './DatabricksConnectionTreeItem';
-import { Helper } from '../../../helpers/Helper';
-import { FSHelper } from '../../../helpers/FSHelper';
 
 export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager {
 

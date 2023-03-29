@@ -1,7 +1,8 @@
 # Release Notes
 
-**v2.0.1:**
+**v2.0.2:**
 - some more preparations and debugging for upcoming CORS implementation
+- added support for `Buffer` in web extension
 - fixed issue wiht `%run` and relative paths starting with `../`
 
 **v2.0.0:**

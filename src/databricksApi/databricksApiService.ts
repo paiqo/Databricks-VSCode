@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
 
+import { ThisExtension } from '../ThisExtension';
 import { Helper } from '../helpers/Helper';
 import { FSHelper } from '../helpers/FSHelper';
-import { ThisExtension } from '../ThisExtension';
+import { fetch, getProxyAgent, RequestInit, Response } from '@env/fetch';
+import { Buffer } from '@env/buffer';
 
 import { iDatabricksWorkspaceItem } from '../vscode/treeviews/workspaces/iDatabricksworkspaceItem';
 import { WorkspaceItemExportFormat, WorkspaceItemLanguage } from '../vscode/treeviews/workspaces/_types';
@@ -12,13 +14,8 @@ import { iDatabricksSecretScope } from '../vscode/treeviews/secrets/iDatabricksS
 import { iDatabricksSecret } from '../vscode/treeviews/secrets/iDatabricksSecret';
 import { ContextLanguage, ExecutionCommand, ExecutionContext, iDatabricksApiClustersListResponse, iDatabricksApiClustersSparkVersionsResponse, iDatabricksApiCommandsCancelResponse, iDatabricksApiCommandsExecuteResponse, iDatabricksApiCommandsStatusResponse, iDatabricksApiContextsCreateResponse, iDatabricksApiContextsDestroyResponse, iDatabricksApiDbfsCreateResponse, iDatabricksApiDbfsListResponse, iDatabricksApiDbfsReadResponse, iDatabricksApiJobsListResponse, iDatabricksApiJobsRunsListResponse, iDatabricksApiRepoListResponse, iDatabricksApiSecretsListResponse, iDatabricksApiSecretsScopesListResponse, iDatabricksApiWorkspaceExportResponse, iDatabricksApiWorkspaceListResponse } from './_types';
 import { iDatabricksCluster } from '../vscode/treeviews/clusters/iDatabricksCluster';
-import { SecretBackendType } from '../vscode/treeviews/secrets/_types';
 import { iDatabricksRepo } from '../vscode/treeviews/repos/_types';
 import { iDatabricksConnection } from '../vscode/treeviews/connections/iDatabricksConnection';
-
-
-import { fetch, getProxyAgent, wrapForForcedInsecureSSL } from '@env/fetch';
-import { RequestInit, Response } from '@env/fetch';
 import { iDatabricksJob } from '../vscode/treeviews/jobs/iDatabricksJob';
 import { iDatabricksJobRun } from '../vscode/treeviews/jobs/iDatabricksJobRun';
 
