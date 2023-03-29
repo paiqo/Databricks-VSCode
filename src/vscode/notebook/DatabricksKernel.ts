@@ -385,6 +385,9 @@ export class DatabricksKernel implements vscode.NotebookController {
 					let runFile: string = Helper.trimChar(commandText.substring(commandText.indexOf(' ') + 1), '"');
 
 					let runUri: vscode.Uri;
+					if (runFile.startsWith("../")) { // relative path with ..
+						runFile = "./" + runFile; // simply prepend ./ and resolve the relative path in the next if()
+					}
 					if (runFile.startsWith("./")) // relative path provided
 					{
 						runUri = await FSHelper.joinPath(FSHelper.parent(cell.notebook.uri), runFile);

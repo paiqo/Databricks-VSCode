@@ -868,7 +868,7 @@
 				},
 				{
 					"command": "databricksConnections.add",
-					"when": "view == databricksConnections && virtualWorkspace",
+					"when": "view == databricksConnections && virtualWorkspace && paiqo.databricks.connectionManager == 'Manual'",
 					"group": "navigation"
 				},
 				{

@@ -1,5 +1,9 @@
 # Release Notes
 
+**v2.0.1:**
+- some more preparations and debugging for upcoming CORS implementation
+- fixed issue wiht `%run` and relative paths starting with `../`
+
 **v2.0.0:**
 - added integration with [official Databricks extensions](https://marketplace.visualstudio.com/items?itemName=databricks.databricks)
   - new connection manager [Databricks Extensions](README.md/#setup-and-configuration-databricks-extension-connection-manager)
