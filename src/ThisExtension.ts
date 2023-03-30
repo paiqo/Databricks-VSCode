@@ -75,7 +75,11 @@ export abstract class ThisExtension {
 			// handle default
 			if (conManager == "Default") {
 				ThisExtension.log("Default connection manager selected. Trying to find the best connection manager ...")
-				if (vscode.extensions.getExtension("databricks.databricks")) {
+				if(ThisExtension.isInBrowser) {
+					ThisExtension.log("Using Manual connection manager as its the only one currently available in the browser ...");
+					conManager = "Manual";
+				}
+				else if (vscode.extensions.getExtension("databricks.databricks")) {
 					ThisExtension.log("Databricks Extension found. Using it as connection manager ...");
 					conManager = "Databricks Extension";
 				}

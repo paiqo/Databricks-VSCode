@@ -1,5 +1,8 @@
 # Release Notes
 
+**v2.0.3:**
+- fixed bug with `Buffer` introduced in `v2.0.2`
+
 **v2.0.2:**
 - some more preparations and debugging for upcoming CORS implementation
 - added support for `Buffer` in web extension

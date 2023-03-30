@@ -24,6 +24,8 @@ export class DatabricksConnectionManagerManualInput extends DatabricksConnection
 			let msg: string = "No connections have been configured yet! Please add a connection manually before proceeding!";
 			ThisExtension.log(msg);
 			vscode.window.showErrorMessage(msg);
+
+			throw new Error(msg);
 		}
 		else {
 			await super.manageLastActiveConnection();

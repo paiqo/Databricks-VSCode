@@ -53,8 +53,13 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	let isValidated: boolean = await ThisExtension.initialize(context);
 	if (isValidated === false) {
-		ThisExtension.log("Issue initializing extension - Please update Databricks settings and restart VSCode!");
-		vscode.window.showErrorMessage("Issue initializing extension - Please update Databricks settings and restart VSCode!");
+		const msg = "Issue initializing extension - Please update Databricks settings and restart VSCode!"
+		ThisExtension.log(msg);
+		vscode.window.showErrorMessage(msg);
+
+		ThisExtension.setStatusBar("ERROR!");
+
+		throw new Error(msg);
 	}
 
 	ThisExtension.setStatusBar("Initialized!");
