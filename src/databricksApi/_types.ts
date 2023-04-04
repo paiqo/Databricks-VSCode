@@ -41,6 +41,7 @@ export interface iDatabricksApiJobsRunsListResponse {
 
 export interface iDatabricksApiContextsCreateResponse {
 	id: 			string;
+	error?:			string;
 }
 
 export interface iDatabricksApiContextsStatusResponse {
@@ -49,34 +50,40 @@ export interface iDatabricksApiContextsStatusResponse {
 }
 
 export interface iDatabricksApiContextsDestroyResponse {
-	id: 			string;
+	id?: 			string;
+	error?:			string;
 }
 
 export interface iDatabricksApiCommandsExecuteResponse {
-	id: 			string;
+	id?: 			string;
+	error?:			string;
 }
 
 export interface iDatabricksApiCommandsCancelResponse {
-	id: 			string;
+	id?: 			string;
+	error?:			string;
 }
 
 export interface iDatabricksApiCommandsStatusResponse {
-	id: 			string;
-	status:			string;
-	results:		any;
+	id?: 			string;
+	status?:			string;
+	results?:		any;
+	error?:			string;
 }
 
 export class ExecutionContext {
-	context_id: 	string;
-	cluster_id: 	string;
-	language:		string;
+	context_id?: 	string;
+	cluster_id?: 	string;
+	language?:		string;
+	error?:			string;
 }
 
 export class ExecutionCommand {
-	command_id: 	string;
-	context_id: 	string;
-	cluster_id: 	string;
-	language:		string;
+	command_id?: 	string;
+	context_id?: 	string;
+	cluster_id?: 	string;
+	language?:		string;
+	error?:			string;
 }
 
 export interface iDatabricksApiClustersSparkVersionsResponse {

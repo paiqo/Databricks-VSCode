@@ -83,7 +83,7 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 			states.push("STOPPED");
 		}
 
-		if (this.NotebookKernelExists) {
+		if (this.JupyterKernelExists) {
 			states.push("KERNEL");
 		}
 		else {
@@ -139,23 +139,23 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 		return this._source;
 	}
 
-	private get NotebookKernel(): DatabricksKernel {
-		return DatabricksKernelManager.getNotebookKernel(this.definition);
+	private get JupyterKernel(): DatabricksKernel {
+		return DatabricksKernelManager.getJupyterKernel(this.definition);
 	}
 
-	public get NotebookKernelExists(): boolean {
-		if (this.NotebookKernel) {
+	public get JupyterKernelExists(): boolean {
+		if (this.JupyterKernel) {
 			return true;
 		}
 		return false;
 	}
 
-	private get InteractiveKernel(): DatabricksKernel {
-		return DatabricksKernelManager.getNotebookKernel(this.definition);
+	private get DatabricksKernel(): DatabricksKernel {
+		return DatabricksKernelManager.getJupyterKernel(this.definition);
 	}
 
-	public get InteractiveKernelExists(): boolean {
-		if (this.InteractiveKernel) {
+	public get DatabricksKernelExists(): boolean {
+		if (this.DatabricksKernel) {
 			return true;
 		}
 		return false;
@@ -191,7 +191,7 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 			vscode.window.showErrorMessage(`ERROR: ${error}`);
 		});
 
-		let kernel = this.NotebookKernel;
+		let kernel = this.JupyterKernel;
 		if (kernel) {
 			kernel.disposeController();
 		}

@@ -25,7 +25,7 @@ export type NotebookMagic =
 
 export type KernelType =
 	"jupyter-notebook"
-	| "interactive"
+	| "databricks-notebook"
 
 // https://code.visualstudio.com/blogs/2021/11/08/custom-notebooks
 export class DatabricksKernel implements vscode.NotebookController {
@@ -96,7 +96,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 		let execContext: ExecutionContext = this.getNotebookContext(notebook.uri);
 		if (!execContext) {
 			ThisExtension.setStatusBar("Initializing Kernel ...", true);
-			execContext = await this.initializeExecutionContext()
+			execContext = await this.initializeExecutionContext(notebook.metadata?.notebookLanguage?.databricksLanguage);
 			this.setNotebookContext(notebook.uri, execContext);
 			await this.updateRepoContext(notebook.uri);
 			ThisExtension.setStatusBar("Kernel initialized!");
@@ -205,8 +205,8 @@ export class DatabricksKernel implements vscode.NotebookController {
 		}
 	}
 
-	private async initializeExecutionContext(): Promise<ExecutionContext> {
-		return await DatabricksApiService.getExecutionContext(this.ClusterID, this.Language);
+	private async initializeExecutionContext(language?: ContextLanguage): Promise<ExecutionContext> {
+		return await DatabricksApiService.getExecutionContext(this.ClusterID, language ?? this.Language);
 	}
 
 	setNotebookContext(notebookUri: vscode.Uri, context: ExecutionContext): void {
@@ -282,13 +282,11 @@ export class DatabricksKernel implements vscode.NotebookController {
 		}
 	}
 
-
-
 	private async parseCommand(cell: vscode.NotebookCell, executionContext: ExecutionContext): Promise<[ContextLanguage, string, NotebookMagic]> {
 		let cmd: string = cell.document.getText();
 		let magicText: string = undefined;
 		let commandText: string = cmd;
-		let language: ContextLanguage = this.Language;
+		let language: ContextLanguage = executionContext.language as ContextLanguage;
 		if (cmd[0] == "%") {
 			let lines = cmd.split('\n');
 			magicText = lines[0].split(" ")[0].slice(1).trim();
@@ -484,6 +482,19 @@ export class DatabricksKernel implements vscode.NotebookController {
 				return;
 			});
 
+			if (command.error) {
+				execution.appendOutput(new vscode.NotebookCellOutput([
+					vscode.NotebookCellOutputItem.text(command.error, 'text/html')
+				]));
+
+				execution.appendOutput(new vscode.NotebookCellOutput([
+					vscode.NotebookCellOutputItem.error(new Error(command.error)),
+				]));
+
+				execution.end(false, Date.now());
+				return;
+			}
+
 			let result = await DatabricksApiService.getCommandResult(command, true);
 
 			if (result.results.resultType == "table") {
@@ -570,7 +581,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 			}
 
 
-			if (["pip"].includes(magic)) {
+			if (["pip"].includes(magic) || commandText.includes("pip install")) {
 				await this.updateRepoContext(cell.notebook.uri);
 			}
 

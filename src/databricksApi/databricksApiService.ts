@@ -412,6 +412,10 @@ export abstract class DatabricksApiService {
 
 		let response: iDatabricksApiContextsCreateResponse = await this.post<iDatabricksApiContextsCreateResponse>(endpoint, body);
 
+		if (!response || response.error) {
+			return response;
+		}
+
 		let ret = {
 			"cluster_id": cluster_id,
 			"language": language,
@@ -427,6 +431,10 @@ export abstract class DatabricksApiService {
 
 		let response: iDatabricksApiContextsDestroyResponse = await this.post<iDatabricksApiContextsDestroyResponse>(endpoint, body);
 
+		if (!response || response.error) {
+			return response;
+		}
+
 		return response;
 	}
 
@@ -440,6 +448,10 @@ export abstract class DatabricksApiService {
 		};
 
 		let response: iDatabricksApiCommandsExecuteResponse = await this.post<iDatabricksApiCommandsExecuteResponse>(endpoint, body);
+
+		if (!response || response.error) {
+			return response;
+		}
 
 		let ret = {
 			"command_id": response.id,
@@ -460,6 +472,10 @@ export abstract class DatabricksApiService {
 		};
 
 		let response: iDatabricksApiCommandsStatusResponse = await this.get<iDatabricksApiCommandsStatusResponse>(endpoint, body);
+
+		if (!response || response.error) {
+			return response;
+		}
 
 		return response;
 	}
@@ -485,6 +501,10 @@ export abstract class DatabricksApiService {
 		};
 
 		let response: iDatabricksApiCommandsCancelResponse = await this.post<iDatabricksApiCommandsCancelResponse>(endpoint, body);
+
+		if (!response || response.error) {
+			return response;
+		}
 
 		let ret = {
 			"command_id": response.id,

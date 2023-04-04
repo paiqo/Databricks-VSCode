@@ -1,5 +1,11 @@
 # Release Notes
 
+**v2.1.0:**
+- introduced a new notebook type for `Scala`, `SQL` and `R`
+- removed interactive notebook kernel as it never really worked
+  - replaced it with new Databricks kernel to work with the new notebook type
+- minor fix to handle `pip install` more generic
+
 **v2.0.3:**
 - fixed bug with `Buffer` introduced in `v2.0.2`
 

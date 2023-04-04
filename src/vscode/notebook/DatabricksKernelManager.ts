@@ -7,8 +7,8 @@ import { DatabricksKernel } from './DatabricksKernel';
 
 
 export abstract class DatabricksKernelManager {
-	private static NotebookKernelSuffix: string = "-jupyter-notebook";
-	private static InteractiveKernelSuffix: string = "-interactive";
+	private static JupyterKernelSuffix: string = "-jupyter-notebook";
+	private static DatabricksKernelSuffix: string = "-databricks-notebook";
 
 	private static _kernels: Map<string, DatabricksKernel> = new Map<string, DatabricksKernel>();
 
@@ -57,40 +57,40 @@ export abstract class DatabricksKernelManager {
 		return this._kernels.get(kernelName);
 	}
 
-	static getNotebookKernelName(cluster: iDatabricksCluster): string {
-		return (cluster.kernel_id ?? cluster.cluster_id) + DatabricksKernelManager.NotebookKernelSuffix;
+	static getJupyterKernelName(cluster: iDatabricksCluster): string {
+		return (cluster.kernel_id ?? cluster.cluster_id) + DatabricksKernelManager.JupyterKernelSuffix;
 	}
 
-	static getNotebookKernel(cluster: iDatabricksCluster): DatabricksKernel {
-		return this.getKernel(this.getNotebookKernelName(cluster));
+	static getJupyterKernel(cluster: iDatabricksCluster): DatabricksKernel {
+		return this.getKernel(this.getJupyterKernelName(cluster));
 	}
 
-	static notebookKernelExists(cluster: iDatabricksCluster): boolean {
-		if (this.getKernel(this.getNotebookKernelName(cluster))) {
+	static jupyterKernelExists(cluster: iDatabricksCluster): boolean {
+		if (this.getKernel(this.getJupyterKernelName(cluster))) {
 			return true;
 		}
 		return false;
 	}
 
-	static getInteractiveKernelName(cluster: iDatabricksCluster): string {
-		return cluster.cluster_id + DatabricksKernelManager.InteractiveKernelSuffix
+	static getDatabricksKernelName(cluster: iDatabricksCluster): string {
+		return cluster.cluster_id + DatabricksKernelManager.DatabricksKernelSuffix
 	}
 
-	static getInteractiveKernel(cluster: iDatabricksCluster): DatabricksKernel {
-		return this.getKernel(this.getInteractiveKernelName(cluster));
+	static getDatabricksKernel(cluster: iDatabricksCluster): DatabricksKernel {
+		return this.getKernel(this.getDatabricksKernelName(cluster));
 	}
 
-	static interactiveKernelExists(cluster: iDatabricksCluster): boolean {
-		if (this.getInteractiveKernel(cluster)) {
+	static databricksKernelExists(cluster: iDatabricksCluster): boolean {
+		if (this.getDatabricksKernel(cluster)) {
 			return true;
 		}
 		return false;
 	}
 
 	static async createKernels(cluster: iDatabricksCluster, logMessages: boolean = true): Promise<void> {
-		if (!this.notebookKernelExists(cluster)) {
+		if (!this.jupyterKernelExists(cluster)) {
 			let notebookKernel: DatabricksKernel = new DatabricksKernel(cluster);
-			this.setKernel(this.getNotebookKernelName(cluster), notebookKernel);
+			this.setKernel(this.getJupyterKernelName(cluster), notebookKernel);
 			if (logMessages) {
 				ThisExtension.log(`Notebook Kernel for Databricks cluster '${cluster.cluster_id}' created!`)
 			}
@@ -101,9 +101,9 @@ export abstract class DatabricksKernelManager {
 			}
 		}
 
-		if (!this.interactiveKernelExists(cluster)) {
-			let interactiveKernel: DatabricksKernel = new DatabricksKernel(cluster, "interactive");
-			this.setKernel(this.getInteractiveKernelName(cluster), interactiveKernel);
+		if (!this.databricksKernelExists(cluster)) {
+			let interactiveKernel: DatabricksKernel = new DatabricksKernel(cluster, "databricks-notebook");
+			this.setKernel(this.getDatabricksKernelName(cluster), interactiveKernel);
 			if (logMessages) {
 				ThisExtension.log(`Interactive Kernel for Databricks cluster '${cluster.cluster_id}' created!`)
 			}
@@ -116,8 +116,8 @@ export abstract class DatabricksKernelManager {
 	}
 
 	static async removeKernels(cluster: iDatabricksCluster, logMessages: boolean = true): Promise<void> {
-		if (this.notebookKernelExists(cluster)) {
-			this.removeKernel(this.getNotebookKernelName(cluster));
+		if (this.jupyterKernelExists(cluster)) {
+			this.removeKernel(this.getJupyterKernelName(cluster));
 			if (logMessages) {
 				ThisExtension.log(`Notebook Kernel for Databricks cluster '${cluster.cluster_id}' removed!`)
 			}
@@ -128,8 +128,8 @@ export abstract class DatabricksKernelManager {
 			}
 		}
 
-		if (this.interactiveKernelExists(cluster)) {
-			this.removeKernel(this.getInteractiveKernelName(cluster));
+		if (this.databricksKernelExists(cluster)) {
+			this.removeKernel(this.getDatabricksKernelName(cluster));
 			if (logMessages) {
 				ThisExtension.log(`Interactive Kernel for Databricks cluster '${cluster.cluster_id}' removed!`)
 			}
@@ -142,16 +142,16 @@ export abstract class DatabricksKernelManager {
 	}
 
 	static async restartClusterKernel(cluster: iDatabricksCluster): Promise<void> {
-		let kernel: DatabricksKernel = this.getNotebookKernel(cluster)
+		let kernel: DatabricksKernel = this.getJupyterKernel(cluster)
 		if (kernel) {
 			kernel.restart();
 		}
 	}
 
-	static async restartNotebookKernel(notebook: { notebookEditor: { notebookUri: vscode.Uri } } | undefined | vscode.Uri): Promise<void> {
+	static async restartJupyterKernel(notebook: { notebookEditor: { notebookUri: vscode.Uri } } | undefined | vscode.Uri): Promise<void> {
 		let notebookUri: vscode.Uri = undefined;
 
-		ThisExtension.setStatusBar("Restarting Kernel ...", true);
+		ThisExtension.setStatusBar("Restarting Jupyter Kernel ...", true);
 
 		if (notebook instanceof vscode.Uri) {
 			notebookUri = notebook;
@@ -164,7 +164,7 @@ export abstract class DatabricksKernelManager {
 			kernel.restart(notebookUri);
 		}
 
-		ThisExtension.setStatusBar("Kernel restarted!");
+		ThisExtension.setStatusBar("Jupyter Kernel restarted!");
 	}
 
 	static async updateWidgets(notebook: { notebookEditor: { notebookUri: vscode.Uri } } | undefined | vscode.Uri): Promise<void> {

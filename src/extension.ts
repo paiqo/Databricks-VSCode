@@ -34,6 +34,7 @@ import { FSHelper } from './helpers/FSHelper';
 import { DatabricksKernelManager } from './vscode/notebook/DatabricksKernelManager';
 import { DatabricksSQLTreeItem } from './vscode/treeviews/sql/DatabricksSQLTreeItem';
 import { DatabricksSecretTreeItem } from './vscode/treeviews/secrets/DatabricksSecretTreeItem';
+import { DatabricksNotebookSerializer } from './vscode/notebook/DatabricksNotebookSerializer';
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -64,10 +65,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	ThisExtension.setStatusBar("Initialized!");
 
+	let notebookSerializer = new DatabricksNotebookSerializer(context);
+
 	ThisExtension.setStatusBar("Initializing Kernels ...", true);
 	DatabricksKernelManager.initialize();
 	vscode.commands.registerCommand('databricksKernel.restart',
-		(notebook: { notebookEditor: { notebookUri: vscode.Uri } } | undefined | vscode.Uri) => DatabricksKernelManager.restartNotebookKernel(notebook)
+		(notebook: { notebookEditor: { notebookUri: vscode.Uri } } | undefined | vscode.Uri) => DatabricksKernelManager.restartJupyterKernel(notebook)
 	);
 	vscode.commands.registerCommand('databricksKernel.updateWidgets',
 		(notebook: { notebookEditor: { notebookUri: vscode.Uri } } | undefined | vscode.Uri) => DatabricksKernelManager.updateWidgets(notebook)
