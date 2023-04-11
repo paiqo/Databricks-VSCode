@@ -54,12 +54,12 @@ export class DatabricksNotebookSerializer implements vscode.NotebookSerializer {
 	public async deserializeNotebook(data: Uint8Array, token: vscode.CancellationToken): Promise<DatabricksNotebook> {
 		var contents = Buffer.from(data).toString();
 
-		const lines: string[] = contents.split("\n");
+		const lines: string[] = contents.trimStart().split("\n");
 		if (lines.length == 0) {
 			ThisExtension.log("Not a Databricks Notebook source file. Creating new Notebook.");
 			return { cells: [] };
 		}
-		if (!lines[0].endsWith(this.HEADER_SUFFIX)) {
+		if (!lines[0].trimEnd().endsWith(this.HEADER_SUFFIX)) {
 			ThisExtension.log("File is not a valid Databricks Notebook source file.");
 			throw new Error("File is not a valid Databricks Notebook source file.");
 		}
@@ -147,11 +147,11 @@ export class DatabricksNotebookSerializer implements vscode.NotebookSerializer {
 			}
 		}
 
-		let finalLines: string[] = [];
-		finalLines.push(`${notebookLanguage.commentCharacters} ${this.HEADER_SUFFIX}`);
-		finalLines = finalLines.concat(notebook.cells.flatMap(x => x.value))
+		const headerLine = `${notebookLanguage.commentCharacters} ${this.HEADER_SUFFIX}\n`;
+		const codeLines = notebook.cells.flatMap(x => x.value).join(`\n\n${notebookLanguage.commentCharacters} COMMAND ----------\n\n`)
 
+		
 		// Give a string of all the data to save and VS Code will handle the rest
-		return await Buffer.from(finalLines.join(`\n\n${notebookLanguage.commentCharacters} COMMAND ----------\n\n`));
+		return await Buffer.from(headerLine + codeLines);
 	}
 }

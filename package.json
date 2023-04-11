@@ -856,6 +856,15 @@
 				"shortTitle": "Widgets",
 				"icon": "$(settings)",
 				"category": "Jupyter"
+			},
+			{
+				"command": "databricksApi.sendToApi",
+				"title": "Send to Databricks API",
+				"shortTitle": "Databricks API",
+				"icon": {
+					"light": "resources/light/databricks_small.png",
+					"dark": "resources/dark/databricks_small.png"
+				}
 			}
 		],
 		"menus": {
@@ -1151,11 +1160,10 @@
 					"when": "notebookKernel =~ /^paiqo.databricks-vscode\\// && notebookType == 'jupyter-notebook' && isWorkspaceTrusted"
 				}
 			],
-			"interactive/toolbar": [
+			"editor/title/run": [
 				{
-					"command": "databricksKernel.restart",
-					"group": "navigation@1",
-					"when": "notebookKernel =~ /^paiqo.databricks-vscode\\// && isWorkspaceTrusted || isWorkspaceTrusted && !notebookKernel"
+					"command": "databricksApi.sendToApi",
+					"when": "resourceExtname == .json || resourceExtname == ''"
 				}
 			]
 		},
@@ -1165,13 +1173,7 @@
 				"displayName": "Databricks Notebook",
 				"selector": [
 					{
-						"filenamePattern": "*.sql"
-					},
-					{
-						"filenamePattern": "*.scala"
-					},
-					{
-						"filenamePattern": "*.r"
+						"filenamePattern": "..some.invalid.pattern.."
 					}
 				],
 				"priority": "default"

@@ -35,6 +35,7 @@ import { DatabricksKernelManager } from './vscode/notebook/DatabricksKernelManag
 import { DatabricksSQLTreeItem } from './vscode/treeviews/sql/DatabricksSQLTreeItem';
 import { DatabricksSecretTreeItem } from './vscode/treeviews/secrets/DatabricksSecretTreeItem';
 import { DatabricksNotebookSerializer } from './vscode/notebook/DatabricksNotebookSerializer';
+import { DatabricksSendToAPI } from './vscode/editors/DatabricksSendToAPI';
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -76,6 +77,12 @@ export async function activate(context: vscode.ExtensionContext) {
 		(notebook: { notebookEditor: { notebookUri: vscode.Uri } } | undefined | vscode.Uri) => DatabricksKernelManager.updateWidgets(notebook)
 	);
 	ThisExtension.setStatusBar("Kernels initialized!");
+
+
+	// register Editor Buttons
+	vscode.commands.registerCommand('databricksApi.sendToApi',
+		DatabricksSendToAPI.sendToAPI
+	);
 
 	// register DatabricksConnectionTreeProvider
 	let databricksConnectionTreeProvider = new DatabricksConnectionTreeProvider();

@@ -19,8 +19,8 @@ export abstract class DatabricksWidget<T = string | string[]> implements vscode.
 
 	lastInput: T;
 
-	constructor(lannguage: ContextLanguage, type: WidgetType, name: string, defaultValue?: string, label?: string) {
-		this.language = lannguage;
+	constructor(language: ContextLanguage, type: WidgetType, name: string, defaultValue?: string, label?: string) {
+		this.language = language;
 		this.type = type as WidgetType;
 		this.name = name;
 		this.defaultValue = defaultValue ?? "";

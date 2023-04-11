@@ -228,6 +228,19 @@ Whenever a notebook is opened from either the local sync folder or via the [Virt
 
 If you are using the [Databricks Extension Connection Manager](#setup-and-configuration-databricks-extension-connection-manager) we will also create a generic notebook kernel for you which used the configured cluster.
 
+To work with non `.ipynb` notebooks, you can also open source files from Databricks as notebooks. For this to work you need to add `workbench.editorAssociations` for the file types to your VSCode settings. The important part is to use `databricks-notebook` as default editor:
+```
+"settings": {
+		"workbench.editorAssociations":{
+			"*.py": "databricks-notebook",
+			"*.scala": "databricks-notebook",
+			"*.sql": "databricks-notebook",
+			"*.r": "databricks-notebook"
+		},
+    ...
+}
+```
+
 ## Execution Modes
 We distinguish between Live-execution and Offline-execution. In Live-execution mode, files are opened directly from Databricks by mounting the Databricks Workspace into your VSCode Workspace using `wsfs:/` URI scheme. In this mode there is no intermediate local copy but you work directly against the Databricks Workspace. Everything you run must already exist online in the Databricks Workspace.
 
