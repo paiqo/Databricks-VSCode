@@ -8,7 +8,7 @@ import { DatabricksWidget, WidgetType } from './DatabricksWidget';
 export class DatabricksSelectorWidget extends DatabricksWidget<string[]> {
 	static WidgetRegExPositional = /dbutils\.widgets\.(?<type>dropdown|combobox|multiselect)\(["']{1}(?<name>.*?)["']{1}\s*,\s*(?<defaultValue>["']{1}.*?["'])\s*,\s*(?<choices>.*?)(,\s*["']{1}(?<label>[^"']*)["'])?\)/gm;
 	static WidgetRegExNamed: RegExp = /dbutils\.widgets\.(?<type>dropdown|combobox|multiselect)\((.*\s*name\s*=\s*['"](?<name>.*?)['"]\s*)(.*\s*defaultValue\s*=\s*['"](?<default>.*?)['"]\s*)(.*\s*choices\s*=\s*['"](?<choices>.*?)['"]\s*)(.*\s*label\s*=\s*['"](?<label>.*?)['"]\s*)\)/gm;
-	static WidgetRegExSQL: RegExp = /CREATE\s+WIDGET\s+(DROPDOWN|COMBOBOX|MULTISELECT)\s+[`]?(?<name>.*?)[`]?(\s|$|;)(\s*DEFAULT\s+(?<default>["'].*?["']))?(\s|$|;)(CHOICES\s+(?<choices>SELECT.*?)($|;))?/gm;
+	static WidgetRegExSQL: RegExp = /CREATE\s+WIDGET\s+(?<type>DROPDOWN|COMBOBOX|MULTISELECT)\s+[`]?(?<name>.*?)[`]?(\s|$|;)(\s*DEFAULT\s+(?<default>["'].*?["']))?(\s|$|;)(CHOICES\s+(?<choices>SELECT.*?)($|;))?/gm;
 	// a string representing how the choices can be calculated
 	choicesRaw: string;
 	// choicesRaw evaluated into an array of strings
@@ -26,7 +26,7 @@ export class DatabricksSelectorWidget extends DatabricksWidget<string[]> {
 
 		for (let match of matches) {
 			let widget = new DatabricksSelectorWidget(language,
-				match.groups["type"] as WidgetType,
+				match.groups["type"].toLowerCase() as WidgetType,
 				match.groups["name"],
 				match.groups["choices"],
 				match.groups["default"],

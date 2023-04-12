@@ -332,7 +332,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 		for (let widget of widgets) {
 			if (!this._widgets.has(widget.name) || force) {
-				await widget.promptForInput();
+				await widget.promptForInput(context);
 				this.setWidget(widget.name, widget);
 			}
 		}
