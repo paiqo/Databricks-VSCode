@@ -4,6 +4,10 @@
 - introduced a new notebook type for `Scala`, `SQL` and `R`
 - removed interactive notebook kernel as it never really worked
   - replaced it with new Databricks kernel to work with the new notebook type
+- added a new Button for JSON files to `Send to Databricks API`
+  - create/update cluster
+  - create/overwrite/update job
+- added support for SQL widgets
 - fix issue with named parameters in widgets ([#128](/../../issues/128))
 - minor fix to handle `pip install` more generic
 

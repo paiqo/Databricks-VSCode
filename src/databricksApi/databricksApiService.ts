@@ -138,7 +138,7 @@ export abstract class DatabricksApiService {
 	- the result is logged using this.logResponse
 	- if the api call raises an exception, we log the exception and return undefined
 	*/
-	private static async get<T = any>(endpoint: string, params: object = null, log: boolean = true, returnType: "JSON" | "TEXT" = "JSON"): Promise<T> {
+	public static async get<T = any>(endpoint: string, params: object = null, log: boolean = true, returnType: "JSON" | "TEXT" = "JSON"): Promise<T> {
 		if (!this._isInitialized && !this._connectionTestRunning) {
 			ThisExtension.log("API has not yet been initialized! Please connect first!");
 		}
@@ -181,7 +181,7 @@ export abstract class DatabricksApiService {
 		}
 	}
 
-	private static async post<T = any>(endpoint: string, body: object, bodyType: "JSON" | "TEXT" = "JSON"): Promise<T> {
+	static async post<T = any>(endpoint: string, body: object, bodyType: "JSON" | "TEXT" = "JSON"): Promise<T> {
 		ThisExtension.log("POST " + endpoint + " --> " + JSON.stringify(body));
 
 		try {
@@ -208,7 +208,7 @@ export abstract class DatabricksApiService {
 		}
 	}
 
-	private static async patch<T = any>(endpoint: string, body: object): Promise<T> {
+	public static async patch<T = any>(endpoint: string, body: object): Promise<T> {
 		ThisExtension.log("PATCH " + endpoint + " --> " + JSON.stringify(body));
 
 		try {
@@ -231,7 +231,7 @@ export abstract class DatabricksApiService {
 		}
 	}
 
-	private static async delete<T = any>(endpoint: string, body: object): Promise<T> {
+	public static async delete<T = any>(endpoint: string, body: object): Promise<T> {
 		ThisExtension.log("DELETE " + endpoint + " --> " + JSON.stringify(body));
 
 		try {

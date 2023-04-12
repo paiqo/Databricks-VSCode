@@ -5,24 +5,15 @@ import { DatabricksWidget } from './DatabricksWidget';
 
 export class DatabricksTextWidget extends DatabricksWidget<string> {
 
-	private static WidgetRegExPositional: RegExp = /dbutils\.widgets\.text\(["']{1}(?<name>.*?)["']{1}\s*,\s*["']{1}(?<default>.*?)["'](,\s*["']{1}(?<label>.*?)["'])?\)/gm;
-	private static WidgetRegExNamed: RegExp = /dbutils\.widgets\.text\((.*\s*name\s*=\s*['"](?<name>.*?)['"]\s*)(.*\s*defaultValue\s*=\s*['"](?<default>.*?)['"]\s*)(.*\s*label\s*=\s*['"](?<label>.*?)['"]\s*)\)/gm;
-
+	static WidgetRegExPositional: RegExp = /dbutils\.widgets\.text\(["']{1}(?<name>.*?)["']{1}\s*,\s*["']{1}(?<default>.*?)["'](,\s*["']{1}(?<label>.*?)["'])?\)/gm;
+	static WidgetRegExNamed: RegExp = /dbutils\.widgets\.text\((.*\s*name\s*=\s*['"](?<name>.*?)['"]\s*)(.*\s*defaultValue\s*=\s*['"](?<default>.*?)['"]\s*)(.*\s*label\s*=\s*['"](?<label>.*?)['"]\s*)\)/gm;
+	static WidgetRegExSQL: RegExp = /CREATE\s+WIDGET\s+TEXT\s+[`]?(?<name>.*?)[`]?(\s|$)(\s*DEFAULT\s+(?<default>["'].*?["']))?/gm;
+	
 	constructor(language: ContextLanguage, name: string, defaultValue?: string, label?: string) {
 		super(language, "text", name, defaultValue, label);
 	}
 
-	static loadFromCommandText(commandText: string, language: ContextLanguage): DatabricksTextWidget[] {
-		let widgets: DatabricksTextWidget[] = [];
-
-		widgets = widgets.concat(this.parseRegEx(commandText, this.WidgetRegExPositional, language));
-		widgets = widgets.concat(this.parseRegEx(commandText, this.WidgetRegExNamed, language));
-
-
-		return widgets;
-	}
-
-	private static parseRegEx(commandText: string, regex: RegExp, language: ContextLanguage): DatabricksTextWidget[] {
+	static parseRegEx(commandText: string, regex: RegExp, language: ContextLanguage): DatabricksTextWidget[] {
 		const matches = commandText.matchAll(regex);
 
 		let widgets: DatabricksTextWidget[] = [];

@@ -11,6 +11,10 @@ export type WidgetType =
 	;
 
 export abstract class DatabricksWidget<T = string | string[]> implements vscode.QuickPickItem {
+	static WidgetRegExPositional: RegExp;
+	static WidgetRegExNamed: RegExp
+	static WidgetRegExSQL: RegExp
+
 	language: ContextLanguage;
 	type: WidgetType;
 	name: string;
@@ -28,18 +32,41 @@ export abstract class DatabricksWidget<T = string | string[]> implements vscode.
 	}
 
 	static loadFromCommandText(commandText: string, language: ContextLanguage): DatabricksWidget[] {
-		throw new Error("Not implemented");
-	};
+		let widgets: DatabricksWidget[] = [];
+
+		if (this.WidgetRegExPositional) {
+			widgets = widgets.concat(this.parseRegEx(commandText, this.WidgetRegExPositional, language));
+		}
+		if (this.WidgetRegExNamed) {
+			widgets = widgets.concat(this.parseRegEx(commandText, this.WidgetRegExNamed, language));
+		}
+		if (this.WidgetRegExSQL) {
+			widgets = widgets.concat(this.parseRegEx(commandText, this.WidgetRegExSQL, language));
+		}
+
+		return widgets;
+	}
+
 	abstract promptForInput(executionContext?: ExecutionContext, useCached?: boolean): Promise<T>;
 
 	abstract getInput(executionContext: ExecutionContext, force?: boolean): Promise<T>;
 
 	abstract getCommandTextValue(): string;
 
-	async replaceInCommandText(commandText: string): Promise<string> {
-		let regex = new RegExp("dbutils\\.widgets\\.get\\s*\\([\"']{1}" + this.name + "[\"']\\)");
+	static parseRegEx(commandText: string, regex: RegExp, language: ContextLanguage): DatabricksWidget[] {
+		throw new Error("Not implemented");
+	}
 
-		return commandText.replace(regex, (await this.getCommandTextValue()) as string);
+	async replaceInCommandText(commandText: string): Promise<string> {
+		const regexCode = new RegExp("dbutils\\.widgets\\.get\\s*\\([\"']{1}" + this.name + "[\"']\\)");
+		const regexSQL = new RegExp("\\$\\{" + this.name + "\\}");
+		const regexSQLArgument = new RegExp("getArgument\('" + this.name + "\)'");
+
+		commandText = commandText.replace(regexCode, (await this.getCommandTextValue()) as string);
+		commandText = commandText.replace(regexSQL, (await this.getCommandTextValue()) as string);
+		commandText = commandText.replace(regexSQLArgument, (await this.getCommandTextValue()) as string);
+		
+		return commandText;
 	}
 
 	get description(): string {

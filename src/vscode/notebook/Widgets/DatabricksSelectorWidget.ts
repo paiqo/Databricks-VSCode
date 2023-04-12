@@ -6,7 +6,9 @@ import { DatabricksWidget, WidgetType } from './DatabricksWidget';
 
 
 export class DatabricksSelectorWidget extends DatabricksWidget<string[]> {
-	private static WidgetRegEx = /dbutils\.widgets\.(?<type>dropdown|combobox|multiselect)\(["']{1}(?<name>.*?)["']{1}\s*,\s*(?<defaultValue>["']{1}.*?["'])\s*,\s*(?<choices>.*?)(,\s*["']{1}(?<label>[^"']*)["'])?\)/gm;
+	static WidgetRegExPositional = /dbutils\.widgets\.(?<type>dropdown|combobox|multiselect)\(["']{1}(?<name>.*?)["']{1}\s*,\s*(?<defaultValue>["']{1}.*?["'])\s*,\s*(?<choices>.*?)(,\s*["']{1}(?<label>[^"']*)["'])?\)/gm;
+	static WidgetRegExNamed: RegExp = /dbutils\.widgets\.(?<type>dropdown|combobox|multiselect)\((.*\s*name\s*=\s*['"](?<name>.*?)['"]\s*)(.*\s*defaultValue\s*=\s*['"](?<default>.*?)['"]\s*)(.*\s*choices\s*=\s*['"](?<choices>.*?)['"]\s*)(.*\s*label\s*=\s*['"](?<label>.*?)['"]\s*)\)/gm;
+	static WidgetRegExSQL: RegExp = /CREATE\s+WIDGET\s+(DROPDOWN|COMBOBOX|MULTISELECT)\s+[`]?(?<name>.*?)[`]?(\s|$|;)(\s*DEFAULT\s+(?<default>["'].*?["']))?(\s|$|;)(CHOICES\s+(?<choices>SELECT.*?)($|;))?/gm;
 	// a string representing how the choices can be calculated
 	choicesRaw: string;
 	// choicesRaw evaluated into an array of strings
@@ -17,12 +19,19 @@ export class DatabricksSelectorWidget extends DatabricksWidget<string[]> {
 		this.choicesRaw = choicesRaw;
 	}
 
-	static loadFromCommandText(commandText: string, language: ContextLanguage): DatabricksSelectorWidget[] {
-		let matches = commandText.matchAll(DatabricksSelectorWidget.WidgetRegEx);
+	static parseRegEx(commandText: string, regex: RegExp, language: ContextLanguage): DatabricksSelectorWidget[] {
+		const matches = commandText.matchAll(regex);
 
 		let widgets: DatabricksSelectorWidget[] = [];
+
 		for (let match of matches) {
-			let widget = new DatabricksSelectorWidget(language, match.groups["type"] as WidgetType, match.groups["name"], match.groups["choices"], match.groups["defaultValue"], match.groups["label"]);
+			let widget = new DatabricksSelectorWidget(language,
+				match.groups["type"] as WidgetType,
+				match.groups["name"],
+				match.groups["choices"],
+				match.groups["default"],
+				match.groups["label"]
+			);
 			widgets.push(widget);
 		}
 

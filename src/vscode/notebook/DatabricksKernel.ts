@@ -318,26 +318,22 @@ export class DatabricksKernel implements vscode.NotebookController {
 		- replace dbutils.widgets.get with the static value from the widget
 
 		*/
-		// shortcut if dbutils.widgets is not used
-		if (!commandText.includes("dbutils.widgets.")) {
+		// shortcut if widgets are not used
+		if (!commandText.includes("dbutils.widgets.") 
+			&& !commandText.includes("CREATE WIDGET")
+			&& !commandText.includes("${")
+			&& !commandText.includes("getArgument(")){
 			return commandText;
 		}
 
-		let textWidgets: DatabricksTextWidget[] = DatabricksTextWidget.loadFromCommandText(commandText, language);
+		let widgets: DatabricksWidget[];
+		widgets = DatabricksTextWidget.loadFromCommandText(commandText, language);
+		widgets = widgets.concat(DatabricksSelectorWidget.loadFromCommandText(commandText, language));
 
-		for (let textWidget of textWidgets) {
-			if (!this._widgets.has(textWidget.name) || force) {
-				await textWidget.promptForInput();
-				this.setWidget(textWidget.name, textWidget);
-			}
-		}
-
-		let selectorWidgets: DatabricksSelectorWidget[] = DatabricksSelectorWidget.loadFromCommandText(commandText, language);
-
-		for (let selectorWidget of selectorWidgets) {
-			if (!this._widgets.has(selectorWidget.name) || force) {
-				await selectorWidget.promptForInput(context);
-				this.setWidget(selectorWidget.name, selectorWidget);
+		for (let widget of widgets) {
+			if (!this._widgets.has(widget.name) || force) {
+				await widget.promptForInput();
+				this.setWidget(widget.name, widget);
 			}
 		}
 
