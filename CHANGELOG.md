@@ -8,6 +8,7 @@
   - create/update cluster
   - create/overwrite/update job
 - added support for SQL widgets
+- fixed an issue with `Databricks Connection Manager` wich was broken due to some changes in the Databricks extension ([#143](/../../issues/143))
 - fix issue with named parameters in widgets ([#128](/../../issues/128))
 - minor fix to handle `pip install` more generic
 
