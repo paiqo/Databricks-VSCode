@@ -78,7 +78,6 @@ export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManag
 					"personalAccessToken": ThisExtension.getConfigurationSetting<string>('databricks.connection.default.personalAccessToken', this._settingScope).value,
 					"personalAccessTokenSecure": ThisExtension.getConfigurationSetting<AccessTokenSecure>('databricks.connection.default.personalAccessTokenSecure', this._settingScope).value,
 					"exportFormats": ThisExtension.getConfigurationSetting<ExportFormatsConfiguration>('databricks.connection.default.exportFormats', this._settingScope).value,
-					"useCodeCells": ThisExtension.getConfigurationSetting<boolean>('databricks.connection.default.useCodeCells', this._settingScope).value,
 					"_source": "databricks.default"
 				};
 

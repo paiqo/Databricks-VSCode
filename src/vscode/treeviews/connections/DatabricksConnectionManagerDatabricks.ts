@@ -92,7 +92,6 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 					"SQL": ".sql",
 					"R": ".r"
 				},
-				"useCodeCells": false,
 				"_source": "DatabricksExtension"
 				})			
 		} catch (e) {

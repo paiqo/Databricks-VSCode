@@ -9,9 +9,6 @@ import { ThisExtension } from '../ThisExtension';
 import { FSHelper } from './FSHelper';
 
 export abstract class Helper {
-	private static CodeCellTag: string = "# %% Code Cell";
-	static DatabricksCommandTagRegEx: string = '#\\s*COMMAND\\s*[-]*';
-	static JupyterCodeCellsSettingName: string = "jupyter.codeRegularExpression";
 	private static openAsNotebookSettingName: string = 'python.dataScience.useNotebookEditor';
 
 	private static _doubleClickTimer: any;

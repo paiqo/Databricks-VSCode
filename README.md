@@ -15,13 +15,14 @@ The extensions can be downloaded from the official Visual Studio Code extension 
 - [Workspace Manager](#workspace-manager)
   - Up-/download of notebooks and whole folders
   - Compare/Diff of local vs online notebook
-  - Support for [Code Cells](https://code.visualstudio.com/docs/python/jupyter-support-py#_jupyter-code-cells) if you do not want to use the .ipynb format
+  - Support for files and notebooks
 - [Cluster Manager](#cluster-manager)
   - Start/stop clusters
   - Script cluster definition as JSON
   - Open in OS File Explorer
 - [Notebook Kernel](#notebook-kernel)
   - Execute local code against a running Databricks cluster
+  - Support for `Python`, `SQL`, `Scala` and `R` files/notebooks
   - interactive cell-by-cell execution as in Databricks web UI
   - rich output and visualization of results
   - support for [Widgets](#widgets)
@@ -116,8 +117,6 @@ Another important setting which requires modifying the JSON directly are the exp
 
 Each filetype can either be exported as raw/source file (.scala, .py, .sql, .r) or, if supported, also as a notebook (.ipynb). This is also very important if you want to upload a local file as these also have to match these extension and will be ignored otherwise! For active development it is recommended to use `.ipynb` format as this also allows you to execute your local code against a running Databricks cluster - see [Notebook Kernel](#notebook-kernel).
 
-If you prefer raw/source files (e.g. for better Git integration), you may also consider using [Code Cells](https://code.visualstudio.com/docs/python/jupyter-support-py#_jupyter-code-cells) be setting ```"useCodeCells" = true``` for your corresponding connection. Please be aware that this does currently not work properly with the [Notebook Kernel](#notebook-kernel)!
-
 All these settings can either be configured on a global/user or on a workspace level. The recommendation is to use workspace configurations and then to include the localSyncFolders into your workspace for easy access to your notebooks and sync to GIT.
 Using a workspace configuration also allows you to separate different Databricks Connections completely - e.g. for different projects.
 
@@ -143,7 +142,6 @@ token = dapi219e30212312311c672aaaaaaaaaa
 localSyncFolder = D:\Desktop\sync\test
 localSyncSubfolders = {"Workspace": "Workspace","Clusters": "Clusters","DBFS": "DBFS","Jobs": "Jobs"}
 exportFormats = {"Scala": ".scala","Python": ".ipynb","SQL": ".sql","R": ".r"}
-useCodeCells = true
 ```
 
 You can also change the following other settings:
@@ -155,7 +153,6 @@ You can also change the following other settings:
 |localSyncFolder|localSyncFolder|text|optional, defaults to `<user home directory>/Databricks-VSCode/<profile name>`|
 |localSyncSubFolders|localSyncSubfolders|JSON|optional, defaults to VSCode default|
 |exportFormats|exportFormats|JSON|optional, defaults to VSCode default|
-|useCodeCells|useCodeCells|boolean|true/false|
 
 # Setup and Configuration (Azure Connection Manager)
 The Azure Connection Manager allows you to use your Azure Active Directory (AAD) account to interact with Databricks. This includes:
@@ -164,7 +161,7 @@ The Azure Connection Manager allows you to use your Azure Active Directory (AAD)
 
 VSCode will prompt you to use your Microsoft Account two times. The first time is to get a list of all available Azure Databricks workspaces that you have access to and then a second time to establish a connection to the selected/active workspace. Whenever you switch connection/workspace, you may get prompted again!
 
-To activate the Azure Connection Manager, simply set the VSCode setting `databricks.connectionManager` to `Azure` and refresh your connections. No additional configurations need to be done. Currently most other connection settings like `useCodeCells`, `exportFormats`, etc. cannot currently be controlled and are set to their defaults.
+To activate the Azure Connection Manager, simply set the VSCode setting `databricks.connectionManager` to `Azure` and refresh your connections. No additional configurations need to be done. Currently most other connection settings like `exportFormats`, etc. cannot currently be controlled and are set to their defaults.
 
 The following Azure-specific settings exist and can be set in the workspace settings:
 - `databricks.azure.tenantId`
@@ -200,8 +197,6 @@ The downloaded files can then be executed directly against the Databricks cluste
 The up-/downloaded state of the single items are also reflected in their icons:
 ![Workspace Manager Icons](https://github.com/paiqo/Databricks-VSCode/blob/master/images/WorkspaceManager_Icons.jpg?raw=true "Workspace Manager Icons")
 
-If you have set ```useCodeCells = true``` in your connection, the Code Cells will be added once you download a raw/source file. They will not be removed again when you upload the raw/source file again!
-
 **NOTE: The logic is currently not recursive - if a folder exists online and locally, does not mean that also all sub-folders and files exist online and locally!**
 
 - A small red dot at the top right of an item indicates that it only exists online in the Databricks workspace but has not yet been downloaded to the ```localSyncFolder``` into the subfolder ```Workspace```.
@@ -228,8 +223,9 @@ Whenever a notebook is opened from either the local sync folder or via the [Virt
 
 If you are using the [Databricks Extension Connection Manager](#setup-and-configuration-databricks-extension-connection-manager) we will also create a generic notebook kernel for you which used the configured cluster.
 
-To work with non `.ipynb` notebooks, you can also open source files from Databricks as notebooks. For this to work you need to add `workbench.editorAssociations` for the file types to your VSCode settings. The important part is to use `databricks-notebook` as default editor:
-```
+To work with non-`.ipynb` notebooks, you can also open source files from Databricks as notebooks (e.g. `.sql`, `.scala`, `.r`). For this to work you need to add `workbench.editorAssociations` for the file types to your VSCode settings. The important part is to use `databricks-notebook` as default editor:
+
+```json
 "settings": {
 		"workbench.editorAssociations":{
 			"*.py": "databricks-notebook",
@@ -240,6 +236,9 @@ To work with non `.ipynb` notebooks, you can also open source files from Databri
     ...
 }
 ```
+
+However, there are some technical restrictions working with those files. While they behave like notebooks, they are still just source files in teh background which means the output of executed cells is not persisted. So it can happen that if you save the notebook and it is then reloaded from the source (which can happen automatically in the background), your cell outputs are lost.
+Also, please make sure that the file extensions you configure here are the same as you configured in your `exportFormats`
 
 ## Execution Modes
 We distinguish between Live-execution and Offline-execution. In Live-execution mode, files are opened directly from Databricks by mounting the Databricks Workspace into your VSCode Workspace using `wsfs:/` URI scheme. In this mode there is no intermediate local copy but you work directly against the Databricks Workspace. Everything you run must already exist online in the Databricks Workspace.

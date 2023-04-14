@@ -237,12 +237,6 @@
 							}
 						}
 					},
-					"databricks.connection.default.useCodeCells": {
-						"type": "boolean",
-						"markdownDescription": "(`VSCode Settings`, Optional) If true, Code Cell tags (# %%) will be added when downloading raw source files.",
-						"scope": "window",
-						"default": true
-					},
 					"databricks.connections": {
 						"type": "array",
 						"makrdownDescription": "(`VSCode Settings`) An array of objects where each object represents a Databricks Connection containing the same settings as defined for databricks.connection.default.* ",
@@ -355,11 +349,6 @@
 											"description": "The subfolder where to store downloaded job and job-run defintions."
 										}
 									}
-								},
-								"useCodeCells": {
-									"type": "boolean",
-									"default": false,
-									"description": "If true, Code Cell tags (# %%) will be added when downloading raw source files."
 								}
 							}
 						},

@@ -102,9 +102,6 @@ export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager 
 						case "exportFormats":
 							connectionParameters.exportFormats = JSON.parse(kvp[1]) as ExportFormatsConfiguration;
 							break;
-						case "useCodeCells":
-							connectionParameters.useCodeCells = Helper.parseBoolean(kvp[1]);
-							break;
 					}
 				}
 			}

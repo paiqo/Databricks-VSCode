@@ -49,17 +49,6 @@ export abstract class DatabricksConnectionManager {
 
 		if (await DatabricksApiService.initialize(con)) {
 
-			if (con.useCodeCells) {
-				let codeCellsCurrentValue = ThisExtension.getConfigurationSetting(Helper.JupyterCodeCellsSettingName).value;
-				if (!codeCellsCurrentValue.includes(Helper.DatabricksCommandTagRegEx)) // Databricks tag was not yet added
-				{
-					await ThisExtension.updateConfigurationSetting(Helper.JupyterCodeCellsSettingName, "^(" + Helper.DatabricksCommandTagRegEx + "|" + codeCellsCurrentValue.slice(2));
-				}
-			}
-			else {
-				await ThisExtension.updateConfigurationSetting(Helper.JupyterCodeCellsSettingName, undefined);
-			}
-
 			if (refreshComponents) {
 				await Helper.delay(100);
 
