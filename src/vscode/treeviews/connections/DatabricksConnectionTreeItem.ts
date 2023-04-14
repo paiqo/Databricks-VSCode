@@ -15,7 +15,6 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 	_localSyncSubfolders: LocalSyncSubfolderConfiguration;
 	_isActive: boolean;
 	_exportFormats: ExportFormatsConfiguration;
-	_useCodeCells: boolean;
 	_personalAccessTokenSecure: {
 		keyTarSettingName: string,
 		databricksCLIProfileName: string
@@ -38,7 +37,6 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 		this._localSyncFolder = FSHelper.resolvePath(definition.localSyncFolder);
 		this._localSyncSubfolders = definition.localSyncSubfolders;
 		this._exportFormats = definition.exportFormats;
-		this._useCodeCells = definition.useCodeCells;
 		this._source = definition._source;
 
 		this._isActive = this.displayName === ThisExtension.ActiveConnectionName;
@@ -77,7 +75,6 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 			`CloudProvider: ${this.cloudProvider}\n` +
 			localSync +
 			`ExportFormats: ${JSON.stringify(this.exportFormats)}\n` +
-			`UseCodeCells: ${this.useCodeCells}\n` +
 			`Source: ${this.source}`;
 	}
 
@@ -158,14 +155,6 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 
 	set exportFormats(value: ExportFormatsConfiguration) {
 		this._exportFormats = value;
-	}
-
-	get useCodeCells(): boolean {
-		return this._useCodeCells;
-	}
-
-	set useCodeCells(value: boolean) {
-		this._useCodeCells = value;
 	}
 
 	get source(): ConnectionSource {
@@ -324,16 +313,6 @@ export class DatabricksConnectionTreeItem extends vscode.TreeItem implements iDa
 			//vscode.window.showWarningMessage(msg);
 
 			con.exportFormats = defaultFromExtension;
-		}
-		if (con.useCodeCells == undefined) { // this.propertyIsValid does not work for booleans !!!
-			// get the default from the config of this extension
-			let defaultFromExtension = ThisExtension.configuration.packageJSON.contributes.configuration[0].properties["databricks.connection.default.useCodeCells"].default;
-			msg = 'Configuration ' + con.displayName + ': Property "useCodeCells" was not provided - using the default value "' + defaultFromExtension + '"!';
-			ThisExtension.log(msg);
-			//vscode.window.showWarningMessage(msg);
-
-			con.useCodeCells = defaultFromExtension;
-			
 		}
 
 		return true;

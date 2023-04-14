@@ -14,7 +14,6 @@ export interface iDatabricksConnection {
 	localSyncFolder?: vscode.Uri;
 	localSyncSubfolders?: LocalSyncSubfolderConfiguration;
 	exportFormats?: ExportFormatsConfiguration;
-	useCodeCells?: boolean;
 
 	_source: ConnectionSource;
 }
