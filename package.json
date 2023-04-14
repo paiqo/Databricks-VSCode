@@ -1183,7 +1183,7 @@
 		"@types/node": "^16.11.7",
 		"@types/rimraf": "^2.0.5",
 		"@types/vscode": "^1.68.0",
-		"@vscode/vsce": "^2.18.0",
+		"@vscode/vsce": "^2.19.0",
 		"@vscode/test-web": "*",
 		"eslint": "^8.19.0",
 		"glob": "^8.0.3",
