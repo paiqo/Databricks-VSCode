@@ -71,16 +71,16 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 			}
 
 			ThisExtension.log("Databricks extension is installed!");
-			let publicApi = await databricksExtension.activate();
-			let connectionManager = publicApi.connectionManager;
+			const publicApi = await databricksExtension.activate();
+			const connectionManager = publicApi.connectionManager;
 			await connectionManager.login();
+			await connectionManager.waitForConnect();
+			
 			this._databricksConnectionManager = connectionManager;;
+			this._apiClient = connectionManager.apiClient ?? connectionManager.workspaceClient?.apiClient;
+			const host = await this._apiClient.host;
 
-			let workspaceManager = connectionManager.workspaceClient;
-			this._apiClient = workspaceManager.apiClient;
-			let host = await this._apiClient.host;
-
-			let localSyncfolder = connectionManager.syncDestinationMapper?.localUri;
+			const localSyncfolder = connectionManager.syncDestinationMapper?.localUri;
 
 			this._connections.push({
 				"apiRootUrl": vscode.Uri.parse(host), 

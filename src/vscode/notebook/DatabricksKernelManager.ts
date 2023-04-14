@@ -18,7 +18,7 @@ export abstract class DatabricksKernelManager {
 	}
 
 	static async refresh(showInfoMessage: boolean = false): Promise<void> {
-		let clusters: iDatabricksCluster[] = await DatabricksApiService.listClusters();
+		let clusters: iDatabricksCluster[] = await DatabricksApiService.listClusters() ?? [];
 
 		for (let cluster of clusters) {
 			if (cluster.cluster_source != "JOB") {
