@@ -28,7 +28,7 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 		await this.loadConnections();
 
 		if (this._connections.length == 0) {
-			let msg: string = "No Databricks Workspaces have been found! Please make sure you are connected to the right tenant and have the appropriate permissions!";
+			let msg: string = "No Databricks Workspaces have been found! Please make sure the Databricks extension is configured properly and working!";
 			ThisExtension.log(msg);
 			vscode.window.showErrorMessage(msg);
 		}
@@ -70,22 +70,24 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 				return;
 			}
 
-			ThisExtension.log("Databricks extension is installed!");
+			ThisExtension.log("Databricks extension is installed! Deriving settings from there ...");
 			const publicApi = await databricksExtension.activate();
 			const connectionManager = publicApi.connectionManager;
 			await connectionManager.login();
 			await connectionManager.waitForConnect();
 			
-			this._databricksConnectionManager = connectionManager;;
+			this._databricksConnectionManager = connectionManager;
+			// new logic to handle two versions of the Databricks Extension
 			this._apiClient = connectionManager.apiClient ?? connectionManager.workspaceClient?.apiClient;
 			const host = await this._apiClient.host;
 
-			const localSyncfolder = connectionManager.syncDestinationMapper?.localUri;
+			// localSyncFolder is not mandatory, hence we also allow null/undefined values
+			const localSyncfolder = connectionManager.syncDestinationMapper?.localUri?.uri;
 
 			this._connections.push({
 				"apiRootUrl": vscode.Uri.parse(host), 
 				"displayName": "Databricks Extension",
-				"localSyncFolder": localSyncfolder.uri,
+				"localSyncFolder": localSyncfolder,
 				"exportFormats": {
 					"Scala": ".scala",
 					"Python": ".ipynb",
@@ -95,6 +97,7 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 				"_source": "DatabricksExtension"
 				})			
 		} catch (e) {
+			ThisExtension.log(`ERROR: Something went wrong loading the connections from Connection Manager 'Databricks Extensions'!`);
 			ThisExtension.log(e);
 		}
 	}

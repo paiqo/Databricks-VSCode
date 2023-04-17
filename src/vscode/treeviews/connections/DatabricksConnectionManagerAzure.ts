@@ -224,6 +224,7 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 
 			DatabricksConnectionManagerAzure._azureConnections = this._connections;
 		} catch (e) {
+			ThisExtension.log(`ERROR: Something went wrong loading the connections from Connection Manager 'Azure'!`);
 			ThisExtension.log(e);
 		}
 	}

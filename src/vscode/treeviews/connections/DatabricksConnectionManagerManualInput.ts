@@ -51,20 +51,20 @@ export class DatabricksConnectionManagerManualInput extends DatabricksConnection
 			
 			let apiRootUrl: string = await Helper.showInputBox("https://adb-123456789012345.99.azuredatabricks.net", "API Root Url", true);
 			if (!apiRootUrl) {
-				ThisExtension.log("Adding new connection aborted!")
+				ThisExtension.log("Adding new connection aborted! No 'API Root URL' provided!")
 				return;
 			}
 			let apiUri: vscode.Uri = vscode.Uri.parse(apiRootUrl, true);
 
 			let personalAccessToken: string = await Helper.showInputBox("dapi99887766554433221100987654321098", "Personal Access Token (PAT)", true);
 			if (!personalAccessToken) {
-				ThisExtension.log("Adding new connection aborted!")
+				ThisExtension.log("Adding new connection aborted! No 'Personal Access Token (PAT)' provided!")
 				return;
 			}
 
 			let displayName: string = await Helper.showInputBox("", "Display name", true);
 			if (!displayName) {
-				ThisExtension.log("Adding new connection aborted!")
+				ThisExtension.log("Adding new connection aborted! No 'Display Name' provided!")
 				return;
 			}
 
@@ -82,6 +82,7 @@ export class DatabricksConnectionManagerManualInput extends DatabricksConnection
 				ThisExtension.log("Connection information not valid - please try again!");
 			}
 		} catch (e) {
+			ThisExtension.log(`ERROR: Something went wrong loading the connections from Connection Manager 'Manual'!`);
 			ThisExtension.log(e);
 		}
 	}

@@ -1134,19 +1134,18 @@
 				{
 					"command": "databricksKernel.restart",
 					"group": "navigation/execute@1",
-					"when": "notebookKernel =~ /^paiqo.databricks-vscode\\// && notebookType == 'jupyter-notebook' && isWorkspaceTrusted"
+					"when": "notebookKernel =~ /^paiqo.databricks-vscode\\// && notebookType =~ /jupyter-notebook|databricks-notebook/ && isWorkspaceTrusted"
 				},
 				{
 					"command": "databricksKernel.updateWidgets",
 					"group": "navigation/execute@1",
-					"when": "notebookKernel =~ /^paiqo.databricks-vscode\\// && notebookType == 'jupyter-notebook' && isWorkspaceTrusted"
+					"when": "notebookKernel =~ /^paiqo.databricks-vscode\\// && notebookType =~ /jupyter-notebook|databricks-notebook/ && isWorkspaceTrusted"
 				}
-			],
-			"editor/title": [
+			],			"editor/title": [
 				{
 					"command": "databricksKernel.restart",
 					"group": "navigation@1",
-					"when": "notebookKernel =~ /^paiqo.databricks-vscode\\// && notebookType == 'jupyter-notebook' && isWorkspaceTrusted"
+					"when": "false && notebookKernel =~ /^paiqo.databricks-vscode\\// && notebookType =~ /jupyter-notebook|databricks-notebook/ && isWorkspaceTrusted"
 				}
 			],
 			"editor/title/run": [

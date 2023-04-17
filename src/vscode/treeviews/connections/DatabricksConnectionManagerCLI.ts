@@ -116,6 +116,7 @@ export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager 
 				}
 			}
 		} catch (e) {
+			ThisExtension.log(`ERROR: Something went wrong loading the connections from Connection Manager 'Databricks CLI Profiles'!`);
 			ThisExtension.log(e);
 		}
 	}

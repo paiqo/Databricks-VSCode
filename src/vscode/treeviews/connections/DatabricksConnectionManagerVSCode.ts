@@ -28,7 +28,7 @@ export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManag
 		}
 		else {
 			await super.manageLastActiveConnection();
-			
+
 			try {
 				ThisExtension.log("Setting 'databricks.lastActiveConnection' to '" + this._lastActiveConnectionName + "' ...");
 				ThisExtension.updateConfigurationSetting("databricks.lastActiveConnection", this._lastActiveConnectionName, this._settingScope);
@@ -59,12 +59,19 @@ export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManag
 		this._settingScope = ThisExtension.SettingScope;
 		this._connections = [];
 
-		ThisExtension.log("Loading Connections from 'databricks.connections' ...");
-		let connections = ThisExtension.getConfigurationSetting<iDatabricksConnection[]>('databricks.connections', this._settingScope, true);
-		connections.value.forEach(x => x._source = "databricks.connections");
-		connections.value.forEach(x => DatabricksConnectionTreeItem.validate(x, false));
+		try {
+			ThisExtension.log("Loading Connections from 'databricks.connections' ...");
+			let connections = ThisExtension.getConfigurationSetting<iDatabricksConnection[]>('databricks.connections', this._settingScope, true);
+			connections.value.forEach(x => x._source = "databricks.connections");
+			connections.value.forEach(x => DatabricksConnectionTreeItem.validate(x, false));
+			this._connections = this._connections.concat(connections.value);
+		}
+		catch (error) {
+			let msg = "Could not load connections from 'databricks.connections' settings!";
+			ThisExtension.log("ERROR: " + msg);
+			vscode.window.showErrorMessage(msg);
+		}
 
-		this._connections = this._connections.concat(connections.value);
 
 		ThisExtension.log("Loading Connection from 'databricks.connection.default.*' ...");
 		try {
