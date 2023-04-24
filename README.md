@@ -237,14 +237,19 @@ To work with non-`.ipynb` notebooks, you can also open source files from Databri
 }
 ```
 
-However, there are some technical restrictions working with those files. While they behave like notebooks, they are still just source files in teh background which means the output of executed cells is not persisted. So it can happen that if you save the notebook and it is then reloaded from the source (which can happen automatically in the background), your cell outputs are lost.
-Also, please make sure that the file extensions you configure here are the same as you configured in your `exportFormats`
+However, there are some technical restrictions working with those files. While they behave like notebooks, they are still just source files in the background which means, the output of executed cells is not persisted. So it can happen that if you save the notebook and it is then reloaded from the source (which can happen automatically in the background), your cell outputs are lost.
+Also, please make sure that the file extensions you configure here are the same as you configured in your `exportFormats`!
+
+As it is also possible to maintain Python libraries within DAtabricks using [Workspace Files](https://docs.databricks.com/files/workspace.html) there is a clash between file extensions of workspace files and Python notebooks downloaded in source format hence there can be some issues when creating new files etc. Therefore it is recommended to keep using `.ipynb` format for Python notebooks and `.py` for workspace files used in libraries.
 
 ## Execution Modes
 We distinguish between Live-execution and Offline-execution. In Live-execution mode, files are opened directly from Databricks by mounting the Databricks Workspace into your VSCode Workspace using `wsfs:/` URI scheme. In this mode there is no intermediate local copy but you work directly against the Databricks Workspace. Everything you run must already exist online in the Databricks Workspace.
 
 This is slightly different in Offline-execution where all files you want to work with need to be synced locally first using the [Workspace Manager](#workspace-manager). This is especially important when it comes `%run` which behaves slightly differntly compared to Live-execution mode. `%run` in Offline-execution runs the code from your local file instead of the code that exists in Dtabricks online!
 Other commands like `dbutils.notebook.run()` always use the code thats currently online so if you have changed the refernced notebook locally, you have to upload it first. This is simply because we cannot easily replicate the behavior of `dbutils.notebook.run()` locally!
+
+## Supported Databricks Features
+Besides the features mentioned above in [Execution modes](#execution-modes) there is also full support for all [Databricks Utilities](https://docs.databricks.com/dev-tools/databricks-utils.html) in `dbutils`. Also more advanced features like [Files in Repos](https://docs.databricks.com/files/workspace.html#configure-support-for-files-in-repos) and [Workspace Files](https://docs.databricks.com/files/workspace.html) are supported. They work the very same way as they do on Databricks directly with the only limitation that the notebook that is run has to be openend either via the `wsfs:/` [File System Integration](#file-system-integration) or from the local path where the workspace is synced to via the [Workspace Manager](#workspace-manager). This is mandatory as we some how have to derive the location of the current notebook within the Databricks workspace to derive and set the relevant paths in the background accordingly.
 
 ## Widgets
 The extension can also handle classic Databricks Widgets created using `dbutils.widgets.xxx()`. However, there are some limitations that might work slightly different than in the Databricks UI:
