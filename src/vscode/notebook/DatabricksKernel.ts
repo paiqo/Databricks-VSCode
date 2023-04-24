@@ -98,7 +98,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 			ThisExtension.setStatusBar("Initializing Kernel ...", true);
 			execContext = await this.initializeExecutionContext(notebook.metadata?.notebookLanguage?.databricksLanguage);
 			this.setNotebookContext(notebook.uri, execContext);
-			await this.updateRepoContext(notebook.uri);
+			await this.updateWorkspaceContext(notebook.uri);
 			ThisExtension.setStatusBar("Kernel initialized!");
 		}
 		for (let cell of cells) {
@@ -228,30 +228,64 @@ export class DatabricksKernel implements vscode.NotebookController {
 		return this._widgets.get(name);
 	}
 
-	async updateRepoContext(notebookUri: vscode.Uri): Promise<void> {
-		let paths: string[] = notebookUri.path.split(FSHelper.SEPARATOR);
-		// if we are working with a notebook from the Databricks Repos folder (works with dbws:/ and locally synced notebooks)
-		if (paths.includes("Repos")) {
-			ThisExtension.log("NotebookKernel: Setting up FilesInRepo support for " + notebookUri);
-			ThisExtension.setStatusBar("Initializing FilesInRepo ...");
-			let driverRepoPath: string = `/Workspace/${paths.slice(paths.indexOf("Repos"), paths.indexOf("Repos") + 3).join(FSHelper.SEPARATOR)}`
-			let driverNotebookDirectory: string = `/Workspace/${paths.slice(paths.indexOf("Repos"), -1).join(FSHelper.SEPARATOR)}`
-			let context: ExecutionContext = this.getNotebookContext(notebookUri);
-			let commandTexts: string[] = ["import sys", "import os", `sys.path.append('${driverRepoPath}')`, `os.chdir('${driverNotebookDirectory}')`];
-			let command: ExecutionCommand = await DatabricksApiService.runCommand(context, commandTexts.join("\n"), "python");
-			let result = await DatabricksApiService.getCommandResult(command, true);
+	async updateWorkspaceContext(notebookUri: vscode.Uri): Promise<void> {
+		let feature: string = undefined;
+		let driverLibraryDirectory: string = undefined; // 
+		let driverWorkingDirectory: string = undefined;
 
-			if (result.results.resultType == "error") {
-				ThisExtension.log(result.results.summary);
-				ThisExtension.log(result.results.cause);
-				ThisExtension.setStatusBar("FilesInRepo failed!");
+		// if we are working with a notebook from a Databricks folder (works with wsfs:/, dbws:/ and locally synced notebooks)
+		if (notebookUri.scheme == ThisExtension.WORKSPACE_SCHEME
+			|| notebookUri.scheme == ThisExtension.WORKSPACE_SCHEME_LEGACY
+			|| (notebookUri.scheme == "file" && notebookUri.fsPath.startsWith(ThisExtension.ActiveConnection.localSyncFolder.fsPath))) {
 
-				vscode.window.showErrorMessage("Could not setup Files in Repo for '" + notebookUri + "' on cluster '" + this.ClusterID + "'\nPlease check logs for details!");
+			let paths: string[] = notebookUri.path.split(FSHelper.SEPARATOR);
+			let workspaceRootUri = await vscode.Uri.from({ scheme: "x", authority: "root", path: "/Workspace" });
+
+			if (paths.includes("Repos")) {
+				feature = "FilesInRepo";
+
+				// this code works for wsfs:/ and also for locally synced notebooks
+				driverLibraryDirectory = (await FSHelper.joinPath(workspaceRootUri, ...paths.slice(paths.indexOf("Repos"), paths.indexOf("Repos") + 3))).path;
+				driverWorkingDirectory = (await FSHelper.joinPath(workspaceRootUri, ...paths.slice(paths.indexOf("Repos"), -1))).path;
 			}
 			else {
-				ThisExtension.log(`NotebookKernel: Successfully set up FilesInRepo by running '${commandTexts[2]}' and '${commandTexts[3]}' on driver!`);
-				ThisExtension.setStatusBar("FilesInRepo initialized!");
+				feature = "FilesInWorkspace";
+
+				driverWorkingDirectory = (await FSHelper.joinPath(workspaceRootUri, ...paths.slice(undefined, -1))).path;
+				// for FilesInWorkspace the libraryDirectory is the same as the workingDirectory
+				driverLibraryDirectory = driverWorkingDirectory;
 			}
+		}
+		else {
+			ThisExtension.log(`NotebookKernel: Could not identify FilesInRepo or FilesInWorkspace support for ${notebookUri}`);
+			ThisExtension.setStatusBar(`No File support!`);
+			return;
+		}
+
+		ThisExtension.log(`NotebookKernel: Setting up ${feature} support for ${notebookUri}`);
+		ThisExtension.setStatusBar(`Initializing ${feature} ...`);
+
+		let context: ExecutionContext = this.getNotebookContext(notebookUri);
+		let commandTexts: string[] = ["import os", `os.chdir('${driverWorkingDirectory}')`];
+
+		if (driverLibraryDirectory != undefined) {
+			commandTexts.push("import sys");
+			commandTexts.push(`sys.path.append('${driverLibraryDirectory}')`);
+		}
+
+		let command: ExecutionCommand = await DatabricksApiService.runCommand(context, commandTexts.join("\n"), "python");
+		let result = await DatabricksApiService.getCommandResult(command, true);
+
+		if (result.results.resultType == "error") {
+			ThisExtension.log(result.results.summary);
+			ThisExtension.log(result.results.cause);
+			ThisExtension.setStatusBar("FilesInRepo failed!");
+
+			vscode.window.showErrorMessage("Could not setup Files in Repo for '" + notebookUri + "' on cluster '" + this.ClusterID + "'\nPlease check logs for details!");
+		}
+		else {
+			ThisExtension.log(`NotebookKernel: Successfully set up FilesInRepo by running the following commands on the driver: \n-> ${commandTexts.join("\n-> ")}`);
+			ThisExtension.setStatusBar("FilesInRepo initialized!");
 		}
 	}
 
@@ -319,10 +353,10 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 		*/
 		// shortcut if widgets are not used
-		if (!commandText.includes("dbutils.widgets.") 
+		if (!commandText.includes("dbutils.widgets.")
 			&& !commandText.includes("CREATE WIDGET")
 			&& !commandText.includes("${")
-			&& !commandText.includes("getArgument(")){
+			&& !commandText.includes("getArgument(")) {
 			return commandText;
 		}
 
@@ -578,7 +612,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 
 			if (["pip"].includes(magic) || commandText.includes("pip install")) {
-				await this.updateRepoContext(cell.notebook.uri);
+				await this.updateWorkspaceContext(cell.notebook.uri);
 			}
 
 			execution.end(result.status == "Finished", Date.now());

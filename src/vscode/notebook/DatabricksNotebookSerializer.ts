@@ -54,6 +54,7 @@ export class DatabricksNotebookSerializer implements vscode.NotebookSerializer {
 	public async deserializeNotebook(data: Uint8Array, token: vscode.CancellationToken): Promise<DatabricksNotebook> {
 		var contents = Buffer.from(data).toString();
 
+		var firstLineWithCode: number = 1;
 		const lines: string[] = contents.trimStart().split("\n");
 		if (lines.length == 0) {
 			ThisExtension.log("Not a Databricks Notebook source file. Creating new Notebook.");
@@ -61,7 +62,8 @@ export class DatabricksNotebookSerializer implements vscode.NotebookSerializer {
 		}
 		if (!lines[0].trimEnd().endsWith(this.HEADER_SUFFIX)) {
 			ThisExtension.log("File is not a valid Databricks Notebook source file.");
-			throw new Error("File is not a valid Databricks Notebook source file.");
+			//throw new Error("File is not a valid Databricks Notebook source file.");
+			firstLineWithCode = 0;
 		}
 
 		const commentChars = lines[0].split(" ")[0];
@@ -70,7 +72,7 @@ export class DatabricksNotebookSerializer implements vscode.NotebookSerializer {
 		let cellLanguage: DatabricksLanguageMapping = undefined;
 		let languages: DatabricksLanguageMapping[] = this.LANGUAGE_MAPPING.filter(x => x.commentCharacters == commentChars);
 
-		if (languages != undefined || languages.length == 1) {
+		if (languages != undefined && languages.length == 1) {
 			notebookLanguage = languages[0];
 		}
 		else
@@ -89,7 +91,7 @@ export class DatabricksNotebookSerializer implements vscode.NotebookSerializer {
 
 		const splitRegex = new RegExp(`\n\n${commentChars} COMMAND ----------\n\n`, "gm");
 
-		let rawCells: string[] = lines.slice(1).join("\n").split(splitRegex);
+		let rawCells: string[] = lines.slice(firstLineWithCode).join("\n").split(splitRegex);
 
 		for (const rawCell of rawCells) {
 			let cell = new DatabricksNotebookCell(vscode.NotebookCellKind.Code, rawCell, notebookLanguage.vscodeLanguage);

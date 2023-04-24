@@ -167,7 +167,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 		return DatabricksWorkspaceNotebook.fromInterface(item, parent);
 	}
 
-	async download(refreshParent: boolean = false): Promise<vscode.Uri> {
+	async download(refreshParent: boolean = true): Promise<vscode.Uri> {
 		try {
 			let localPath: vscode.Uri;
 			//vscode.window.showInformationMessage(`Download of item ${this._path}) started ...`);

@@ -1,5 +1,9 @@
 # Release Notes
 
+**v2.1.1:**
+- added support for [Files in Workspace](https://docs.databricks.com/files/workspace.html)
+- fixed issue with `.py` files not opening anymore with new notebook experience for source files enabled
+
 **v2.1.0:**
 - introduced a new notebook type for `Scala`, `SQL` and `R`
 - removed interactive notebook kernel as it never really worked
