@@ -75,45 +75,43 @@ export class DatabricksNotebookSerializer implements vscode.NotebookSerializer {
 		if (languages != undefined && languages.length == 1) {
 			notebookLanguage = languages[0];
 		}
-		else
-		{
+		else {
 			// its Python or R
 			const rAssignments = contents.split("<-").length;
 			const pythonAssignments = contents.split("=").length;
 
-			if(rAssignments > pythonAssignments)
-			{
+			if (rAssignments > pythonAssignments) {
 				notebookLanguage = this.LANGUAGE_MAPPING.find(x => x.databricksLanguage == "r");
 			}
 			// else its Python which is the default anyway
 		}
 		let notebook: DatabricksNotebook = new DatabricksNotebook([]);
 
-		const splitRegex = new RegExp(`\n\n${commentChars} COMMAND ----------\n\n`, "gm");
+		const splitRegex = new RegExp(`\n\n${commentChars} ${this.CELL_SEPARATOR_SUFFIX}\n\n`, "gm");
 
 		let rawCells: string[] = lines.slice(firstLineWithCode).join("\n").split(splitRegex);
 
 		for (const rawCell of rawCells) {
 			let cell = new DatabricksNotebookCell(vscode.NotebookCellKind.Code, rawCell, notebookLanguage.vscodeLanguage);
 			cell.metadata = { "cellLanguage": notebookLanguage };
-				
+
 			// check for magic
 			if (rawCell.startsWith(`${commentChars} ${this.MAGIC_PREFIX}`)) {
 				let firstLine = rawCell.split("\n")[0];
 				let firstLineValues = firstLine.split(/\s+/gm);
 				let magic = firstLineValues[2];
 
-				if(magic == "%md")
-				{
+				if (magic == "%md") {
 					cell.kind = vscode.NotebookCellKind.Markup;
 					cell.value = cell.value.replace(new RegExp(`^${commentChars} ${this.MAGIC_PREFIX} ${magic}\n`, "gm"), "");
 				}
-				else
-				{
+				else {
 					cellLanguage = this.LANGUAGE_MAPPING.find(x => x.magic == magic);
-					cell.metadata = { "cellLanguage": cellLanguage };
+					if (cellLanguage) {
+						cell.metadata = { "cellLanguage": cellLanguage };
+					}
 				}
-				
+
 				cell.value = cell.value.replace(new RegExp(`^${commentChars} ${this.MAGIC_PREFIX} `, "gm"), "");
 			}
 			cell.languageId = cell.metadata.cellLanguage.vscodeLanguage;
@@ -133,26 +131,22 @@ export class DatabricksNotebookSerializer implements vscode.NotebookSerializer {
 		let notebook: DatabricksNotebook = data;
 
 		let notebookLanguage: DatabricksLanguageMapping = notebook.metadata.notebookLanguage;
-		
-		let finalCells: vscode.NotebookCellData[] = [];
-
 
 		for (const cell of notebook.cells as DatabricksNotebookCell[]) {
 			if (cell.kind == vscode.NotebookCellKind.Markup) {
 				cell.magic = "%md";
 				cell.value = `${notebookLanguage.commentCharacters} ${this.MAGIC_PREFIX} ${cell.magic}\n${cell.value}`;
 			}
-			
-			if(cell.magic)
-			{
+
+			if (cell.magic) {
 				cell.value = cell.value.replace("\n", `\n${notebookLanguage.commentCharacters} ${this.MAGIC_PREFIX} `);
 			}
 		}
 
 		const headerLine = `${notebookLanguage.commentCharacters} ${this.HEADER_SUFFIX}\n`;
-		const codeLines = notebook.cells.flatMap(x => x.value).join(`\n\n${notebookLanguage.commentCharacters} COMMAND ----------\n\n`)
+		const codeLines = notebook.cells.flatMap(x => x.value).join(`\n\n${notebookLanguage.commentCharacters} ${this.CELL_SEPARATOR_SUFFIX}\n\n`)
 
-		
+
 		// Give a string of all the data to save and VS Code will handle the rest
 		return await Buffer.from(headerLine + codeLines);
 	}

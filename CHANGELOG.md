@@ -1,5 +1,8 @@
 # Release Notes
 
+**v2.1.2:**
+- fixed issue with `%run` (and other magics) when rendering source files as notebooks ([#153](/../../issues/153))
+
 **v2.1.1:**
 - added support for [Files in Workspace](https://docs.databricks.com/files/workspace.html)
 - fixed issue with `.py` files not opening anymore with new notebook experience for source files enabled
