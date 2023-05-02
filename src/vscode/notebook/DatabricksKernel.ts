@@ -11,6 +11,7 @@ import { iDatabricksCluster } from '../treeviews/clusters/iDatabricksCluster';
 import { DatabricksWidget } from './Widgets/DatabricksWidget';
 import { DatabricksTextWidget } from './Widgets/DatabricksTextWidget';
 import { DatabricksSelectorWidget } from './Widgets/DatabricksSelectorWidget';
+import { LanguageFileExtensionMapper } from '../treeviews/workspaces/LanguageFileExtensionMapper';
 
 export type NotebookMagic =
 	"sql"
@@ -46,7 +47,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 	private _cluster: iDatabricksCluster;
 
 
-	constructor(cluster: iDatabricksCluster, notebookType: KernelType = 'jupyter-notebook', language: ContextLanguage = "python") {
+	constructor(cluster: iDatabricksCluster, notebookType: KernelType, language: ContextLanguage = "python") {
 		this.notebookType = notebookType;
 		this._cluster = cluster;
 		this._language = language;
@@ -79,9 +80,6 @@ export class DatabricksKernel implements vscode.NotebookController {
 		if (notebook.uri.scheme == ThisExtension.WORKSPACE_SCHEME_LEGACY || notebook.uri.scheme == ThisExtension.WORKSPACE_SCHEME || notebook.uri.toString().startsWith(ThisExtension.ActiveConnection.localSyncFolder.toString())) {
 			this.Controller.updateNotebookAffinity(notebook, vscode.NotebookControllerAffinity.Preferred);
 		}
-
-		if (notebook.uri.scheme == "vscode-interactive") {
-		}
 	}
 
 	createNotebookCellExecution(cell: vscode.NotebookCell): vscode.NotebookCellExecution {
@@ -96,6 +94,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 		let execContext: ExecutionContext = this.getNotebookContext(notebook.uri);
 		if (!execContext) {
 			ThisExtension.setStatusBar("Initializing Kernel ...", true);
+			// for databricks-notebook type the language is in the metadata, for jupyter-notebook it defaults to the Kernel default "python"
 			execContext = await this.initializeExecutionContext(notebook.metadata?.notebookLanguage?.databricksLanguage);
 			this.setNotebookContext(notebook.uri, execContext);
 			await this.updateWorkspaceContext(notebook.uri);
@@ -412,7 +411,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 					execution.end(false, Date.now());
 					return;
 				case "run":
-					let runFile: string = Helper.trimChar(commandText.substring(commandText.indexOf(' ') + 1), '"');
+					let runFile: string = Helper.trimChar(commandText.substring(commandText.indexOf(' ') + 1).trim(), '"');
 
 					let runUri: vscode.Uri;
 					if (runFile.startsWith("../")) { // relative path with ..
@@ -447,6 +446,10 @@ export class DatabricksKernel implements vscode.NotebookController {
 								}
 								// we cannot use vscode.workspace.fs here as we need the SOURCE file and not the ipynb file 
 								commandText = Buffer.from(await DatabricksApiService.downloadWorkspaceItem(runUri.path, "SOURCE")).toString();
+
+								// get the language of the executed file
+								let wsfsWorkItem = await DatabricksApiService.getWorkspaceItem(runUri.path);
+								language = wsfsWorkItem.language.toLowerCase() as ContextLanguage;
 								break;
 
 							case "file":
@@ -457,7 +460,9 @@ export class DatabricksKernel implements vscode.NotebookController {
 								if (relevantFiles.length == 1) {
 									runUri = vscode.Uri.joinPath(FSHelper.parent(runUri), relevantFiles[0][0]);
 									commandText = Buffer.from(await vscode.workspace.fs.readFile(runUri)).toString();
+									language = LanguageFileExtensionMapper.fromUri(runUri).language.toLowerCase() as ContextLanguage;
 
+									// if the local file is an .ipynb, we need to extract the code cells
 									if (FSHelper.extension(runUri) == ".ipynb") {
 										let notebookJSON = JSON.parse(commandText);
 										let cells = notebookJSON["cells"];
@@ -472,6 +477,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 									}
 								}
 								else {
+									ThisExtension.log("No (or mutiple, non-unique) files found for %run '" + runUri + "'!")
 									throw vscode.FileSystemError.FileNotFound(runUri);
 								}
 								break;
@@ -492,7 +498,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 					}
 
 					let outputRun: vscode.NotebookCellOutput = new vscode.NotebookCellOutput([
-						vscode.NotebookCellOutputItem.text(commandText, 'text/plain')
+						vscode.NotebookCellOutputItem.text(`Code from file '${runUri}':\n ${commandText}`, 'text/plain')
 					])
 
 					execution.appendOutput(outputRun);
@@ -528,40 +534,48 @@ export class DatabricksKernel implements vscode.NotebookController {
 			let result = await DatabricksApiService.getCommandResult(command, true);
 
 			if (result.results.resultType == "table") {
-				let data: Array<any> = [];
-				let html: string;
-
-				html = '<div style="height:300px;overflow:auto;resize:both;"><table style="width:100%" class="searchable sortable"><thead><tr>';
-
-				let schema = result.results.schema;
-
-				for (let col of schema) {
-					html += '<th>' + col.name + '</th>';
+				let output: vscode.NotebookCellOutput;
+				if (result.results.data.length == 0) {
+					output = new vscode.NotebookCellOutput([
+						vscode.NotebookCellOutputItem.text("<Empty result set>", 'text/plain')
+					]);
 				}
+				else {
+					let data: Array<any> = [];
+					let html: string;
 
-				html += '</tr></thead><tbody>';
+					html = '<div style="height:300px;overflow:auto;resize:both;"><table style="width:100%" class="searchable sortable"><thead><tr>';
 
-				for (let row of result.results.data) {
-					let newRow = {};
+					let schema = result.results.schema;
 
-					html += '<tr>';
-					for (let i = 0; i < schema.length; i++) {
-						html += '<td>' + row[i] + '</td>';
-						newRow[schema[i].name] = row[i];
+					for (let col of schema) {
+						html += '<th>' + col.name + '</th>';
 					}
-					html += '</tr>';
-					data.push(newRow);
+
+					html += '</tr></thead><tbody>';
+
+					for (let row of result.results.data) {
+						let newRow = {};
+
+						html += '<tr>';
+						for (let i = 0; i < schema.length; i++) {
+							html += '<td>' + row[i] + '</td>';
+							newRow[schema[i].name] = row[i];
+						}
+						html += '</tr>';
+						data.push(newRow);
+					}
+
+					html += '</tbody></table></div>';
+
+					output = new vscode.NotebookCellOutput([
+						vscode.NotebookCellOutputItem.text(html, 'text/html'),
+						vscode.NotebookCellOutputItem.json(data, 'text/x-json'), // to be used by proper JSON/table renderers
+						vscode.NotebookCellOutputItem.json(data, 'application/json'), // to be used by proper JSON/table renderers
+						vscode.NotebookCellOutputItem.json(result.results, 'application/databricks-table') // the original result from databricks including schema and datatypes for more advanced renderers
+					])
+					output.metadata = { row_count: data.length, truncated: result.results.truncated };
 				}
-
-				html += '</tbody></table></div>';
-
-				let output: vscode.NotebookCellOutput = new vscode.NotebookCellOutput([
-					vscode.NotebookCellOutputItem.text(html, 'text/html'),
-					vscode.NotebookCellOutputItem.json(data, 'text/x-json'), // to be used by proper JSON/table renderers
-					vscode.NotebookCellOutputItem.json(data, 'application/json'), // to be used by proper JSON/table renderers
-					vscode.NotebookCellOutputItem.json(result.results, 'application/databricks-table') // the original result from databricks including schema and datatypes for more advanced renderers
-				])
-				output.metadata = { row_count: data.length, truncated: result.results.truncated };
 				execution.appendOutput(output);
 
 				if (language == "sql") {

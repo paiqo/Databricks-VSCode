@@ -89,7 +89,7 @@ export abstract class DatabricksKernelManager {
 
 	static async createKernels(cluster: iDatabricksCluster, logMessages: boolean = true): Promise<void> {
 		if (!this.jupyterKernelExists(cluster)) {
-			let notebookKernel: DatabricksKernel = new DatabricksKernel(cluster);
+			let notebookKernel: DatabricksKernel = new DatabricksKernel(cluster, "jupyter-notebook");
 			this.setKernel(this.getJupyterKernelName(cluster), notebookKernel);
 			if (logMessages) {
 				ThisExtension.log(`Notebook Kernel for Databricks cluster '${cluster.cluster_id}' created!`)
@@ -102,15 +102,15 @@ export abstract class DatabricksKernelManager {
 		}
 
 		if (!this.databricksKernelExists(cluster)) {
-			let interactiveKernel: DatabricksKernel = new DatabricksKernel(cluster, "databricks-notebook");
-			this.setKernel(this.getDatabricksKernelName(cluster), interactiveKernel);
+			let databricksKernel: DatabricksKernel = new DatabricksKernel(cluster, "databricks-notebook");
+			this.setKernel(this.getDatabricksKernelName(cluster), databricksKernel);
 			if (logMessages) {
-				ThisExtension.log(`Interactive Kernel for Databricks cluster '${cluster.cluster_id}' created!`)
+				ThisExtension.log(`Databricks Kernel for Databricks cluster '${cluster.cluster_id}' created!`)
 			}
 		}
 		else {
 			if (logMessages) {
-				ThisExtension.log(`Interactive Kernel for Databricks cluster '${cluster.cluster_id}' already exists!`)
+				ThisExtension.log(`Databricks Kernel for Databricks cluster '${cluster.cluster_id}' already exists!`)
 			}
 		}
 	}
@@ -131,12 +131,12 @@ export abstract class DatabricksKernelManager {
 		if (this.databricksKernelExists(cluster)) {
 			this.removeKernel(this.getDatabricksKernelName(cluster));
 			if (logMessages) {
-				ThisExtension.log(`Interactive Kernel for Databricks cluster '${cluster.cluster_id}' removed!`)
+				ThisExtension.log(`Databricks Kernel for Databricks cluster '${cluster.cluster_id}' removed!`)
 			}
 		}
 		else {
 			if (logMessages) {
-				ThisExtension.log(`Interactive Kernel for Databricks cluster '${cluster.cluster_id}' does not exists!`)
+				ThisExtension.log(`Databricks Kernel for Databricks cluster '${cluster.cluster_id}' does not exists!`)
 			}
 		}
 	}
