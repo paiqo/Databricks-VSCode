@@ -181,7 +181,7 @@ The extension supports various connection managers and the list can be easily ex
 - [VSCode Settings](#setup-and-configuration-vscode-connection-manager)
 - [Databricks CLI](#setup-and-configuration-databricks-cli-connection-manager)
 - [Azure](#setup-and-configuration-azure-connection-manager)
-- [Databricks Extensions](#setup-and-configuration-databricks-extensions-connection-manager)
+- [Databricks Extensions](#setup-and-configuration-databricks-extension-connection-manager)
 - `Manual` where you are simply prompted to enter connection information at the start of your session.
 
 You can specify the one to use by setting the VSCode setting `databricks.connectionManager`.
@@ -218,6 +218,12 @@ The execution of the first cell may take a bit longer as the remote execution co
 For better visualization of tabluar results this extension includes a dependency to the extension [vscode-data-table](https://github.com/RandomFractals/vscode-data-table) which offers much more features than the standard visualizations.
 
 Notebook Kernels also support other features like [Files in Repo](https://docs.databricks.com/_static/notebooks/files-in-repos.html) to build libraries within your repo, [_sqldf](https://docs.databricks.com/notebooks/notebooks-use.html#explore-sql-cell-results-in-python-notebooks-natively-using-python) to expose results of SQL cells to Python/Pyspark, `%run` to run other notebooks inline with the current notebook and also [dbutils.notebook.run()](https://docs.databricks.com/dev-tools/databricks-utils.html#notebook-utility-dbutilsnotebook).
+
+However, there are some known limitations to `%run` as listed blow:
+- cells of referenced notebooks that use magics are not executed
+  - this also applies to `%run` (see below)
+- nested `%run` statements are not supported
+  - you might consider migrating to [Files in Workspace](https://docs.databricks.com/files/workspace.html)
 
 Whenever a notebook is opened from either the local sync folder or via the [Virtual File System](#file-system-integration) using `wsfs:/` URI, the Databricks notebook kernels are the preferred ones and should appear at the top of the list when you select a kernel.
 
