@@ -1,5 +1,8 @@
 # Release Notes
 
+**v2.1.3:**
+- fixed issue with `%run` and different notebook languages ([#154](/../../issues/154))
+
 **v2.1.2:**
 - fixed issue with `%run` (and other magics) when rendering source files as notebooks ([#153](/../../issues/153))
 
