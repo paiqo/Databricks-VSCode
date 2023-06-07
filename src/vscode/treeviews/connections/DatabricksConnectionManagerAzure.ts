@@ -167,6 +167,11 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 					response = await fetch(`https://management.azure.com/subscriptions/${subscriptionID}/providers/Microsoft.Databricks/workspaces?api-version=2018-04-01`, config);
 					if (response.ok) {
 						let azureWorkspaces = await response.json() as AzureResourceListRepsonse
+						if(!azureWorkspaces.value || azureWorkspaces.value.length == 0)
+						{
+							ThisExtension.log("No Databricks Workspaces found for subscription '" + subscriptionID + "'!");
+							continue;
+						}
 						ThisExtension.setStatusBar("Got " + azureWorkspaces.value.length + " Databricks Workspaces!", false);
 						ThisExtension.log("Read " + azureWorkspaces.value.length + " available Databricks Workspaces: " + JSON.stringify(azureWorkspaces));
 
