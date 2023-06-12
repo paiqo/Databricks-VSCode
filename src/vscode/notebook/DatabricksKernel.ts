@@ -12,6 +12,7 @@ import { DatabricksWidget } from './Widgets/DatabricksWidget';
 import { DatabricksTextWidget } from './Widgets/DatabricksTextWidget';
 import { DatabricksSelectorWidget } from './Widgets/DatabricksSelectorWidget';
 import { LanguageFileExtensionMapper } from '../treeviews/workspaces/LanguageFileExtensionMapper';
+import { DatabricksConnectionManagerDatabricks } from '../treeviews/connections/DatabricksConnectionManagerDatabricks';
 
 export type NotebookMagic =
 	"sql"
@@ -231,16 +232,28 @@ export class DatabricksKernel implements vscode.NotebookController {
 		let feature: string = undefined;
 		let driverLibraryDirectory: string = undefined; // 
 		let driverWorkingDirectory: string = undefined;
+		const localSyncFolder = ThisExtension.ActiveConnection.localSyncFolder;
 
 		// if we are working with a notebook from a Databricks folder (works with wsfs:/, dbws:/ and locally synced notebooks)
 		if (notebookUri.scheme == ThisExtension.WORKSPACE_SCHEME
 			|| notebookUri.scheme == ThisExtension.WORKSPACE_SCHEME_LEGACY
-			|| (notebookUri.scheme == "file" && notebookUri.fsPath.startsWith(ThisExtension.ActiveConnection.localSyncFolder.fsPath))) {
+			|| (notebookUri.scheme == "file" && notebookUri.fsPath.startsWith(localSyncFolder.fsPath))) {
 
-			let paths: string[] = notebookUri.path.split(FSHelper.SEPARATOR);
-			let workspaceRootUri = await vscode.Uri.from({ scheme: "x", authority: "root", path: "/Workspace" });
+			const paths: string[] = notebookUri.path.split(FSHelper.SEPARATOR);
+			const notebookRelativePath = notebookUri.path.replace((await FSHelper.joinPath(localSyncFolder, ThisExtension.ActiveConnection.localSyncSubfolders.Workspace)).path, "");
+			const workspaceRootUri = await vscode.Uri.from({ scheme: "x", authority: "root", path: "/Workspace" });
 
-			if (paths.includes("Repos")) {
+			if(ThisExtension.ConnectionManagerText == "Databricks Extension")
+			{
+				feature = "Databricks Extension Sync";
+				const dbConn: DatabricksConnectionManagerDatabricks = ThisExtension.ConnectionManager as DatabricksConnectionManagerDatabricks;
+
+				// this code works for wsfs:/ and also for locally synced notebooks
+				driverLibraryDirectory = (await FSHelper.joinPath(workspaceRootUri, dbConn.remoteSyncFolder.path, ...notebookRelativePath.split("/").slice(undefined, -1))).path;
+				driverWorkingDirectory = (await FSHelper.joinPath(workspaceRootUri, dbConn.remoteSyncFolder.path)).path;
+	
+			}
+			else if (paths.includes("Repos")) {
 				feature = "FilesInRepo";
 
 				// this code works for wsfs:/ and also for locally synced notebooks
@@ -256,7 +269,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 			}
 		}
 		else {
-			ThisExtension.log(`NotebookKernel: Could not identify FilesInRepo or FilesInWorkspace support for ${notebookUri}`);
+			ThisExtension.log(`NotebookKernel: Could not identify Notebook location for ${notebookUri} to set up Notebook Driver Context!`);
 			ThisExtension.setStatusBar(`No File support!`);
 			return;
 		}
@@ -278,13 +291,13 @@ export class DatabricksKernel implements vscode.NotebookController {
 		if (result.results.resultType == "error") {
 			ThisExtension.log(result.results.summary);
 			ThisExtension.log(result.results.cause);
-			ThisExtension.setStatusBar("FilesInRepo failed!");
+			ThisExtension.setStatusBar(`${feature} failed!`);
 
-			vscode.window.showErrorMessage("Could not setup Files in Repo for '" + notebookUri + "' on cluster '" + this.ClusterID + "'\nPlease check logs for details!");
+			vscode.window.showErrorMessage(`Could not setup Notebook Driver Context for '${notebookUri}' on cluster '${this.ClusterID}'\nPlease check logs for details!`);
 		}
 		else {
-			ThisExtension.log(`NotebookKernel: Successfully set up FilesInRepo by running the following commands on the driver: \n-> ${commandTexts.join("\n-> ")}`);
-			ThisExtension.setStatusBar("FilesInRepo initialized!");
+			ThisExtension.log(`NotebookKernel: Successfully set up Notebook Driver Context by running the following commands on the driver: \n-> ${commandTexts.join("\n-> ")}`);
+			ThisExtension.setStatusBar("Context initialized!");
 		}
 	}
 

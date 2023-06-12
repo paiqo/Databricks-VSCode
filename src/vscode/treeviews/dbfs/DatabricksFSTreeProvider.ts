@@ -65,13 +65,18 @@ export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<Databri
 		} 
 		else 
 		{
-			let dbfsRootFolder = vscode.Uri.joinPath(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.SubfolderConfiguration().DBFS);
-			
-			// if the workspace folder does not yet exist we create it and return an empty array (as nothing can exist below it yet);
-			if (!await FSHelper.pathExists(dbfsRootFolder)) {
-				FSHelper.ensureFolder(dbfsRootFolder);
-				//vscode.window.showWarningMessage("With release v5.0.0 the sub-folder 'Workspace' was added for synced Workspace items. This supports better integratino with CI/CD and DatabricksPS PowerShell module. Please move your local files manually to '" + workspaceRootFolder + "' or sync them again! This message will only show up once!");
-				return Promise.resolve([]);
+			let dbfsRootFolder: vscode.Uri = undefined;
+			let subFolderConfig = ThisExtension.ConnectionManager.SubfolderConfiguration();
+			if(subFolderConfig.DBFS)
+			{
+				let dbfsRootFolder = vscode.Uri.joinPath(ThisExtension.ActiveConnection.localSyncFolder, subFolderConfig.DBFS);
+				
+				// if the workspace folder does not yet exist we create it and return an empty array (as nothing can exist below it yet);
+				if (!await FSHelper.pathExists(dbfsRootFolder)) {
+					FSHelper.ensureFolder(dbfsRootFolder);
+					//vscode.window.showWarningMessage("With release v5.0.0 the sub-folder 'Workspace' was added for synced Workspace items. This supports better integratino with CI/CD and DatabricksPS PowerShell module. Please move your local files manually to '" + workspaceRootFolder + "' or sync them again! This message will only show up once!");
+					return Promise.resolve([]);
+				}
 			}
 			let items: DatabricksFSTreeItem[] = await new DatabricksFSDirectory("/", "Online", dbfsRootFolder, null).getChildren();
 

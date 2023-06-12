@@ -84,10 +84,10 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 	get _contextValue(): string {
 		let states: string[] = ["FILE"];
 
-		if (this.localPathExists) {
+		if (this.localPathExists && ThisExtension.ConnectionManager.SubfolderConfiguration().DBFS) {
 			states.push("UPLOAD");
 		}
-		if (this.onlinePathExists) {
+		if (this.onlinePathExists && ThisExtension.ConnectionManager.SubfolderConfiguration().DBFS) {
 			states.push("DOWNLOAD")
 		}
 		if (this.localPathExists || this.onlinePathExists) {

@@ -10,6 +10,7 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 
 	private _databricksConnectionManager: any;
 	private _apiClient: any;
+	private _remoteSyncfolder: vscode.Uri;
 
 	constructor() {
 		super();
@@ -42,6 +43,10 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 
 				await this.activateConnection(this.LastActiveConnection, true);
 
+				if(!this._databricksConnectionManager.cluster)
+				{
+					throw new Error("Please configure/attach a cluster in the Databricks Extension first to use all features!");
+				}
 				let cluster = this._databricksConnectionManager.cluster.details as iDatabricksCluster;
 				ThisExtension.SQLClusterID = cluster.cluster_id;
 				cluster.cluster_name = "Extension (Generic)";
@@ -51,6 +56,7 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 			} catch (error) {
 				let msg = "Could not activate Connection '" + this._lastActiveConnectionName + "'!";
 				ThisExtension.log(msg);
+				ThisExtension.log(error)
 				vscode.window.showErrorMessage(msg);
 			}
 		}
@@ -83,6 +89,7 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 
 			// localSyncFolder is not mandatory, hence we also allow null/undefined values
 			const localSyncfolder = connectionManager.syncDestinationMapper?.localUri?.uri;
+			this._remoteSyncfolder = connectionManager.syncDestinationMapper?.remoteUri?.uri;
 
 			this._connections.push({
 				"apiRootUrl": vscode.Uri.parse(host), 
@@ -93,6 +100,12 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 					"Python": ".ipynb",
 					"SQL": ".sql",
 					"R": ".r"
+				},
+				"localSyncSubfolders": {
+					"Workspace": "",
+					"DBFS": undefined,
+					"Jobs": undefined,
+					"Clusters": undefined
 				},
 				"_source": "DatabricksExtension"
 				})			
@@ -109,5 +122,9 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 		await this._apiClient.config.authenticate(headers);
 
 		return headers
+	}
+
+	get remoteSyncFolder(): vscode.Uri {
+		return this._remoteSyncfolder;
 	}
 }

@@ -435,9 +435,9 @@ export type ExportFormatsConfiguration = {
 
 export type LocalSyncSubfolderConfiguration = {
 	Workspace: string;
-	Clusters: string;
-	DBFS: string;
-	Jobs: string;
+	Clusters?: string;
+	DBFS?: string;
+	Jobs?: string;
 };
 
 export type ConfigSettingSource =
