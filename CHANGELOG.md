@@ -1,5 +1,9 @@
 # Release Notes
 
+**v2.2.0:**
+- added `Azure` as new default connection manager for [VSCode Web](https://vscode.dev)
+- fixed issue with integration of Databricks extension and notebook contexts ([#160](/../../issues/160))
+
 **v2.1.3:**
 - fixed issue with `%run` and different notebook languages ([#154](/../../issues/154))
 
