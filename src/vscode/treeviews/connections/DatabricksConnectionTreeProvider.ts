@@ -3,6 +3,7 @@ import { DatabricksConnectionTreeItem } from './DatabricksConnectionTreeItem';
 import { ThisExtension } from '../../../ThisExtension';
 import { iDatabricksConnection } from './iDatabricksConnection';
 import { Helper } from '../../../helpers/Helper';
+import { DatabricksConnectionManagerManualInput } from './DatabricksConnectionManagerManualInput';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class DatabricksConnectionTreeProvider implements vscode.TreeDataProvider<DatabricksConnectionTreeItem> {
@@ -57,6 +58,7 @@ export class DatabricksConnectionTreeProvider implements vscode.TreeDataProvider
 
 	async add(): Promise<void> {
 		// [Add] is only displayed for Manual Connection Manager which asks for credentials during initialize()
+		ThisExtension.ConnectionManager = new DatabricksConnectionManagerManualInput();
 		await ThisExtension.ConnectionManager.initialize();
 	}
 

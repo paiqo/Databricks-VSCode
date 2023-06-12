@@ -9,6 +9,7 @@ import { DatabricksConnectionManagerCLI } from './vscode/treeviews/connections/D
 import { DatabricksConnectionManagerManualInput } from './vscode/treeviews/connections/DatabricksConnectionManagerManualInput';
 import { DatabricksConnectionManagerAzure } from './vscode/treeviews/connections/DatabricksConnectionManagerAzure';
 import { DatabricksConnectionManagerDatabricks } from './vscode/treeviews/connections/DatabricksConnectionManagerDatabricks';
+import { ENVIRONMENT } from '@env/env';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -76,8 +77,8 @@ export abstract class ThisExtension {
 			if (conManager == "Default") {
 				ThisExtension.log("Default connection manager selected. Trying to find the best connection manager ...")
 				if(ThisExtension.isInBrowser) {
-					ThisExtension.log("Using Manual connection manager as its the only one currently available in the browser ...");
-					conManager = "Manual";
+					ThisExtension.log("Using Azure connection manager as it works best from the browser ...");
+					conManager = "Azure";
 				}
 				else if (vscode.extensions.getExtension("databricks.databricks")) {
 					ThisExtension.log("Databricks Extension found. Using it as connection manager ...");
@@ -184,6 +185,10 @@ export abstract class ThisExtension {
 
 	static get ConnectionManager(): DatabricksConnectionManager {
 		return this._connectionManager;
+	}
+
+	static set ConnectionManager(value: DatabricksConnectionManager) {
+		this._connectionManager = value;
 	}
 
 	static get ConnectionManagerText(): ConnectionManager {
@@ -311,11 +316,16 @@ export abstract class ThisExtension {
 	}
 
 	static get isInBrowser(): boolean {
+		return ENVIRONMENT == "web";
+
+		/*
+		// legacy code
 		if (this._isInBrowser == undefined) {
 		// some features are disabled if we are in the browser - this seems to work for all cases I found so far
 		this._isInBrowser = vscode.env.uiKind === vscode.UIKind.Web || process.hasOwnProperty("browser") && process["browser"];
 		}
 		return this._isInBrowser
+		*/
 	}
 
 	static async updateConfigurationSetting(setting: string, value: any, target: ConfigSettingSource = this._settingScope): Promise<void> {

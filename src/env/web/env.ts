@@ -1,0 +1,1 @@
+export const ENVIRONMENT: "node" | "web" = "web";

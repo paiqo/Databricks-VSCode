@@ -53,7 +53,8 @@
 	"activationEvents": [
 		"onFileSystem:dbfs",
 		"onFileSystem:dbws",
-		"onFileSystem:wsfs"
+		"onFileSystem:wsfs",
+		"onNotebook:jupyter-notebook"
 	],
 	"capabilities": {
 		"virtualWorkspaces": {
@@ -865,12 +866,12 @@
 				},
 				{
 					"command": "databricksConnections.add",
-					"when": "view == databricksConnections && virtualWorkspace",
+					"when": "view == databricksConnections && paiqo.databricks.isInBrowser",
 					"group": "navigation"
 				},
 				{
 					"command": "databricksConnections.settings",
-					"when": "view == databricksConnections && !virtualWorkspace",
+					"when": "view == databricksConnections",
 					"group": "navigation"
 				},
 				{
