@@ -33,7 +33,7 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 
 		this._treeView = treeView;
 
-		this.startAutoRefresh(10); // refresh every 5 minutes
+		this.startAutoRefresh(300); // refresh every 5 minutes
 	}
 
 	private async _onDidChangeSelection(items: readonly DatabricksClusterTreeItem[]): Promise<void> { }

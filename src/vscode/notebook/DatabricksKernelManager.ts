@@ -18,7 +18,7 @@ export abstract class DatabricksKernelManager {
 		ThisExtension.setStatusBar("Initializing Kernels ...", true);
 
 		this.refresh(false);
-		this.startAutoRefresh(300);
+		this.startAutoRefresh(300); // refresh every 5 minutes
 
 		ThisExtension.setStatusBar("Kernels initialized!");
 	}

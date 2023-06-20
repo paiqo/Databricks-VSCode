@@ -32,7 +32,7 @@ export class DatabricksJobTreeProvider implements vscode.TreeDataProvider<Databr
 
 		this._treeView = treeView;
 
-		this.startAutoRefresh(30); // refresh every 30 seconds
+		this.startAutoRefresh(300); // refresh every 5 minutes
 	}
 
 	private async _onDidChangeSelection(items: readonly DatabricksJobTreeItem[]): Promise<void> { }
