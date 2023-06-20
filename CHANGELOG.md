@@ -1,5 +1,10 @@
 # Release Notes
 
+**v2.2.2:**
+- fixed issues with [Azure Connection Manager](README.md/#setup-and-configuration-azure-connection-manager)
+- reworked extension activation to be more resilient
+- reworked autorefresh for treeviews
+
 **v2.2.0:**
 - added `Azure` as new default connection manager for [VSCode Web](https://vscode.dev)
 - fixed issue with integration of Databricks extension and notebook contexts ([#160](/../../issues/160))
