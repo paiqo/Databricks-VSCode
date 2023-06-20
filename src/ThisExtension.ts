@@ -29,7 +29,6 @@ export abstract class ThisExtension {
 	private static _settingScope: ConfigSettingSource;
 	private static _sensitiveValueStore: SensitiveValueStore;
 	private static _sqlClusterId: string;
-	private static _isInBrowser: boolean = undefined;
 
 	public static ActiveConnection: iDatabricksConnection;
 
@@ -39,6 +38,10 @@ export abstract class ThisExtension {
 
 	static get extensionContext(): vscode.ExtensionContext {
 		return this._context;
+	}
+
+	static set extensionContext(value: vscode.ExtensionContext) {
+		this._context = value;
 	}
 
 	static get secrets(): vscode.SecretStorage {
@@ -76,7 +79,7 @@ export abstract class ThisExtension {
 			// handle default
 			if (conManager == "Default") {
 				ThisExtension.log("Default connection manager selected. Trying to find the best connection manager ...")
-				if(ThisExtension.isInBrowser) {
+				if (ThisExtension.isInBrowser) {
 					ThisExtension.log("Using Azure connection manager as it works best from the browser ...");
 					conManager = "Azure";
 				}
@@ -113,7 +116,6 @@ export abstract class ThisExtension {
 					break;
 				default:
 					this.log("'" + connectionManager + "' is not a valid value for config setting 'databricks.connectionManager!");
-
 			}
 
 			this._connectionManagerText = conManager
@@ -122,9 +124,22 @@ export abstract class ThisExtension {
 
 			await this.setContext();
 
+			this.refreshUI();
+
 			return true;
 		} catch (error) {
 			return false;
+		}
+	}
+
+	public static async refreshUI(): Promise<void> {
+		// refresh all treeviews after the extension has been initialized
+		const allCommands = await vscode.commands.getCommands(true);
+
+		for (let command of allCommands) {
+			if (command.match(/^databricks.*?\.refresh/)) {
+				vscode.commands.executeCommand(command, undefined, false);
+			}
 		}
 	}
 

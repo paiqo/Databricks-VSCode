@@ -35,14 +35,6 @@ export class DatabricksRepoTreeProvider implements vscode.TreeDataProvider<Datab
 	private async _onDidCollapseElement(item: DatabricksRepoTreeItem): Promise<void> { }
 	private async _onDidChangeVisibility(visible: boolean): Promise<void> { }
 	
-	async autoRefresh(timeoutSeconds: number = 10) {
-		while (true) {
-			await new Promise(resolve => setTimeout(resolve, timeoutSeconds * 1000));
-			
-			this.refresh(false);
-		}
-	}
-
 	async refresh(showInfoMessage: boolean = false, item: DatabricksRepoTreeItem = null): Promise<void> {
 		if(showInfoMessage){
 			Helper.showTemporaryInformationMessage('Refreshing Repos ...');

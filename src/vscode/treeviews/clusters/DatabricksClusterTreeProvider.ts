@@ -16,6 +16,7 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 	readonly onDidChangeTreeData: vscode.Event<DatabricksClusterTreeItem | undefined> = this._onDidChangeTreeData.event;
 
 	private _treeView: vscode.TreeView<DatabricksClusterTreeItem>;
+	private _autoRefreshTimer;
 
 	constructor(context: vscode.ExtensionContext) {
 		const treeView = vscode.window.createTreeView('databricksClusters', {
@@ -32,7 +33,7 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 
 		this._treeView = treeView;
 
-		this.autoRefresh(300); // refresh every 5 minutes
+		this.startAutoRefresh(10); // refresh every 5 minutes
 	}
 
 	private async _onDidChangeSelection(items: readonly DatabricksClusterTreeItem[]): Promise<void> { }
@@ -40,11 +41,27 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 	private async _onDidCollapseElement(item: DatabricksClusterTreeItem): Promise<void> { }
 	private async _onDidChangeVisibility(visible: boolean): Promise<void> { }
 
-	async autoRefresh(timeoutSeconds: number) {
-		while (true) {
-			await new Promise(resolve => setTimeout(resolve, timeoutSeconds * 1000));
+	async startAutoRefresh(timeoutSeconds: number): Promise<void> {
+		if (this._autoRefreshTimer) {
+			ThisExtension.log('AutoRefresh for ClusterTreeView is already running!');
+		}
+		else {
+			ThisExtension.log(`Starting AutoRefresh for ClusterTreeView every ${timeoutSeconds} seconds!`);
+			this._autoRefreshTimer = setInterval(async () => {
+				await this.refresh(false, true);
+			}, timeoutSeconds * 1000);
+		}
 
-			this.refresh(false, true);
+	}
+
+	async stopAutoRefresh(): Promise<void> {
+		if (this._autoRefreshTimer) {
+			ThisExtension.log('Stopping AutoRefresh for ClusterTreeView!');
+			clearInterval(this._autoRefreshTimer);
+			this._autoRefreshTimer = undefined;
+		}
+		else {
+			ThisExtension.log('AutoRefresh for ClusterTreeView is not running!');
 		}
 	}
 

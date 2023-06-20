@@ -58,7 +58,7 @@ export class DatabricksSQLTreeProvider implements vscode.TreeDataProvider<Databr
 		}
 
 		if (!ThisExtension.SQLClusterID) {
-			return [];
+			return Promise.resolve([]);
 		}
 
 		if (element != null && element != undefined) {

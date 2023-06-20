@@ -39,6 +39,9 @@ import { DatabricksSendToAPI } from './vscode/editors/DatabricksSendToAPI';
 
 export async function activate(context: vscode.ExtensionContext) {
 
+	// some of the following code needs the context before the initialization already
+	ThisExtension.extensionContext = context;
+
 	ThisExtension.Logger = vscode.window.createOutputChannel(context.extension.id);
 	ThisExtension.log("Logger initialized!");
 
@@ -51,33 +54,15 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	ThisExtension.StatusBar = vscode.window.createStatusBarItem("databricks-vscode", vscode.StatusBarAlignment.Right);
 	ThisExtension.StatusBar.show();
-	ThisExtension.setStatusBar("Initializing ...", true);
-
-	let isValidated: boolean = await ThisExtension.initialize(context);
-	if (isValidated === false) {
-		const msg = "Issue initializing extension - Please update Databricks settings and restart VSCode!"
-		ThisExtension.log(msg);
-		vscode.window.showErrorMessage(msg);
-
-		ThisExtension.setStatusBar("ERROR!");
-
-		throw new Error(msg);
-	}
-
-	ThisExtension.setStatusBar("Initialized!");
-
+	
 	let notebookSerializer = new DatabricksNotebookSerializer(context);
-
-	ThisExtension.setStatusBar("Initializing Kernels ...", true);
-	DatabricksKernelManager.initialize();
+	
 	vscode.commands.registerCommand('databricksKernel.restart',
 		(notebook: { notebookEditor: { notebookUri: vscode.Uri } } | undefined | vscode.Uri) => DatabricksKernelManager.restartJupyterKernel(notebook)
 	);
 	vscode.commands.registerCommand('databricksKernel.updateWidgets',
 		(notebook: { notebookEditor: { notebookUri: vscode.Uri } } | undefined | vscode.Uri) => DatabricksKernelManager.updateWidgets(notebook)
 	);
-	ThisExtension.setStatusBar("Kernels initialized!");
-
 
 	// register Editor Buttons
 	vscode.commands.registerCommand('databricksApi.sendToApi',
@@ -147,7 +132,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	// register DatabricksJobsTreeProvider
 	let databricksJobsTreeProvider = new DatabricksJobTreeProvider(context);
 	//vscode.window.registerTreeDataProvider('databricksJobs', databricksJobsTreeProvider);
-	vscode.commands.registerCommand('databricksJobs.refresh', (item: DatabricksJobTreeItem, showInfoMessage: boolean = true) => databricksJobsTreeProvider.refresh(showInfoMessage, item));
+	vscode.commands.registerCommand('databricksJobs.refresh', (item: DatabricksJobTreeItem, showInfoMessage: boolean = true) => databricksJobsTreeProvider.refresh(showInfoMessage, false, item));
 
 	vscode.commands.registerCommand('databricksJobItem.click', (job: DatabricksJobTreeItem) => job.click());
 	vscode.commands.registerCommand('databricksJobItem.showDefinition', (job: DatabricksJobTreeItem) => job.showDefinition());
@@ -208,6 +193,29 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksRepo.checkOut', (repo: DatabricksRepoRepository) => repo.checkOut());
 	vscode.commands.registerCommand('databricksRepo.pull', (repo: DatabricksRepoRepository) => repo.pull());
 	vscode.commands.registerCommand('databricksRepo.delete', (repo: DatabricksRepoRepository) => repo.delete());
+
+
+	vscode.commands.registerCommand('databricksPowerTools.initialize', async () => {
+		ThisExtension.setStatusBar("Initializing ...", true);
+
+		let isValidated: boolean = await ThisExtension.initialize(context);
+		if (isValidated === false) {
+			const msg = "Issue initializing extension - Please update Databricks settings and restart VSCode!"
+			ThisExtension.log(msg);
+			vscode.window.showErrorMessage(msg);
+
+			ThisExtension.setStatusBar("ERROR!");
+
+			throw new Error(msg);
+		}
+		//vscode.commands.executeCommand('databricksConnections.refresh');
+		
+		ThisExtension.setStatusBar("Initialized!");
+		DatabricksKernelManager.initialize();
+	}
+	);
+
+	vscode.commands.executeCommand('databricksPowerTools.initialize');
 }
 
 

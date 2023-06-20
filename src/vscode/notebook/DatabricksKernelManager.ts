@@ -12,9 +12,39 @@ export abstract class DatabricksKernelManager {
 
 	private static _kernels: Map<string, DatabricksKernel> = new Map<string, DatabricksKernel>();
 
+	private static _autoRefreshTimer;
+
 	static async initialize(): Promise<void> {
+		ThisExtension.setStatusBar("Initializing Kernels ...", true);
+
 		this.refresh(false);
-		this.autoRefresh(300);
+		this.startAutoRefresh(300);
+
+		ThisExtension.setStatusBar("Kernels initialized!");
+	}
+
+	static async startAutoRefresh(timeoutSeconds: number): Promise<void> {
+		if (this._autoRefreshTimer) {
+			ThisExtension.log('AutoRefresh for KernelManager is already running!');
+		}
+		else {
+			ThisExtension.log(`Starting AutoRefresh for KernelManager every ${timeoutSeconds} seconds!`);
+			this._autoRefreshTimer = setInterval(async () => {
+				await this.refresh(false);
+			}, timeoutSeconds * 1000);
+		}
+
+	}
+
+	static async stopAutoRefresh(): Promise<void> {
+		if (this._autoRefreshTimer) {
+			ThisExtension.log('Stopping AutoRefresh for KernelManager!');
+			clearInterval(this._autoRefreshTimer);
+			this._autoRefreshTimer = undefined;
+		}
+		else {
+			ThisExtension.log('AutoRefresh for KernelManager is not running!');
+		}
 	}
 
 	static async refresh(showInfoMessage: boolean = false): Promise<void> {
@@ -29,14 +59,6 @@ export abstract class DatabricksKernelManager {
 					DatabricksKernelManager.removeKernels(cluster, showInfoMessage);
 				}
 			}
-		}
-	}
-
-	static async autoRefresh(timeoutSeconds: number = 10) {
-		while (true) {
-			await new Promise(resolve => setTimeout(resolve, timeoutSeconds * 1000));
-
-			this.refresh(false);
 		}
 	}
 

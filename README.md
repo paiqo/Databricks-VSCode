@@ -1,8 +1,8 @@
 # Databricks Power Tools for VSCode
-[![Version](https://vsmarketplacebadges.dev/version/paiqo.databricks-vscode.svg?color=blue&style=?style=for-the-badge&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
-[![Installs](https://vsmarketplacebadges.dev/installs/paiqo.databricks-vscode.svg?color=yellow)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
-[![Downloads](https://vsmarketplacebadges.dev/downloads/paiqo.databricks-vscode.svg?color=yellow)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
-[![Ratings](https://vsmarketplacebadges.dev/rating/paiqo.databricks-vscode.svg?color=green)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
+[![Version](https://img.shields.io/visual-studio-marketplace/v/paiqo.databricks-vscode)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
+[![Installs](https://img.shields.io/visual-studio-marketplace/i/paiqo.databricks-vscode)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
+[![Downloads](https://img.shields.io/visual-studio-marketplace/d/paiqo.databricks-vscode)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
+[![Ratings](https://img.shields.io/visual-studio-marketplace/r/paiqo.databricks-vscode)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
 
 ![Databricks-VSCode](/images/Databricks-VSCode.jpg?raw=true "Databricks-VSCode")
 

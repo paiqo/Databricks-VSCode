@@ -26,7 +26,7 @@ export abstract class DatabricksConnectionManager {
 	}
 
 	public get Connections(): iDatabricksConnection[] {
-		while (!this._initialized) { Helper.wait(500); }
+		//while (!this._initialized) { Helper.wait(500); }
 
 		return this._connections;
 	}

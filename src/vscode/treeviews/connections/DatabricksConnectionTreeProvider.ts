@@ -18,8 +18,8 @@ export class DatabricksConnectionTreeProvider implements vscode.TreeDataProvider
 		if (showInfoMessage) {
 			Helper.showTemporaryInformationMessage('Refreshing Connections ...');
 		}
-		//await ThisExtension.ConnectionManager.initialize();
-		await ThisExtension.initialize(ThisExtension.extensionContext);
+		await ThisExtension.ConnectionManager.initialize();
+		//await ThisExtension.initialize(ThisExtension.extensionContext);
 		// we always refresh the whole tree-View!
 		this._onDidChangeTreeData.fire(undefined);
 	}

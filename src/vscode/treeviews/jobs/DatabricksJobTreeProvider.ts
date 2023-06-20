@@ -6,6 +6,7 @@ import { DatabricksJobTreeItem } from './DatabricksJobTreeItem';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { DatabricksJob } from './DatabricksJob';
 import { DatabricksInteractiveJobs } from './DatabricksInteractiveJobs';
+import { ThisExtension } from '../../../ThisExtension';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class DatabricksJobTreeProvider implements vscode.TreeDataProvider<DatabricksJobTreeItem> {
@@ -13,6 +14,8 @@ export class DatabricksJobTreeProvider implements vscode.TreeDataProvider<Databr
 	readonly onDidChangeTreeData: vscode.Event<DatabricksJobTreeItem | undefined> = this._onDidChangeTreeData.event;
 
 	private _treeView: vscode.TreeView<DatabricksJobTreeItem>;
+
+	private _autoRefreshTimer;
 
 	constructor(context: vscode.ExtensionContext) {
 		const treeView = vscode.window.createTreeView('databricksJobs', { 
@@ -29,7 +32,7 @@ export class DatabricksJobTreeProvider implements vscode.TreeDataProvider<Databr
 
 		this._treeView = treeView;
 
-		this.autoRefresh(30); // refresh every 30 seconds
+		this.startAutoRefresh(30); // refresh every 30 seconds
 	}
 
 	private async _onDidChangeSelection(items: readonly DatabricksJobTreeItem[]): Promise<void> { }
@@ -37,16 +40,32 @@ export class DatabricksJobTreeProvider implements vscode.TreeDataProvider<Databr
 	private async _onDidCollapseElement(item: DatabricksJobTreeItem): Promise<void> { }
 	private async _onDidChangeVisibility(visible: boolean): Promise<void> { }
 	
-	async autoRefresh(timeoutSeconds: number) {
-		while (true) {
-			await new Promise(resolve => setTimeout(resolve, timeoutSeconds * 1000));
-			
-			this.refresh(false, undefined);
+	async startAutoRefresh(timeoutSeconds: number): Promise<void> {
+		if (this._autoRefreshTimer) {
+			ThisExtension.log('AutoRefresh for JobsTreeView is already running!');
+		}
+		else {
+			ThisExtension.log(`Starting AutoRefresh for JobsTreeView every ${timeoutSeconds} seconds!`);
+			this._autoRefreshTimer = setInterval(async () => {
+				await this.refresh(false, true);
+			}, timeoutSeconds * 1000);
+		}
+
+	}
+
+	async stopAutoRefresh(): Promise<void> {
+		if (this._autoRefreshTimer) {
+			ThisExtension.log('Stopping AutoRefresh for JobsTreeView!');
+			clearInterval(this._autoRefreshTimer);
+			this._autoRefreshTimer = undefined;
+		}
+		else {
+			ThisExtension.log('AutoRefresh for JobsTreeView is not running!');
 		}
 	}
 
-	async refresh(showInfoMessage: boolean = false, item: DatabricksJobTreeItem): Promise<void> {
-		if(showInfoMessage){
+	async refresh(showInfoMessage: boolean = false, isAutoRefresh = false, item: DatabricksJobTreeItem = null): Promise<void> {
+		if (showInfoMessage && !isAutoRefresh) {
 			Helper.showTemporaryInformationMessage('Refreshing Jobs ...');
 		}
 		this._onDidChangeTreeData.fire(item);

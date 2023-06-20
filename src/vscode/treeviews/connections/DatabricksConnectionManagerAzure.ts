@@ -28,6 +28,7 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 
 	constructor() {
 		super();
+		//vscode.authentication.onDidChangeSessions((event) => DatabricksConnectionManagerAzure._onDidChangeSessions(event));
 	}
 
 	get TenantId(): string {
@@ -58,8 +59,6 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 		this._subscriptionsIds = ThisExtension.getConfigurationSetting<string[]>("databricks.azure.subscriptionIds").value;
 		this._workspaces = ThisExtension.getConfigurationSetting<AzureConfig[]>("databricks.azure.workspaces").value;
 
-		vscode.authentication.onDidChangeSessions((event) => DatabricksConnectionManagerAzure._onDidChangeSessions(event));
-
 		await this.loadConnections();
 
 		if (this._connections.length == 0) {
@@ -85,8 +84,7 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 		}
 	}
 
-	private static async _onDidChangeSessions(event: vscode.AuthenticationSessionsChangeEvent)
-	{
+	private static async _onDidChangeSessions(event: vscode.AuthenticationSessionsChangeEvent) {
 		vscode.window.showWarningMessage("Session Changed! " + event.provider.id);
 
 		let headers = await ThisExtension.ConnectionManager.getAuthorizationHeaders(ThisExtension.ActiveConnection);
@@ -104,16 +102,20 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 			scopes.push("VSCODE_TENANT:" + tenantId);
 		}
 
-		let session: vscode.AuthenticationSession = await vscode.authentication.getSession("microsoft", scopes);
+		try {
+			let session: vscode.AuthenticationSession = await vscode.authentication.getSession("microsoft", scopes);
+			return session;
+		}
+		catch (e) {
+			ThisExtension.log("Error getting session: " + e);
+		}
 
-		return session;
 	}
 
 	async loadConnections(): Promise<void> {
 		// to improve switching between Azure Databricks workspaces, we cache the connections once they were loaded
 		// to add a newly added Azure Databricks workspace, VSCode needds to be restarted!
-		if(DatabricksConnectionManagerAzure._azureConnections && DatabricksConnectionManagerAzure._azureConnections.length > 0)
-		{
+		if (DatabricksConnectionManagerAzure._azureConnections && DatabricksConnectionManagerAzure._azureConnections.length > 0) {
 			this._connections = DatabricksConnectionManagerAzure._azureConnections;
 			return;
 		}
@@ -141,7 +143,7 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 			};
 			let response: Response;
 
-			if (this.Workspaces.length == 0) {
+			if (!this.Workspaces || this.Workspaces.length == 0) {
 				this.Workspaces = [];
 				if (this.SubscriptionIDs.length == 0) {
 					ThisExtension.log("Getting list of Azure Subscriptions ...");
@@ -158,71 +160,84 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 					else {
 						ThisExtension.log("Could not load Azure subscriptions!\n" + await response.text());
 						vscode.window.showErrorMessage("Could not load Azure subscriptions!");
+
+						this.SubscriptionIDs = [];
 					}
 				}
 
 				for (let subscriptionID of this.SubscriptionIDs) {
-					ThisExtension.log("Checking subscription '" + subscriptionID + "' for Databricks workspaces ...");
-					ThisExtension.setStatusBar("Checking Subscription " + subscriptionID + " ...", true);
-					response = await fetch(`https://management.azure.com/subscriptions/${subscriptionID}/providers/Microsoft.Databricks/workspaces?api-version=2018-04-01`, config);
-					if (response.ok) {
-						let azureWorkspaces = await response.json() as AzureResourceListRepsonse
-						if(!azureWorkspaces.value || azureWorkspaces.value.length == 0)
-						{
-							ThisExtension.log("No Databricks Workspaces found for subscription '" + subscriptionID + "'!");
-							continue;
-						}
-						ThisExtension.setStatusBar("Got " + azureWorkspaces.value.length + " Databricks Workspaces!", false);
-						ThisExtension.log("Read " + azureWorkspaces.value.length + " available Databricks Workspaces: " + JSON.stringify(azureWorkspaces));
-
-						for (let workspace of azureWorkspaces.value) {
-							let syncFolder: string = undefined;
-							if (!ThisExtension.isInBrowser) {
-								syncFolder = (await FSHelper.joinPath(FSHelper.getUserDir(), "Databricks-VSCode", workspace.name)).fsPath;
+					try {
+						ThisExtension.log("Checking subscription '" + subscriptionID + "' for Databricks workspaces ...");
+						ThisExtension.setStatusBar("Checking Subscription " + subscriptionID + " ...", true);
+						response = await fetch(`https://management.azure.com/subscriptions/${subscriptionID}/providers/Microsoft.Databricks/workspaces?api-version=2018-04-01`, config);
+						if (response.ok) {
+							let azureWorkspaces = await response.json() as AzureResourceListRepsonse
+							if (!azureWorkspaces.value || azureWorkspaces.value.length == 0) {
+								ThisExtension.log("No Databricks Workspaces found for subscription '" + subscriptionID + "'!");
+								continue;
 							}
-							this.Workspaces.push({
-								resourceId: workspace.id,
-								displayName: workspace.name,
-								localSyncFolder: syncFolder
-							})
+							ThisExtension.setStatusBar("Got " + azureWorkspaces.value.length + " Databricks Workspaces!", false);
+							ThisExtension.log("Read " + azureWorkspaces.value.length + " available Databricks Workspaces: " + JSON.stringify(azureWorkspaces));
+
+							for (let workspace of azureWorkspaces.value) {
+								let syncFolder: string = undefined;
+								if (!ThisExtension.isInBrowser) {
+									syncFolder = (await FSHelper.joinPath(FSHelper.getUserDir(), "Databricks-VSCode", workspace.name)).fsPath;
+								}
+								this.Workspaces.push({
+									resourceId: workspace.id,
+									displayName: workspace.name,
+									localSyncFolder: syncFolder
+								})
+							}
+							ThisExtension.setStatusBar("Subscription " + subscriptionID + " loaded!", false);
+						}
+						else {
+							ThisExtension.setStatusBar("Subscription " + subscriptionID + " failed!", false);
+							throw new Error(await response.text());
 						}
 					}
-					else {
-						ThisExtension.log("Could not load Databricks Workspaces for subscription '" + subscriptionID + "'!\n" + await response.text());
+					catch (ex) {
+						ThisExtension.log("Could not load Databricks Workspaces for subscription '" + subscriptionID + "'!\n" + ex);
 						vscode.window.showErrorMessage("Could not load Databricks Workspaces from subscription '" + subscriptionID + "'!");
 					}
 				}
 			}
 
 			for (let workspace of this.Workspaces) {
-				response = await fetch(`https://management.azure.com/${workspace.resourceId}?api-version=2018-04-01`, config);
+				try {
+					response = await fetch(`https://management.azure.com/${workspace.resourceId}?api-version=2018-04-01`, config);
 
-				if (response.ok) {
-					let azureWorkspace = await response.json() as AzureResource
-					ThisExtension.log("Adding Databricks Workspaces: " + JSON.stringify(azureWorkspace));
+					if (response.ok) {
+						let azureWorkspace = await response.json() as AzureResource
+						ThisExtension.log("Adding Databricks Workspaces: " + JSON.stringify(azureWorkspace));
 
-					let syncFolder: vscode.Uri = undefined;
-					if (workspace.localSyncFolder) {
-						syncFolder = vscode.Uri.file(workspace.localSyncFolder);
-					}
-					let newConnection: iDatabricksConnection = {
-						_source: "Azure",
-						apiRootUrl: vscode.Uri.parse("https://" + azureWorkspace.properties.workspaceUrl),
-						displayName: workspace.displayName ?? azureWorkspace.name,
-						azureResourceId: azureWorkspace.id,
-						localSyncFolder: syncFolder
-					};
+						let syncFolder: vscode.Uri = undefined;
+						if (workspace.localSyncFolder) {
+							syncFolder = vscode.Uri.file(workspace.localSyncFolder);
+						}
+						let newConnection: iDatabricksConnection = {
+							_source: "Azure",
+							apiRootUrl: vscode.Uri.parse("https://" + azureWorkspace.properties.workspaceUrl),
+							displayName: workspace.displayName ?? azureWorkspace.name,
+							azureResourceId: azureWorkspace.id,
+							localSyncFolder: syncFolder
+						};
 
-					if (DatabricksConnectionTreeItem.validate(newConnection, false)) {
-						ThisExtension.log("New Connection found: " + newConnection.displayName + " (" + newConnection.azureResourceId + ")");
-						this._connections.push(newConnection);
+						if (DatabricksConnectionTreeItem.validate(newConnection, false)) {
+							ThisExtension.log("New Connection found: " + newConnection.displayName + " (" + newConnection.azureResourceId + ")");
+							this._connections.push(newConnection);
+						}
+						else {
+							ThisExtension.log("Could not load all necessary information from Azure Databricks Workspace '" + newConnection.displayName + "' (" + newConnection.azureResourceId + ")!");
+						}
 					}
 					else {
-						ThisExtension.log("Could not load all necessary information from Azure Databricks Workspace '" + newConnection.displayName + "' (" + newConnection.azureResourceId + ")!");
+						throw new Error(await response.text());
 					}
 				}
-				else {
-					ThisExtension.log("Could not load Databricks Workspace '" + workspace.resourceId + "'!\n" + await response.text());
+				catch (ex) {
+					ThisExtension.log("Could not load Databricks Workspace '" + workspace.resourceId + "'!\n" + ex);
 					vscode.window.showErrorMessage("Could not load Databricks Workspace '" + workspace.resourceId + "'!");
 				}
 			}
