@@ -13,11 +13,15 @@ import { iDatabricksFSItem } from '../vscode/treeviews/dbfs/iDatabricksFSItem';
 import { iDatabricksSecretScope } from '../vscode/treeviews/secrets/iDatabricksSecretScope';
 import { iDatabricksSecret } from '../vscode/treeviews/secrets/iDatabricksSecret';
 import { ContextLanguage, ExecutionCommand, ExecutionContext, iDatabricksApiClustersListResponse, iDatabricksApiClustersSparkVersionsResponse, iDatabricksApiCommandsCancelResponse, iDatabricksApiCommandsExecuteResponse, iDatabricksApiCommandsStatusResponse, iDatabricksApiContextsCreateResponse, iDatabricksApiContextsDestroyResponse, iDatabricksApiDbfsCreateResponse, iDatabricksApiDbfsListResponse, iDatabricksApiDbfsReadResponse, iDatabricksApiJobsListResponse, iDatabricksApiJobsRunsListResponse, iDatabricksApiRepoListResponse, iDatabricksApiSecretsListResponse, iDatabricksApiSecretsScopesListResponse, iDatabricksApiWorkspaceExportResponse, iDatabricksApiWorkspaceListResponse } from './_types';
-import { iDatabricksCluster } from '../vscode/treeviews/clusters/iDatabricksCluster';
 import { iDatabricksRepo } from '../vscode/treeviews/repos/_types';
 import { iDatabricksConnection } from '../vscode/treeviews/connections/iDatabricksConnection';
 import { iDatabricksJob } from '../vscode/treeviews/jobs/iDatabricksJob';
 import { iDatabricksJobRun } from '../vscode/treeviews/jobs/iDatabricksJobRun';
+
+
+import { Config, Headers, WorkspaceClient } from './databricks-sdk-js/SDK';
+import { ClusterInfo } from './databricks-sdk-js/SDK/apis/clusters';
+
 
 export abstract class DatabricksApiService {
 	private static API_SUB_URL: string = "/api/";
@@ -28,16 +32,35 @@ export abstract class DatabricksApiService {
 	private static _apiBaseUrl: string;
 	private static _headers;
 
+	private static _workspaceClient: WorkspaceClient;
 	//#region Initialization
 	static async initialize(con: iDatabricksConnection): Promise<boolean> {
 		try {
 			ThisExtension.log("Initializing Databricks API Service ...");
+
+
 
 			this._isInitialized = false;
 			let headers = await ThisExtension.ConnectionManager.getAuthorizationHeaders(con);
 			this._apiBaseUrl = Helper.trimChar(con.apiRootUrl.with({ path: '', query: '', fragment: '' }).toString(true), '/') + this.API_SUB_URL;
 
 			this.updateHeaders(headers);
+
+			let config = new Config({});
+			config.host = con.apiRootUrl.toString(true);
+			//config.token = con.personalAccessToken;
+			//config.authType = "pat";
+			await config.authenticate(this._headers as Headers);
+
+			this._workspaceClient = new WorkspaceClient(config);
+			ThisExtension.log(JSON.stringify(await this._workspaceClient.currentUser.me()));
+			let clusters = await this._workspaceClient.clusters.list(undefined);
+
+
+			for await (const cluster of clusters) {
+				ThisExtension.log(JSON.stringify(cluster));
+				break;
+			}
 
 			ThisExtension.log(`Testing new Databricks API (${con.apiRootUrl}) settings ...`);
 			this._connectionTestRunning = true;
@@ -518,7 +541,17 @@ export abstract class DatabricksApiService {
 	//#endregion
 
 	//#region Clusters API
-	static async listClusters(): Promise<iDatabricksCluster[]> {
+	static async listClusters(): Promise<ClusterInfo[]> {
+
+		let clusters = await this._workspaceClient.clusters.list(undefined);
+
+		let items: ClusterInfo[] = [];
+		for await (const cluster of clusters) {
+			items.push(cluster);
+		}
+
+		return items;
+		/*
 		let endpoint = '2.0/clusters/list';
 
 		let response: iDatabricksApiClustersListResponse = await this.get<iDatabricksApiClustersListResponse>(endpoint);
@@ -536,6 +569,7 @@ export abstract class DatabricksApiService {
 		// running clusters are returned first, so we just keep the order from the API
 		//Helper.sortArrayByProperty(items, "cluster_name");
 		return items;
+		*/
 	}
 
 	static async startCluster(cluster_id: string): Promise<void> {

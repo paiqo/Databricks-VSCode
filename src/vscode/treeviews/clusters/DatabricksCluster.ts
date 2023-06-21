@@ -1,23 +1,23 @@
 import * as vscode from 'vscode';
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { ThisExtension } from '../../../ThisExtension';
-import { ClusterState, ClusterSource } from './_types';
-import { iDatabricksCluster } from './iDatabricksCluster';
+import { ClusterState } from './_types';
 import { Helper } from '../../../helpers/Helper';
 import { DatabricksKernel } from '../../notebook/DatabricksKernel';
 import { DatabricksClusterTreeItem } from './DatabricksClusterTreeItem';
 import { DatabricksKernelManager } from '../../notebook/DatabricksKernelManager';
 import { FSHelper } from '../../../helpers/FSHelper';
+import { ClusterInfo, ClusterSource } from '../../../databricksApi/databricks-sdk-js/SDK/apis/clusters';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksCluster extends DatabricksClusterTreeItem {
 	private _id: string;
 	private _state: ClusterState;
-	private _definition: iDatabricksCluster;
+	private _definition: ClusterInfo;
 	private _source: ClusterSource;
 
 	constructor(
-		definition: iDatabricksCluster,
+		definition: ClusterInfo,
 		parent: DatabricksClusterTreeItem = null
 	) {
 		super("CLUSTER", definition.cluster_name, parent, vscode.TreeItemCollapsibleState.None);
@@ -90,12 +90,15 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 			states.push("NOKERNEL");
 		}
 
+		/*
+		# TODO
 		if (this.definition.pinned_by_user_name) {
 			states.push("PINNED");
 		}
 		else {
 			states.push("NOT_PINNED");
 		}
+		*/
 
 		if (this.definition.cluster_source == "JOB") {
 			states.push("JOB");
@@ -116,7 +119,7 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 		return FSHelper.joinPathSync(ThisExtension.rootUri, 'resources', theme, state + '.png');
 	}
 
-	get definition(): iDatabricksCluster {
+	get definition(): ClusterInfo {
 		return this._definition;
 	}
 
@@ -166,7 +169,7 @@ export class DatabricksCluster extends DatabricksClusterTreeItem {
 	}
 
 	static fromJson(jsonString: string): DatabricksClusterTreeItem {
-		let item: iDatabricksCluster = JSON.parse(jsonString);
+		let item: ClusterInfo = JSON.parse(jsonString);
 		return new DatabricksCluster(item);
 	}
 

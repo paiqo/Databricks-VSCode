@@ -14,9 +14,3 @@ export type ClusterState =
 | 	"ERROR" 		// This state is not used anymore. It was used to indicate a cluster that failed to be created. Terminating and Terminated are used instead.
 | 	"UNKNOWN" 		// Indicates that a cluster is in an unknown state. A cluster should never be in this state.	
 ;
-
-export type ClusterSource = 
-	"UI"		// Cluster created through the UI.
-|	"JOB"		// Cluster created by the Databricks job scheduler.
-|	"API"		// Cluster created through an API call.
-;

@@ -27,7 +27,18 @@ const webConfig = /** @type WebpackConfig */ {
             '@env': path.join(__dirname, './src/env/web')
         },
         fallback:
-            { "path": require.resolve("path-browserify") }
+        {
+            "path": require.resolve("path-browserify"),
+            "child_process": false,
+            "assert": false,
+            "stream": false,
+            "http": false,
+            "https": false,
+            "crypto": false,
+            "util": false,
+            "fs/promises": false,
+            "os": false,
+        }
     },
     module: {
         rules: [
@@ -50,6 +61,9 @@ const webConfig = /** @type WebpackConfig */ {
         new webpack.ProvidePlugin({
             process: "process/browser", // provide a shim for the global `process` variable
         }),
+        new webpack.NormalModuleReplacementPlugin(/node:/, (resource) => {
+            resource.request = resource.request.replace(/^node:/, "");
+        })
     ],
     externals: {
         vscode: "commonjs vscode" // ignored because it doesn't exist

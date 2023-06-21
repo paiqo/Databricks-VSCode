@@ -2,10 +2,10 @@ import * as vscode from 'vscode';
 
 import { DatabricksApiService } from '../../../databricksApi/databricksApiService';
 import { ThisExtension } from '../../../ThisExtension';
-import { iDatabricksCluster } from './iDatabricksCluster';
 import { DatabricksClusterTreeItem } from './DatabricksClusterTreeItem';
 import { DatabricksCluster } from './DatabricksCluster';
 import { FSHelper } from '../../../helpers/FSHelper';
+import { ClusterInfo } from '../../../databricksApi/databricks-sdk-js/SDK/apis/clusters';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksClusterJobClusters extends DatabricksClusterTreeItem {
@@ -24,7 +24,7 @@ export class DatabricksClusterJobClusters extends DatabricksClusterTreeItem {
 	}
 
 	async getChildren(): Promise<DatabricksClusterTreeItem[]> {
-		let clusters: iDatabricksCluster[] = await DatabricksApiService.listClusters();
+		let clusters: ClusterInfo[] = await DatabricksApiService.listClusters();
 		let items: DatabricksClusterTreeItem[] = [];
 
 		for (let cluster of clusters) {

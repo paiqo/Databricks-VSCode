@@ -7,12 +7,12 @@ import { Buffer } from '@env/buffer';
 
 import { ContextLanguage, ExecutionCommand, ExecutionContext } from '../../databricksApi/_types';
 import { DatabricksApiService } from '../../databricksApi/databricksApiService';
-import { iDatabricksCluster } from '../treeviews/clusters/iDatabricksCluster';
 import { DatabricksWidget } from './Widgets/DatabricksWidget';
 import { DatabricksTextWidget } from './Widgets/DatabricksTextWidget';
 import { DatabricksSelectorWidget } from './Widgets/DatabricksSelectorWidget';
 import { LanguageFileExtensionMapper } from '../treeviews/workspaces/LanguageFileExtensionMapper';
 import { DatabricksConnectionManagerDatabricks } from '../treeviews/connections/DatabricksConnectionManagerDatabricks';
+import { ClusterInfo } from '../../databricksApi/databricks-sdk-js/SDK/apis/clusters';
 
 export type NotebookMagic =
 	"sql"
@@ -45,10 +45,10 @@ export class DatabricksKernel implements vscode.NotebookController {
 	private _language: ContextLanguage;
 	private _executionContexts: Map<string, ExecutionContext>;
 	private _widgets: Map<string, DatabricksWidget>;
-	private _cluster: iDatabricksCluster;
+	private _cluster: ClusterInfo;
 
 
-	constructor(cluster: iDatabricksCluster, notebookType: KernelType, language: ContextLanguage = "python") {
+	constructor(cluster: ClusterInfo, notebookType: KernelType, language: ContextLanguage = "python") {
 		this.notebookType = notebookType;
 		this._cluster = cluster;
 		this._language = language;
@@ -121,7 +121,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 	}
 
 	get KernelID(): string {
-		return this._cluster.kernel_id ?? this._cluster.cluster_id;
+		return this._cluster.cluster_id;
 	}
 
 	get ClusterID(): string {

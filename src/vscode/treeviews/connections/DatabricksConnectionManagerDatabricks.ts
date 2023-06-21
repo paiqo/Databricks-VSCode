@@ -4,12 +4,13 @@ import { ThisExtension } from '../../../ThisExtension';
 import { iDatabricksConnection } from './iDatabricksConnection';
 import { DatabricksConnectionManager } from './DatabricksConnectionManager';
 import { DatabricksKernelManager } from '../../notebook/DatabricksKernelManager';
-import { iDatabricksCluster } from '../clusters/iDatabricksCluster';
+import { ClusterSource } from '../../../databricksApi/databricks-sdk-js/SDK/apis/clusters';
+import { ApiClient } from '../../../databricksApi/databricks-sdk-js/SDK';
 
 export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionManager {
 
 	private _databricksConnectionManager: any;
-	private _apiClient: any;
+	private _apiClient: ApiClient;
 	private _remoteSyncfolder: vscode.Uri;
 
 	constructor() {
@@ -47,8 +48,8 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 				{
 					throw new Error("Please configure/attach a cluster in the Databricks Extension first to use all features!");
 				}
-				let cluster = this._databricksConnectionManager.cluster.details as iDatabricksCluster;
-				ThisExtension.SQLClusterID = cluster.cluster_id;
+				let cluster = this._databricksConnectionManager.cluster;
+				ThisExtension.SQLClusterID = cluster;
 				cluster.cluster_name = "Extension (Generic)";
 				cluster.kernel_id = "databricks_extension_generic";
 
@@ -84,7 +85,7 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 			
 			this._databricksConnectionManager = connectionManager;
 			// new logic to handle two versions of the Databricks Extension
-			this._apiClient = connectionManager.apiClient ?? connectionManager.workspaceClient?.apiClient;
+			this._apiClient = (connectionManager.apiClient ?? connectionManager.workspaceClient?.apiClient) as ApiClient;
 			const host = await this._apiClient.host;
 
 			// localSyncFolder is not mandatory, hence we also allow null/undefined values
@@ -92,7 +93,7 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 			this._remoteSyncfolder = connectionManager.syncDestinationMapper?.remoteUri?.uri;
 
 			this._connections.push({
-				"apiRootUrl": vscode.Uri.parse(host), 
+				"apiRootUrl": vscode.Uri.parse(host.toString()), 
 				"displayName": "Databricks Extension",
 				"localSyncFolder": localSyncfolder,
 				"exportFormats": {

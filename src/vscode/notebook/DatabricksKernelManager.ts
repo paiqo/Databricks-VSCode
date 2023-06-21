@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 
 import { ThisExtension } from '../../ThisExtension';
 import { DatabricksApiService } from '../../databricksApi/databricksApiService';
-import { iDatabricksCluster } from '../treeviews/clusters/iDatabricksCluster';
 import { DatabricksKernel } from './DatabricksKernel';
+import { ClusterInfo } from '../../databricksApi/databricks-sdk-js/SDK/apis/clusters';
 
 
 export abstract class DatabricksKernelManager {
@@ -48,7 +48,7 @@ export abstract class DatabricksKernelManager {
 	}
 
 	static async refresh(showInfoMessage: boolean = false): Promise<void> {
-		let clusters: iDatabricksCluster[] = await DatabricksApiService.listClusters() ?? [];
+		let clusters: ClusterInfo[] = await DatabricksApiService.listClusters() ?? [];
 
 		for (let cluster of clusters) {
 			if (cluster.cluster_source != "JOB") {
@@ -79,37 +79,37 @@ export abstract class DatabricksKernelManager {
 		return this._kernels.get(kernelName);
 	}
 
-	static getJupyterKernelName(cluster: iDatabricksCluster): string {
-		return (cluster.kernel_id ?? cluster.cluster_id) + DatabricksKernelManager.JupyterKernelSuffix;
+	static getJupyterKernelName(cluster: ClusterInfo): string {
+		return (cluster.cluster_id) + DatabricksKernelManager.JupyterKernelSuffix;
 	}
 
-	static getJupyterKernel(cluster: iDatabricksCluster): DatabricksKernel {
+	static getJupyterKernel(cluster: ClusterInfo): DatabricksKernel {
 		return this.getKernel(this.getJupyterKernelName(cluster));
 	}
 
-	static jupyterKernelExists(cluster: iDatabricksCluster): boolean {
+	static jupyterKernelExists(cluster: ClusterInfo): boolean {
 		if (this.getKernel(this.getJupyterKernelName(cluster))) {
 			return true;
 		}
 		return false;
 	}
 
-	static getDatabricksKernelName(cluster: iDatabricksCluster): string {
+	static getDatabricksKernelName(cluster: ClusterInfo): string {
 		return cluster.cluster_id + DatabricksKernelManager.DatabricksKernelSuffix
 	}
 
-	static getDatabricksKernel(cluster: iDatabricksCluster): DatabricksKernel {
+	static getDatabricksKernel(cluster: ClusterInfo): DatabricksKernel {
 		return this.getKernel(this.getDatabricksKernelName(cluster));
 	}
 
-	static databricksKernelExists(cluster: iDatabricksCluster): boolean {
+	static databricksKernelExists(cluster: ClusterInfo): boolean {
 		if (this.getDatabricksKernel(cluster)) {
 			return true;
 		}
 		return false;
 	}
 
-	static async createKernels(cluster: iDatabricksCluster, logMessages: boolean = true): Promise<void> {
+	static async createKernels(cluster: ClusterInfo, logMessages: boolean = true): Promise<void> {
 		if (!this.jupyterKernelExists(cluster)) {
 			let notebookKernel: DatabricksKernel = new DatabricksKernel(cluster, "jupyter-notebook");
 			this.setKernel(this.getJupyterKernelName(cluster), notebookKernel);
@@ -137,7 +137,7 @@ export abstract class DatabricksKernelManager {
 		}
 	}
 
-	static async removeKernels(cluster: iDatabricksCluster, logMessages: boolean = true): Promise<void> {
+	static async removeKernels(cluster: ClusterInfo, logMessages: boolean = true): Promise<void> {
 		if (this.jupyterKernelExists(cluster)) {
 			this.removeKernel(this.getJupyterKernelName(cluster));
 			if (logMessages) {
@@ -163,7 +163,7 @@ export abstract class DatabricksKernelManager {
 		}
 	}
 
-	static async restartClusterKernel(cluster: iDatabricksCluster): Promise<void> {
+	static async restartClusterKernel(cluster: ClusterInfo): Promise<void> {
 		let kernel: DatabricksKernel = this.getJupyterKernel(cluster)
 		if (kernel) {
 			kernel.restart();

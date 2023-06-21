@@ -1,0 +1,1 @@
+{"version":3,"file":"TokenFixtures.d.ts","sourceRoot":"","sources":["../../../src/test/fixtures/TokenFixtures.ts"],"names":[],"mappings":"AAAA,OAAO,EAAC,iBAAiB,EAAC,MAAM,aAAa,CAAC;AAE9C,qBAAa,YAAa,YAAW,iBAAiB;IAClD,OAAO,CAAC,SAAS,CAA+B;IAEhD,IAAI,uBAAuB,YAE1B;IAED,uBAAuB,CAAC,CAAC,EAAE,CAAC,CAAC,CAAC,EAAE,GAAG,KAAK,GAAG;CAG9C"}

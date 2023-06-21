@@ -7,7 +7,7 @@ import { DatabricksKernelManager } from '../../notebook/DatabricksKernelManager'
 import { DatabricksCluster } from './DatabricksCluster';
 import { DatabricksClusterJobClusters } from './DatabricksClusterJobClusters';
 import { DatabricksClusterTreeItem } from './DatabricksClusterTreeItem';
-import { iDatabricksCluster } from './iDatabricksCluster';
+import { ClusterInfo } from '../../../databricksApi/databricks-sdk-js/SDK/apis/clusters';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<DatabricksClusterTreeItem> {
@@ -88,7 +88,7 @@ export class DatabricksClusterTreeProvider implements vscode.TreeDataProvider<Da
 			return element.getChildren();
 		}
 		else {
-			let clusters: iDatabricksCluster[] = await DatabricksApiService.listClusters();
+			let clusters: ClusterInfo[] = await DatabricksApiService.listClusters();
 			let items: DatabricksClusterTreeItem[] = [];
 
 			if (clusters != undefined) {

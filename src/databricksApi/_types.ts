@@ -1,6 +1,4 @@
 import { iDatabricksWorkspaceItem } from "../vscode/treeviews/workspaces/iDatabricksworkspaceItem";
-import { iDatabricksCluster } from "../vscode/treeviews/clusters/iDatabricksCluster";
-
 import { iDatabricksJob } from "../vscode/treeviews/jobs/iDatabricksJob";
 import { iDatabricksJobRun } from "../vscode/treeviews/jobs/iDatabricksJobRun";
 import { iDatabricksRepo } from "../vscode/treeviews/repos/_types";
@@ -8,6 +6,7 @@ import { iDatabricksSecretScope } from "../vscode/treeviews/secrets/iDatabricksS
 import { iDatabricksSecret } from "../vscode/treeviews/secrets/iDatabricksSecret";
 import { iDatabricksRuntimeVersion } from "../vscode/treeviews/clusters/iDatabricksRuntimeVersion";
 import { iDatabricksFSItem } from "../vscode/treeviews/dbfs/iDatabricksFSItem";
+import { ClusterSource } from "./databricks-sdk-js/SDK/apis/clusters";
 
 export type ContextLanguage = 
 	"scala" 
@@ -25,7 +24,7 @@ export interface iDatabricksApiWorkspaceExportResponse {
 }
 
 export interface iDatabricksApiClustersListResponse {
-	clusters: iDatabricksCluster[];
+	clusters: ClusterSource[];
 }
 
 export interface iDatabricksApiJobsListResponse {
