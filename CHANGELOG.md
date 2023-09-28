@@ -1,5 +1,8 @@
 # Release Notes
 
+**v2.2.3:**
+- fixed issue with `.py` files from FilesInWorkspace being treated as notebooks when uploaded from local ([760](/../../issues/167))
+
 **v2.2.2:**
 - fixed issues with [Azure Connection Manager](README.md/#setup-and-configuration-azure-connection-manager)
 - reworked extension activation to be more resilient

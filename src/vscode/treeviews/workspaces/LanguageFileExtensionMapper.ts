@@ -12,15 +12,20 @@ export class LanguageFileExtensionMapper {
 	constructor() { }
 
 	static get exportFormat(): ExportFormatsConfiguration {
-		return ThisExtension.ActiveConnection.exportFormats;
+		if(ThisExtension.ActiveConnection)
+		{
+			return ThisExtension.ActiveConnection.exportFormats;
+		}
+		return undefined;
 	}
 
-	static get supportedFileExtensions(): string[] {
+	static get configuredFileExtensions(): string[] {
+		const expFormats = this.exportFormat;
 		return [
-			this.exportFormat.Python,
-			this.exportFormat.R,
-			this.exportFormat.SQL,
-			this.exportFormat.Scala
+			expFormats.Python,
+			expFormats.R,
+			expFormats.SQL,
+			expFormats.Scala
 		];
 	}
 
@@ -80,8 +85,13 @@ export class LanguageFileExtensionMapper {
 
 	static fromExtension(extension: string): LanguageFileExtensionMapper {
 		let ret: LanguageFileExtensionMapper = new LanguageFileExtensionMapper();
-
 		ret._extension = extension.toLowerCase();
+
+		// check if the extension is configured as any of our export formats
+		if(!this.configuredFileExtensions.includes(ret._extension))
+		{
+			return undefined;
+		}
 
 		ret._isNotebook = false;
 		ret._exportFormat = "SOURCE";
@@ -89,8 +99,8 @@ export class LanguageFileExtensionMapper {
 		switch (ret.extension) {
 			case ".py":
 				ret._language = "PYTHON";
+				ret._exportFormat = "SOURCE";
 				break;
-			case ".py.ipynb":
 			case ".ipynb":
 				ret._language = "PYTHON";
 				ret._isNotebook = true;
@@ -118,10 +128,6 @@ export class LanguageFileExtensionMapper {
 	}
 
 	static extensionFromFileName(fileName: string): string {
-		if (fileName.endsWith(".py.ipynb")) {
-			return ".py.ipynb";
-		}
-
 		let tokens = fileName.split('.'); // e.g. '.ipynb' or '.scala'
 
 		if(tokens.length == 1)

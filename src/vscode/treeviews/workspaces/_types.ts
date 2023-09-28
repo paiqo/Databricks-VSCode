@@ -10,7 +10,8 @@ export type WorkspaceItemExportFormat =
 	"SOURCE" 
 | 	"HTML" 
 | 	"JUPYTER"
-| 	"DBC";
+| 	"DBC"
+|	"AUTO";
 
 
 export type WorkspaceItemLanguage = 

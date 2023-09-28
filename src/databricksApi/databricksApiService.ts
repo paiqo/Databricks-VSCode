@@ -383,28 +383,6 @@ export abstract class DatabricksApiService {
 	}
 	//#endregion
 
-	//#region Workspace File API (files in Repo)
-	static async downloadWorkspaceFile(path: string): Promise<Uint8Array> {
-		let endpoint = '2.0/workspace-files/import-file/' + Helper.trimChar(path, '/');
-
-		ThisExtension.log(`Downloading '${path}' ...`);
-
-		let response = await this.get(endpoint, {}, false, "TEXT");
-
-		return await Buffer.from(response, 'latin1') as Uint8Array;
-	}
-
-	static async uploadWorkspaceFile(path: string, content: Uint8Array): Promise<void> {
-		let endpoint = '2.0/workspace-files/import-file/' + Helper.trimChar(path, '/');
-
-		ThisExtension.log(`Uploading '${path}' ...`);
-
-		let body = (await Buffer.from(content).toString('latin1')) as any as object;
-
-		let response = await this.post<string>(endpoint, body, "TEXT");
-	}
-	//#endregion
-
 	//#region Context and Command APIs (v1.2)
 	static async getExecutionContext(cluster_id: string, language: string = "sql"): Promise<ExecutionContext> {
 		let endpoint = '1.2/contexts/create';

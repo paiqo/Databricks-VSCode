@@ -14,9 +14,10 @@ export class DatabricksWorkspaceFile extends DatabricksWorkspaceTreeItem {
 	constructor(
 		path: string,
 		object_id: number,
-		parent: DatabricksWorkspaceTreeItem
+		local_path?: vscode.Uri,
+		parent: DatabricksWorkspaceTreeItem = undefined
 	) {
-		super(path, "FILE", object_id, parent, undefined, vscode.TreeItemCollapsibleState.None);
+		super(path, "FILE", object_id, parent, local_path, vscode.TreeItemCollapsibleState.None);
 
 		this._isInitialized = true;
 
@@ -81,8 +82,6 @@ export class DatabricksWorkspaceFile extends DatabricksWorkspaceTreeItem {
 		if (this.localPathExists && !this.onlinePathExists) { sync_state = "_OFFLINE"; }
 		if (!this.localPathExists && this.onlinePathExists) { sync_state = "_ONLINE"; }
 
-		// TODO: change once new icons exist
-		sync_state = ""; 
 		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, 'workspace', 'file' + sync_state + '.png');
 	}
 
@@ -111,7 +110,7 @@ export class DatabricksWorkspaceFile extends DatabricksWorkspaceTreeItem {
 	}
 
 	public static fromInterface(item: iDatabricksWorkspaceItem, parent: DatabricksWorkspaceTreeItem = null): DatabricksWorkspaceFile {
-		return new DatabricksWorkspaceFile(item.path, item.object_id, parent);
+		return new DatabricksWorkspaceFile(item.path, item.object_id, null, parent);
 	}
 
 	public static fromJSON(jsonString: string, parent: DatabricksWorkspaceTreeItem = null): DatabricksWorkspaceFile {
@@ -132,7 +131,7 @@ export class DatabricksWorkspaceFile extends DatabricksWorkspaceTreeItem {
 				localPath = await FSHelper.joinPath(this.localFolderPath, this.label.toString());
 			}
 
-			await vscode.workspace.fs.writeFile( localPath, await DatabricksApiService.downloadWorkspaceFile(this.path));
+			await DatabricksApiService.downloadWorkspaceItemToFile(this.path, localPath, "SOURCE");
 			this._localPath = localPath;
 
 			Helper.showTemporaryInformationMessage(`Download of item ${FSHelper.basename(localPath)} finished!`);
@@ -150,7 +149,8 @@ export class DatabricksWorkspaceFile extends DatabricksWorkspaceTreeItem {
 
 	async upload(): Promise<void> {
 		try {
-			let response = await DatabricksApiService.uploadWorkspaceFile(this.path, await vscode.workspace.fs.readFile(this.localPath));
+			let response = await DatabricksApiService.uploadWorkspaceItemFromFile(this.localPath, this.path, undefined, true, "AUTO");
+			//let response = await DatabricksApiService.uploadWorkspaceFile(this.path, await vscode.workspace.fs.readFile(this.localPath));
 			Helper.showTemporaryInformationMessage(`Upload of item ${this.path}) finished!`);
 
 			if (ThisExtension.RefreshAfterUpDownload) {

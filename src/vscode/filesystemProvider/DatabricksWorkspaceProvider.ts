@@ -92,7 +92,10 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 	}
 
 	get exportFormat(): WorkspaceItemExportFormat {
-		return this.mapper.exportFormat;
+		if(this.mapper) {
+			return this.mapper.exportFormat;
+		}
+		return "AUTO";
 	}
 
 	get isNotebook(): boolean {
@@ -216,12 +219,7 @@ export class DatabricksWorkspaceProvider implements vscode.FileSystemProvider {
 		}
 
 		let contentBytes: Uint8Array = undefined;
-		if (remoteItem.object_type == "FILE") {
-			contentBytes = await DatabricksApiService.downloadWorkspaceFile(remoteItem.uriPath);
-		}
-		else {
-			contentBytes = await DatabricksApiService.downloadWorkspaceItem(remoteItem.apiPath, remoteItem.exportFormat);
-		}
+		contentBytes = await DatabricksApiService.downloadWorkspaceItem(remoteItem.apiPath, remoteItem.exportFormat);
 
 		return contentBytes
 	}
@@ -239,17 +237,12 @@ export class DatabricksWorkspaceProvider implements vscode.FileSystemProvider {
 			throw vscode.FileSystemError.FileExists(uri);
 		}
 
-		if (remoteItem.object_type == "FILE") {
-			await DatabricksApiService.uploadWorkspaceFile(remoteItem.uriPath, content);
+		// when a new file is added (remote does not yet exists and no content is provided), we just upload an empty file in SOURCE format.
+		if (!remoteItem.exists && content.length == 0) {
+			await DatabricksApiService.uploadWorkspaceItem(content, remoteItem.apiPath, remoteItem.language, options.overwrite, "SOURCE");
 		}
 		else {
-			// when a new file is added (remote does not yet exists and no content is provided), we just upload an empty file in SOURCE format.
-			if (!remoteItem.exists && content.length == 0) {
-				await DatabricksApiService.uploadWorkspaceItem(content, remoteItem.apiPath, remoteItem.language, options.overwrite, "SOURCE");
-			}
-			else {
-				await DatabricksApiService.uploadWorkspaceItem(content, remoteItem.apiPath, remoteItem.language, options.overwrite, remoteItem.exportFormat);
-			}
+			await DatabricksApiService.uploadWorkspaceItem(content, remoteItem.apiPath, remoteItem.language, options.overwrite, remoteItem.exportFormat);
 		}
 
 		this._fireSoon({ type: vscode.FileChangeType.Changed, uri });
