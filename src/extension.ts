@@ -45,8 +45,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	ThisExtension.Logger = vscode.window.createOutputChannel(context.extension.id);
 	ThisExtension.log("Logger initialized!");
 
-	if(ThisExtension.isInBrowser)
-	{
+	if (ThisExtension.isInBrowser) {
 		let msg: string = "As the Databricks API does not yet fully support CORS, running as a web extension is still quite limited!";
 		vscode.window.showWarningMessage(msg);
 		ThisExtension.log(msg);
@@ -54,9 +53,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	ThisExtension.StatusBar = vscode.window.createStatusBarItem("databricks-vscode", vscode.StatusBarAlignment.Right);
 	ThisExtension.StatusBar.show();
-	
+
 	let notebookSerializer = new DatabricksNotebookSerializer(context);
-	
+
 	vscode.commands.registerCommand('databricksKernel.restart',
 		(notebook: { notebookEditor: { notebookUri: vscode.Uri } } | undefined | vscode.Uri) => DatabricksKernelManager.restartJupyterKernel(notebook)
 	);
@@ -100,7 +99,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	// Workspace File System Provider
 	const workspaceProvider = new DatabricksWorkspaceProvider(context);
 	vscode.commands.registerCommand('databricksWorkspace.addToWorkspace', (showMessage: boolean) => {
-		FSHelper.addToWorkspace(vscode.Uri.parse(ThisExtension.WORKSPACE_SCHEME +':/'), "Databricks - Workspace", showMessage);
+		FSHelper.addToWorkspace(vscode.Uri.parse(ThisExtension.WORKSPACE_SCHEME + ':/'), "Databricks - Workspace", showMessage);
 	});
 
 	if (ThisExtension.isInBrowser) {
@@ -209,13 +208,13 @@ export async function activate(context: vscode.ExtensionContext) {
 			throw new Error(msg);
 		}
 		//vscode.commands.executeCommand('databricksConnections.refresh');
-		
+
 		ThisExtension.setStatusBar("Initialized!");
 		DatabricksKernelManager.initialize();
 	}
 	);
 
-	vscode.commands.executeCommand('databricksPowerTools.initialize');
+	await vscode.commands.executeCommand('databricksPowerTools.initialize');
 }
 
 

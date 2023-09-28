@@ -149,21 +149,18 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 					let languageFileExtension: LanguageFileExtensionMapper = undefined;
 
 					if (local[1] == vscode.FileType.File) {
-						if(localUri.path.includes("/Repos/"))
-						{
-							// TODO: special case for Repos where also regular files are supported!
-						}
 						let ext = LanguageFileExtensionMapper.extensionFromFileName(FSHelper.basename(localUri));
 
-						if (LanguageFileExtensionMapper.supportedFileExtensions.includes(ext)
-							|| ThisExtension.allFileExtensions.includes(ext)) {
+						// if the extension is configured in ExportFormats - treat it as notebook
+						if (LanguageFileExtensionMapper.configuredFileExtensions.includes(ext)) {
 							languageFileExtension = LanguageFileExtensionMapper.fromFileName(FSHelper.basename(localUri));
+							localItems.push(new DatabricksWorkspaceNotebook(shownLocalRelativePath, -1, languageFileExtension, localUri, this));
 						}
+						// treat other files as FilesInWorkspace
 						else {
-							vscode.window.showWarningMessage("File " + localUri + " has no valid extension and will be ignored! Supported extensions can be confiugred using setting 'exportFormats'.");
-							continue;
+							ThisExtension.log("File " + localUri + " has no configured notebook file extension and will be treated as regular file");
+							localItems.push(new DatabricksWorkspaceFile(originalLocalRelativePath, -1, localUri, this));
 						}
-						localItems.push(new DatabricksWorkspaceNotebook(shownLocalRelativePath, -1, languageFileExtension, localUri, this));
 					}
 					else {
 						localItems.push(new DatabricksWorkspaceDirectory(shownLocalRelativePath, -1, localUri, this));
@@ -171,7 +168,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 				}
 				else {
 					for (let existingItem of onlineItems) {
-						if (existingItem.path == shownLocalRelativePath) {
+						if (existingItem.path == shownLocalRelativePath || existingItem.path == originalLocalRelativePath) {
 							existingItem.localPath = localUri;
 							existingItem.init();
 							break;

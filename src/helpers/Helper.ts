@@ -313,4 +313,11 @@ export abstract class Helper {
 			};
 		});
 	}
+
+	static cutEnd(text: string, cutOffText: string): string {
+		if (text.endsWith(cutOffText)) {
+			return text.substring(0, text.length - cutOffText.length);
+		}
+		return text;
+	}
 }

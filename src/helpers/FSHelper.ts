@@ -97,10 +97,9 @@ export abstract class FSHelper {
 	}
 
 	static isVSCodeInternalURI(uri: vscode.Uri): boolean {
-		if (uri.path.startsWith("/.vscode")
-			|| uri.path.startsWith("/.git")
-			|| uri.path == "/pom.xml"
-			|| uri.path == "/node_modules"
+		if (uri.path.includes('/.') // any hidden files/folders
+			|| uri.path.endsWith("/pom.xml")
+			|| uri.path.endsWith("/node_modules")
 			|| uri.path.endsWith("AndroidManifest.xml")) {
 			return true;
 		}
