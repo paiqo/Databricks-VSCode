@@ -30,14 +30,15 @@ const webConfig = /** @type WebpackConfig */ {
         {
             "path": require.resolve("path-browserify"),
             "child_process": false,
-            "assert": false,
-            "stream": false,
-            "http": false,
-            "https": false,
-            "crypto": false,
-            "util": false,
+            "assert": require.resolve('assert'),
+            "stream": require.resolve('stream-browserify'),
+            "crypto": require.resolve('crypto-browserify'),
+            "util": require.resolve('util'),
             "fs/promises": false,
-            "os": false,
+            "http": require.resolve('stream-http'),
+            "https": require.resolve('https-browserify'),
+            "os": require.resolve('os-browserify/browser'),
+            "url": require.resolve('url'),
         }
     },
     module: {

@@ -108,7 +108,7 @@ Another important setting which requires modifying the JSON directly are the exp
 		"databricks.connection.default.exportFormats": 
 		{
 			"Scala": ".scala",
-			"Python": ".py.ipynb",
+			"Python": ".ipynb",
 			"SQL": ".sql",
 			"R": ".r"
 		},
@@ -224,6 +224,7 @@ However, there are some known limitations to `%run` as listed blow:
   - this also applies to `%run` (see below)
 - nested `%run` statements are not supported
   - you might consider migrating to [Files in Workspace](https://docs.databricks.com/files/workspace.html)
+  - Additional information: [%run vs dbutils.notebook](https://docs.databricks.com/notebooks/notebook-workflows.html)
 
 Whenever a notebook is opened from either the local sync folder or via the [Virtual File System](#file-system-integration) using `wsfs:/` URI, the Databricks notebook kernels are the preferred ones and should appear at the top of the list when you select a kernel.
 

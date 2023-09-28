@@ -10,8 +10,8 @@ export abstract class FSHelper {
 	static SEPARATOR: string = '/';
 
 	static async addToWorkspace(uri: vscode.Uri, name: string, showMessage: boolean = true): Promise<void> {
-		if (!vscode.workspace.workspaceFolders) {
-			vscode.window.showErrorMessage("Please save your current session as a VSCode workspace first to use this feature!");
+		if (!vscode.workspace.workspaceFile) {
+			await vscode.commands.executeCommand('vscode.openFolder', uri);
 		}
 		else {
 			// add at the end of the workspace

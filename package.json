@@ -23,9 +23,6 @@
 	"engines": {
 		"vscode": "^1.68.0"
 	},
-	"extensionDependencies": [
-		"RandomFractalsInc.vscode-data-table"
-	],
 	"galleryBanner": {
 		"color": "#0ea5ff",
 		"theme": "dark"
@@ -1147,7 +1144,8 @@
 					"group": "navigation/execute@1",
 					"when": "notebookKernel =~ /^paiqo.databricks-vscode\\// && notebookType =~ /jupyter-notebook|databricks-notebook/ && isWorkspaceTrusted"
 				}
-			],			"editor/title": [
+			],
+			"editor/title": [
 				{
 					"command": "databricksKernel.restart",
 					"group": "navigation@1",
@@ -1188,20 +1186,27 @@
 		"@types/node": "^16.11.7",
 		"@types/rimraf": "^2.0.5",
 		"@types/vscode": "^1.68.0",
-		"@vscode/vsce": "^2.19.0",
 		"@vscode/test-web": "*",
+		"@vscode/vsce": "^2.19.0",
+		"assert": "^2.0.0",
+		"buffer": "^6.0.3",
+		"crypto-browserify": "^3.12.0",
 		"eslint": "^8.19.0",
 		"glob": "^8.0.3",
+		"https-browserify": "^1.0.0",
 		"mocha": "^10.0.0",
 		"native-ext-loader": "^2.3.0",
 		"node-fetch": "^3.2.10",
+		"os-browserify": "^0.3.0",
 		"path-browserify": "^1.0.1",
 		"process": "^0.11.10",
+		"reflect-metadata": "^0.1.13",
+		"stream-browserify": "^3.0.0",
+		"stream-http": "^3.2.0",
 		"ts-loader": "^9.3.1",
 		"typescript": "^4.7.4",
+		"url": "^0.11.1",
 		"webpack": "^5.76.0",
-		"webpack-cli": "^4.10.0",
-		"buffer": "^6.0.3",
-		"reflect-metadata": "^0.1.13"
+		"webpack-cli": "^4.10.0"
 	}
 }
