@@ -103,13 +103,7 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 		}
 
 		try {
-			let options: vscode.AuthenticationGetSessionOptions = {
-				clearSessionPreference: false,
-				createIfNone: true,
-				forceNewSession: false,
-				silent: false
-			}
-			let session: vscode.AuthenticationSession = await vscode.authentication.getSession("microsoft", scopes, options);
+			let session: vscode.AuthenticationSession = await vscode.authentication.getSession("microsoft", scopes, { createIfNone: true });
 			return session;
 		}
 		catch (e) {
