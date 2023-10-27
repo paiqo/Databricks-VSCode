@@ -1,0 +1,20 @@
+export interface iDatabricksUCMetastore {
+	name: string,
+	storage_root: string,
+	default_data_access_config_id: string,
+	storage_root_credential_id: string,
+	delta_sharing_scope: string,
+	delta_sharing_recipient_token_lifetime_in_seconds: number,
+	delta_sharing_organization_name: string,
+	owner: string,
+	privilege_model_version: string,
+	region: string,
+	metastore_id: string,
+	created_at: Date,
+	created_by: string,
+	updated_at: Date,
+	updated_by: string,
+	storage_root_credential_name: string,
+	cloud: string,
+	global_metastore_id: string
+}

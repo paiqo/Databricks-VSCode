@@ -8,6 +8,8 @@ import { iDatabricksSecretScope } from "../vscode/treeviews/secrets/iDatabricksS
 import { iDatabricksSecret } from "../vscode/treeviews/secrets/iDatabricksSecret";
 import { iDatabricksRuntimeVersion } from "../vscode/treeviews/clusters/iDatabricksRuntimeVersion";
 import { iDatabricksFSItem } from "../vscode/treeviews/dbfs/iDatabricksFSItem";
+import { iDatabricksUCMetastore } from "../vscode/treeviews/unityCatalog/iDatabricksUCMetastore";
+import { iDatabricksUCSystemSchema } from "../vscode/treeviews/unityCatalog/iDatabricksUCSystemTable";
 
 export type ContextLanguage = 
 	"scala" 
@@ -115,6 +117,14 @@ export interface iDatabricksApiDbfsReadResponse {
 
 export interface iDatabricksApiDbfsCreateResponse {
 	handle: 		number;
+}
+
+export interface iDatabricksUCMetastoresListRepsonse {
+	metastores: iDatabricksUCMetastore[];
+}
+
+export interface iDatabricksUCSystemSchemasListRepsonse {
+	schemas: iDatabricksUCSystemSchema[];
 }
 
 

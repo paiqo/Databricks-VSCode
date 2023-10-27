@@ -11,7 +11,9 @@
 		"databricks.python.envFile": "${workspaceFolder}/.env",
 		"databricks.sync.destinationType": "repo",
 		"databricks.connectionManager": "Azure",
-		"databricks.lastActiveConnection": "mlops-dev-lab"
+		"databricks.lastActiveConnection": "mlops-dev-lab",
+		"jupyter.interactiveWindow.cellMarker.codeRegex": "^# COMMAND ----------|^# Databricks notebook source|^(#\\s*COMMAND\\s*[-]*|#\\s*%%|#\\s*\\<codecell\\>|#\\s*In\\[\\d*?\\]|#\\s*In\\[ \\])",
+		"jupyter.interactiveWindow.cellMarker.default": "# COMMAND ----------"
 	},
 	"tasks": {
 		"version": "2.0.0",

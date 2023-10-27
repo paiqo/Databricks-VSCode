@@ -460,6 +460,11 @@
 					"id": "databricksRepos",
 					"name": "Repos",
 					"type": "tree"
+				},
+				{
+					"id": "databricksUnityCatalog",
+					"name": "Unity Catalog",
+					"type": "tree"
 				}
 			]
 		},
@@ -860,6 +865,12 @@
 					"light": "resources/light/databricks_small.png",
 					"dark": "resources/dark/databricks_small.png"
 				}
+			},
+			{
+				"command": "databricksUnityCatalog.refresh",
+				"title": "Refresh",
+				"category": "Databricks Power Tools",
+				"icon": "$(refresh)"
 			}
 		],
 		"menus": {
@@ -952,6 +963,11 @@
 				{
 					"command": "databricksRepos.refresh",
 					"when": "view == databricksRepos",
+					"group": "navigation"
+				},
+				{
+					"command": "databricksUnityCatalog.refresh",
+					"when": "view == databricksUnityCatalog",
 					"group": "navigation"
 				}
 			],

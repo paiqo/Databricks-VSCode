@@ -12,12 +12,14 @@ import { iDatabricksRuntimeVersion } from '../vscode/treeviews/clusters/iDatabri
 import { iDatabricksFSItem } from '../vscode/treeviews/dbfs/iDatabricksFSItem';
 import { iDatabricksSecretScope } from '../vscode/treeviews/secrets/iDatabricksSecretScope';
 import { iDatabricksSecret } from '../vscode/treeviews/secrets/iDatabricksSecret';
-import { ContextLanguage, ExecutionCommand, ExecutionContext, iDatabricksApiClustersListResponse, iDatabricksApiClustersSparkVersionsResponse, iDatabricksApiCommandsCancelResponse, iDatabricksApiCommandsExecuteResponse, iDatabricksApiCommandsStatusResponse, iDatabricksApiContextsCreateResponse, iDatabricksApiContextsDestroyResponse, iDatabricksApiDbfsCreateResponse, iDatabricksApiDbfsListResponse, iDatabricksApiDbfsReadResponse, iDatabricksApiJobsListResponse, iDatabricksApiJobsRunsListResponse, iDatabricksApiRepoListResponse, iDatabricksApiSecretsListResponse, iDatabricksApiSecretsScopesListResponse, iDatabricksApiWorkspaceExportResponse, iDatabricksApiWorkspaceListResponse } from './_types';
+import { ContextLanguage, ExecutionCommand, ExecutionContext, iDatabricksApiClustersListResponse, iDatabricksApiClustersSparkVersionsResponse, iDatabricksApiCommandsCancelResponse, iDatabricksApiCommandsExecuteResponse, iDatabricksApiCommandsStatusResponse, iDatabricksApiContextsCreateResponse, iDatabricksApiContextsDestroyResponse, iDatabricksApiDbfsCreateResponse, iDatabricksApiDbfsListResponse, iDatabricksApiDbfsReadResponse, iDatabricksApiJobsListResponse, iDatabricksApiJobsRunsListResponse, iDatabricksApiRepoListResponse, iDatabricksApiSecretsListResponse, iDatabricksApiSecretsScopesListResponse, iDatabricksApiWorkspaceExportResponse, iDatabricksApiWorkspaceListResponse, iDatabricksUCMetastoresListRepsonse, iDatabricksUCSystemSchemasListRepsonse } from './_types';
 import { iDatabricksCluster } from '../vscode/treeviews/clusters/iDatabricksCluster';
 import { iDatabricksRepo } from '../vscode/treeviews/repos/_types';
 import { iDatabricksConnection } from '../vscode/treeviews/connections/iDatabricksConnection';
 import { iDatabricksJob } from '../vscode/treeviews/jobs/iDatabricksJob';
 import { iDatabricksJobRun } from '../vscode/treeviews/jobs/iDatabricksJobRun';
+import { iDatabricksUCMetastore } from '../vscode/treeviews/unityCatalog/iDatabricksUCMetastore';
+import { iDatabricksUCSystemSchema } from '../vscode/treeviews/unityCatalog/iDatabricksUCSystemTable';
 
 export abstract class DatabricksApiService {
 	private static API_SUB_URL: string = "/api/";
@@ -1016,4 +1018,55 @@ export abstract class DatabricksApiService {
 		let response = await this.delete(endpoint, body);
 	}
 	//#endregion
+
+	//#region Unity Catalog
+	static async getUCMetastore(): Promise<iDatabricksUCMetastore> {
+		let endpoint = '2.1/unity-catalog/metastore_summary';
+
+		let response: iDatabricksUCMetastore = await this.get<iDatabricksUCMetastore>(endpoint);
+
+		if (!response) {
+			return undefined;
+		}
+
+		return response;
+	}
+	static async listUCMetastores(): Promise<iDatabricksUCMetastore[]> {
+		let endpoint = '2.1/unity-catalog/metastores';
+
+		let response: iDatabricksUCMetastoresListRepsonse = await this.get<iDatabricksUCMetastoresListRepsonse>(endpoint);
+
+		if (!response) {
+			return undefined;
+		}
+
+		let items = response.metastores as iDatabricksUCMetastore[];
+
+		if (!items) {
+			return [];
+		}
+
+		Helper.sortArrayByProperty(items, "name");
+		return items;
+	}
+
+	static async listUCSystemSchemas(metastore_id: string): Promise<iDatabricksUCSystemSchema[]> {
+		let endpoint = `2.1/unity-catalog/metastores/${metastore_id}/systemschemas`;
+
+		let response: iDatabricksUCSystemSchemasListRepsonse = await this.get<iDatabricksUCSystemSchemasListRepsonse>(endpoint);
+
+		if (!response) {
+			return undefined;
+		}
+
+		let items = response.schemas as iDatabricksUCSystemSchema[];
+
+		if (!items) {
+			return [];
+		}
+
+		Helper.sortArrayByProperty(items, "schema");
+		return items;
+	}
+	//#region 
 }

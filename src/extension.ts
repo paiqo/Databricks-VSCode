@@ -36,6 +36,8 @@ import { DatabricksSQLTreeItem } from './vscode/treeviews/sql/DatabricksSQLTreeI
 import { DatabricksSecretTreeItem } from './vscode/treeviews/secrets/DatabricksSecretTreeItem';
 import { DatabricksNotebookSerializer } from './vscode/notebook/DatabricksNotebookSerializer';
 import { DatabricksSendToAPI } from './vscode/editors/DatabricksSendToAPI';
+import { DatabricksUCTreeProvider } from './vscode/treeviews/unityCatalog/DatabricksUCTreeProvider';
+import { DatabricksUCTreeItem } from './vscode/treeviews/unityCatalog/DatabricksUCTreeItem';
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -193,6 +195,11 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('databricksRepo.pull', (repo: DatabricksRepoRepository) => repo.pull());
 	vscode.commands.registerCommand('databricksRepo.delete', (repo: DatabricksRepoRepository) => repo.delete());
 
+	// register DatabricksUCTreeProvider
+	let databricksUCTreeProvider = new DatabricksUCTreeProvider(context);
+	//vscode.window.registerTreeDataProvider('databricksSQL', databricksSQLTreeProvider);
+	vscode.commands.registerCommand('databricksUnityCatalog.refresh', (item: DatabricksUCTreeItem = null, showInfoMessage: boolean = true) => databricksUCTreeProvider.refresh(item, showInfoMessage, false));
+	
 
 	vscode.commands.registerCommand('databricksPowerTools.initialize', async () => {
 		ThisExtension.setStatusBar("Initializing ...", true);
