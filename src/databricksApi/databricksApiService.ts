@@ -210,6 +210,33 @@ export abstract class DatabricksApiService {
 		}
 	}
 
+	static async put<T = any>(endpoint: string, body: object, bodyType: "JSON" | "TEXT" = "JSON"): Promise<T> {
+		ThisExtension.log("PUT " + endpoint + " --> " + JSON.stringify(body));
+
+		try {
+			const config: RequestInit = {
+				method: "PUT",
+				headers: this._headers,
+				body: bodyType == "JSON" ? JSON.stringify(body) : body.toString(),
+				agent: getProxyAgent()
+			};
+			let response: Response = await fetch(this.getFullUrl(endpoint), config);
+
+			if (bodyType == "JSON") {
+				let result: T = await response.json() as T;
+
+				await this.logResponse(result);
+
+				return result;
+			}
+			return await response.text() as any as T;
+		} catch (error) {
+			this.handleApiException(error);
+
+			return undefined;
+		}
+	}
+
 	public static async patch<T = any>(endpoint: string, body: object): Promise<T> {
 		ThisExtension.log("PATCH " + endpoint + " --> " + JSON.stringify(body));
 
@@ -1067,6 +1094,18 @@ export abstract class DatabricksApiService {
 
 		Helper.sortArrayByProperty(items, "schema");
 		return items;
+	}
+
+	static async enableUCSystemSchema(metastore_id: string, schema: string): Promise<void> {
+		let endpoint = `2.1/unity-catalog/metastores/${metastore_id}/systemschemas/${schema}`;
+
+		let response = await this.put(endpoint, {});
+	}
+
+	static async disableUCSystemSchema(metastore_id: string, schema: string): Promise<void> {
+		let endpoint = `2.1/unity-catalog/metastores/${metastore_id}/systemschemas/${schema}`;
+
+		let response = await this.delete(endpoint, {});
 	}
 	//#region 
 }

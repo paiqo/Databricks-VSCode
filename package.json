@@ -871,6 +871,18 @@
 				"title": "Refresh",
 				"category": "Databricks Power Tools",
 				"icon": "$(refresh)"
+			},
+			{
+				"command": "databricksUCSystemSchema.enable",
+				"title": "Enable",
+				"category": "Databricks Power Tools",
+				"icon": "$(play)"
+			},
+			{
+				"command": "databricksUCSystemSchema.disable",
+				"title": "Disable",
+				"category": "Databricks Power Tools",
+				"icon": "$(stop)"
 			}
 		],
 		"menus": {
@@ -1094,7 +1106,7 @@
 				},
 				{
 					"command": "databricksFSItem.delete",
-					"when": "view == databricksFS &&  viewItem =~ /.*,DELETE,.*/",
+					"when": "view == databricksFS && viewItem =~ /.*,DELETE,.*/",
 					"group": "inline@99"
 				},
 				{
@@ -1150,7 +1162,18 @@
 					"command": "databricksRepo.delete",
 					"when": "view == databricksRepos && viewItem == REPOSITORY",
 					"group": "inline@99"
+				},
+				{
+					"command": "databricksUCSystemSchema.enable",
+					"when": "view == databricksUnityCatalog && viewItem =~ /.*,SYSTEMSCHEMA,.*/ && viewItem =~ /.*,ENABLE,.*/",
+					"group": "inline@99"
+				},
+				{
+					"command": "databricksUCSystemSchema.disable",
+					"when": "view == databricksUnityCatalog && viewItem =~ /.*,SYSTEMSCHEMA,.*/ && viewItem =~ /.*,DISABLE,.*/",
+					"group": "inline@99"
 				}
+				
 			],
 			"notebook/toolbar": [
 				{

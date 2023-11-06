@@ -9,16 +9,17 @@ import { FSHelper } from '../../../helpers/FSHelper';
 import { iDatabricksUCMetastore } from './iDatabricksUCMetastore';
 import { DatabricksUCSystemSchema } from './DatabricksUCSystemSchema';
 import { iDatabricksUCSystemSchema } from './iDatabricksUCSystemTable';
+import { DatabricksUCMetastore } from './DatabricksUCMetastore';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksUCSystemSchemas extends DatabricksUCTreeItem {
 	private metastore: iDatabricksUCMetastore;
 	constructor(
-		metastore: iDatabricksUCMetastore
+		parent: DatabricksUCMetastore
 	) {
-		super("SYSTEMSCHEMAS", metastore.metastore_id + "/SYSTEMSCHEMAS", "System Schemas", undefined, vscode.TreeItemCollapsibleState.Collapsed);
+		super("SYSTEMSCHEMAS", parent.definition.metastore_id + "/SYSTEMSCHEMAS", "System Schemas", undefined, parent, vscode.TreeItemCollapsibleState.Collapsed);
 
-		this.metastore = metastore;
+		this.metastore = parent.definition;
 
 		super.contextValue = this._contextValue;
 		super.iconPath = {
@@ -32,21 +33,19 @@ export class DatabricksUCSystemSchemas extends DatabricksUCTreeItem {
 		return this.type;
 	}
 
-	protected  getIconPath(theme: string): vscode.Uri {
-		let state: string = "UC";
-
-		return FSHelper.joinPathSync(ThisExtension.rootUri, 'resources', theme, state + '.png');
+	protected getIconPath(theme: string): vscode.Uri {
+		return FSHelper.joinPathSync(ThisExtension.rootUri, 'resources', theme, 'workspace', 'directory.png');
 	}
 
 	async getChildren(): Promise<DatabricksUCSystemSchema[]> {
 		let items: DatabricksUCSystemSchema[] = [];
-			
-			let apiItems: iDatabricksUCSystemSchema[] = await DatabricksApiService.listUCSystemSchemas(this.metastore.metastore_id);
 
-			if (apiItems) {
-				apiItems.map(item => items.push(new DatabricksUCSystemSchema(item)));
-			}
+		let apiItems: iDatabricksUCSystemSchema[] = await DatabricksApiService.listUCSystemSchemas(this.metastore.metastore_id);
 
-			return items;
+		if (apiItems) {
+			apiItems.map(item => items.push(new DatabricksUCSystemSchema(item, this)));
+		}
+
+		return items;
 	}
 }

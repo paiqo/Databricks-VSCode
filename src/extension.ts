@@ -38,6 +38,7 @@ import { DatabricksNotebookSerializer } from './vscode/notebook/DatabricksNotebo
 import { DatabricksSendToAPI } from './vscode/editors/DatabricksSendToAPI';
 import { DatabricksUCTreeProvider } from './vscode/treeviews/unityCatalog/DatabricksUCTreeProvider';
 import { DatabricksUCTreeItem } from './vscode/treeviews/unityCatalog/DatabricksUCTreeItem';
+import { DatabricksUCSystemSchema } from './vscode/treeviews/unityCatalog/DatabricksUCSystemSchema';
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -199,6 +200,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	let databricksUCTreeProvider = new DatabricksUCTreeProvider(context);
 	//vscode.window.registerTreeDataProvider('databricksSQL', databricksSQLTreeProvider);
 	vscode.commands.registerCommand('databricksUnityCatalog.refresh', (item: DatabricksUCTreeItem = null, showInfoMessage: boolean = true) => databricksUCTreeProvider.refresh(item, showInfoMessage, false));
+	
+	vscode.commands.registerCommand('databricksUCSystemSchema.enable', (systemSchema: DatabricksUCSystemSchema) => systemSchema.enable());
+	vscode.commands.registerCommand('databricksUCSystemSchema.disable', (systemSchema: DatabricksUCSystemSchema) => systemSchema.disable());
 	
 
 	vscode.commands.registerCommand('databricksPowerTools.initialize', async () => {

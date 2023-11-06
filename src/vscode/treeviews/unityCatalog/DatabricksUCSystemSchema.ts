@@ -7,23 +7,23 @@ import { DatabricksApiService } from '../../../databricksApi/databricksApiServic
 import { DatabricksUCTreeItem } from './DatabricksUCTreeItem';
 import { FSHelper } from '../../../helpers/FSHelper';
 import { iDatabricksUCSystemSchema } from './iDatabricksUCSystemTable';
+import { DatabricksUCSystemSchemas } from './DatabricksUCSystemSchemas';
+import { DatabricksUCMetastore } from './DatabricksUCMetastore';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksUCSystemSchema extends DatabricksUCTreeItem {
 	
 	constructor(
-		definition: iDatabricksUCSystemSchema
+		definition: iDatabricksUCSystemSchema,
+		parent: DatabricksUCSystemSchemas
 	) {
-		super("SYSTEMSCHEMA", definition.schema, definition.schema, definition, vscode.TreeItemCollapsibleState.None);
+		super("SYSTEMSCHEMA", definition.schema, definition.schema, definition, parent, vscode.TreeItemCollapsibleState.None);
 
 		super.label = this.name;
 		super.tooltip = this._tooltip;
 		super.description = this._description;
 		super.contextValue = this._contextValue;
-		super.iconPath = {
-			light: this.getIconPath("light"),
-			dark: this.getIconPath("dark")
-		};
+		super.iconPath = this.getThemeIcon();
 	}
 
 	// tooltip shown when hovering over the item
@@ -48,28 +48,51 @@ export class DatabricksUCSystemSchema extends DatabricksUCTreeItem {
 
 	// used in package.json to filter commands via viewItem == CANSTART
 	get _contextValue(): string {
-		return this.type;
+		let actions: string[] = super._contextValue.split(",").filter(item => item.length > 0);
+
+		switch(this.definition.state)
+		{
+			case "AVAILABLE":
+				actions.push("ENABLE");
+				break;
+			case "ENABLE_COMPLETED":
+				actions.push("DISABLE");
+				break;
+		}
+
+		// use , as separator to allow to check for ,<value>, in package.json when condition
+		return "," + actions.join(",") + ",";
 	}
 
-	protected  getIconPath(theme: string): vscode.Uri {
-		let state: string = "UC";
-
-		return FSHelper.joinPathSync(ThisExtension.rootUri, 'resources', theme, state + '.png');
+	protected  getThemeIcon(): vscode.ThemeIcon {
+		switch(this.definition.state)
+		{
+			case "AVAILABLE":
+				return new vscode.ThemeIcon("issue-opened");
+			case "UNAVAILABLE":
+				return new vscode.ThemeIcon("error");
+			case "ENABLE_COMPLETED":
+				return new vscode.ThemeIcon("issue-closed");
+		}
 	}
-
-	readonly command = {
-		command: 'databricksUCItem.click', title: "Open File", arguments: [this]
-	};
-
 
 	get definition(): iDatabricksUCSystemSchema {
 		return this._definition as iDatabricksUCSystemSchema;
 	}
 
-	get link(): string {
-		let actConn = ThisExtension.ActiveConnection;
-		let link: string = "";//Helper.trimChar(FSHelper.joinPathSync(actConn.apiRootUrl, "?#UC", this.UC_id.toString()).toString(true), '/');
+	async enable(): Promise<void> {
+		const metastore = this.getParentByType<DatabricksUCMetastore>("METASTORE");
+
+		await DatabricksApiService.enableUCSystemSchema(metastore.metastore_id, this.definition.schema);
+
+		setTimeout(() => this.refreshParent(), 1000);
+	}
+
+	async disable(): Promise<void> {
+		const metastore = this.getParentByType<DatabricksUCMetastore>("METASTORE");
 		
-		return link;
+		await DatabricksApiService.disableUCSystemSchema(metastore.metastore_id, this.definition.schema);
+
+		setTimeout(() => this.refreshParent(), 1000);
 	}
 }

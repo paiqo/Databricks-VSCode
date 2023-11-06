@@ -59,6 +59,7 @@ export abstract class DatabricksConnectionManager {
 				vscode.commands.executeCommand("databricksSecrets.refresh", undefined, false);
 				vscode.commands.executeCommand("databricksSQL.refresh", undefined, false);
 				vscode.commands.executeCommand("databricksRepos.refresh", undefined, false);
+				vscode.commands.executeCommand("databricksUnityCatalog.refresh", undefined, false);
 			}
 		}
 	}

@@ -14,7 +14,7 @@ export class DatabricksUCMetastore extends DatabricksUCTreeItem {
 	constructor(
 		definition: iDatabricksUCMetastore
 	) {
-		super("METASTORE", definition.metastore_id, definition.name, definition, vscode.TreeItemCollapsibleState.Collapsed);
+		super("METASTORE", definition.metastore_id, definition.name, definition, null, vscode.TreeItemCollapsibleState.Collapsed);
 
 		super.label = this.name;
 		super.tooltip = this._tooltip;
@@ -52,15 +52,8 @@ export class DatabricksUCMetastore extends DatabricksUCTreeItem {
 	}
 
 	protected  getIconPath(theme: string): vscode.Uri {
-		let state: string = "UC";
-
-		return FSHelper.joinPathSync(ThisExtension.rootUri, 'resources', theme, state + '.png');
+		return FSHelper.joinPathSync(ThisExtension.rootUri, 'resources', theme, 'sql', 'metastore.png');
 	}
-
-	readonly command = {
-		command: 'databricksUCItem.click', title: "Open File", arguments: [this]
-	};
-
 
 	get definition(): iDatabricksUCMetastore {
 		return this._definition as iDatabricksUCMetastore;
@@ -85,8 +78,12 @@ export class DatabricksUCMetastore extends DatabricksUCTreeItem {
 	async getChildren(): Promise<DatabricksUCTreeItem[]> {
 		let items: DatabricksUCTreeItem[] = [];
 
-		items.push(new DatabricksUCSystemSchemas(this.definition));
+		items.push(new DatabricksUCSystemSchemas(this));
 		
 		return items;
+	}
+
+	get metastore_id(): string {
+		return this.definition.metastore_id;
 	}
 }

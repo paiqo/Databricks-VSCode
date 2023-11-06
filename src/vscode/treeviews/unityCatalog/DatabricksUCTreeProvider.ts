@@ -32,7 +32,7 @@ export class DatabricksUCTreeProvider implements vscode.TreeDataProvider<Databri
 
 		this._treeView = treeView;
 
-		this.startAutoRefresh(300); // refresh every 5 minutes
+		this.startAutoRefresh(3600); // refresh every hour
 	}
 
 	private async _onDidChangeSelection(items: readonly DatabricksUCTreeItem[]): Promise<void> { }
