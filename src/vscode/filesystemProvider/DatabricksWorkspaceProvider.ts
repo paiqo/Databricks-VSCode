@@ -8,6 +8,7 @@ import { DatabricksApiService } from '../../databricksApi/databricksApiService';
 import { iDatabricksWorkspaceItem } from '../treeviews/workspaces/iDatabricksworkspaceItem';
 import { Helper } from '../../helpers/Helper';
 import { ThisExtension } from '../../ThisExtension';
+import { DatabricksNotebook } from '../notebook/DatabricksNotebook';
 
 export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabricksWorkspaceItem {
 	// vscode.FileStat properties, basically all are read-only
@@ -238,12 +239,10 @@ export class DatabricksWorkspaceProvider implements vscode.FileSystemProvider {
 		}
 
 		// when a new file is added (remote does not yet exists and no content is provided), we just upload an empty file in SOURCE format.
-		if (!remoteItem.exists && content.length == 0) {
-			await DatabricksApiService.uploadWorkspaceItem(content, remoteItem.apiPath, remoteItem.language, options.overwrite, "SOURCE");
+		if (!remoteItem.exists && content.length == 0 && remoteItem.isNotebook ) {
+			content = Buffer.from(DatabricksNotebook.getEmptyNotebook());
 		}
-		else {
-			await DatabricksApiService.uploadWorkspaceItem(content, remoteItem.apiPath, remoteItem.language, options.overwrite, remoteItem.exportFormat);
-		}
+		await DatabricksApiService.uploadWorkspaceItem(content, remoteItem.apiPath, remoteItem.language, options.overwrite, remoteItem.exportFormat);
 
 		this._fireSoon({ type: vscode.FileChangeType.Changed, uri });
 	}

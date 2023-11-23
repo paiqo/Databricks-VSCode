@@ -97,6 +97,29 @@ export class LanguageFileExtensionMapper {
 		ret._exportFormat = "SOURCE";
 
 		switch (ret.extension) {
+			case this.exportFormat.Python:
+				ret._language = "PYTHON";
+				ret._exportFormat = "SOURCE";
+				if(ret.extension.endsWith('.ipynb'))
+				{
+					ret._isNotebook = true;
+					ret._exportFormat = "JUPYTER";
+				}
+				break;
+			case this.exportFormat.R:
+				ret._language = "R";
+				break;
+			case this.exportFormat.Scala:
+				ret._language = "SCALA";
+				break;
+			case this.exportFormat.SQL:
+				ret._language = "SQL";
+				break;
+			default: 
+				ret._exportFormat = "AUTO";
+				ret._language = undefined;
+				break;
+			/*
 			case ".py":
 				ret._language = "PYTHON";
 				ret._exportFormat = "SOURCE";
@@ -121,7 +144,8 @@ export class LanguageFileExtensionMapper {
 			default: 
 				ThisExtension.log("Invalid file extension found: " + ret.extension);
 				//throw new Error("Language for extension '" + ret.extension + "' is not defined!");
-				return undefined;				
+				return undefined;
+			*/				
 		}
 
 		return ret;

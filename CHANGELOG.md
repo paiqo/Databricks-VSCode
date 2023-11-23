@@ -1,7 +1,10 @@
 # Release Notes
 
+**v2.2.4:**
+- fixed issue when creating new files in `wsfs:/` scheme ([176](/../../issues/176))
+
 **v2.2.3:**
-- fixed issue with `.py` files from FilesInWorkspace being treated as notebooks when uploaded from local ([760](/../../issues/167))
+- fixed issue with `.py` files from FilesInWorkspace being treated as notebooks when uploaded from local ([167](/../../issues/167))
 
 **v2.2.2:**
 - fixed issues with [Azure Connection Manager](README.md/#setup-and-configuration-azure-connection-manager)
