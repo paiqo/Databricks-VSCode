@@ -454,15 +454,27 @@ export class DatabricksKernel implements vscode.NotebookController {
 						switch (runUri.scheme) {
 							case ThisExtension.WORKSPACE_SCHEME_LEGACY: // legacy
 							case ThisExtension.WORKSPACE_SCHEME:
+								// this error is raised if the path is not found or the file is not a notebook
+								const notebookNotFoundError = new Error(`Notebook not found: ${runUri.path}. Notebooks can be specified via a relative path (./Notebook or ../folder/Notebook) or via an absolute path (/Abs/Path/to/Notebook). Make sure you are specifying the path correctly.`)
 								if (!await FSHelper.pathExists(runUri)) {
-									throw vscode.FileSystemError.FileNotFound(runUri);
+									throw notebookNotFoundError;
 								}
 								// we cannot use vscode.workspace.fs here as we need the SOURCE file and not the ipynb file 
 								commandText = Buffer.from(await DatabricksApiService.downloadWorkspaceItem(runUri.path, "SOURCE")).toString();
 
 								// get the language of the executed file
 								let wsfsWorkItem = await DatabricksApiService.getWorkspaceItem(runUri.path);
+								if(wsfsWorkItem.object_type != "NOTEBOOK")
+								{
+									throw notebookNotFoundError;
+								}
 								language = wsfsWorkItem.language.toLowerCase() as ContextLanguage;
+
+								if(commandText.includes("%run") || commandText.includes("dbutils.notebook.run"))
+								{
+									throw new Error("Recursive calls of `%run` or `dbutils.notebook.run()` are not supported! Please refer to https://github.com/paiqo/Databricks-VSCode#notebook-kernel for more information.");
+								}
+
 								break;
 
 							case "file":

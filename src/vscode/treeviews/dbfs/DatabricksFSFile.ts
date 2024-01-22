@@ -143,7 +143,7 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 		}
 		else {
 			if (showWarning)
-				vscode.window.showWarningMessage("Opening local cached file. To open most recent file from Databricks, please manually download it first!");
+				Helper.showTemporaryInformationMessage("Opening local cached file. To open most recent file from Databricks, please manually download it first!", 8000);
 		}
 
 		vscode.workspace

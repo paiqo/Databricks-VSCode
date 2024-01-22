@@ -1,5 +1,9 @@
 # Release Notes
 
+**v2.3.0:**
+- fixed issue with `%run` and `.py` files where the logic was different from the Databricks UI implementation ([180](/../../issues/180))
+- added new error message for nested calls to `%run`/`dbutils.notebook.run` ([175](/../../issues/175))
+
 **v2.2.4:**
 - fixed issue when creating new files in `wsfs:/` scheme ([176](/../../issues/176))
 

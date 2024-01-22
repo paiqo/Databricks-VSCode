@@ -225,7 +225,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 		}
 		else {
 			if (showWarning)
-				vscode.window.showWarningMessage("Opening local cached file. To open most recent file from Databricks, please manually download it first!");
+				Helper.showTemporaryInformationMessage("Opening local cached file. To open most recent file from Databricks, please manually download it first!", 8000);
 		}
 		let viewType: string = "default";
 		if (this.localFileExtension.endsWith(".ipynb")) {
