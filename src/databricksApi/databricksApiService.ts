@@ -66,10 +66,18 @@ export abstract class DatabricksApiService {
 	}
 
 	public static updateHeaders(authorizationHeaders: any): void {
-		this._headers = {
-			...authorizationHeaders,
-			//"Content-Type": 'application/json', // does not work with CORS ! https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_request_header
+		let genericHeaders = {
 			"Accept": 'application/json'
+		}
+
+		// if a map is provided instead of an object, we convert the Map to an object first
+		if (authorizationHeaders instanceof Map) {
+			authorizationHeaders = Helper.mapToObject(authorizationHeaders);
+		}
+
+		this._headers = {
+			...genericHeaders,
+			...authorizationHeaders
 		}
 	}
 	//#endregion

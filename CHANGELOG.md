@@ -1,5 +1,8 @@
 # Release Notes
 
+**v2.3.1:**
+- fixed issue with [Databricks Extension Connection Manager](README.md/#setup-and-configuration-databricks-extension-connection-manager) ([189](/../../issues/189))
+
 **v2.3.0:**
 - fixed issue with `%run` and `.py` files where the logic was different from the Databricks UI implementation ([180](/../../issues/180))
 - added new error message for nested calls to `%run`/`dbutils.notebook.run` ([175](/../../issues/175))

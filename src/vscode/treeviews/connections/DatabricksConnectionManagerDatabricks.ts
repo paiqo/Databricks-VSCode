@@ -118,7 +118,8 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 	updateConnection(updatedCon: iDatabricksConnection): void { }
 
 	async getAuthorizationHeaders(con: iDatabricksConnection): Promise<object> {
-		const headers: Record<string, string> = {};
+		//const headers: Record<string, string> = {};
+		const headers: Map<string, string> = new Map<string, string>();
 		await this._apiClient.config.authenticate(headers);
 
 		return headers
