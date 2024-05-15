@@ -114,7 +114,7 @@ export class DatabricksSelectorWidget extends DatabricksWidget<string[]> {
 				case "r":
 					return "c('" + this.lastInput.join('", "') + '")';
 				case "sql":
-					return "('" + this.lastInput.join("','") + "')";
+					return this.lastInput.join(",");
 
 				case "python":
 					return "['" + this.lastInput.join("','") + "']";
@@ -129,7 +129,7 @@ export class DatabricksSelectorWidget extends DatabricksWidget<string[]> {
 			switch (this.language) {
 				case "r":
 				case "sql":
-					return "'" + this.lastInput + "'";
+					return this.lastInput.join(",");
 
 				case "python":
 				case "scala":

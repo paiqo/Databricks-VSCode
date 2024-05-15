@@ -57,7 +57,7 @@ export class DatabricksTextWidget extends DatabricksWidget<string> {
 		switch (this.language) {
 			case "r":
 			case "sql":
-				return "'" + this.lastInput + "'";
+				return this.lastInput;
 
 			case "python":
 			case "scala":

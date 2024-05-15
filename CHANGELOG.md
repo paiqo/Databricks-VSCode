@@ -1,5 +1,8 @@
 # Release Notes
 
+**v2.3.2:**
+- fixed issue with SQL Widgets ([190](/../../issues/190))
+
 **v2.3.1:**
 - fixed issue with [Databricks Extension Connection Manager](README.md/#setup-and-configuration-databricks-extension-connection-manager) ([189](/../../issues/189))
 
