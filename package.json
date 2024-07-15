@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks Power Tools",
 	"description": "Run notebooks cell-by-cell, browse and edit your Databricks Workspace, DBFS, Clusters, Jobs, Secrets, Repos and SQL. Supports Azure Databricks, Databricks on AWS and Databricks on GCP.",
-	"version": "2.3.2",
+	"version": "2.3.3",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -1194,6 +1194,8 @@
 		"glob": "^8.0.3",
 		"mocha": "^10.0.0",
 		"native-ext-loader": "^2.3.0",
+		"https-agent": "^1.0.0",
+		"https-proxy-agent": "^5.0.1",
 		"node-fetch": "^3.2.10",
 		"path-browserify": "^1.0.1",
 		"process": "^0.11.10",

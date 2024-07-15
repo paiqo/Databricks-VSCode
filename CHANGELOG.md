@@ -1,5 +1,8 @@
 # Release Notes
 
+**v2.3.3:**
+- fixed issue with regular Python files (type FILE) in the workspace when created locally ([195](/../../issues/195))
+
 **v2.3.2:**
 - fixed issue with SQL Widgets ([190](/../../issues/190))
 

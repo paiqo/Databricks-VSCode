@@ -38,9 +38,9 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 	}
 
 	async init(): Promise<void> {
-		super.label = this.path.split('/').pop();
+		this.label = this.path.split('/').pop();
 
-		super.iconPath = {
+		this.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};

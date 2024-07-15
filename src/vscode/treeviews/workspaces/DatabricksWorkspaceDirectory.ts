@@ -154,7 +154,22 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 						// if the extension is configured in ExportFormats - treat it as notebook
 						if (LanguageFileExtensionMapper.configuredFileExtensions.includes(ext)) {
 							languageFileExtension = LanguageFileExtensionMapper.fromFileName(FSHelper.basename(localUri));
-							localItems.push(new DatabricksWorkspaceNotebook(shownLocalRelativePath, -1, languageFileExtension, localUri, this));
+							if(languageFileExtension.language == "PYTHON" && languageFileExtension.extension == ".py") {
+								// the local file could also be a non-notebook python file - so we need to check the header of the file
+								const binaryContent = await vscode.workspace.fs.readFile(localUri);
+								const fileContent = Buffer.from(binaryContent).toString('utf8');
+
+								if(fileContent.startsWith("# Databricks notebook source")) {
+									localItems.push(new DatabricksWorkspaceNotebook(shownLocalRelativePath, -1, languageFileExtension, localUri, this));
+								}
+								else {
+									localItems.push(new DatabricksWorkspaceFile(shownLocalRelativePath, -1, localUri, this));
+								}
+							}
+							else {
+								localItems.push(new DatabricksWorkspaceNotebook(shownLocalRelativePath, -1, languageFileExtension, localUri, this));
+							}
+							
 						}
 						// treat other files as FilesInWorkspace
 						else {
