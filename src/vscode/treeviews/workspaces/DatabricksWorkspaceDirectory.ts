@@ -163,7 +163,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 									localItems.push(new DatabricksWorkspaceNotebook(shownLocalRelativePath, -1, languageFileExtension, localUri, this));
 								}
 								else {
-									localItems.push(new DatabricksWorkspaceFile(shownLocalRelativePath, -1, localUri, this));
+									localItems.push(new DatabricksWorkspaceFile(shownLocalRelativePath + languageFileExtension.extension, -1, localUri, this));
 								}
 							}
 							else {
