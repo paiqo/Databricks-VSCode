@@ -72,7 +72,7 @@ export class DatabricksJob extends DatabricksJobTreeItem {
 
 	get link(): string {
 		let actConn = ThisExtension.ActiveConnection;
-		let link: string = Helper.trimChar(FSHelper.joinPathSync(actConn.apiRootUrl, "?#job", this.job_id.toString()).toString(true), '/');
+		let link: string = Helper.trimChar(FSHelper.joinPathSync(actConn.apiRootUrl, "jobs", this.job_id.toString()).toString(true), '/');
 		
 		return link;
 	}
