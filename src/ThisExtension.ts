@@ -1,10 +1,9 @@
 import * as vscode from 'vscode';
 
-import { WorkspaceItemLanguage } from './vscode/treeviews/workspaces/_types';
 import { DatabricksConnectionManager } from './vscode/treeviews/connections/DatabricksConnectionManager';
 import { iDatabricksConnection } from './vscode/treeviews/connections/iDatabricksConnection';
 import { DatabricksConnectionManagerVSCode } from './vscode/treeviews/connections/DatabricksConnectionManagerVSCode';
-import { ConnectionManager, ConnectionSource, SensitiveValueStore } from './vscode/treeviews/connections/_types';
+import { ConnectionManager, SensitiveValueStore } from './vscode/treeviews/connections/_types';
 import { DatabricksConnectionManagerCLI } from './vscode/treeviews/connections/DatabricksConnectionManagerCLI';
 import { DatabricksConnectionManagerManualInput } from './vscode/treeviews/connections/DatabricksConnectionManagerManualInput';
 import { DatabricksConnectionManagerAzure } from './vscode/treeviews/connections/DatabricksConnectionManagerAzure';
@@ -17,7 +16,6 @@ export abstract class ThisExtension {
 	static readonly DBFS_SCHEME = "dbfs";
 	static readonly WORKSPACE_SCHEME = "wsfs";
 	static readonly WORKSPACE_SCHEME_LEGACY = "dbws";
-
 
 	private static _context: vscode.ExtensionContext;
 	private static _extension: vscode.Extension<any>;
@@ -131,6 +129,8 @@ export abstract class ThisExtension {
 			return false;
 		}
 	}
+
+	
 
 	public static async refreshUI(): Promise<void> {
 		// refresh all treeviews after the extension has been initialized

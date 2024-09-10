@@ -27,6 +27,7 @@ export abstract class DatabricksApiService {
 	private static _connectionTestRunning: boolean = false;
 	private static _apiBaseUrl: string;
 	private static _headers;
+	private static _autoRefreshHeadersTimer;
 
 	//#region Initialization
 	static async initialize(con: iDatabricksConnection): Promise<boolean> {
@@ -34,10 +35,13 @@ export abstract class DatabricksApiService {
 			ThisExtension.log("Initializing Databricks API Service ...");
 
 			this._isInitialized = false;
-			let headers = await ThisExtension.ConnectionManager.getAuthorizationHeaders(con);
+			
 			this._apiBaseUrl = Helper.trimChar(con.apiRootUrl.with({ path: '', query: '', fragment: '' }).toString(true), '/') + this.API_SUB_URL;
 
+			let headers = await ThisExtension.ConnectionManager.getAuthorizationHeaders(con);
 			this.updateHeaders(headers);
+			this._autoRefreshHeadersTimer = undefined;
+			this.startAutoRefreshHeaders();
 
 			ThisExtension.log(`Testing new Databricks API (${con.apiRootUrl}) settings ...`);
 			this._connectionTestRunning = true;
@@ -78,6 +82,32 @@ export abstract class DatabricksApiService {
 		this._headers = {
 			...genericHeaders,
 			...authorizationHeaders
+		}
+	}
+
+	private static async startAutoRefreshHeaders(timeoutSeconds: number = 1800): Promise<void> {
+		if (this._autoRefreshHeadersTimer) {
+			ThisExtension.log('AutoRefresh for Databricks API Headers is already running!');
+		}
+		else {
+			ThisExtension.log(`Starting AutoRefresh for Databricks API Headers every ${timeoutSeconds} seconds!`);
+			await Helper.delay(timeoutSeconds * 1000);
+			this._autoRefreshHeadersTimer = setInterval(async () => {
+				ThisExtension.log('Refreshing Databricks API Headers ...');
+				let headers = await ThisExtension.ConnectionManager.getAuthorizationHeaders(ThisExtension.ActiveConnection);
+				await this.updateHeaders(headers);
+			}, timeoutSeconds * 1000);
+		}
+	}
+
+	private static async stopAutoRefresh(): Promise<void> {
+		if (this._autoRefreshHeadersTimer) {
+			ThisExtension.log('Stopping AutoRefresh for Databricks API Headers!');
+			clearInterval(this._autoRefreshHeadersTimer);
+			this._autoRefreshHeadersTimer = undefined;
+		}
+		else {
+			ThisExtension.log('AutoRefresh for Databricks API Headers is not running!');
 		}
 	}
 	//#endregion

@@ -88,4 +88,6 @@ export class DatabricksConnectionManagerManualInput extends DatabricksConnection
 	}
 
 	updateConnection(updatedCon: iDatabricksConnection): void {	}
+
+	dispose(): void { }
 }

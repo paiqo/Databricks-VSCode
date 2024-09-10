@@ -122,4 +122,6 @@ export class DatabricksConnectionManagerCLI extends DatabricksConnectionManager 
 	}
 
 	updateConnection(updatedCon: iDatabricksConnection): void {	}
+
+	dispose(): void { }
 }

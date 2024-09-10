@@ -43,8 +43,7 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 
 				await this.activateConnection(this.LastActiveConnection, true);
 
-				if(!this._databricksConnectionManager.cluster)
-				{
+				if (!this._databricksConnectionManager.cluster) {
 					throw new Error("Please configure/attach a cluster in the Databricks Extension first to use all features!");
 				}
 				let cluster = this._databricksConnectionManager.cluster.details as iDatabricksCluster;
@@ -81,7 +80,7 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 			const connectionManager = publicApi.connectionManager;
 			await connectionManager.login();
 			await connectionManager.waitForConnect();
-			
+
 			this._databricksConnectionManager = connectionManager;
 			// new logic to handle two versions of the Databricks Extension
 			this._apiClient = connectionManager.apiClient ?? connectionManager.workspaceClient?.apiClient;
@@ -92,7 +91,7 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 			this._remoteSyncfolder = connectionManager.syncDestinationMapper?.remoteUri?.uri;
 
 			this._connections.push({
-				"apiRootUrl": vscode.Uri.parse(host), 
+				"apiRootUrl": vscode.Uri.parse(host),
 				"displayName": "Databricks Extension",
 				"localSyncFolder": localSyncfolder,
 				"exportFormats": {
@@ -108,7 +107,7 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 					"Clusters": undefined
 				},
 				"_source": "DatabricksExtension"
-				})			
+			})
 		} catch (e) {
 			ThisExtension.log(`ERROR: Something went wrong loading the connections from Connection Manager 'Databricks Extensions'!`);
 			ThisExtension.log(e);
@@ -128,4 +127,6 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 	get remoteSyncFolder(): vscode.Uri {
 		return this._remoteSyncfolder;
 	}
+
+	dispose(): void { }
 }

@@ -165,4 +165,6 @@ export class DatabricksConnectionManagerVSCode extends DatabricksConnectionManag
 
 		return accessToken;
 	}
+
+	dispose(): void { }
 }

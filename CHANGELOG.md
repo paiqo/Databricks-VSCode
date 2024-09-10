@@ -1,5 +1,8 @@
 # Release Notes
 
+**v2.3.5:**
+- fixed issue with expiring tokens ([196](/../../issues/196))
+
 **v2.3.4:**
 - fixed another issue with regular Python files (type FILE) in the workspace when created locally ([195](/../../issues/195))
 

@@ -28,7 +28,7 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 
 	constructor() {
 		super();
-		//vscode.authentication.onDidChangeSessions((event) => DatabricksConnectionManagerAzure._onDidChangeSessions(event));
+		vscode.authentication.onDidChangeSessions((event) => DatabricksConnectionManagerAzure._onDidChangeSessions(event));
 	}
 
 	get TenantId(): string {
@@ -85,10 +85,12 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 	}
 
 	private static async _onDidChangeSessions(event: vscode.AuthenticationSessionsChangeEvent) {
-		vscode.window.showWarningMessage("Session Changed! " + event.provider.id);
+		if (event.provider.id == "microsoft") {
+			ThisExtension.log("Session for provider '" + event.provider.label + "' changed - refreshing connections! ");
 
-		let headers = await ThisExtension.ConnectionManager.getAuthorizationHeaders(ThisExtension.ActiveConnection);
-		DatabricksApiService.updateHeaders(headers);
+			let headers = await ThisExtension.ConnectionManager.getAuthorizationHeaders(ThisExtension.ActiveConnection);
+			DatabricksApiService.updateHeaders(headers);
+		}
 	}
 
 	private async getAADAccessToken(scopes: string[], tenantId?: string): Promise<vscode.AuthenticationSession> {
@@ -262,4 +264,6 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 			"Authorization": "Bearer " + this._databricksSession.accessToken
 		};
 	}
+
+	dispose(): void { }
 }

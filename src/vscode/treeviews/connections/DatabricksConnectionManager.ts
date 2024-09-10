@@ -6,7 +6,7 @@ import { LocalSyncSubfolderConfiguration, ThisExtension } from '../../../ThisExt
 import { iDatabricksConnection } from './iDatabricksConnection';
 
 
-export abstract class DatabricksConnectionManager {
+export abstract class DatabricksConnectionManager implements vscode.Disposable {
 	protected _connections: iDatabricksConnection[];
 	protected _lastActiveConnectionName: string;
 
@@ -104,4 +104,9 @@ export abstract class DatabricksConnectionManager {
 			this._lastActiveConnectionName = this._connections[0].displayName;
 		}
 	}
+
+	/**
+	 * Dispose this object.
+	 */
+	abstract dispose(): void;
 }
