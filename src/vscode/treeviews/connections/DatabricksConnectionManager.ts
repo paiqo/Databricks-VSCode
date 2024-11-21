@@ -39,6 +39,10 @@ export abstract class DatabricksConnectionManager implements vscode.Disposable {
 		return this.Connections.find((x) => x.displayName == this.LastActiveConnectionName);
 	}
 
+	get enableJwtTokenRefresh(): boolean {
+		return false;
+	}
+
 	async activateConnection(con: iDatabricksConnection, refreshComponents: boolean = false): Promise<void> {
 		ThisExtension.log(`Activating Databricks Connection '${con.displayName}' ...`);
 

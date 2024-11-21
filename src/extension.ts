@@ -38,7 +38,6 @@ import { DatabricksNotebookSerializer } from './vscode/notebook/DatabricksNotebo
 import { DatabricksSendToAPI } from './vscode/editors/DatabricksSendToAPI';
 
 export async function activate(context: vscode.ExtensionContext) {
-
 	// some of the following code needs the context before the initialization already
 	ThisExtension.extensionContext = context;
 

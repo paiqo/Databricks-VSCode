@@ -8,3 +8,4 @@ node_modules/
 dist/
 .vscode-test-web
 .databricks
+*.test.code-workspace

@@ -8,7 +8,11 @@
             "request": "launch",
             "runtimeExecutable": "${execPath}",
             "args": [
-                "--extensionDevelopmentPath=${workspaceRoot}"
+                "--extensionDevelopmentPath=${workspaceRoot}",
+                "${workspaceRoot}/tests/DatabricksVSCode.test.code-workspace",
+                //"--disable-extensions",
+				"--skip-release-notes",
+				"--skip-welcome",
             ],
             "sourceMaps": true,
             "outFiles": [
@@ -26,8 +30,12 @@
             "debugWebWorkerHost": true,
             "request": "launch",
             "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}",
-                "--extensionDevelopmentKind=web"
+                "--extensionDevelopmentKind=web",
+                "--extensionDevelopmentPath=${workspaceRoot}",
+                "${workspaceRoot}/tests/DatabricksVSCode.test.code-workspace",
+                "--disable-extensions",
+				"--skip-release-notes",
+				"--skip-welcome",
             ],
             "outFiles": [
                 "${workspaceFolder}/dist/web/**/*.js"

@@ -265,5 +265,9 @@ export class DatabricksConnectionManagerAzure extends DatabricksConnectionManage
 		};
 	}
 
+	get enableJwtTokenRefresh(): boolean {
+		return true;
+	}
+
 	dispose(): void { }
 }

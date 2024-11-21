@@ -27,7 +27,7 @@ export abstract class DatabricksApiService {
 	private static _connectionTestRunning: boolean = false;
 	private static _apiBaseUrl: string;
 	private static _headers;
-	private static _autoRefreshHeadersTimer;
+	private static _autoRefreshHeadersTimer = undefined;
 
 	//#region Initialization
 	static async initialize(con: iDatabricksConnection): Promise<boolean> {
@@ -35,13 +35,11 @@ export abstract class DatabricksApiService {
 			ThisExtension.log("Initializing Databricks API Service ...");
 
 			this._isInitialized = false;
-			
+
 			this._apiBaseUrl = Helper.trimChar(con.apiRootUrl.with({ path: '', query: '', fragment: '' }).toString(true), '/') + this.API_SUB_URL;
 
 			let headers = await ThisExtension.ConnectionManager.getAuthorizationHeaders(con);
 			this.updateHeaders(headers);
-			this._autoRefreshHeadersTimer = undefined;
-			this.startAutoRefreshHeaders();
 
 			ThisExtension.log(`Testing new Databricks API (${con.apiRootUrl}) settings ...`);
 			this._connectionTestRunning = true;
@@ -79,28 +77,48 @@ export abstract class DatabricksApiService {
 			authorizationHeaders = Helper.mapToObject(authorizationHeaders);
 		}
 
+		if (this._headers && this._headers["Authorization"] != authorizationHeaders.Authorization) {
+			ThisExtension.log("HEADERS CHANGED!!!");
+		}
+
 		this._headers = {
 			...genericHeaders,
 			...authorizationHeaders
 		}
+
+		if(ThisExtension.ConnectionManager.enableJwtTokenRefresh) {
+			if (this._headers["Authorization"] 
+			&& this._headers["Authorization"].split(' ')[0] == "Bearer"
+			&& !this._headers["Authorization"].split(' ')[1].startsWith("dapi")) {
+				this.startAutoRefreshHeaders(this._headers["Authorization"]);
+			}
+		}
 	}
 
-	private static async startAutoRefreshHeaders(timeoutSeconds: number = 1800): Promise<void> {
-		if (this._autoRefreshHeadersTimer) {
-			ThisExtension.log('AutoRefresh for Databricks API Headers is already running!');
-		}
-		else {
-			ThisExtension.log(`Starting AutoRefresh for Databricks API Headers every ${timeoutSeconds} seconds!`);
-			await Helper.delay(timeoutSeconds * 1000);
-			this._autoRefreshHeadersTimer = setInterval(async () => {
+	private static async startAutoRefreshHeaders(token: string): Promise<void> {
+		if (token && token.split(' ')[0] == "Bearer") {
+			const token = this._headers["Authorization"].split(' ')[1];
+
+			const exp = JSON.parse(atob(token.split('.')[1])).exp;
+			const now = Date.now();
+			// wait two seconds before the token expires to refresh it
+			const timeout = exp - Math.floor(now / 1000) - 2;
+
+			ThisExtension.log("Will refresh Bearer token in " + timeout + " seconds!");
+
+			this._autoRefreshHeadersTimer = setTimeout(async () => {
 				ThisExtension.log('Refreshing Databricks API Headers ...');
 				let headers = await ThisExtension.ConnectionManager.getAuthorizationHeaders(ThisExtension.ActiveConnection);
-				await this.updateHeaders(headers);
-			}, timeoutSeconds * 1000);
+				this.updateHeaders(headers);
+
+			}, timeout * 1000);
+		}
+		else {
+			ThisExtension.log('No Bearer token found in Authorization header! Token will not be refreshed!');
 		}
 	}
 
-	private static async stopAutoRefresh(): Promise<void> {
+	private static async stopAutoRefreshHeaders(): Promise<void> {
 		if (this._autoRefreshHeadersTimer) {
 			ThisExtension.log('Stopping AutoRefresh for Databricks API Headers!');
 			clearInterval(this._autoRefreshHeadersTimer);

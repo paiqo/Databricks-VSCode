@@ -124,6 +124,10 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 		return headers
 	}
 
+	get enableJwtTokenRefresh(): boolean {
+		return true;
+	}
+
 	get remoteSyncFolder(): vscode.Uri {
 		return this._remoteSyncfolder;
 	}
