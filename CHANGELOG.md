@@ -1,5 +1,8 @@
 # Release Notes
 
+**v2.4.0:**
+- added interactive kernel again ([202](/../../issues/202))
+
 **v2.3.6:**
 - fixed another issue with expiring tokens ([196](/../../issues/196))
 

@@ -28,6 +28,7 @@ export type NotebookMagic =
 export type KernelType =
 	"jupyter-notebook"
 	| "databricks-notebook"
+	| "interactive"
 
 // https://code.visualstudio.com/blogs/2021/11/08/custom-notebooks
 export class DatabricksKernel implements vscode.NotebookController {
