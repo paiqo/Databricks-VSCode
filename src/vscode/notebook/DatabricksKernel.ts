@@ -241,7 +241,8 @@ export class DatabricksKernel implements vscode.NotebookController {
 			|| (notebookUri.scheme == "file" && notebookUri.fsPath.startsWith(localSyncFolder.fsPath))) {
 
 			const paths: string[] = notebookUri.path.split(FSHelper.SEPARATOR);
-			const notebookRelativePath = notebookUri.path.replace((await FSHelper.joinPath(localSyncFolder, ThisExtension.ActiveConnection.localSyncSubfolders.Workspace)).path, "");
+			const sycnPath = await FSHelper.joinPath(localSyncFolder, ThisExtension.ActiveConnection.localSyncSubfolders.Workspace);
+			const notebookRelativePath = notebookUri.path.replace(new RegExp(`${sycnPath.path}`, "ig"), "");
 			const workspaceRootUri = await vscode.Uri.from({ scheme: "x", authority: "root", path: "/Workspace" });
 
 			if(ThisExtension.ConnectionManagerText == "Databricks Extension")
@@ -264,7 +265,9 @@ export class DatabricksKernel implements vscode.NotebookController {
 			else {
 				feature = "FilesInWorkspace";
 
-				driverWorkingDirectory = (await FSHelper.joinPath(workspaceRootUri, ...paths.slice(undefined, -1))).path;
+				// does not work with local files?!
+				const relPaths = notebookRelativePath.split("/");
+				driverWorkingDirectory = (await FSHelper.joinPath(workspaceRootUri, ...relPaths.slice(undefined, -1))).path;
 				// for FilesInWorkspace the libraryDirectory is the same as the workingDirectory
 				driverLibraryDirectory = driverWorkingDirectory;
 			}

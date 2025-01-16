@@ -6,8 +6,8 @@ import { DatabricksWidget, WidgetType } from './DatabricksWidget';
 
 
 export class DatabricksSelectorWidget extends DatabricksWidget<string[]> {
-	static WidgetRegExPositional = /dbutils\.widgets\.(?<type>dropdown|combobox|multiselect)\(["']{1}(?<name>.*?)["']{1}\s*,\s*(?<defaultValue>["']{1}.*?["'])\s*,\s*(?<choices>.*?)(,\s*["']{1}(?<label>[^"']*)["'])?\)/gm;
-	static WidgetRegExNamed: RegExp = /dbutils\.widgets\.(?<type>dropdown|combobox|multiselect)\((.*\s*name\s*=\s*['"](?<name>.*?)['"]\s*)(.*\s*defaultValue\s*=\s*['"](?<default>.*?)['"]\s*)(.*\s*choices\s*=\s*['"](?<choices>.*?)['"]\s*)(.*\s*label\s*=\s*['"](?<label>.*?)['"]\s*)\)/gm;
+	static WidgetRegExPositional = /dbutils\.widgets\.(?<type>dropdown|combobox|multiselect)\(["']{1}(?<name>.*?)["']{1}\s*,\s*(?<defaultValue>["']{1}.*?["'])\s*,\s*(?<choices>.*?)(,\s*["']{1}(?<label>[^"']*)["'])?\)$/gm;
+	static WidgetRegExNamed: RegExp = /dbutils\.widgets\.(?<type>dropdown|combobox|multiselect)\((.*\s*name\s*=\s*['"](?<name>.*?)['"]\s*)(.*\s*defaultValue\s*=\s*['"](?<default>.*?)['"]\s*)(.*\s*choices\s*=\s*['"](?<choices>.*?)['"]\s*)(.*\s*label\s*=\s*['"](?<label>.*?)['"]\s*)\)$/gm;
 	static WidgetRegExSQL: RegExp = /CREATE\s+WIDGET\s+(?<type>DROPDOWN|COMBOBOX|MULTISELECT)\s+[`]?(?<name>.*?)[`]?(\s|$|;)(\s*DEFAULT\s+(?<default>["'].*?["']))?(\s|$|;)(CHOICES\s+(?<choices>SELECT.*?)($|;))?/gm;
 	// a string representing how the choices can be calculated
 	choicesRaw: string;
@@ -80,12 +80,15 @@ export class DatabricksSelectorWidget extends DatabricksWidget<string[]> {
 			switch (this.language) {
 				case "python":
 					query = "display(sc.parallelize(" + this.choicesRaw + ").map(lambda x:(x,)).toDF())";
+					query = `display(spark.createDataFrame([(x,) for x in ${this.choicesRaw}]))`
 					break;
 				case "scala":
 					query = "display(spark.sparkContext.parallelize(" + this.choicesRaw + ").map(x => (x,)).toDF())";
+					query = `display(${this.choicesRaw}.toDF())`
 					break;
 				case "r":
 					query = "display(data.frame(" + this.choicesRaw + ", stringsAsFactors = FALSE))";
+					query = `display(data.frame(${this.choicesRaw}))`
 					break;
 				case "sql":
 					query = "select * from (" + this.choicesRaw + ") as t";

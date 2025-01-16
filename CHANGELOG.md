@@ -1,5 +1,9 @@
 # Release Notes
 
+**v2.4.2:**
+- fix issues with widgets. Support for Spark-connect clusters and Scala
+- fix issue with driverpath that is when using the notebook experience
+
 **v2.4.1:**
 - fix issue with notebook serialization not working properly for markdown
 
