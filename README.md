@@ -229,12 +229,12 @@ Whenever a notebook is opened from either the local sync folder or via the [Virt
 
 If you are using the [Databricks Extension Connection Manager](#setup-and-configuration-databricks-extension-connection-manager) we will also create a generic notebook kernel for you which used the configured cluster.
 
-To work with non-`.ipynb` notebooks, you can also open source files from Databricks as notebooks (e.g. `.sql`, `.scala`, `.r`). For this to work you need to add `workbench.editorAssociations` for the file types to your VSCode settings. The important part is to use `databricks-notebook` as default editor:
+To work with non-`.ipynb` notebooks (=`SOURCE` format), you can also open source files from Databricks as notebooks (e.g. `.py`, `.sql`, `.scala`, `.r`). This is very common if you open files from a Git Repository used in Databricks. To open those `SOURCE` files, you need to add `workbench.editorAssociations` for the file types to your VSCode settings. The important part is to use `databricks-notebook` as default editor:
 
 ```json
 "settings": {
 		"workbench.editorAssociations":{
-			"*.py": "databricks-notebook",
+			"**/notebooks/**/*.py": "databricks-notebook",
 			"*.scala": "databricks-notebook",
 			"*.sql": "databricks-notebook",
 			"*.r": "databricks-notebook"
@@ -243,10 +243,14 @@ To work with non-`.ipynb` notebooks, you can also open source files from Databri
 }
 ```
 
+The example above will open all `.py` files, where any parent folder is called `notebooks`, as a VSCode notebook. Same also for all Scale, SQL and R files.
+To control how notebooks are serialized in GIT, please check [Manage notebook format](https://docs.databricks.com/en/notebooks/notebook-format.html)
+
 However, there are some technical restrictions working with those files. While they behave like notebooks, they are still just source files in the background which means, the output of executed cells is not persisted. So it can happen that if you save the notebook and it is then reloaded from the source (which can happen automatically in the background), your cell outputs are lost.
 Also, please make sure that the file extensions you configure here are the same as you configured in your `exportFormats`!
+To execute those files as notebooks, you can only use Kernels provided by Databricks Power Tools and no local kernels!
 
-As it is also possible to maintain Python libraries within DAtabricks using [Workspace Files](https://docs.databricks.com/files/workspace.html) there is a clash between file extensions of workspace files and Python notebooks downloaded in source format hence there can be some issues when creating new files etc. Therefore it is recommended to keep using `.ipynb` format for Python notebooks and `.py` for workspace files used in libraries.
+As it is also possible to maintain Python libraries within Databricks using [Workspace Files](https://docs.databricks.com/files/workspace.html) there is a clash between file extensions of workspace files and Python notebooks downloaded in source format hence there can be some issues when creating new files etc. Therefore it is recommended to keep using `.ipynb` format for Python notebooks and `.py` for workspace files used in libraries.
 
 ## Execution Modes
 We distinguish between Live-execution and Offline-execution. In Live-execution mode, files are opened directly from Databricks by mounting the Databricks Workspace into your VSCode Workspace using `wsfs:/` URI scheme. In this mode there is no intermediate local copy but you work directly against the Databricks Workspace. Everything you run must already exist online in the Databricks Workspace.

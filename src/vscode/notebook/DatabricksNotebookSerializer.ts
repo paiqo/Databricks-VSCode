@@ -47,12 +47,20 @@ export class DatabricksNotebookSerializer implements vscode.NotebookSerializer {
 			"magic": "%sql",
 			"commentCharacters": "--",
 			"fileExtension": ".sql"
+		},
+		{
+			"databricksLanguage": undefined,
+			"vscodeLanguage": "markdown",
+			"magic": "%md",
+			"commentCharacters": undefined,
+			"fileExtension": undefined
 		}
 	]
 		;
 
 	public async deserializeNotebook(data: Uint8Array, token: vscode.CancellationToken): Promise<DatabricksNotebook> {
 		var contents = Buffer.from(data).toString();
+		contents = contents.replace(/\r/gm, ""); // remove any carriage returns
 
 		var firstLineWithCode: number = 1;
 		const lines: string[] = contents.trimStart().split("\n");
@@ -76,7 +84,7 @@ export class DatabricksNotebookSerializer implements vscode.NotebookSerializer {
 			notebookLanguage = languages[0];
 		}
 		else {
-			// its Python or R
+			// its Python or R which use the same comment-character
 			const rAssignments = contents.split("<-").length;
 			const pythonAssignments = contents.split("=").length;
 
@@ -100,19 +108,17 @@ export class DatabricksNotebookSerializer implements vscode.NotebookSerializer {
 				let firstLine = rawCell.split("\n")[0];
 				let firstLineValues = firstLine.split(/\s+/gm);
 				let magic = firstLineValues[2];
+				cellLanguage = this.LANGUAGE_MAPPING.find(x => x.magic == magic);
 
 				if (magic == "%md") {
 					cell.kind = vscode.NotebookCellKind.Markup;
 					cell.value = cell.value.replace(new RegExp(`^${commentChars} ${this.MAGIC_PREFIX} ${magic}\n`, "gm"), "");
 				}
-				else {
-					cellLanguage = this.LANGUAGE_MAPPING.find(x => x.magic == magic);
-					if (cellLanguage) {
-						cell.metadata = { "cellLanguage": cellLanguage };
-					}
+				if (cellLanguage) {
+					cell.metadata = { "cellLanguage": cellLanguage };
 				}
 
-				cell.value = cell.value.replace(new RegExp(`^${commentChars} ${this.MAGIC_PREFIX} `, "gm"), "");
+				cell.value = cell.value.replace(new RegExp(`^${commentChars} ${this.MAGIC_PREFIX}`, "gm"), "");
 			}
 			cell.languageId = cell.metadata.cellLanguage.vscodeLanguage;
 			notebook.cells.push(cell);

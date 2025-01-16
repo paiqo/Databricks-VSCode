@@ -1,5 +1,8 @@
 # Release Notes
 
+**v2.4.1:**
+- fix issue with notebook serialization not working properly for markdown
+
 **v2.4.0:**
 - added interactive kernel again ([202](/../../issues/202))
 
