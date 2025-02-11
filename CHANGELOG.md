@@ -1,11 +1,15 @@
 # Release Notes
 
+**v2.5.0:**
+- added a new config setting `databricks.workspace.root` to set the root from where the [Workspace Manager](README.md/#workspace-manager) starts ([205](/../../issues/205))
+- fixed issues where refresh of treeviews was not working properly
+
 **v2.4.2:**
-- fix issues with widgets. Support for Spark-connect clusters and Scala
-- fix issue with driverpath that is when using the notebook experience
+- fixed issues with widgets. Support for Spark-connect clusters and Scala
+- fixed issue with driverpath that is when using the notebook experience
 
 **v2.4.1:**
-- fix issue with notebook serialization not working properly for markdown
+- fixed issue with notebook serialization not working properly for markdown
 
 **v2.4.0:**
 - added interactive kernel again ([202](/../../issues/202))

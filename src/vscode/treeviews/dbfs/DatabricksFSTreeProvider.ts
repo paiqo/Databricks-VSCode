@@ -40,10 +40,21 @@ export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<Databri
 	private async _onDidChangeVisibility(visible: boolean): Promise<void> { }
 
 	async refresh(showInfoMessage: boolean = false, item: DatabricksFSTreeItem = null): Promise<void> {
-		if(showInfoMessage){
-			Helper.showTemporaryInformationMessage('Refreshing DBFS ...');
-		}
-		this._onDidChangeTreeData.fire(item);
+		// as tree_item is not always accurate, we refresh based on the actual selection
+				if (this._treeView.selection.length == 0) {
+					this._onDidChangeTreeData.fire(undefined);
+					return;
+				}
+				if (showInfoMessage) {
+					Helper.showTemporaryInformationMessage('Refreshing DBFS ...');
+				}
+				for (let item of this._treeView.selection) {
+					// on leaves, we refresh the parent instead
+					if (item && item.collapsibleState == vscode.TreeItemCollapsibleState.None) {
+						item = item.parent;
+					}
+					this._onDidChangeTreeData.fire(item);
+				}
 	}
 
 	async getTreeItem(element: DatabricksFSTreeItem): Promise<DatabricksFSTreeItem> {

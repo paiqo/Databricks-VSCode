@@ -34,10 +34,10 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 		// we can only run initialize for this class after all values had been set in the constructor
 		// but we must not run it as part of the call to super()
 		if (this._isInitialized) {
-			super.label = this.path.split('/').pop();
-			super.tooltip = this._tooltip;
-			super.contextValue = this._contextValue;
-			super.iconPath = {
+			this.label = this.path.split('/').pop();
+			this.tooltip = this._tooltip;
+			this.contextValue = this._contextValue;
+			this.iconPath = {
 				light: this.getIconPath("light"),
 				dark: this.getIconPath("dark")
 			};
@@ -124,7 +124,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 		if(!this.localPathExists)
 		{
 			// check again for the local path as it might have been created since this Directory object was created
-			let localPathProbe: vscode.Uri = await FSHelper.joinPath(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.SubfolderConfiguration().Workspace, this.path);
+			let localPathProbe: vscode.Uri = await FSHelper.joinPath(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.SubfolderConfiguration().Workspace, this.pathRelativeToWorkspaceRoot);
 			if(await FSHelper.pathExists(localPathProbe))
 			{
 				this.localPath = localPathProbe;
@@ -202,7 +202,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 	async download(refreshParent: boolean = true): Promise<void> {
 		if(!this.localPath) // if we try to download a subfolder of a folder that has not yet been synced this.localPath is not populated!
 		{
-			this.localPath = vscode.Uri.joinPath(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.SubfolderConfiguration().Workspace, this.path);
+			this.localPath = vscode.Uri.joinPath(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.SubfolderConfiguration().Workspace, this.pathRelativeToWorkspaceRoot);
 		}
 		FSHelper.ensureFolder(this.localPath);
 		let items: DatabricksWorkspaceTreeItem[] = await this.getChildren() as DatabricksWorkspaceTreeItem[];

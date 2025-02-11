@@ -79,7 +79,16 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 	vscode.commands.registerCommand('databricksConnectionItem.activate', (connection: DatabricksConnectionTreeItem) => connection.activate());
 
-	// register DatabricksWorkspaceTreeProvider
+	// register DatabricksWorkspaceTreeProvider and FileSystemProvider
+	// Workspace File System Provider
+	const workspaceFsProvider = new DatabricksWorkspaceProvider(context);
+	vscode.commands.registerCommand('databricksWorkspace.addToWorkspace', (showMessage: boolean) => {
+			FSHelper.addToWorkspace(
+				vscode.Uri.parse(ThisExtension.WORKSPACE_SCHEME + ':' + ThisExtension.WorkspaceRootPath), 
+				"Databricks - Workspace - " + ThisExtension.WorkspaceRootPath, 
+				showMessage);
+		});
+	
 	if (!ThisExtension.isInBrowser) {
 		let databricksWorkspaceTreeProvider = new DatabricksWorkspaceTreeProvider(context);
 		//vscode.window.registerTreeDataProvider('databricksWorkspace', databricksWorkspaceTreeProvider);
@@ -95,13 +104,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('databricksWorkspaceItem.openExplorer', (workspaceItem: DatabricksWorkspaceTreeItem) => workspaceItem.openExplorer());
 		vscode.commands.registerCommand('databricksWorkspaceItem.delete', (workspaceItem: DatabricksWorkspaceNotebook | DatabricksWorkspaceDirectory) => workspaceItem.delete());
 	}
-	// Workspace File System Provider
-	const workspaceProvider = new DatabricksWorkspaceProvider(context);
-	vscode.commands.registerCommand('databricksWorkspace.addToWorkspace', (showMessage: boolean) => {
-		FSHelper.addToWorkspace(vscode.Uri.parse(ThisExtension.WORKSPACE_SCHEME + ':/'), "Databricks - Workspace", showMessage);
-	});
-
-	if (ThisExtension.isInBrowser) {
+	else {
 		// in a virtual workspace we always want to add the WSFS/DBWS mount to the workspace
 		vscode.commands.executeCommand('databricksWorkspace.addToWorkspace', false);
 	}

@@ -15,7 +15,7 @@ export class DatabricksWorkspaceLibrary extends DatabricksWorkspaceTreeItem {
 	) {
 		super(path, "LIBRARY", object_id, parent, undefined, vscode.TreeItemCollapsibleState.None);
 
-		super.tooltip = this._tooltip;
+		this.tooltip = this._tooltip;
 	}
 
 	get _tooltip(): string {

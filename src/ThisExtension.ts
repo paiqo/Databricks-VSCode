@@ -214,6 +214,12 @@ export abstract class ThisExtension {
 		return this._sqlClusterId;
 	}
 
+	static get WorkspaceRootPath(): string {	
+		const workspaceRootFolder = ThisExtension.getConfigurationSetting<string>("databricks.workspace.root", ThisExtension.SettingScope, true).value;
+
+		return workspaceRootFolder;
+	}
+
 	static set SQLClusterID(value: string) {
 		if (value != undefined) {
 			ThisExtension.log(`Using cluster with id '${value}' for SQL Browser!`);

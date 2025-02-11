@@ -46,15 +46,15 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 		// but we must not run it as part of the call to super()
 		if(this._isInitialized)
 		{
-			super.label = this.path.split('/').pop();
-			super.tooltip = this._tooltip;
-			super.description = this._description;
-			super.contextValue = this._contextValue;
-			super.iconPath = {
+			this.label = this.path.split('/').pop();
+			this.tooltip = this._tooltip;
+			this.description = this._description;
+			this.contextValue = this._contextValue;
+			this.iconPath = {
 				light: this.getIconPath("light"),
 				dark: this.getIconPath("dark")
 			};
-			super.command = this._command;
+			this.command = this._command;
 		}
 	}
 
@@ -139,7 +139,7 @@ export class DatabricksWorkspaceNotebook extends DatabricksWorkspaceTreeItem {
 	};
 
 	get localFolderPath(): vscode.Uri {
-		return FSHelper.parent(FSHelper.joinPathSync(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.SubfolderConfiguration().Workspace, this.path));
+		return FSHelper.parent(FSHelper.joinPathSync(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.SubfolderConfiguration().Workspace, this.pathRelativeToWorkspaceRoot));
 	}
 
 	get localFileExtension(): string {

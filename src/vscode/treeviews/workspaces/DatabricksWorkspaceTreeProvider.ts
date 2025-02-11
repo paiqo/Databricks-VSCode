@@ -14,6 +14,7 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 	readonly onDidChangeTreeData: vscode.Event<DatabricksWorkspaceTreeItem | undefined> = this._onDidChangeTreeData.event;
 
 	private _treeView: vscode.TreeView<DatabricksWorkspaceTreeItem>;
+	private _rootPath: string;
 
 	constructor(context: vscode.ExtensionContext) {
 		const treeView = vscode.window.createTreeView('databricksWorkspace', { 
@@ -42,11 +43,21 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 	private async _onDidChangeVisibility(visible: boolean): Promise<void> { }
 
 	async refresh(item: DatabricksWorkspaceTreeItem = null, showInfoMessage: boolean = false): Promise<void> {
+		// as tree_item is not always accurate, we refresh based on the actual selection
+		if (this._treeView.selection.length == 0) {
+			this._onDidChangeTreeData.fire(undefined);
+			return;
+		}
 		if (showInfoMessage) {
 			Helper.showTemporaryInformationMessage('Refreshing Workspace ...');
 		}
-
-		this._onDidChangeTreeData.fire(item);
+		for (let item of this._treeView.selection) {
+			// on leaves, we refresh the parent instead
+			if (item && item.collapsibleState == vscode.TreeItemCollapsibleState.None) {
+				item = item.parent;
+			}
+			this._onDidChangeTreeData.fire(item);
+		}
 	}
 
 	async getTreeItem(element: DatabricksWorkspaceTreeItem): Promise<DatabricksWorkspaceTreeItem> {
@@ -62,6 +73,8 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 			return Promise.resolve([]);
 		}
 
+		this._rootPath = ThisExtension.WorkspaceRootPath;
+
 		if (element != null && element != undefined) {
 			return element.getChildren();
 		}
@@ -73,15 +86,19 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 				FSHelper.ensureFolder(workspaceRootFolder);
 			}
 			
-			return new DatabricksWorkspaceDirectory("/", 0, workspaceRootFolder).getChildren();
+			return new DatabricksWorkspaceDirectory(this._rootPath, 0, workspaceRootFolder).getChildren();
 		}
 	}
 
+	public get rootPath(): string {
+		return this._rootPath;
+	}
+
 	async download(): Promise<void> {
-		await new DatabricksWorkspaceDirectory("/", 0).download();
+		await new DatabricksWorkspaceDirectory(this._rootPath, 0).download();
 	}
 
 	async upload(): Promise<void> {
-		await new DatabricksWorkspaceDirectory("/", 0).upload();
+		await new DatabricksWorkspaceDirectory(this._rootPath, 0).upload();
 	}
 }

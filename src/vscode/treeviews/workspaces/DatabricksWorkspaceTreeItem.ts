@@ -91,6 +91,10 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 		return DatabricksWorkspaceTreeItem.fromInterface(item, parent);
 	}
 
+	get pathRelativeToWorkspaceRoot(): string {
+		return this.path.substring(ThisExtension.WorkspaceRootPath.length);
+	}
+
 	get localPath(): vscode.Uri {
 		return this._localPath;
 	}
