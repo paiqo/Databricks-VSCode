@@ -86,7 +86,7 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 				FSHelper.ensureFolder(workspaceRootFolder);
 			}
 			
-			return new DatabricksWorkspaceDirectory(this._rootPath, 0, workspaceRootFolder).getChildren();
+			return new DatabricksWorkspaceDirectory(this.rootPath, 0, workspaceRootFolder).getChildren();
 		}
 	}
 
@@ -95,10 +95,10 @@ export class DatabricksWorkspaceTreeProvider implements vscode.TreeDataProvider<
 	}
 
 	async download(): Promise<void> {
-		await new DatabricksWorkspaceDirectory(this._rootPath, 0).download();
+		await new DatabricksWorkspaceDirectory(this.rootPath, 0).download();
 	}
 
 	async upload(): Promise<void> {
-		await new DatabricksWorkspaceDirectory(this._rootPath, 0).upload();
+		await new DatabricksWorkspaceDirectory(this.rootPath, 0).upload();
 	}
 }
