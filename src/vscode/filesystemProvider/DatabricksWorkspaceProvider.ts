@@ -9,6 +9,7 @@ import { iDatabricksWorkspaceItem } from '../treeviews/workspaces/iDatabrickswor
 import { Helper } from '../../helpers/Helper';
 import { ThisExtension } from '../../ThisExtension';
 import { DatabricksNotebook } from '../notebook/DatabricksNotebook';
+import { DatabricksKernel } from '../notebook/DatabricksKernel';
 
 export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabricksWorkspaceItem {
 	// vscode.FileStat properties, basically all are read-only
@@ -155,6 +156,10 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 			newInstance.mapper = LanguageFileExtensionMapper.fromUri(source);
 			newInstance.uriPath = source.path;
 			await newInstance.loadFromAPI();
+
+			if(newInstance.object_type == "REPO") {
+				DatabricksKernel.addRepo(source);
+			}
 		}
 		else {
 			// from API
@@ -163,7 +168,10 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 			newInstance.object_id = source.object_id;
 			newInstance.object_type = source.object_type;
 			newInstance.language = source.language;
+			newInstance.uriPath
 		}
+
+		
 
 		return newInstance;
 	}

@@ -1,5 +1,8 @@
 # Release Notes
 
+**v2.6.0:**
+- added support for Git Folders (=Repos anywhere in the workspace) for Live and Offline mode
+
 **v2.5.0:**
 - added a new config setting `databricks.workspace.root` to set the root from where the [Workspace Manager](README.md/#workspace-manager) starts ([205](/../../issues/205))
 - fixed issues where refresh of treeviews was not working properly

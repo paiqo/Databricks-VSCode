@@ -12,9 +12,9 @@ import { DatabricksWorkspaceFile } from './DatabricksWorkspaceFile';
 import { FSHelper } from '../../../helpers/FSHelper';
 
 
+
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
-
 	constructor(
 		path: string,
 		object_id: number,
@@ -111,8 +111,11 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 							onlineItems.push(DatabricksWorkspaceFile.fromInterface(item, this));
 							break;
 						case "DIRECTORY":
-						case "REPO":
 							onlineItems.push(DatabricksWorkspaceDirectory.fromInterface(item, this));
+							break;
+						case "REPO":
+							// need to use a dynamic import here as we would get a circular dependency otherwise
+							onlineItems.push((await DatabricksWorkspaceDirectory.getRepoInstance()).fromInterface(item, this));
 							break;
 					}
 				}
@@ -121,12 +124,10 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 		let onlinePaths: string[] = onlineItems.map((x) => (x as iDatabricksWorkspaceItem).path);
 
 		let localItems: DatabricksWorkspaceTreeItem[] = [];
-		if(!this.localPathExists)
-		{
+		if (!this.localPathExists) {
 			// check again for the local path as it might have been created since this Directory object was created
 			let localPathProbe: vscode.Uri = await FSHelper.joinPath(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.SubfolderConfiguration().Workspace, this.pathRelativeToWorkspaceRoot);
-			if(await FSHelper.pathExists(localPathProbe))
-			{
+			if (await FSHelper.pathExists(localPathProbe)) {
 				this.localPath = localPathProbe;
 			}
 		}
@@ -154,12 +155,12 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 						// if the extension is configured in ExportFormats - treat it as notebook
 						if (LanguageFileExtensionMapper.configuredFileExtensions.includes(ext)) {
 							languageFileExtension = LanguageFileExtensionMapper.fromFileName(FSHelper.basename(localUri));
-							if(languageFileExtension.language == "PYTHON" && languageFileExtension.extension == ".py") {
+							if (languageFileExtension.language == "PYTHON" && languageFileExtension.extension == ".py") {
 								// the local file could also be a non-notebook python file - so we need to check the header of the file
 								const binaryContent = await vscode.workspace.fs.readFile(localUri);
 								const fileContent = Buffer.from(binaryContent).toString('utf8');
 
-								if(fileContent.startsWith("# Databricks notebook source")) {
+								if (fileContent.startsWith("# Databricks notebook source")) {
 									localItems.push(new DatabricksWorkspaceNotebook(shownLocalRelativePath, -1, languageFileExtension, localUri, this));
 								}
 								else {
@@ -169,7 +170,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 							else {
 								localItems.push(new DatabricksWorkspaceNotebook(shownLocalRelativePath, -1, languageFileExtension, localUri, this));
 							}
-							
+
 						}
 						// treat other files as FilesInWorkspace
 						else {
@@ -200,7 +201,7 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 	}
 
 	async download(refreshParent: boolean = true): Promise<void> {
-		if(!this.localPath) // if we try to download a subfolder of a folder that has not yet been synced this.localPath is not populated!
+		if (!this.localPath) // if we try to download a subfolder of a folder that has not yet been synced this.localPath is not populated!
 		{
 			this.localPath = vscode.Uri.joinPath(ThisExtension.ActiveConnection.localSyncFolder, ThisExtension.ConnectionManager.SubfolderConfiguration().Workspace, this.pathRelativeToWorkspaceRoot);
 		}
@@ -218,11 +219,18 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 						await nb.download(false);
 						break;
 					case "DIRECTORY":
-					case "REPO":
 						let dir = DatabricksWorkspaceDirectory.fromInterface(item, this);
 
 						dir.localPath = await FSHelper.joinPath(this.localPath, dir.label.toString());
 						await dir.download(false);
+
+						break;
+					case "REPO":
+						// need to use a dynamic import here as we would get a circular dependency otherwise
+						let repo = (await DatabricksWorkspaceDirectory.getRepoInstance()).fromInterface(item, this);
+
+						repo.localPath = await FSHelper.joinPath(this.localPath, repo.label.toString());
+						await repo.download(false);
 
 						break;
 				}
@@ -247,14 +255,22 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 
 						nb.localPath = await FSHelper.joinPath(this.localPath, nb.label + nb.localFileExtension);
 						await nb.upload();
-						
+
 						break;
 					case "DIRECTORY":
-					case "REPO":
 						let dir = DatabricksWorkspaceDirectory.fromInterface(item);
 
 						dir.localPath = await FSHelper.joinPath(this.localPath, dir.label.toString());
 						await dir.upload();
+
+						break;
+					case "REPO":
+						// need to use a dynamic import here as we would get a circular dependency otherwise
+						let repo = (await DatabricksWorkspaceDirectory.getRepoInstance()).fromInterface(item, this);
+
+
+						repo.localPath = await FSHelper.joinPath(this.localPath, repo.label.toString());
+						await repo.upload();
 
 						break;
 				}
@@ -296,5 +312,10 @@ export class DatabricksWorkspaceDirectory extends DatabricksWorkspaceTreeItem {
 
 		// we always call refresh
 		setTimeout(() => this.refreshParent(), 500);
+	}
+
+	static async getRepoInstance() {
+		// need to use a dynamic import here as we would get a circular dependency otherwise
+		return (await import('./DatabricksWorkspaceRepo')).DatabricksWorkspaceRepo;
 	}
 }

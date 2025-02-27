@@ -320,4 +320,12 @@ export abstract class Helper {
 		}
 		return text;
 	}
+
+	static find<T>(iterable: Iterable<T>, predicate: any) {
+    for (const element of iterable) {
+        if (predicate(element)) {
+            return element;
+        }
+    }
+}
 }

@@ -48,6 +48,7 @@ export class DatabricksKernel implements vscode.NotebookController {
 	private _widgets: Map<string, DatabricksWidget>;
 	private _cluster: iDatabricksCluster;
 
+	public static RepoMapping: Map<string, vscode.Uri> = new Map<string, vscode.Uri>();
 
 	constructor(cluster: iDatabricksCluster, notebookType: KernelType, language: ContextLanguage = "python") {
 		this.notebookType = notebookType;
@@ -245,15 +246,14 @@ export class DatabricksKernel implements vscode.NotebookController {
 			const notebookRelativePath = notebookUri.path.replace(new RegExp(`${sycnPath.path}`, "ig"), "");
 			const workspaceRootUri = await vscode.Uri.from({ scheme: "x", authority: "root", path: "/Workspace" });
 
-			if(ThisExtension.ConnectionManagerText == "Databricks Extension")
-			{
+			if (ThisExtension.ConnectionManagerText == "Databricks Extension") {
 				feature = "Databricks Extension Sync";
 				const dbConn: DatabricksConnectionManagerDatabricks = ThisExtension.ConnectionManager as DatabricksConnectionManagerDatabricks;
 
 				// this code works for wsfs:/ and also for locally synced notebooks
 				driverLibraryDirectory = (await FSHelper.joinPath(workspaceRootUri, dbConn.remoteSyncFolder.path, ...notebookRelativePath.split("/").slice(undefined, -1))).path;
 				driverWorkingDirectory = (await FSHelper.joinPath(workspaceRootUri, dbConn.remoteSyncFolder.path)).path;
-	
+
 			}
 			else if (paths.includes("Repos")) {
 				feature = "FilesInRepo";
@@ -268,8 +268,19 @@ export class DatabricksKernel implements vscode.NotebookController {
 				// does not work with local files?!
 				const relPaths = notebookRelativePath.split("/");
 				driverWorkingDirectory = (await FSHelper.joinPath(workspaceRootUri, ...relPaths.slice(undefined, -1))).path;
-				// for FilesInWorkspace the libraryDirectory is the same as the workingDirectory
-				driverLibraryDirectory = driverWorkingDirectory;
+
+				const repo = await DatabricksKernel.getRepo(notebookUri);
+
+				if (repo) {
+					feature = "RepoInWorkspace";
+
+					driverLibraryDirectory = (await FSHelper.joinPath(workspaceRootUri, repo.path.replace(sycnPath.path, ""))).path;
+					//driverLibraryDirectory = (await FSHelper.joinPath(workspaceRootUri, repo.path)).path;
+				}
+				else {
+					// for FilesInWorkspace the libraryDirectory is the same as the workingDirectory
+					driverLibraryDirectory = driverWorkingDirectory;
+				}
 			}
 		}
 		else {
@@ -468,14 +479,12 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 								// get the language of the executed file
 								let wsfsWorkItem = await DatabricksApiService.getWorkspaceItem(runUri.path);
-								if(wsfsWorkItem.object_type != "NOTEBOOK")
-								{
+								if (wsfsWorkItem.object_type != "NOTEBOOK") {
 									throw notebookNotFoundError;
 								}
 								language = wsfsWorkItem.language.toLowerCase() as ContextLanguage;
 
-								if(commandText.includes("%run") || commandText.includes("dbutils.notebook.run"))
-								{
+								if (commandText.includes("%run") || commandText.includes("dbutils.notebook.run")) {
 									throw new Error("Recursive calls of `%run` or `dbutils.notebook.run()` are not supported! Please refer to https://github.com/paiqo/Databricks-VSCode#notebook-kernel for more information.");
 								}
 
@@ -668,5 +677,44 @@ export class DatabricksKernel implements vscode.NotebookController {
 			execution.end(false, Date.now());
 			return;
 		}
+	}
+
+	public static addRepo(path: vscode.Uri) {
+		if (path) {
+			this.RepoMapping.set(path.toString(), path);
+		}
+	}
+
+	public static async getRepo(path: vscode.Uri): Promise<vscode.Uri> {
+		if (!path) {
+			return undefined;
+		}
+
+		if (path.scheme == "file") {
+			const localSyncFolder = ThisExtension.ActiveConnection.localSyncFolder;
+			const sycnPath = await FSHelper.joinPath(localSyncFolder, ThisExtension.ActiveConnection.localSyncSubfolders.Workspace);
+
+			path = path.with({ path: path.path.replace(new RegExp(`${sycnPath.path}`, "ig"), "") });
+		}
+
+		if (!this.RepoMapping || this.RepoMapping.size == 0) {
+			let parts = path.path.split(FSHelper.SEPARATOR);
+
+			for (let i = parts.length - 1; i > 0; i--) {
+				let probePath = parts.slice(0, i).join(FSHelper.SEPARATOR);
+
+				const item = await DatabricksApiService.getWorkspaceItem(probePath);
+
+				if (item.object_type == "REPO") {
+					const repoPath = path.with({ path: probePath });
+					this.RepoMapping.set(repoPath.toString(), repoPath);
+					break;
+				}
+			}
+		}
+
+		const repo = Helper.find(DatabricksKernel.RepoMapping.values(), (x: vscode.Uri) => path.toString().startsWith(x.toString()));
+
+		return repo;
 	}
 }
