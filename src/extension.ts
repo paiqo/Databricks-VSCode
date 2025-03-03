@@ -36,6 +36,7 @@ import { DatabricksSQLTreeItem } from './vscode/treeviews/sql/DatabricksSQLTreeI
 import { DatabricksSecretTreeItem } from './vscode/treeviews/secrets/DatabricksSecretTreeItem';
 import { DatabricksNotebookSerializer } from './vscode/notebook/DatabricksNotebookSerializer';
 import { DatabricksSendToAPI } from './vscode/editors/DatabricksSendToAPI';
+import { DatabricksFileDecorationProvider } from './vscode/fileDecoration/DatabricksFileDecorationProvider';
 
 export async function activate(context: vscode.ExtensionContext) {
 	// some of the following code needs the context before the initialization already
@@ -88,6 +89,8 @@ export async function activate(context: vscode.ExtensionContext) {
 				"Databricks - Workspace - " + ThisExtension.WorkspaceRootPath, 
 				showMessage);
 		});
+	DatabricksFileDecorationProvider.register(context);
+	
 	
 	if (!ThisExtension.isInBrowser) {
 		let databricksWorkspaceTreeProvider = new DatabricksWorkspaceTreeProvider(context);

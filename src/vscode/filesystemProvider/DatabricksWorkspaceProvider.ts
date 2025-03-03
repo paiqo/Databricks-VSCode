@@ -94,7 +94,7 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 	}
 
 	get exportFormat(): WorkspaceItemExportFormat {
-		if(this.mapper) {
+		if (this.mapper) {
 			return this.mapper.exportFormat;
 		}
 		return "AUTO";
@@ -156,10 +156,6 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 			newInstance.mapper = LanguageFileExtensionMapper.fromUri(source);
 			newInstance.uriPath = source.path;
 			await newInstance.loadFromAPI();
-
-			if(newInstance.object_type == "REPO") {
-				DatabricksKernel.addRepo(source);
-			}
 		}
 		else {
 			// from API
@@ -168,10 +164,12 @@ export class DatabricksWorkspaceProviderItem implements vscode.FileStat, iDatabr
 			newInstance.object_id = source.object_id;
 			newInstance.object_type = source.object_type;
 			newInstance.language = source.language;
-			newInstance.uriPath
+			newInstance.uriPath = source.path;
 		}
 
-		
+		if (newInstance.object_type == "REPO") {
+			DatabricksKernel.addRepo(vscode.Uri.parse(ThisExtension.WORKSPACE_SCHEME + "://" + newInstance.uriPath));
+		}
 
 		return newInstance;
 	}
@@ -247,7 +245,7 @@ export class DatabricksWorkspaceProvider implements vscode.FileSystemProvider {
 		}
 
 		// when a new file is added (remote does not yet exists and no content is provided), we just upload an empty file in SOURCE format.
-		if (!remoteItem.exists && content.length == 0 && remoteItem.isNotebook ) {
+		if (!remoteItem.exists && content.length == 0 && remoteItem.isNotebook) {
 			content = Buffer.from(DatabricksNotebook.getEmptyNotebook());
 		}
 		await DatabricksApiService.uploadWorkspaceItem(content, remoteItem.apiPath, remoteItem.language, options.overwrite, remoteItem.exportFormat);

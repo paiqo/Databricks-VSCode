@@ -13,6 +13,7 @@ import { DatabricksTextWidget } from './Widgets/DatabricksTextWidget';
 import { DatabricksSelectorWidget } from './Widgets/DatabricksSelectorWidget';
 import { LanguageFileExtensionMapper } from '../treeviews/workspaces/LanguageFileExtensionMapper';
 import { DatabricksConnectionManagerDatabricks } from '../treeviews/connections/DatabricksConnectionManagerDatabricks';
+import { DatabricksFileDecorationProvider } from '../fileDecoration/DatabricksFileDecorationProvider';
 
 export type NotebookMagic =
 	"sql"
@@ -682,10 +683,11 @@ export class DatabricksKernel implements vscode.NotebookController {
 	public static addRepo(path: vscode.Uri) {
 		if (path) {
 			this.RepoMapping.set(path.toString(), path);
+			DatabricksFileDecorationProvider.updateFileDecoration([path]);
 		}
 	}
 
-	public static async getRepo(path: vscode.Uri): Promise<vscode.Uri> {
+	public static async getRepo(path: vscode.Uri, strict: boolean = false): Promise<vscode.Uri> {
 		if (!path) {
 			return undefined;
 		}
@@ -713,7 +715,40 @@ export class DatabricksKernel implements vscode.NotebookController {
 			}
 		}
 
-		const repo = Helper.find(DatabricksKernel.RepoMapping.values(), (x: vscode.Uri) => path.toString().startsWith(x.toString()));
+		const repo = Helper.find(DatabricksKernel.RepoMapping.values(), (x: vscode.Uri) => {
+			if(strict) {
+				return path.toString() == x.toString();
+			}	
+			else {
+				return path.toString().startsWith(x.toString());
+			}
+		}
+		);	
+
+		return repo;
+	}
+
+	public static getRepoSync(path: vscode.Uri, strict: boolean = false): vscode.Uri {
+		if (!path || !this.RepoMapping || this.RepoMapping.size == 0) {
+			return undefined;
+		}
+
+		if (path.scheme == "file") {
+			const localSyncFolder = ThisExtension.ActiveConnection.localSyncFolder;
+			const sycnPath = FSHelper.joinPathSync(localSyncFolder, ThisExtension.ActiveConnection.localSyncSubfolders.Workspace);
+
+			path = path.with({ path: path.path.replace(new RegExp(`${sycnPath.path}`, "ig"), "") });
+		}
+
+		const repo = Helper.find(DatabricksKernel.RepoMapping.values(), (x: vscode.Uri) => {
+			if(strict) {
+				return path.toString() == x.toString();
+			}	
+			else {
+				return path.toString().startsWith(x.toString());
+			}
+		}
+		);	
 
 		return repo;
 	}
