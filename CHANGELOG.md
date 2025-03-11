@@ -1,5 +1,10 @@
 # Release Notes
 
+**v2.7.0:**
+- improved `Add to workspace` to allow adding individual items from workspace or DBFS
+- added `resourceUri` to the Workspace and DBFS browser to also show decorations (e.g. Repos)
+- improved process to change parameters via widgets
+
 **v2.6.0:**
 - added support for Git Folders (=Repos anywhere in the workspace) for Live and Offline mode
 - add File Decoration for Git Folders to easily identify them

@@ -14,11 +14,11 @@ export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<Databri
 	private _treeView: vscode.TreeView<DatabricksFSTreeItem>;
 
 	constructor(context: vscode.ExtensionContext) {
-		const treeView = vscode.window.createTreeView('databricksFS', { 
-			treeDataProvider: this, 
-			showCollapseAll: true, 
+		const treeView = vscode.window.createTreeView('databricksFS', {
+			treeDataProvider: this,
+			showCollapseAll: true,
 			canSelectMany: false
-			});
+		});
 		context.subscriptions.push(treeView);
 
 		treeView.onDidChangeSelection((event) => this._onDidChangeSelection(event.selection));
@@ -28,8 +28,7 @@ export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<Databri
 
 		this._treeView = treeView;
 
-		if(ThisExtension.isInBrowser)
-		{
+		if (ThisExtension.isInBrowser) {
 			this._treeView.message = "DBFS Browser is disabled in Virtual Workspaces!";
 		}
 	}
@@ -41,20 +40,20 @@ export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<Databri
 
 	async refresh(showInfoMessage: boolean = false, item: DatabricksFSTreeItem = null): Promise<void> {
 		// as tree_item is not always accurate, we refresh based on the actual selection
-				if (this._treeView.selection.length == 0) {
-					this._onDidChangeTreeData.fire(undefined);
-					return;
-				}
-				if (showInfoMessage) {
-					Helper.showTemporaryInformationMessage('Refreshing DBFS ...');
-				}
-				for (let item of this._treeView.selection) {
-					// on leaves, we refresh the parent instead
-					if (item && item.collapsibleState == vscode.TreeItemCollapsibleState.None) {
-						item = item.parent;
-					}
-					this._onDidChangeTreeData.fire(item);
-				}
+		if (this._treeView.selection.length == 0) {
+			this._onDidChangeTreeData.fire(undefined);
+			return;
+		}
+		if (showInfoMessage) {
+			Helper.showTemporaryInformationMessage('Refreshing DBFS ...');
+		}
+		for (let item of this._treeView.selection) {
+			// on leaves, we refresh the parent instead
+			if (item && item.collapsibleState == vscode.TreeItemCollapsibleState.None) {
+				item = item.parent;
+			}
+			this._onDidChangeTreeData.fire(item);
+		}
 	}
 
 	async getTreeItem(element: DatabricksFSTreeItem): Promise<DatabricksFSTreeItem> {
@@ -65,23 +64,20 @@ export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<Databri
 		return element.parent;
 	}
 
-	async getChildren(element?: DatabricksFSTreeItem): Promise<DatabricksFSTreeItem[]> {	
-		if(!DatabricksApiService.isInitialized) { 
+	async getChildren(element?: DatabricksFSTreeItem): Promise<DatabricksFSTreeItem[]> {
+		if (!DatabricksApiService.isInitialized) {
 			return Promise.resolve([]);
 		}
-		
-		if (element != null && element != undefined) 
-		{
+
+		if (element != null && element != undefined) {
 			return element.getChildren();
-		} 
-		else 
-		{
+		}
+		else {
 			let dbfsRootFolder: vscode.Uri = undefined;
 			let subFolderConfig = ThisExtension.ConnectionManager.SubfolderConfiguration();
-			if(subFolderConfig.DBFS)
-			{
+			if (subFolderConfig.DBFS) {
 				let dbfsRootFolder = vscode.Uri.joinPath(ThisExtension.ActiveConnection.localSyncFolder, subFolderConfig.DBFS);
-				
+
 				// if the workspace folder does not yet exist we create it and return an empty array (as nothing can exist below it yet);
 				if (!await FSHelper.pathExists(dbfsRootFolder)) {
 					FSHelper.ensureFolder(dbfsRootFolder);
@@ -92,8 +88,8 @@ export class DatabricksFSTreeProvider implements vscode.TreeDataProvider<Databri
 			let items: DatabricksFSTreeItem[] = await new DatabricksFSDirectory("/", "Online", dbfsRootFolder, null).getChildren();
 
 			// remove the artificial parent again to make sure to refresh the root 
-			items.forEach(x => x.parent = null); 
-			
+			items.forEach(x => x.parent = null);
+
 			return items;
 		}
 	}

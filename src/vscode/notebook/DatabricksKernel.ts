@@ -197,8 +197,14 @@ export class DatabricksKernel implements vscode.NotebookController {
 
 	async updateWidgets(notebookUri: vscode.Uri = undefined): Promise<void> {
 		if (this._widgets && this._widgets.size > 0) {
-			let options: vscode.QuickPickOptions = { canPickMany: true, ignoreFocusOut: true, placeHolder: "Select widgets to update" };
-			let widgetsToUpdate: DatabricksWidget[] = await vscode.window.showQuickPick<DatabricksWidget>([...this._widgets.values()], options) as any as DatabricksWidget[];
+			let widgetsToUpdate: DatabricksWidget[] = [];
+			if (this._widgets.size == 1) {
+				widgetsToUpdate = [this._widgets.values().next().value];
+			}
+			else {
+				let options: vscode.QuickPickOptions = { canPickMany: true, ignoreFocusOut: true, placeHolder: "Select widgets to update" };
+				widgetsToUpdate = await vscode.window.showQuickPick<DatabricksWidget>([...this._widgets.values()], options) as any as DatabricksWidget[];
+			}
 			for (let widget of widgetsToUpdate) {
 				await widget.promptForInput(this.getNotebookContext(notebookUri), true);
 			}
@@ -716,14 +722,14 @@ export class DatabricksKernel implements vscode.NotebookController {
 		}
 
 		const repo = Helper.find(DatabricksKernel.RepoMapping.values(), (x: vscode.Uri) => {
-			if(strict) {
+			if (strict) {
 				return path.toString() == x.toString();
-			}	
+			}
 			else {
 				return path.toString().startsWith(x.toString());
 			}
 		}
-		);	
+		);
 
 		return repo;
 	}
@@ -741,14 +747,14 @@ export class DatabricksKernel implements vscode.NotebookController {
 		}
 
 		const repo = Helper.find(DatabricksKernel.RepoMapping.values(), (x: vscode.Uri) => {
-			if(strict) {
+			if (strict) {
 				return path.toString() == x.toString();
-			}	
+			}
 			else {
 				return path.toString().startsWith(x.toString());
 			}
 		}
-		);	
+		);
 
 		return repo;
 	}

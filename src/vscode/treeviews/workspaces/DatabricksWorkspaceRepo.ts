@@ -16,7 +16,7 @@ export class DatabricksWorkspaceRepo extends DatabricksWorkspaceDirectory {
 	) {
 		super(path, object_id, local_path, parent);
 
-		DatabricksKernel.addRepo(this.localPath);
+		DatabricksKernel.addRepo(this.resourceUri);
 	}
 
 	public static fromInterface(item: iDatabricksWorkspaceItem, parent: DatabricksWorkspaceTreeItem = null): DatabricksWorkspaceRepo {

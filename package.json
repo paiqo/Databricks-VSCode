@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks Power Tools",
 	"description": "Run notebooks cell-by-cell, browse and edit your Databricks Workspace, DBFS, Clusters, Jobs, Secrets, Repos and SQL. Supports Azure Databricks, Databricks on AWS and Databricks on GCP.",
-	"version": "2.6.0",
+	"version": "2.7.0",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -530,7 +530,7 @@
 			},
 			{
 				"command": "databricksWorkspace.addToWorkspace",
-				"title": "Add Databricks Workspace to VSCode workspace",
+				"title": "Add to VSCode workspace",
 				"category": "Databricks Power Tools",
 				"icon": "$(symbol-class)"
 			},

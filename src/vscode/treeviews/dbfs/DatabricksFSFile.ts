@@ -36,17 +36,14 @@ export class DatabricksFSFile extends DatabricksFSTreeItem {
 	}
 
 	async init(): Promise<void> {
+		super.init();
+
 		// we can only run initialize for this class after all values had been set in the constructor
 		// but we must not run it as part of the call to super()
 		if (this._isInitialized) {
-			super.label = Helper.getToken(this.path, '/', -1);
-			super.tooltip = this._tooltip;
-			super.description = this._description;
-			super.contextValue = this._contextValue;
-			super.iconPath = {
-				light: this.getIconPath("light"),
-				dark: this.getIconPath("dark")
-			}
+			this.tooltip = this._tooltip;
+			this.description = this._description;
+			this.contextValue = this._contextValue;
 		}
 	}
 

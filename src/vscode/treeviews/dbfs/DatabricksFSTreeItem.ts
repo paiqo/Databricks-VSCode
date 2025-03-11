@@ -32,7 +32,7 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 
 		// files are not expandable
 		if (!this.is_dir) {
-			super.collapsibleState = undefined;
+			this.collapsibleState = undefined;
 		}
 
 		this._isInitialized = true;
@@ -44,11 +44,13 @@ export class DatabricksFSTreeItem extends vscode.TreeItem implements iDatabricks
 		// we can only run initialize for this class after all values had been set in the constructor
 		// but we must not run it as part of the call to super()
 		if (this._isInitialized) {
-			super.label = this.path.split('/').pop();
-			super.iconPath = {
+			this.label = this.path.split('/').pop();
+			this.iconPath = {
 				light: this.getIconPath("light"),
 				dark: this.getIconPath("dark")
 			};
+
+			this.resourceUri = this.dbfsUri;
 		}
 	}
 

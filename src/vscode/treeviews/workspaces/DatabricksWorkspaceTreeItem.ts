@@ -44,6 +44,8 @@ export class DatabricksWorkspaceTreeItem extends vscode.TreeItem implements iDat
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
+
+		this.resourceUri = vscode.Uri.parse(ThisExtension.WORKSPACE_SCHEME + ':' + this.path);
 	}
 
 	protected getIconPath(theme: string): vscode.Uri {
