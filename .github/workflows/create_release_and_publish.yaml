@@ -1,0 +1,59 @@
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish to Marketplace'
+        required: true
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+        default: 'true'
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+name: Create Release and Publish to Marketplace
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install npm
+        run: npm install
+
+      - name: Install vsce
+        run: npm i -g vsce
+
+      - name: Calculate version/tag-name from package.json
+        id: calculatePackageVersion
+        run: |
+          PACKAGE_VERSION=`cat package.json | jq ".version" -M | sed 's/\"//g'`
+          echo "PackageVersion=v$PACKAGE_VERSION" >> $GITHUB_OUTPUT
+          echo "package version = v$PACKAGE_VERSION"
+      
+      - name: Package extension
+        run: vsce package
+
+      - name: Top 10 Changelog.md
+        run: head -n 10 CHANGELOG.md >> CHANGELOG_Short.md
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: CHANGELOG_Short.md
+          tag_name: ${{ steps.calculatePackageVersion.outputs.PackageVersion }}
+          generate_release_notes: true
+          files: |
+            *.vsix
+            CHANGELOG.md
+
+      - name: Publish extension
+        if: ${{ inputs.publish == 'true' }} || ${{ github.event_name == 'push' }}
+        env:
+          VSCE_PUBLISH_TOKEN: ${{ secrets.VSCE_PUBLISH_TOKEN }}
+        run: vsce publish -p $VSCE_PUBLISH_TOKEN

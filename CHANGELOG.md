@@ -1,5 +1,12 @@
 # Release Notes
 
+**v2.8.1:**
+- added automated deployment
+
+**v2.8.0:**
+- fixed issue with interaction with original Databricks Extension
+- added warning if `Serverless` is used in original Databricks Extension
+
 **v2.7.0:**
 - improved `Add to workspace` to allow adding individual items from workspace or DBFS
 - added `resourceUri` to the Workspace and DBFS browser to also show decorations (e.g. Repos)

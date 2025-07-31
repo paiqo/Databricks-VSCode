@@ -74,22 +74,30 @@ export abstract class DatabricksConnectionManager implements vscode.Disposable {
 
 		let dbfs: string = "DBFS";
 		try {
-			dbfs = con.localSyncSubfolders.DBFS;
+			if (con.localSyncSubfolders?.DBFS) {
+				dbfs = con.localSyncSubfolders.DBFS;
+			}
 		} catch (error) { }
 
 		let workspace: string = "Workspace";
 		try {
-			workspace = con.localSyncSubfolders.Workspace;
+			if (con.localSyncSubfolders?.Workspace) {
+				workspace = con.localSyncSubfolders.Workspace;
+			}
 		} catch (error) { }
 
 		let clusters: string = "Clusters";
 		try {
-			clusters = con.localSyncSubfolders.Clusters;
+			if (con.localSyncSubfolders?.Clusters) {
+				clusters = con.localSyncSubfolders.Clusters;
+			}
 		} catch (error) { }
 
 		let jobs: string = "Jobs";
 		try {
-			jobs = con.localSyncSubfolders.Jobs;
+			if (con.localSyncSubfolders?.Jobs) {
+				jobs = con.localSyncSubfolders.Jobs;
+			}
 		} catch (error) { }
 
 		return {

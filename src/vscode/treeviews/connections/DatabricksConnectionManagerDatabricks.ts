@@ -43,15 +43,23 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 
 				await this.activateConnection(this.LastActiveConnection, true);
 
-				if (!this._databricksConnectionManager.cluster) {
-					throw new Error("Please configure/attach a cluster in the Databricks Extension first to use all features!");
+				if (this._databricksConnectionManager.serverless) {
+					// currently not supported - cluster is empty for serverless
+					vscode.window.showWarningMessage("Serverless clusters are not supported yet!");
 				}
-				let cluster = this._databricksConnectionManager.cluster.details as iDatabricksCluster;
-				ThisExtension.SQLClusterID = cluster.cluster_id;
-				cluster.cluster_name = "Extension (Generic)";
-				cluster.kernel_id = "databricks_extension_generic";
+				else {
+					if (!this._databricksConnectionManager.cluster) {
+						throw new Error("Please configure/attach a cluster in the Databricks Extension first to use all features!");
+					}
 
-				DatabricksKernelManager.createKernels(cluster);
+					let cluster = this._databricksConnectionManager.cluster.details as iDatabricksCluster;
+					ThisExtension.SQLClusterID = cluster.cluster_id;
+					cluster.cluster_name = "Extension (Generic)";
+					cluster.kernel_id = "databricks_extension_generic";
+
+					DatabricksKernelManager.createKernels(cluster);
+				}
+				
 			} catch (error) {
 				let msg = "Could not activate Connection '" + this._lastActiveConnectionName + "'!";
 				ThisExtension.log(msg);
@@ -87,7 +95,7 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 			const host = await this._apiClient.host;
 
 			// localSyncFolder is not mandatory, hence we also allow null/undefined values
-			const localSyncfolder = connectionManager.syncDestinationMapper?.localUri?.uri;
+			const localSyncfolder = connectionManager.syncDestinationMapper?.localUri?.uri || connectionManager.workspaceFolderManager.activeProjectUri;
 			this._remoteSyncfolder = connectionManager.syncDestinationMapper?.remoteUri?.uri;
 
 			this._connections.push({
@@ -101,7 +109,7 @@ export class DatabricksConnectionManagerDatabricks extends DatabricksConnectionM
 					"R": ".r"
 				},
 				"localSyncSubfolders": {
-					"Workspace": "",
+					"Workspace": undefined,
 					"DBFS": undefined,
 					"Jobs": undefined,
 					"Clusters": undefined
