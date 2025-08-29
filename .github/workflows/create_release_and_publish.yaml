@@ -40,6 +40,7 @@ jobs:
       - name: Publish extension to Open VSX Registry
         uses: HaaLeo/publish-vscode-extension@v2
         id: publishToOpenVSX
+        if: ${{ (inputs.publish == 'true') || (github.event_name == 'push') }}
         with:
           pat: ${{ secrets.OPENVSX_PUBLISH_TOKEN }}
 
