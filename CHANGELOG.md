@@ -1,5 +1,8 @@
 # Release Notes
 
+**v2.8.2:**
+- added automated deployment for [OpenVSX](https://open-vsx.org/)
+
 **v2.8.1:**
 - added automated deployment
 
