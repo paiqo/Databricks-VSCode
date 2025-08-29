@@ -23,16 +23,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Dump GITHUB context
-        env:
-          GITHUB: ${{ toJSON(github) }}
-        run: echo "${GITHUB}"
-
-      - name: Dump input context
-        env:
-          INPUTS: ${{ toJSON(inputs) }}
-        run: echo "${INPUTS}"
-
       - name: Install npm
         run: npm install
 
