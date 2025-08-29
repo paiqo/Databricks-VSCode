@@ -29,6 +29,20 @@ jobs:
       - name: Install vsce
         run: npm i -g vsce
 
+      # we first publish to VSCode gallery 
+      # in case that version is already there, it would fail and also not overwrite the Github Release
+      - name: Publish extension to VSCode Marketplace
+        if: ${{ (inputs.publish == 'true') || (github.event_name == 'push') }}
+        env:
+          VSCE_PUBLISH_TOKEN: ${{ secrets.VSCE_PUBLISH_TOKEN }}
+        run: vsce publish -p $VSCE_PUBLISH_TOKEN
+
+      - name: Publish extension to Open VSX Registry
+        uses: HaaLeo/publish-vscode-extension@v2
+        id: publishToOpenVSX
+        with:
+          pat: ${{ secrets.OPENVSX_PUBLISH_TOKEN }}
+
       - name: Calculate version/tag-name from package.json
         id: calculatePackageVersion
         run: |
@@ -51,9 +65,3 @@ jobs:
           files: |
             *.vsix
             CHANGELOG.md
-
-      - name: Publish extension
-        if: ${{ inputs.publish == 'true' }} || ${{ github.event_name == 'push' }}
-        env:
-          VSCE_PUBLISH_TOKEN: ${{ secrets.VSCE_PUBLISH_TOKEN }}
-        run: vsce publish -p $VSCE_PUBLISH_TOKEN
