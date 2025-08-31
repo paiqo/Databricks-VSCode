@@ -579,6 +579,16 @@ export class DatabricksKernel implements vscode.NotebookController {
 			let result = await DatabricksApiService.getCommandResult(command, true);
 
 			if (result.results.resultType == "table") {
+				if (!ThisExtension.ConnectionManager.isDataTableRenderersInstalled) {
+					let dtrHtml = "Install <a href=\"vscode:extension/RandomFractalsInc.vscode-data-table\">Data Table Renderers</a> for better table visualization!";
+					let dtrOutput = new vscode.NotebookCellOutput([
+						vscode.NotebookCellOutputItem.text(dtrHtml, 'text/html'),
+					])
+
+					execution.appendOutput(dtrOutput);
+					ThisExtension.ConnectionManager.resetIsDataTableRenderersInstalled();
+				}
+
 				let output: vscode.NotebookCellOutput;
 				if (result.results.data.length == 0) {
 					output = new vscode.NotebookCellOutput([

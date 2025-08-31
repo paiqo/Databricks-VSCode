@@ -11,6 +11,7 @@ export abstract class DatabricksConnectionManager implements vscode.Disposable {
 	protected _lastActiveConnectionName: string;
 
 	protected _initialized: boolean;
+	protected _isDataTableRenderersInstalled: boolean;
 
 	abstract initialize(): Promise<void>;
 	abstract loadConnections(): Promise<void>;
@@ -41,6 +42,23 @@ export abstract class DatabricksConnectionManager implements vscode.Disposable {
 
 	get enableJwtTokenRefresh(): boolean {
 		return false;
+	}
+
+	get isDataTableRenderersInstalled(): boolean {
+		if (this._isDataTableRenderersInstalled === undefined) {
+			const dataTableRenderers: vscode.Extension<any> = vscode.extensions.getExtension("RandomFractalsInc.vscode-data-table");
+			if (!dataTableRenderers) {
+				this._isDataTableRenderersInstalled = false;
+			}
+			else {
+				this._isDataTableRenderersInstalled = true;
+			}
+		}
+		return this._isDataTableRenderersInstalled;
+	}
+
+	resetIsDataTableRenderersInstalled(): void {
+		this._isDataTableRenderersInstalled = undefined;
 	}
 
 	async activateConnection(con: iDatabricksConnection, refreshComponents: boolean = false): Promise<void> {
