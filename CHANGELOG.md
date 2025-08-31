@@ -1,5 +1,8 @@
 # Release Notes
 
+**v2.8.3:**
+- removed hard dependency to `RandomFractalsInc.vscode-data-table` for proper rendering of tables in notebooks
+
 **v2.8.2:**
 - added automated deployment for [OpenVSX](https://open-vsx.org/)
 
