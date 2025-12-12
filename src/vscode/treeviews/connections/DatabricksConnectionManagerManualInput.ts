@@ -56,7 +56,7 @@ export class DatabricksConnectionManagerManualInput extends DatabricksConnection
 			}
 			let apiUri: vscode.Uri = vscode.Uri.parse(apiRootUrl, true);
 
-			let personalAccessToken: string = await Helper.showInputBox("dapi99887766554433221100987654321098", "Personal Access Token (PAT)", true);
+			let personalAccessToken: string = await Helper.showInputBox("dapi012345XXXabcdef", "Personal Access Token (PAT)", true);
 			if (!personalAccessToken) {
 				ThisExtension.log("Adding new connection aborted! No 'Personal Access Token (PAT)' provided!")
 				return;

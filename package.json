@@ -175,7 +175,7 @@
 						"markdownDescription": "(`VSCode Settings`, Mandatory) The Personal Access Token (PAT) used to access the Databricks API.",
 						"scope": "window",
 						"examples": [
-							"dapi0123456789abcdef0123456789abcdef"
+							"dapi012345XXXabcdef"
 						]
 					},
 					"databricks.connection.default.personalAccessTokenSecure": {
@@ -298,7 +298,7 @@
 								},
 								"personalAccessToken": {
 									"type": "string",
-									"default": "dapi123456789abcdef123456789abcdef",
+									"default": "dapi012345XXXabcdef",
 									"description": "The Personal Access Token (PAT) used to access the Databricks API."
 								},
 								"personalAccessTokenSecure": {
