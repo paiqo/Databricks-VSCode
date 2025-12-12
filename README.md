@@ -84,13 +84,13 @@ Using `VSCode Settings` as your connection manager allows you to define and mana
 				"apiRootUrl": "https://adb-98765421987.65.azuredatabricks.net",
 				"displayName": "My DEV workspace",
 				"localSyncFolder": "c:\\Databricks\\dev",
-				"personalAccessToken": "dapi219e30212312311c672bbbbbbbbbb"
+				"personalAccessToken": "dapi012345XXXabcdef"
 			},
 			{
 				"apiRootUrl": "https://adb-123456789123.45.azuredatabricks.net",
 				"displayName": "My TEST workspace",
 				"localSyncFolder": "c:\\Databricks\\test",
-				"personalAccessToken": "dapi219e30212312311c672aaaaaaaaaa"
+				"personalAccessToken": "dapi012345XXXabcdef"
 			}
 		],
 		...
@@ -133,12 +133,12 @@ If you want to change this you can do so by manually extending your Databricks C
 ``` text
 [DEV]
 host = https://westeurope.azuredatabricks.net/
-token = dapi219e30212312311c6721a66ce879e
+token = dapi012345XXXabcdef
 localSyncFolder = D:\Desktop\sync\dev
 
 [TEST]
 host = https://westeurope.azuredatabricks.net/
-token = dapi219e30212312311c672aaaaaaaaaa
+token = dapi012345XXXabcdef
 localSyncFolder = D:\Desktop\sync\test
 localSyncSubfolders = {"Workspace": "Workspace","Clusters": "Clusters","DBFS": "DBFS","Jobs": "Jobs"}
 exportFormats = {"Scala": ".scala","Python": ".ipynb","SQL": ".sql","R": ".r"}
