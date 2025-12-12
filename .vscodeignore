@@ -1,7 +1,6 @@
 .vscode/**
 .vscode-test/**
-out/test/**
-test/**
+tests/**
 **/*.map
 .gitignore
 tsconfig.json
@@ -11,3 +10,4 @@ src/
 node_modules/
 out/
 images/
+.*/**
