@@ -2,7 +2,7 @@
 	"name": "databricks-vscode",
 	"displayName": "Databricks Power Tools",
 	"description": "Run notebooks cell-by-cell, browse and edit your Databricks Workspace, DBFS, Clusters, Jobs, Secrets, Repos and SQL. Supports Azure Databricks, Databricks on AWS and Databricks on GCP.",
-	"version": "2.8.3",
+	"version": "2.8.4",
 	"publisher": "paiqo",
 	"icon": "resources/databricks_extension.png",
 	"author": {
@@ -21,7 +21,7 @@
 	"qna": "https://github.com/paiqo/Databricks-VSCode",
 	"enableApiProposals": false,
 	"engines": {
-		"vscode": "^1.68.0"
+		"vscode": "^1.105.0"
 	},
 	"galleryBanner": {
 		"color": "#0ea5ff",
@@ -425,44 +425,52 @@
 					"name": "Connections",
 					"type": "tree",
 					"initialSize": 25,
-					"when": "!paiqo.databricks.hideConnectionManager"
+					"when": "!paiqo.databricks.hideConnectionManager",
+					"icon": "$(extensions-remote)"
 				},
 				{
 					"id": "databricksWorkspace",
 					"name": "Workspace",
 					"type": "tree",
-					"when": "!virtualWorkspace && !paiqo.databricks.isInBrowser"
+					"when": "!virtualWorkspace && !paiqo.databricks.isInBrowser",
+					"icon": "$(list-tree)"
 				},
 				{
 					"id": "databricksClusters",
 					"name": "Clusters",
-					"type": "tree"
+					"type": "tree",
+					"icon": "$(server-environment)"
 				},
 				{
 					"id": "databricksJobs",
 					"name": "Jobs",
-					"type": "tree"
+					"type": "tree",
+					"icon": "$(repo-forked)"
 				},
 				{
 					"id": "databricksFS",
 					"name": "DBFS",
 					"type": "tree",
-					"when": "!virtualWorkspace && !paiqo.databricks.isInBrowser"
+					"when": "!virtualWorkspace && !paiqo.databricks.isInBrowser",
+					"icon": "$(list-flat)"
 				},
 				{
 					"id": "databricksSecrets",
 					"name": "Secrets",
-					"type": "tree"
+					"type": "tree",
+					"icon": "$(key)"
 				},
 				{
 					"id": "databricksSQL",
 					"name": "SQL",
-					"type": "tree"
+					"type": "tree",
+					"icon": "$(database)"
 				},
 				{
 					"id": "databricksRepos",
 					"name": "Repos",
-					"type": "tree"
+					"type": "tree",
+					"icon": "$(repo)"
 				}
 			]
 		},
@@ -1186,20 +1194,20 @@
 		"test": "vscode-test-web --extensionDevelopmentPath=. --extensionTestsPath=dist/web/extension.js"
 	},
 	"devDependencies": {
-		"@types/glob": "^7.2.0",
-		"@types/mocha": "^9.1.1",
-		"@types/node": "^16.11.7",
+		"@types/glob": "^8.1.0",
+		"@types/mocha": "^10.0.10",
+		"@types/node": "^12.20.55",
 		"@types/rimraf": "^2.0.5",
-		"@types/vscode": "^1.68.0",
+		"@types/vscode": "^1.105.0",
 		"@vscode/vsce": "^2.19.0",
 		"@vscode/test-web": "*",
 		"eslint": "^8.19.0",
-		"glob": "^8.0.3",
-		"mocha": "^10.0.0",
+		"glob": "^9.0.0",
+		"mocha": "^11.7.0",
 		"native-ext-loader": "^2.3.0",
 		"https-agent": "^1.0.0",
 		"https-proxy-agent": "^5.0.1",
-		"node-fetch": "^3.2.10",
+		"node-fetch": "^3.3.2",
 		"path-browserify": "^1.0.1",
 		"process": "^0.11.10",
 		"ts-loader": "^9.3.1",
