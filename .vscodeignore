@@ -1,3 +1,4 @@
+# Exceptions defined in this file will be excluded from the VS Code extension package and final VSIX file.
 .vscode/**
 .vscode-test/**
 tests/**
