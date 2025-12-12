@@ -1,5 +1,10 @@
 # Release Notes
 
+**v2.8.4:**
+- removed misleading licensing information ([226](/../../issues/226))
+- updated dependencies
+- added tree-view icons
+
 **v2.8.3:**
 - removed hard dependency to `RandomFractalsInc.vscode-data-table` for proper rendering of tables in notebooks
 
