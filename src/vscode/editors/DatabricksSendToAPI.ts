@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
+
+import { Helper } from '../../helpers/Helper';
+
 import { DatabricksSendToApiConfig } from './_types';
 import { DatabricksApiService } from '../../databricksApi/databricksApiService';
-import { json } from 'stream/consumers';
-import { error } from 'console';
-import { Helper } from '../../helpers/Helper';
+
 
 export class DatabricksSendToAPI {
 
