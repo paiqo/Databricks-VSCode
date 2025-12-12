@@ -1,7 +1,7 @@
+# Exceptions defined in this file will be excluded from the VS Code extension package and final VSIX file.
 .vscode/**
 .vscode-test/**
-out/test/**
-test/**
+tests/**
 **/*.map
 .gitignore
 tsconfig.json
@@ -11,3 +11,4 @@ src/
 node_modules/
 out/
 images/
+.*/**

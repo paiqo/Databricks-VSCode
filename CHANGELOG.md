@@ -1,5 +1,8 @@
 # Release Notes
 
+**v2.8.5:**
+- new version with sample API tokens masked better so they do not cause issues with validation
+
 **v2.8.4:**
 - removed misleading licensing information ([226](/../../issues/226))
 - updated dependencies
