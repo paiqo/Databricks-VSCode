@@ -95,6 +95,7 @@ export abstract class ThisExtension {
 				this._connectionManagerText = conManager;
 			}
 
+			this.log("Loading connection from connection manager '" + conManager + "' ...");
 			switch (conManager) {
 
 				case "VSCode Settings":

@@ -123,8 +123,16 @@ Using a workspace configuration also allows you to separate different Databricks
 **NOTE: Changing any of the connection settings only take effect once the connection is activated! If you make changes to your current connection, you need to activate another connection temporary and then the original one again! Alternatively, a restart of VSCode also works.**
 
 # Setup and Configuration (Databricks CLI Connection Manager)
-To use the Databricks CLI Connection Manager, you first need to install and configure the [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html). Once you have created a connection or profiles, you can proceed here.
+To use the Databricks CLI Connection Manager, you first need to install and configure the [Databricks CLI](https://learn.microsoft.com/en-us/azure/databricks/dev-tools/cli/). Once you have created one or more authentication profiles, you can proceed here.
 Basically all you need to do in VSCode for this extension to derive the connections from the Databricks CLI is to change the VSCode setting `databricks.connectionManager` to `Databricks CLI Profiles`. This can be done in the regular settings UI or by modifying the settings JSON directly.
+
+When loading connections, the extension uses Databricks CLI authentication commands:
+- `databricks auth profiles --skip-validate -o json` to list available profiles
+- `databricks auth env --profile <profile> -o json` to resolve profile auth details
+- `databricks auth token --profile <profile> -o json` as fallback to acquire an access token (for OAuth/U2M profiles)
+Further details can also be found in the [official documentation(https://docs.databricks.com/aws/en/dev-tools/auth/config-profiles)]
+
+This means classic PAT-based and newer OAuth CLI profiles are both supported.
 
 ## Additional settings
 In order to work to its full potential, the VSCode extension needs some addional settings which are not maintained by the Databricks CLI. Foremost the `localSyncFolder` to store files locally (e.g. notebooks, cluster/job definitions, ...). For the Databricks CLI Connection Manager this path defaults to `<user home directory>/Databricks-VSCode/<profile name>`.
@@ -142,14 +150,20 @@ token = dapi012345XXXabcdef
 localSyncFolder = D:\Desktop\sync\test
 localSyncSubfolders = {"Workspace": "Workspace","Clusters": "Clusters","DBFS": "DBFS","Jobs": "Jobs"}
 exportFormats = {"Scala": ".scala","Python": ".ipynb","SQL": ".sql","R": ".r"}
+
+[PROD]
+host=https://adb-7243786962536639.19.azuredatabricks.net/
+auth_type=databricks-cli
+localSyncFolder = D:\Desktop\sync\prod
 ```
 
 You can also change the following other settings:
 
 |CLI setting|VSCode setting|format|descrption|
 |-----------|--------------|------|----------|
-|host|apiRootUrl|text/URL|mandatory by Databricks CLI|
-|token|personalAccessToken|text|mandatory by Databricks CLI|
+|host|apiRootUrl|text/URL|mandatory|
+|token|personalAccessToken|text|mandatory when using a token|
+|auth|none|text|mandatory when NOT using a token|
 |localSyncFolder|localSyncFolder|text|optional, defaults to `<user home directory>/Databricks-VSCode/<profile name>`|
 |localSyncSubFolders|localSyncSubfolders|JSON|optional, defaults to VSCode default|
 |exportFormats|exportFormats|JSON|optional, defaults to VSCode default|
