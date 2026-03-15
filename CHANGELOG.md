@@ -1,5 +1,8 @@
 # Release Notes
 
+**v2.8.6:**
+- reworked connecton manager `Databricks CLI Profiles` ([234](/../../issues/234))
+
 **v2.8.5:**
 - new version with sample API tokens masked better so they do not cause issues with validation
 
