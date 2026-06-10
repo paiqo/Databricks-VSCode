@@ -21,7 +21,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
 
       - name: Install npm
         run: npm install
@@ -38,7 +38,7 @@ jobs:
         run: vsce publish -p $VSCE_PUBLISH_TOKEN
 
       - name: Publish extension to Open VSX Registry
-        uses: HaaLeo/publish-vscode-extension@v2
+        uses: HaaLeo/publish-vscode-extension@ca5561daa085dee804bf9f37fe0165785a9b14db # v2
         id: publishToOpenVSX
         if: ${{ (inputs.publish == 'true') || (github.event_name == 'push') }}
         with:
@@ -58,7 +58,7 @@ jobs:
         run: head -n 10 CHANGELOG.md >> CHANGELOG_Short.md
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
           body_path: CHANGELOG_Short.md
           tag_name: ${{ steps.calculatePackageVersion.outputs.PackageVersion }}
