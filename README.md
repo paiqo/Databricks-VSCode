@@ -1,8 +1,8 @@
 # Databricks Power Tools for VSCode
-[![Version](https://img.shields.io/visual-studio-marketplace/v/paiqo.databricks-vscode)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
-[![Installs](https://img.shields.io/visual-studio-marketplace/i/paiqo.databricks-vscode)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
-[![Downloads](https://img.shields.io/visual-studio-marketplace/d/paiqo.databricks-vscode)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
-[![Ratings](https://img.shields.io/visual-studio-marketplace/r/paiqo.databricks-vscode)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
+[![GNU GPL v3 License](https://img.shields.io/badge/License-GNUv3-green.png?color=green)](http://opensource.org/licenses/MIT)
+[![Version](https://vsmarketplacebadges.dev/version/paiqo.databricks-vscode.png?&colorB=orange)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode) [![Installs](https://vsmarketplacebadges.dev/installs/paiqo.databricks-vscode.png)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode) [![Downloads](https://vsmarketplacebadges.dev/downloads/paiqo.databricks-vscode.png)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode) [![Rating Short](https://vsmarketplacebadges.dev/rating-short/paiqo.databricks-vscode.png)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode) 
+
+[![TrendingDaily](https://vsmarketplacebadges.dev/trending-daily/paiqo.databricks-vscode.png?&colorB=blue)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode) [![TrendingWeekly](https://vsmarketplacebadges.dev/trending-weekly/paiqo.databricks-vscode.png?&colorB=blue)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode) [![TrendingMonthly](https://vsmarketplacebadges.dev/trending-monthly/paiqo.databricks-vscode.png?&colorB=blue)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
 
 ![Databricks-VSCode](/images/Databricks-VSCode.jpg?raw=true "Databricks-VSCode")
 
