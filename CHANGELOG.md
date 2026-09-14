@@ -1,5 +1,9 @@
 # Release Notes
 
+**v2.9.0:**
+- update README.md
+- update dependencies
+
 **v2.8.6:**
 - reworked connecton manager `Databricks CLI Profiles` ([234](/../../issues/234))
 
