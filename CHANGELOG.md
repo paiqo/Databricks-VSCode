@@ -1,7 +1,7 @@
 # Release Notes
 
 **v2.9.0:**
-- update README.md
+- update README.md 
 - update dependencies
 
 **v2.8.6:**
